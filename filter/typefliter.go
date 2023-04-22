@@ -59,6 +59,18 @@ var RemoveByExt = func(ext string) TypeFunc {
 	}
 }
 
+var ExtOnly = func(ext ...string) TypeFunc {
+	return func(e os.DirEntry) bool {
+		name := e.Name()
+		for _, e := range ext {
+			if strings.HasSuffix(name, "."+e) {
+				return true
+			}
+		}
+		return false
+	}
+}
+
 var RemoveRegexp = func(regexpression string) TypeFunc {
 	compiled, err := regexp.Compile(regexpression)
 	if err != nil {
@@ -85,6 +97,6 @@ var RemoveHidden = func(e os.DirEntry) bool {
 	return !strings.HasPrefix(e.Name(), ".")
 }
 
-func HiddenOnly(e os.DirEntry) bool {
+var HiddenOnly = func(e os.DirEntry) bool {
 	return strings.HasPrefix(e.Name(), ".")
 }
