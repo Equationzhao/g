@@ -110,7 +110,7 @@ func main() {
 				Usage:   "show time",
 				Action: func(context *cli.Context, b bool) error {
 					if b {
-						contentFunc = append(contentFunc, filter.EnableTime("06 Jan 02 15:04", r))
+						contentFunc = append(contentFunc, filter.EnableTime("02.Jan'06 15:04", r))
 					}
 					return nil
 				},

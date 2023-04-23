@@ -30,6 +30,7 @@ func (b Byline) Print(s ...string) {
 	fmt.Println(strings.Join(s, "\n"))
 }
 
+// FitTerminal !TODO: implement this
 type FitTerminal struct{}
 
 func (f FitTerminal) Print(s ...string) {
