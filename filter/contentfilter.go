@@ -1,7 +1,7 @@
 package filter
 
 import (
-	"g/render"
+	"github.com/Equationzhao/g/render"
 	"github.com/valyala/bytebufferpool"
 	"os"
 	"sort"

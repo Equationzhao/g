@@ -1,8 +1,8 @@
 package tree
 
 import (
-	"g/filter"
-	"g/render"
+	"github.com/Equationzhao/g/filter"
+	"github.com/Equationzhao/g/render"
 	"os"
 	"path/filepath"
 	"sync"

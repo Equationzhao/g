@@ -2,11 +2,11 @@ package main
 
 import (
 	"fmt"
-	"g/filter"
-	"g/printer"
-	"g/render"
-	"g/theme"
-	"g/tree"
+	"github.com/Equationzhao/g/filter"
+	"github.com/Equationzhao/g/printer"
+	"github.com/Equationzhao/g/render"
+	"github.com/Equationzhao/g/theme"
+	"github.com/Equationzhao/g/tree"
 	"github.com/urfave/cli/v2"
 	"os"
 )

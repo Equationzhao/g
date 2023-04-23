@@ -1,7 +1,7 @@
 package render
 
 import (
-	"g/theme"
+	"github.com/Equationzhao/g/theme"
 	"github.com/valyala/bytebufferpool"
 	"path/filepath"
 	"strings"

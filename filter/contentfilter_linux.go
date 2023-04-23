@@ -3,7 +3,7 @@
 package filter
 
 import (
-	"g/render"
+	"github.com/Equationzhao/g/render"
 	"os"
 	"os/user"
 	"strconv"
