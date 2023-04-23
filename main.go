@@ -14,9 +14,9 @@ import (
 var typeFunc = make([]*filter.TypeFunc, 0)
 var contentFunc = make([]filter.ContentOption, 0)
 var r = render.NewRenderer(theme.DefaultTheme, theme.DefaultInfoTheme)
-var p printer.Printer = printer.Inline{}
+var p printer.Printer = printer.FitTerminal{}
 
-const version = "v0.2.0"
+const version = "v0.2.1"
 
 func init() {
 	typeFunc = append(typeFunc, &filter.RemoveHidden)
@@ -67,6 +67,9 @@ func main() {
 				Action: func(context *cli.Context, b bool) error {
 					if b {
 						contentFunc = append(contentFunc, filter.EnableFileMode(r))
+						if _, ok := p.(printer.Byline); !ok {
+							p = printer.Byline{}
+						}
 					}
 					return nil
 				},
@@ -78,6 +81,9 @@ func main() {
 				Action: func(context *cli.Context, b bool) error {
 					if b {
 						contentFunc = append(contentFunc, filter.EnableSize(filter.Auto, r))
+						if _, ok := p.(printer.Byline); !ok {
+							p = printer.Byline{}
+						}
 					}
 					return nil
 				},
@@ -89,6 +95,9 @@ func main() {
 				Action: func(context *cli.Context, b bool) error {
 					if b {
 						contentFunc = append(contentFunc, filter.EnableOwner(r))
+						if _, ok := p.(printer.Byline); !ok {
+							p = printer.Byline{}
+						}
 					}
 					return nil
 				},
@@ -100,6 +109,9 @@ func main() {
 				Action: func(context *cli.Context, b bool) error {
 					if b {
 						contentFunc = append(contentFunc, filter.EnableGroup(r))
+						if _, ok := p.(printer.Byline); !ok {
+							p = printer.Byline{}
+						}
 					}
 					return nil
 				},
@@ -111,6 +123,9 @@ func main() {
 				Action: func(context *cli.Context, b bool) error {
 					if b {
 						contentFunc = append(contentFunc, filter.EnableTime("02.Jan'06 15:04", r))
+						if _, ok := p.(printer.Byline); !ok {
+							p = printer.Byline{}
+						}
 					}
 					return nil
 				},
@@ -126,7 +141,9 @@ func main() {
 				Usage:   "print by line",
 				Action: func(context *cli.Context, b bool) error {
 					if b {
-						p = printer.Byline{}
+						if _, ok := p.(printer.Byline); !ok {
+							p = printer.Byline{}
+						}
 					}
 					return nil
 				},
@@ -159,7 +176,9 @@ func main() {
 						}
 						typeFunc = newFF
 						contentFunc = append(contentFunc, filter.EnableFileMode(r), filter.EnableSize(filter.Auto, r), filter.EnableOwner(r), filter.EnableGroup(r), filter.EnableTime("06 Jan 02 15:04", r))
-						p = printer.Byline{}
+						if _, ok := p.(printer.Byline); !ok {
+							p = printer.Byline{}
+						}
 					}
 					return nil
 				},
@@ -171,7 +190,9 @@ func main() {
 				Action: func(context *cli.Context, b bool) error {
 					if b {
 						contentFunc = append(contentFunc, filter.EnableFileMode(r), filter.EnableSize(filter.Auto, r), filter.EnableOwner(r), filter.EnableGroup(r), filter.EnableTime("06 Jan 02 15:04", r))
-						p = printer.Byline{}
+						if _, ok := p.(printer.Byline); !ok {
+							p = printer.Byline{}
+						}
 					}
 					return nil
 				},
@@ -225,7 +246,7 @@ func main() {
 
 					if i != len(path)-1 {
 						//goland:noinspection GoPrintFunctions
-						fmt.Println("\n")
+						fmt.Println("\n") //nolint:govet
 					}
 				}
 			} else {
@@ -259,7 +280,7 @@ func main() {
 					// remove the last func
 					if i != len(path)-1 {
 						//goland:noinspection GoPrintFunctions
-						fmt.Println("\n")
+						fmt.Println("\n") //nolint:govet
 						contentFunc = contentFunc[:len(contentFunc)-1]
 					}
 				}
