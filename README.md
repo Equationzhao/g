@@ -62,6 +62,6 @@ g -t path
 ```
 
 limit depth in tree
-```
+```bash
 g -t -d=<level> path
 ```
