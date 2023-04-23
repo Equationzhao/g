@@ -1,8 +1,11 @@
 # g
-a powerful ls
+<div style="text-align: center;"><img src="logo.jpg" width="400"  alt="logo"/></div>
+
+<div style="text-align: center;">a powerful ls</div>
+
+## Screenshots
 
 ![image](https://user-images.githubusercontent.com/75521101/233822292-f692869a-015c-48b1-a3bb-38a2199159ed.png)
-
 
 ## usage
 
@@ -65,3 +68,6 @@ limit depth in tree
 ```bash
 g -t -d=<level> path
 ```
+## custom theme
+
+[theme](THEME.md)
