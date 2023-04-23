@@ -71,3 +71,6 @@ g -t -d=<level> path
 ## custom theme
 
 [theme](THEME.md)
+
+## logo
+created by bing
