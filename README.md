@@ -72,5 +72,11 @@ g -t -d=<level> path
 
 [theme](THEME.md)
 
+## install
+
+```bash
+go install github.com/Equationzhao/g/tree@latest
+```
+
 ## logo
 created by bing
