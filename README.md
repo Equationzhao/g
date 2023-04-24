@@ -75,7 +75,7 @@ g -t -d=<level> path
 ## install
 
 ```bash
-go install github.com/Equationzhao/g/tree@latest
+go install github.com/Equationzhao/g@latest
 ```
 
 ## logo
