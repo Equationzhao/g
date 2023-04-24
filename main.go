@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"github.com/Equationzhao/g/filter"
 	"github.com/Equationzhao/g/printer"
@@ -240,7 +241,14 @@ func main() {
 						path[i] = home
 					}
 
-					s := tree.NewTreeString(path[i], depth, filter.NewTypeFilter(typeFunc...), r)
+					s, err := tree.NewTreeString(path[i], depth, filter.NewTypeFilter(typeFunc...), r)
+					if errors.Is(err, os.ErrNotExist) {
+						fmt.Printf("%s g: No such file or directory: %s %s\n", theme.Error, err.(*os.PathError).Path, theme.Reset)
+						continue
+					} else if err != nil {
+						fmt.Println(theme.Error+err.Error()+theme.Reset, err)
+						continue
+					}
 					fmt.Println(s.MakeTreeStr())
 					fmt.Printf("\n%d directories, %d files\n", s.Directory(), s.File())
 

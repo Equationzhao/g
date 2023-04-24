@@ -31,13 +31,13 @@ func (n *Tree) MakeTreeStr() string {
 	return n.tree.String()
 }
 
-func NewTreeString(entry string, depthLimit int, typeFilter *filter.TypeFilter, renderer *render.Renderer) *Tree {
+func NewTreeString(entry string, depthLimit int, typeFilter *filter.TypeFilter, renderer *render.Renderer) (*Tree, error) {
 	n := &Tree{tree: NewWithRoot(entry)}
 
 	var wg sync.WaitGroup
 	stat, err := os.Stat(entry)
 	if err != nil {
-		return nil
+		return nil, err
 	}
 	if stat.IsDir() {
 		n.stat.directory.Add(1)
@@ -47,7 +47,7 @@ func NewTreeString(entry string, depthLimit int, typeFilter *filter.TypeFilter, 
 
 	expand(n.tree, depthLimit, &wg, entry, &n.stat, typeFilter, renderer)
 	wg.Wait()
-	return n
+	return n, nil
 }
 
 func expand(node tree, depthLimit int, wg *sync.WaitGroup, parent string, s *statistic, typeFilter *filter.TypeFilter, renderer *render.Renderer) {
