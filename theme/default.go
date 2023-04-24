@@ -10,6 +10,8 @@ const (
 	Cyan   = "\033[1;36m"
 	White  = "\033[1;37m"
 	Reset  = "\033[0m"
+    Error  = "\033[1;31mError:"
+    Warn   = "\033[1;33mWarn:"
 )
 
 var DefaultInfoTheme = Theme{
