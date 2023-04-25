@@ -50,12 +50,10 @@ func (f *FitTerminal) Print(s ...string) {
 }
 
 func (f *FitTerminal) printColumns(strs *[]string, margin int) {
-	defer func() {
-		_ = f.Flush()
-	}()
+	defer f.Flush()
 
 	maxLength := 0
-
+	marginStr := strings.Repeat(" ", margin)
 	// also keep track of each individual length to easily calculate padding
 	var lengths []int
 	for _, str := range *strs {
@@ -95,14 +93,18 @@ func (f *FitTerminal) printColumns(strs *[]string, margin int) {
 			str = (*strs)[j]
 		}
 
+		// calculate the amount of padding required
+		numSpacesRequired := maxLength - strLen
+		spaceStr := strings.Repeat(" ", numSpacesRequired)
+
 		// print the item itself
 		_, _ = f.WriteString(str)
 		// if we're at the last column, print a line break
 		if x+1 == numCols {
 			_ = f.WriteByte('\n')
 		} else {
-			_, _ = f.WriteString(strings.Repeat(" ", maxLength-strLen))
-			_, _ = f.WriteString(strings.Repeat(" ", margin))
+			_, _ = f.WriteString(spaceStr)
+			_, _ = f.WriteString(marginStr)
 		}
 	}
 }
