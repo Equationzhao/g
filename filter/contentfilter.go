@@ -217,20 +217,18 @@ func (cf *ContentFilter) GetStringSlice(e []os.FileInfo) []string {
 	wg := sync.WaitGroup{}
 	wg.Add(len(e))
 	for i, entry := range e {
-		entry := entry
-		i := i
-		go func() {
+		go func(entry os.FileInfo, i int) {
 			for _, option := range cf.options {
 				_, _ = resBuffers[i].WriteString(option(entry))
 				_ = resBuffers[i].WriteByte(' ')
 			}
 			wg.Done()
-		}()
+		}(entry, i)
 	}
 	res := make([]string, 0, len(e))
 	wg.Wait()
-	for _, builder := range resBuffers {
-		res = append(res, builder.String())
+	for _, buffer := range resBuffers {
+		res = append(res, buffer.String())
 	}
 
 	return res
