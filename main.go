@@ -16,6 +16,7 @@ var typeFunc = make([]*filter.TypeFunc, 0)
 var contentFunc = make([]filter.ContentOption, 0)
 var r = render.NewRenderer(theme.DefaultTheme, theme.DefaultInfoTheme)
 var p printer.Printer = printer.NewFitTerminal()
+var timeFormat = "02.Jan'06 15:04"
 
 const version = "v0.2.1"
 
@@ -57,6 +58,19 @@ func main() {
 							}
 						}
 						typeFunc = newFF
+					}
+					return nil
+				},
+			},
+			&cli.StringFlag{
+				Name: "time-format",
+			},
+			&cli.BoolFlag{
+				Name:  "full-time",
+				Usage: "like -all/l --time-style=full-iso",
+				Action: func(context *cli.Context, b bool) error {
+					if b {
+						timeFormat = "2006-01-02 15:04:05.000000000"
 					}
 					return nil
 				},
@@ -123,7 +137,7 @@ func main() {
 				Usage:   "show time",
 				Action: func(context *cli.Context, b bool) error {
 					if b {
-						contentFunc = append(contentFunc, filter.EnableTime("02.Jan'06 15:04", r))
+						contentFunc = append(contentFunc, filter.EnableTime(timeFormat, r))
 						if _, ok := p.(*printer.Byline); !ok {
 							p = printer.NewByline()
 						}
@@ -149,6 +163,18 @@ func main() {
 					return nil
 				},
 			},
+			&cli.BoolFlag{
+				Name:  "commas",
+				Usage: "print by line",
+				Action: func(context *cli.Context, b bool) error {
+					if b {
+						if _, ok := p.(*printer.Byline); !ok {
+							p = printer.NewCommaPrint()
+						}
+					}
+					return nil
+				},
+			},
 			&cli.StringFlag{
 				Name:        "theme",
 				Aliases:     []string{"th"},
@@ -163,9 +189,8 @@ func main() {
 				},
 			},
 			&cli.BoolFlag{
-				Name:    "all",
-				Aliases: []string{"la"},
-				Usage:   "show all info",
+				Name:  "g",
+				Usage: "like -all/l, but do not list owner",
 				Action: func(context *cli.Context, b bool) error {
 					if b {
 						// remove filter.RemoveHidden
@@ -176,7 +201,50 @@ func main() {
 							}
 						}
 						typeFunc = newFF
-						contentFunc = append(contentFunc, filter.EnableFileMode(r), filter.EnableSize(filter.Auto, r), filter.EnableOwner(r), filter.EnableGroup(r), filter.EnableTime("06 Jan 02 15:04", r))
+						contentFunc = append(contentFunc, filter.EnableFileMode(r), filter.EnableSize(filter.Auto, r), filter.EnableOwner(r), filter.EnableTime(timeFormat, r))
+						if _, ok := p.(*printer.Byline); !ok {
+							p = printer.NewByline()
+						}
+					}
+					return nil
+				},
+			},
+			&cli.BoolFlag{
+				Name:  "o",
+				Usage: "like -all/l, but do not list group information",
+				Action: func(context *cli.Context, b bool) error {
+					if b {
+						// remove filter.RemoveHidden
+						newFF := make([]*filter.TypeFunc, 0, len(typeFunc))
+						for _, typeFunc := range typeFunc {
+							if typeFunc != &filter.RemoveHidden {
+								newFF = append(newFF, typeFunc)
+							}
+						}
+						typeFunc = newFF
+						contentFunc = append(contentFunc, filter.EnableFileMode(r), filter.EnableSize(filter.Auto, r), filter.EnableGroup(r), filter.EnableTime(timeFormat, r))
+						if _, ok := p.(*printer.Byline); !ok {
+							p = printer.NewByline()
+						}
+					}
+					return nil
+				},
+			},
+			&cli.BoolFlag{
+				Name:    "all",
+				Aliases: []string{"la", "l"},
+				Usage:   "show all info/use a long listing format",
+				Action: func(context *cli.Context, b bool) error {
+					if b {
+						// remove filter.RemoveHidden
+						newFF := make([]*filter.TypeFunc, 0, len(typeFunc))
+						for _, typeFunc := range typeFunc {
+							if typeFunc != &filter.RemoveHidden {
+								newFF = append(newFF, typeFunc)
+							}
+						}
+						typeFunc = newFF
+						contentFunc = append(contentFunc, filter.EnableFileMode(r), filter.EnableSize(filter.Auto, r), filter.EnableOwner(r), filter.EnableGroup(r), filter.EnableTime(timeFormat, r))
 						if _, ok := p.(*printer.Byline); !ok {
 							p = printer.NewByline()
 						}
@@ -190,7 +258,7 @@ func main() {
 				Usage:   "show human readable size",
 				Action: func(context *cli.Context, b bool) error {
 					if b {
-						contentFunc = append(contentFunc, filter.EnableFileMode(r), filter.EnableSize(filter.Auto, r), filter.EnableOwner(r), filter.EnableGroup(r), filter.EnableTime("06 Jan 02 15:04", r))
+						contentFunc = append(contentFunc, filter.EnableFileMode(r), filter.EnableSize(filter.Auto, r), filter.EnableOwner(r), filter.EnableGroup(r), filter.EnableTime(timeFormat, r))
 						if _, ok := p.(*printer.Byline); !ok {
 							p = printer.NewByline()
 						}
@@ -220,6 +288,10 @@ func main() {
 					}
 					return nil
 				},
+			},
+			&cli.BoolFlag{
+				Name:    "F",
+				Aliases: []string{"sf", "file"},
 			},
 		},
 		HideHelpCommand: true,

@@ -218,10 +218,12 @@ func (cf *ContentFilter) GetStringSlice(e []os.FileInfo) []string {
 	wg.Add(len(e))
 	for i, entry := range e {
 		go func(entry os.FileInfo, i int) {
-			for _, option := range cf.options {
+			options := cf.options[:len(cf.options)-1]
+			for _, option := range options {
 				_, _ = resBuffers[i].WriteString(option(entry))
 				_ = resBuffers[i].WriteByte(' ')
 			}
+			_, _ = resBuffers[i].WriteString(cf.options[len(cf.options)-1](entry))
 			wg.Done()
 		}(entry, i)
 	}
