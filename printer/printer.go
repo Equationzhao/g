@@ -30,6 +30,7 @@ func NewByline() Printer {
 func (b *Byline) Print(s ...string) {
 	for _, v := range s {
 		_, _ = b.WriteString(v)
+		_ = b.WriteByte('\n')
 	}
 	_ = b.Flush()
 }
@@ -81,7 +82,7 @@ func (f *FitTerminal) printColumns(strs *[]string, margin int) {
 		// treat output like a "table" with (x, y) coordinates as an intermediate representation
 		// first calculate (x, y) from i
 		x, y := rowIndexToTableCoords(i, numCols)
-		// then convery (x, y) to `j`, the top-to-bottom index
+		// then convey (x, y) to `j`, the top-to-bottom index
 		j := tableCoordsToColIndex(x, y, numRows)
 
 		// try to access the array, but the table might have more cells than array elements, so only try to access if within bounds
