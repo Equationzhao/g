@@ -407,14 +407,21 @@ func main() {
 					if err != nil {
 						goto final
 					}
-					if si {
-						contentFunc = append(contentFunc, filter.EnableIconName(r, path[i]))
-					} else {
-						contentFunc = append(contentFunc, filter.EnableName(r))
+
+					// if -A(almost-all) is not set, add the "." info
+					if !context.Bool("A") {
+						statCurrent, err := os.Stat(".")
+						if err != nil {
+							fmt.Println(err)
+						}
+						statParent, err := os.Stat("..")
+						if err != nil {
+							fmt.Println(err)
+						}
+						infos = append(infos, statCurrent, statParent)
 					}
-					res := filter.NewTypeFilter(typeFunc...).Filter(d)
-					infos := make([]os.FileInfo, 0, len(res))
-					for _, v := range res {
+
+					for _, v := range d {
 						info, err := v.Info()
 						if err != nil {
 							fmt.Println(err)
@@ -422,6 +429,11 @@ func main() {
 							infos = append(infos, info)
 						}
 					}
+
+					// remove non-display items
+					infos = filter.NewTypeFilter(typeFunc...).Filter(infos)
+
+				final:
 					stringSlice := filter.NewContentFilter(contentFunc...).GetStringSlice(infos)
 					p.Print(stringSlice...)
 
