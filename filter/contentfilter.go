@@ -134,12 +134,12 @@ func EnableName(renderer *render.Renderer) ContentOption {
 	}
 }
 
-func EnableIconName(renderer *render.Renderer, s string) ContentOption {
+func EnableIconName(renderer *render.Renderer, parent string) ContentOption {
 	return func(info os.FileInfo) string {
 		if info.IsDir() {
 			return renderer.DirIcon(info.Name())
 		} else if info.Mode()&os.ModeSymlink != 0 {
-			return renderer.SymlinkIcon(info.Name(), s)
+			return renderer.SymlinkIcon(info.Name(), parent)
 		} else {
 			return renderer.ByExtIcon(info.Name())
 		}

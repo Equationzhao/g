@@ -74,6 +74,10 @@ var DefaultTheme = Theme{
 		Color: Green,
 		Icon:  "\uF17A",
 	},
+	"EXE": Style{
+		Color: Green,
+		Icon:  "\uF17A",
+	},
 	"file": Style{
 		Color: White,
 		Icon:  "\uF016",
@@ -91,6 +95,10 @@ var DefaultTheme = Theme{
 		Icon:  "\ueb15",
 	},
 	"link": Style{
+		Color: Purple,
+		Icon:  "\ueb15",
+	},
+	"lnk": Style{
 		Color: Purple,
 		Icon:  "\ueb15",
 	},
@@ -221,6 +229,10 @@ var DefaultTheme = Theme{
 	"node_modules": Style{
 		Color: Cyan,
 		Icon:  "\ue5fa",
+	},
+	"npm": Style{
+		Color: Cyan,
+		Icon:  "\ue71e",
 	},
 	"jsx": Style{
 		Color: Cyan,
