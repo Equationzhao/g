@@ -62,6 +62,24 @@ func main() {
 					return nil
 				},
 			},
+			&cli.BoolFlag{
+				Name:    "A",
+				Aliases: []string{"almost-all"},
+				Usage:   "do not list implied . and ..",
+				Action: func(context *cli.Context, b bool) error {
+					if b {
+						// remove filter.RemoveHidden
+						newFF := make([]*filter.TypeFunc, 0, len(typeFunc))
+						for _, typeFunc := range typeFunc {
+							if typeFunc != &filter.RemoveHidden {
+								newFF = append(newFF, typeFunc)
+							}
+						}
+						typeFunc = newFF
+					}
+					return nil
+				},
+			},
 			&cli.StringFlag{
 				Name: "time-format",
 			},
@@ -105,7 +123,7 @@ func main() {
 			},
 			&cli.BoolFlag{
 				Name:    "show-owner",
-				Aliases: []string{"so"},
+				Aliases: []string{"so", "author"},
 				Usage:   "show owner",
 				Action: func(context *cli.Context, b bool) error {
 					if b {
@@ -113,6 +131,17 @@ func main() {
 						if _, ok := p.(*printer.Byline); !ok {
 							p = printer.NewByline()
 						}
+					}
+					return nil
+				},
+			},
+			&cli.BoolFlag{
+				Name:    "B",
+				Aliases: []string{"ignore-backups"},
+				Usage:   "do not list implied entries ending with ~",
+				Action: func(context *cli.Context, b bool) error {
+					if b {
+						typeFunc = append(typeFunc, &filter.RemoveBackups)
 					}
 					return nil
 				},
@@ -308,9 +337,11 @@ func main() {
 						fmt.Printf("%s:\n", path[i])
 					}
 
-					if path[i] == "~" {
-						home, _ := os.UserHomeDir()
-						path[i] = home
+					if //goland:noinspection GoBoolExpressions
+					OS == "windows" {
+						if path[i] == "~" {
+							path[i], _ = os.UserHomeDir()
+						}
 					}
 
 					s, err := tree.NewTreeString(path[i], depth, filter.NewTypeFilter(typeFunc...), r)
@@ -330,14 +361,51 @@ func main() {
 					}
 				}
 			} else {
+				// flag: if show-icon or all is set
 				si := context.Bool("show-icon") || context.Bool("all")
 				for i := 0; i < len(path); i++ {
 					if len(path) > 1 {
 						fmt.Printf("%s:\n", path[i])
 					}
+
+					if //goland:noinspection GoBoolExpressions
+					OS == "windows" {
+						if path[i] == "~" {
+							path[i], _ = os.UserHomeDir()
+						}
+					}
+					infos := make([]os.FileInfo, 0, 20)
+
+					// switch to target dir
+					// or get target file info
+					if path[i] != "." {
+						stat, err := os.Stat(path[i])
+						if err != nil {
+							fmt.Printf("%s g: %s %s\n", theme.Error, err.Error(), theme.Reset)
+							continue
+						}
+						if stat.IsDir() {
+							_ = os.Chdir(path[i])
+							if err != nil {
+								fmt.Printf("%s g: %s %s\n", theme.Error, err.Error(), theme.Reset)
+								continue
+							}
+							path[i] = "."
+						} else {
+							infos = append(infos, stat)
+						}
+					}
+
+					// if si->add si, else->add default
+					if si {
+						contentFunc = append(contentFunc, filter.EnableIconName(r, path[i]))
+					} else {
+						contentFunc = append(contentFunc, filter.EnableName(r))
+					}
+
 					d, err := os.ReadDir(path[i])
 					if err != nil {
-						fmt.Println(err)
+						goto final
 					}
 					if si {
 						contentFunc = append(contentFunc, filter.EnableIconName(r, path[i]))
