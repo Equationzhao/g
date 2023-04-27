@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/Equationzhao/g/filter"
+	"github.com/Equationzhao/g/pathbeautify"
 	"github.com/Equationzhao/g/printer"
 	"github.com/Equationzhao/g/render"
 	"github.com/Equationzhao/g/theme"
@@ -39,7 +40,6 @@ func main() {
 			},
 			&cli.IntFlag{
 				Name:        "depth",
-				Aliases:     []string{"d"},
 				Usage:       "tree limit depth, negative -> infinity",
 				DefaultText: "infinity",
 				Value:       -1,
@@ -319,8 +319,13 @@ func main() {
 				},
 			},
 			&cli.BoolFlag{
+				Name:    "d",
+				Aliases: []string{"directory"},
+				Usage:   "list directories themselves, not their contents",
+			},
+			&cli.BoolFlag{
 				Name:    "F",
-				Aliases: []string{"sf", "file"},
+				Aliases: []string{"file"},
 			},
 		},
 		HideHelpCommand: true,
@@ -337,12 +342,7 @@ func main() {
 						fmt.Printf("%s:\n", path[i])
 					}
 
-					if //goland:noinspection GoBoolExpressions
-					OS == "windows" {
-						if path[i] == "~" {
-							path[i], _ = os.UserHomeDir()
-						}
-					}
+					pathbeautify.Transform(&path[i])
 
 					s, err := tree.NewTreeString(path[i], depth, filter.NewTypeFilter(typeFunc...), r)
 					if errors.Is(err, os.ErrNotExist) {
@@ -361,21 +361,23 @@ func main() {
 					}
 				}
 			} else {
+				startDir, _ := os.Getwd()
 				// flag: if show-icon or all is set
-				si := context.Bool("show-icon") || context.Bool("all")
+				flagsi := context.Bool("show-icon") || context.Bool("all")
+				// flag: if d is set
+				flagd := context.Bool("d")
+				// flag: if A is set
+				flagA := context.Bool("A")
 				for i := 0; i < len(path); i++ {
 					if len(path) > 1 {
 						fmt.Printf("%s:\n", path[i])
 					}
 
-					if //goland:noinspection GoBoolExpressions
-					OS == "windows" {
-						if path[i] == "~" {
-							path[i], _ = os.UserHomeDir()
-						}
-					}
+					pathbeautify.Transform(&path[i])
+
 					infos := make([]os.FileInfo, 0, 20)
 
+					isFile := false
 					// switch to target dir
 					// or get target file info
 					if path[i] != "." {
@@ -385,31 +387,44 @@ func main() {
 							continue
 						}
 						if stat.IsDir() {
-							_ = os.Chdir(path[i])
-							if err != nil {
-								fmt.Printf("%s g: %s %s\n", theme.Error, err.Error(), theme.Reset)
-								continue
+							if flagd {
+								// when -d is set, treat dir as file
+								infos = append(infos, stat)
+								isFile = true
+							} else {
+								_ = os.Chdir(path[i])
+								if err != nil {
+									fmt.Printf("%s g: %s %s\n", theme.Error, err.Error(), theme.Reset)
+									continue
+								}
+								path[i] = "."
 							}
-							path[i] = "."
 						} else {
 							infos = append(infos, stat)
+							isFile = true
 						}
 					}
 
-					// if si->add si, else->add default
-					if si {
+					// if flagsi->add flagsi, else->add default
+					if flagsi {
 						contentFunc = append(contentFunc, filter.EnableIconName(r, path[i]))
 					} else {
 						contentFunc = append(contentFunc, filter.EnableName(r))
 					}
 
-					d, err := os.ReadDir(path[i])
+					var d []os.DirEntry
+					var err error
+					if isFile {
+						goto final
+					}
+
+					d, err = os.ReadDir(path[i])
 					if err != nil {
 						goto final
 					}
 
 					// if -A(almost-all) is not set, add the "." info
-					if !context.Bool("A") {
+					if !flagA {
 						statCurrent, err := os.Stat(".")
 						if err != nil {
 							fmt.Println(err)
@@ -442,6 +457,7 @@ func main() {
 						//goland:noinspection GoPrintFunctions
 						fmt.Println("\n") //nolint:govet
 						contentFunc = contentFunc[:len(contentFunc)-1]
+						_ = os.Chdir(startDir)
 					}
 				}
 			}

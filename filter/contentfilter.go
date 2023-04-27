@@ -78,23 +78,23 @@ func EnableSize(size Size, renderer *render.Renderer) ContentOption {
 		var res string
 		switch size {
 		case Bit:
-			res = strconv.FormatInt(int64(v*8), 10) + "bit"
+			res = strconv.FormatInt(int64(v*8), 10)
 		case B:
-			res = strconv.FormatInt(int64(v), 10) + "B"
+			res = strconv.FormatInt(int64(v), 10)
 		case KB:
-			res = strconv.FormatFloat(v/1024.0, 'f', 0, 64) + "KB"
+			res = strconv.FormatFloat(v/1024.0, 'f', 0, 64)
 		case MB:
-			res = strconv.FormatFloat(v/1024.0/1024.0, 'f', 1, 64) + "MB"
+			res = strconv.FormatFloat(v/1024.0/1024.0, 'f', 1, 64)
 		case GB:
-			res = strconv.FormatFloat(v/1024.0/1024.0/1024.0, 'f', 1, 64) + "GB"
+			res = strconv.FormatFloat(v/1024.0/1024.0/1024.0, 'f', 1, 64)
 		case TB:
-			res = strconv.FormatFloat(v/1024.0/1024.0/1024.0/1024.0, 'f', 1, 64) + "TB"
+			res = strconv.FormatFloat(v/1024.0/1024.0/1024.0/1024.0, 'f', 1, 64)
 		case PB:
-			res = strconv.FormatFloat(v/1024.0/1024.0/1024.0/1024.0/1024.0, 'f', 1, 64) + "PB"
+			res = strconv.FormatFloat(v/1024.0/1024.0/1024.0/1024.0/1024.0, 'f', 1, 64)
 		case EB:
-			res = strconv.FormatFloat(v/1024.0/1024.0/1024.0/1024.0/1024.0/1024.0, 'f', 1, 64) + "EB"
+			res = strconv.FormatFloat(v/1024.0/1024.0/1024.0/1024.0/1024.0/1024.0, 'f', 1, 64)
 		case ZB:
-			res = strconv.FormatFloat(v/1024.0/1024.0/1024.0/1024.0/1024.0/1024.0/1024.0, 'f', 1, 64) + "ZB"
+			res = strconv.FormatFloat(v/1024.0/1024.0/1024.0/1024.0/1024.0/1024.0/1024.0, 'f', 1, 64)
 		case Auto:
 			for i := B; i <= ZB; i++ {
 				if v < 1000 {
@@ -112,7 +112,7 @@ func EnableSize(size Size, renderer *render.Renderer) ContentOption {
 		default:
 			panic("invalid " + strconv.Itoa(int(size)))
 		}
-		return renderer.Size(res)
+		return renderer.Size(fillBlank(res, 7))
 	}
 }
 
@@ -223,6 +223,7 @@ func (cf *ContentFilter) GetStringSlice(e []os.FileInfo) []string {
 				_, _ = resBuffers[i].WriteString(option(entry))
 				_ = resBuffers[i].WriteByte(' ')
 			}
+			// the last one should not follow by space
 			_, _ = resBuffers[i].WriteString(cf.options[len(cf.options)-1](entry))
 			wg.Done()
 		}(entry, i)

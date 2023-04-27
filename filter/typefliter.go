@@ -61,12 +61,12 @@ var RemoveByExt = func(ext string) TypeFunc {
 
 var ExtOnly = func(ext ...string) TypeFunc {
 	return func(e os.FileInfo) bool {
-		name := e.Name()
-		for _, e := range ext {
-			if strings.HasSuffix(name, "."+e) {
+		for _, exti := range ext {
+			if strings.HasSuffix(e.Name(), "."+exti) {
 				return true
 			}
 		}
+
 		return false
 	}
 }
