@@ -2,6 +2,7 @@ package printer
 
 import (
 	"bufio"
+	"fmt"
 	"github.com/acarl005/stripansi"
 	"github.com/olekukonko/ts"
 	"io"
@@ -66,7 +67,7 @@ func (f *FitTerminal) printColumns(strs *[]string) {
 	// see how wide the terminal is
 	width := getTermWidth()
 	// calculate the dimensions of the columns
-	numCols, numRows := calculateTableSize(width, 2, maxLength, len(*strs))
+	numCols, numRows := calculateTableSize(width, 4, maxLength, len(*strs))
 
 	// if we're forced into a single column, fall back to simple printing (one per line)
 	if numCols == 1 {
@@ -224,5 +225,83 @@ func (c *CommaPrint) printColumns(strs *[]string) {
 		} else {
 			_, _ = c.WriteString(" ")
 		}
+	}
+}
+
+type Across struct {
+	*bufio.Writer
+}
+
+func NewAcross() *Across {
+	return &Across{
+		Writer: bufio.NewWriter(Output),
+	}
+}
+
+func (a *Across) Print(s ...string) {
+	a.printRow(&s)
+}
+
+func (a *Across) printRow(strs *[]string) {
+	defer a.Flush()
+	width := getTermWidth()
+
+	const m = 4
+	strLen := make([]int, len(*strs))
+
+	maxLength := 0
+	for i, str := range *strs {
+		colorless := stripansi.Strip(str)
+		strLen[i] = utf8.RuneCountInString(colorless)
+		maxLength = max(maxLength, strLen[i])
+	}
+
+	cols := (width + m) / (maxLength + 2*m)
+	if cols == 0 {
+		cols = 1
+	}
+
+	colWidth := (width+m)/cols - m
+
+	for i := 0; i < len(*strs); i += cols {
+		for j := 0; j < cols && i+j < len(*strs); j++ {
+			index := i + j
+			str := (*strs)[index]
+			padding := colWidth - strLen[index]
+			if padding < 0 {
+				padding = 0
+			}
+			if j < cols-1 {
+				fmt.Fprintf(a, "%s%s", str, a.stringOf(' ', padding+m))
+			} else {
+				fmt.Fprintf(a, "%s%s", str, a.stringOf(' ', padding))
+			}
+		}
+		_ = a.WriteByte('\n')
+	}
+}
+
+func (a *Across) stringOf(ch rune, count int) string {
+	s := make([]rune, count)
+	for i := 0; i < count; i++ {
+		s[i] = ch
+	}
+	return string(s)
+}
+
+type Zero struct {
+	bufio.Writer
+}
+
+func NewZero() *Zero {
+	return &Zero{
+		Writer: *bufio.NewWriter(Output),
+	}
+}
+
+func (z *Zero) Print(s ...string) {
+	defer z.Flush()
+	for _, str := range s {
+		_, _ = z.WriteString(str)
 	}
 }

@@ -36,7 +36,7 @@ func (m *usernameMap) Get(u Uid) Username {
 	} else {
 		m.mutex.RUnlock()
 		m.mutex.Lock()
-		if username, ok := m.m[u]; ok {
+		if username, ok = m.m[u]; ok {
 			m.mutex.Unlock()
 			return username
 		} else {

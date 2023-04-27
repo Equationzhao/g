@@ -81,14 +81,36 @@ func main() {
 				},
 			},
 			&cli.StringFlag{
-				Name: "time-format",
+				Name:    "time-format",
+				Usage:   "time/date format with -l",
+				EnvVars: []string{"TIME_STYLE"},
+				Action: func(context *cli.Context, s string) error {
+					/*
+						The TIME_STYLE argument can be full-iso, long-iso, iso, locale, or  +FORMAT.   FORMAT
+						is  interpreted  like in date(1).  If FORMAT is FORMAT1<newline>FORMAT2, then FORMAT1
+						applies to non-recent files and FORMAT2 to recent files.   TIME_STYLE  prefixed  with
+						'posix-' takes effect only outside the POSIX locale.  Also the TIME_STYLE environment
+						variable sets the default style to use.
+					*/
+					switch s {
+					case "full-iso":
+						timeFormat = "2006-01-02 15:04:05.000000000 -0700"
+					case "long-iso":
+						timeFormat = "2006-01-02 15:04"
+					case "locale":
+						timeFormat = "Jan 02 15:04"
+					default:
+
+					}
+					return nil
+				},
 			},
 			&cli.BoolFlag{
 				Name:  "full-time",
 				Usage: "like -all/l --time-style=full-iso",
 				Action: func(context *cli.Context, b bool) error {
 					if b {
-						timeFormat = "2006-01-02 15:04:05.000000000"
+						timeFormat = "2006-01-02 15:04:05.000000000 -0700"
 					}
 					return nil
 				},
@@ -193,12 +215,101 @@ func main() {
 				},
 			},
 			&cli.BoolFlag{
-				Name:  "commas",
-				Usage: "print by line",
+				Name:    "zero",
+				Aliases: []string{"0"},
+				Usage:   "end each output line with NUL, not newline",
+				Action: func(context *cli.Context, b bool) error {
+					if b {
+						if _, ok := p.(*printer.Zero); !ok {
+							p = printer.NewZero()
+						}
+					}
+					return nil
+				},
+			},
+			&cli.BoolFlag{
+				Name:  "m",
+				Usage: "fill width with a comma separated list of entries",
 				Action: func(context *cli.Context, b bool) error {
 					if b {
 						if _, ok := p.(*printer.Byline); !ok {
 							p = printer.NewCommaPrint()
+						}
+					}
+					return nil
+				},
+			},
+			&cli.BoolFlag{
+				Name:  "x",
+				Usage: "list entries by lines instead of by columns",
+				Action: func(context *cli.Context, b bool) error {
+					if b {
+						if _, ok := p.(*printer.Across); !ok {
+							p = printer.NewAcross()
+						}
+					}
+					return nil
+				},
+			},
+			&cli.BoolFlag{
+				Name:    "all",
+				Aliases: []string{"la", "l"},
+				Usage:   "show all info/use a long listing format",
+				Action: func(context *cli.Context, b bool) error {
+					if b {
+						// remove filter.RemoveHidden
+						newFF := make([]*filter.TypeFunc, 0, len(typeFunc))
+						for _, typeFunc := range typeFunc {
+							if typeFunc != &filter.RemoveHidden {
+								newFF = append(newFF, typeFunc)
+							}
+						}
+						typeFunc = newFF
+						contentFunc = append(contentFunc, filter.EnableFileMode(r), filter.EnableSize(filter.Auto, r), filter.EnableOwner(r), filter.EnableGroup(r), filter.EnableTime(timeFormat, r))
+						if _, ok := p.(*printer.Byline); !ok {
+							p = printer.NewByline()
+						}
+					}
+					return nil
+				},
+			},
+			&cli.BoolFlag{
+				Name:  "C",
+				Usage: "list entries by columns",
+				Action: func(context *cli.Context, b bool) error {
+					if b {
+						if _, ok := p.(*printer.FitTerminal); !ok {
+							p = printer.NewFitTerminal()
+						}
+					}
+					return nil
+				},
+			},
+			&cli.StringFlag{
+				Name:  "format",
+				Usage: "across  -x,  commas  -m, horizontal -x, long -l, single-column -1, verbose -l, vertical -C",
+				Action: func(context *cli.Context, s string) error {
+					switch s {
+					case "across", "x", "horizontal":
+						if _, ok := p.(*printer.Across); !ok {
+							p = printer.NewAcross()
+						}
+					case "commas", "m":
+						if _, ok := p.(*printer.CommaPrint); !ok {
+							p = printer.NewCommaPrint()
+						}
+					case "long", "l", "verbose":
+						contentFunc = append(contentFunc, filter.EnableFileMode(r), filter.EnableSize(filter.Auto, r), filter.EnableOwner(r), filter.EnableGroup(r), filter.EnableTime(timeFormat, r))
+						if _, ok := p.(*printer.Byline); !ok {
+							p = printer.NewByline()
+						}
+					case "single-column", "1":
+						if _, ok := p.(*printer.Byline); !ok {
+							p = printer.NewByline()
+						}
+					case "vertical", "C":
+						if _, ok := p.(*printer.FitTerminal); !ok {
+							p = printer.NewFitTerminal()
 						}
 					}
 					return nil
@@ -252,28 +363,6 @@ func main() {
 						}
 						typeFunc = newFF
 						contentFunc = append(contentFunc, filter.EnableFileMode(r), filter.EnableSize(filter.Auto, r), filter.EnableGroup(r), filter.EnableTime(timeFormat, r))
-						if _, ok := p.(*printer.Byline); !ok {
-							p = printer.NewByline()
-						}
-					}
-					return nil
-				},
-			},
-			&cli.BoolFlag{
-				Name:    "all",
-				Aliases: []string{"la", "l"},
-				Usage:   "show all info/use a long listing format",
-				Action: func(context *cli.Context, b bool) error {
-					if b {
-						// remove filter.RemoveHidden
-						newFF := make([]*filter.TypeFunc, 0, len(typeFunc))
-						for _, typeFunc := range typeFunc {
-							if typeFunc != &filter.RemoveHidden {
-								newFF = append(newFF, typeFunc)
-							}
-						}
-						typeFunc = newFF
-						contentFunc = append(contentFunc, filter.EnableFileMode(r), filter.EnableSize(filter.Auto, r), filter.EnableOwner(r), filter.EnableGroup(r), filter.EnableTime(timeFormat, r))
 						if _, ok := p.(*printer.Byline); !ok {
 							p = printer.NewByline()
 						}
