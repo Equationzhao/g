@@ -60,8 +60,18 @@ func expand(node tree, depthLimit int, wg *sync.WaitGroup, parent string, s *sta
 		node.AddNode(err.Error())
 	}
 
+	infos := make([]os.FileInfo, 0, len(d))
+	for _, entry := range d {
+		info, err := entry.Info()
+		if err != nil {
+			node.AddNode(err.Error())
+			return
+		}
+		infos = append(infos, info)
+	}
+
 	if typeFilter != nil {
-		d = typeFilter.Filter(d)
+		infos = typeFilter.Filter(infos)
 	}
 
 	for _, v := range d {
@@ -95,11 +105,7 @@ func expand(node tree, depthLimit int, wg *sync.WaitGroup, parent string, s *sta
 			if renderer != nil {
 				wg.Add(1)
 				go func() {
-					symlinks, err := filepath.EvalSymlinks(filepath.Join(parent, info.Name()))
-					if err != nil {
-						symlinks = err.Error()
-					}
-					node.AddNode(renderer.Symlink(info.Name() + " -> " + symlinks))
+					node.AddNode(renderer.Symlink(info.Name(), parent))
 					wg.Done()
 				}()
 			} else {

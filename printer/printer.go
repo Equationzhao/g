@@ -2,6 +2,7 @@ package printer
 
 import (
 	"bufio"
+	"fmt"
 	"github.com/acarl005/stripansi"
 	"github.com/olekukonko/ts"
 	"io"
@@ -46,14 +47,13 @@ func NewFitTerminal() Printer {
 }
 
 func (f *FitTerminal) Print(s ...string) {
-	f.printColumns(&s, 4)
+	f.printColumns(&s)
 }
 
-func (f *FitTerminal) printColumns(strs *[]string, margin int) {
+func (f *FitTerminal) printColumns(strs *[]string) {
 	defer f.Flush()
 
 	maxLength := 0
-	marginStr := strings.Repeat(" ", margin)
 	// also keep track of each individual length to easily calculate padding
 	var lengths []int
 	for _, str := range *strs {
@@ -67,12 +67,13 @@ func (f *FitTerminal) printColumns(strs *[]string, margin int) {
 	// see how wide the terminal is
 	width := getTermWidth()
 	// calculate the dimensions of the columns
-	numCols, numRows := calculateTableSize(width, margin, maxLength, len(*strs))
+	numCols, numRows := calculateTableSize(width, 4, maxLength, len(*strs))
 
 	// if we're forced into a single column, fall back to simple printing (one per line)
 	if numCols == 1 {
 		for _, str := range *strs {
 			_, _ = f.WriteString(str)
+			_ = f.WriteByte('\n')
 		}
 		return
 	}
@@ -95,7 +96,7 @@ func (f *FitTerminal) printColumns(strs *[]string, margin int) {
 
 		// calculate the amount of padding required
 		numSpacesRequired := maxLength - strLen
-		spaceStr := strings.Repeat(" ", numSpacesRequired)
+		spaceStr := strings.Repeat(" ", numSpacesRequired+1)
 
 		// print the item itself
 		_, _ = f.WriteString(str)
@@ -104,7 +105,6 @@ func (f *FitTerminal) printColumns(strs *[]string, margin int) {
 			_ = f.WriteByte('\n')
 		} else {
 			_, _ = f.WriteString(spaceStr)
-			_, _ = f.WriteString(marginStr)
 		}
 	}
 }
@@ -155,4 +155,153 @@ func max(a int, b int) int {
 		return a
 	}
 	return b
+}
+
+type CommaPrint struct {
+	*bufio.Writer
+}
+
+func NewCommaPrint() *CommaPrint {
+	return &CommaPrint{
+		Writer: bufio.NewWriter(Output),
+	}
+}
+
+func (c *CommaPrint) Print(s ...string) {
+	r := s[:len(s)-1]
+	for i := range r {
+		r[i] += ","
+	}
+	c.printColumns(&s)
+}
+
+func (c *CommaPrint) printColumns(strs *[]string) {
+	defer c.Flush()
+
+	maxLength := 0
+	// also keep track of each individual length to easily calculate padding
+	var lengths []int
+	for _, str := range *strs {
+		colorless := stripansi.Strip(str)
+		// len() is insufficient here, as it counts emojis as 4 characters each
+		length := utf8.RuneCountInString(colorless)
+		maxLength = max(maxLength, length)
+		lengths = append(lengths, length)
+	}
+
+	// see how wide the terminal is
+	width := getTermWidth()
+	// calculate the dimensions of the columns
+	numCols, numRows := calculateTableSize(width, 0, maxLength, len(*strs))
+
+	// if we're forced into a single column, fall back to simple printing (one per line)
+	if numCols == 1 {
+		for _, str := range *strs {
+			_, _ = c.WriteString(str)
+			_ = c.WriteByte('\n')
+		}
+		return
+	}
+
+	// `i` will be a left-to-right index. this will need to get converted to a top-to-bottom index
+	for i := 0; i < numCols*numRows; i++ {
+		// treat output like a "table" with (x, y) coordinates as an intermediate representation
+		// first calculate (x, y) from i
+		x, y := rowIndexToTableCoords(i, numCols)
+		// then convey (x, y) to `j`, the top-to-bottom index
+		j := tableCoordsToColIndex(x, y, numRows)
+
+		// try to access the array, but the table might have more cells than array elements, so only try to access if within bounds
+		str := ""
+		if j < len(lengths) {
+			str = (*strs)[j]
+		}
+
+		// print the item itself
+		_, _ = c.WriteString(str)
+		// if we're at the last column, print a line break
+		if x+1 == numCols {
+			_ = c.WriteByte('\n')
+		} else {
+			_, _ = c.WriteString(" ")
+		}
+	}
+}
+
+type Across struct {
+	*bufio.Writer
+}
+
+func NewAcross() *Across {
+	return &Across{
+		Writer: bufio.NewWriter(Output),
+	}
+}
+
+func (a *Across) Print(s ...string) {
+	a.printRow(&s)
+}
+
+func (a *Across) printRow(strs *[]string) {
+	defer a.Flush()
+	width := getTermWidth()
+
+	const m = 4
+	strLen := make([]int, len(*strs))
+
+	maxLength := 0
+	for i, str := range *strs {
+		colorless := stripansi.Strip(str)
+		strLen[i] = utf8.RuneCountInString(colorless)
+		maxLength = max(maxLength, strLen[i])
+	}
+
+	cols := (width + m) / (maxLength + 2*m)
+	if cols == 0 {
+		cols = 1
+	}
+
+	colWidth := (width+m)/cols - m
+
+	for i := 0; i < len(*strs); i += cols {
+		for j := 0; j < cols && i+j < len(*strs); j++ {
+			index := i + j
+			str := (*strs)[index]
+			padding := colWidth - strLen[index]
+			if padding < 0 {
+				padding = 0
+			}
+			if j < cols-1 {
+				fmt.Fprintf(a, "%s%s", str, a.stringOf(' ', padding+m))
+			} else {
+				fmt.Fprintf(a, "%s%s", str, a.stringOf(' ', padding))
+			}
+		}
+		_ = a.WriteByte('\n')
+	}
+}
+
+func (a *Across) stringOf(ch rune, count int) string {
+	s := make([]rune, count)
+	for i := 0; i < count; i++ {
+		s[i] = ch
+	}
+	return string(s)
+}
+
+type Zero struct {
+	bufio.Writer
+}
+
+func NewZero() *Zero {
+	return &Zero{
+		Writer: *bufio.NewWriter(Output),
+	}
+}
+
+func (z *Zero) Print(s ...string) {
+	defer z.Flush()
+	for _, str := range s {
+		_, _ = z.WriteString(str)
+	}
 }

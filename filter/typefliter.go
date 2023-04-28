@@ -6,6 +6,11 @@ import (
 	"strings"
 )
 
+const (
+	keep   = true
+	remove = false
+)
+
 type TypeFilter struct {
 	tfs []*TypeFunc
 }
@@ -14,7 +19,7 @@ func NewTypeFilter(tfs ...*TypeFunc) *TypeFilter {
 	return &TypeFilter{tfs: tfs}
 }
 
-func (tf *TypeFilter) Filter(e []os.DirEntry) (res []os.DirEntry) {
+func (tf *TypeFilter) Filter(e []os.FileInfo) (res []os.FileInfo) {
 	for _, entry := range e {
 		ok := true
 		for _, funcPtr := range tf.tfs {
@@ -30,19 +35,19 @@ func (tf *TypeFilter) Filter(e []os.DirEntry) (res []os.DirEntry) {
 	return res
 }
 
-func alwaysTrue(e os.DirEntry) bool {
-	return true
+func alwaysTrue(e os.FileInfo) bool {
+	return keep
 }
 
 // TypeFunc return true -> Keep
 // return false -> remove
-type TypeFunc = func(e os.DirEntry) bool
+type TypeFunc = func(e os.FileInfo) bool
 
-var RemoveDir = func(e os.DirEntry) bool {
+var RemoveDir = func(e os.FileInfo) bool {
 	return !e.IsDir()
 }
 
-var DirOnly = func(e os.DirEntry) bool {
+var DirOnly = func(e os.FileInfo) bool {
 	return e.IsDir()
 }
 
@@ -50,24 +55,29 @@ var DirOnly = func(e os.DirEntry) bool {
 //
 //	eg:
 //		a.go b.c c.rs d.cxx dir
-//		RemoveByExt("go")
+//		RemoveByExt([]string{"go", "cxx"})
 //	result:
-//		b.c c.rs d.cxx dir
-var RemoveByExt = func(ext string) TypeFunc {
-	return func(e os.DirEntry) bool {
-		return !strings.HasSuffix(e.Name(), "."+ext)
+//		b.c c.rs dir
+var RemoveByExt = func(ext ...string) TypeFunc {
+	return func(e os.FileInfo) bool {
+		for _, exti := range ext {
+			if strings.HasSuffix(e.Name(), "."+exti) {
+				return remove
+			}
+		}
+		return keep
 	}
 }
 
 var ExtOnly = func(ext ...string) TypeFunc {
-	return func(e os.DirEntry) bool {
-		name := e.Name()
-		for _, e := range ext {
-			if strings.HasSuffix(name, "."+e) {
-				return true
+	return func(e os.FileInfo) bool {
+		for _, exti := range ext {
+			if strings.HasSuffix(e.Name(), "."+exti) {
+				return keep
 			}
 		}
-		return false
+
+		return remove
 	}
 }
 
@@ -77,7 +87,7 @@ var RemoveRegexp = func(regexpression string) TypeFunc {
 		return alwaysTrue
 	}
 
-	return func(e os.DirEntry) bool {
+	return func(e os.FileInfo) bool {
 		return !compiled.Match([]byte(regexpression))
 	}
 }
@@ -88,15 +98,19 @@ var RegexpOnly = func(regexpression string) TypeFunc {
 		return alwaysTrue
 	}
 
-	return func(e os.DirEntry) bool {
+	return func(e os.FileInfo) bool {
 		return compiled.Match([]byte(regexpression))
 	}
 }
 
-var RemoveHidden = func(e os.DirEntry) bool {
+var RemoveHidden = func(e os.FileInfo) bool {
 	return !strings.HasPrefix(e.Name(), ".")
 }
 
-var HiddenOnly = func(e os.DirEntry) bool {
+var HiddenOnly = func(e os.FileInfo) bool {
 	return strings.HasPrefix(e.Name(), ".")
+}
+
+var RemoveBackups = func(e os.FileInfo) bool {
+	return !strings.HasSuffix(e.Name(), "~")
 }
