@@ -100,7 +100,7 @@ func EnableSize(size Size, renderer *render.Renderer) ContentOption {
 				if v < 1000 {
 					res = strconv.FormatFloat(v, 'f', 1, 64)
 					if res == "0.0" {
-						res = ""
+						res = "-"
 					} else {
 						res += convert2Size(i)
 					}
@@ -122,27 +122,125 @@ func EnableTime(format string, renderer *render.Renderer) ContentOption {
 	}
 }
 
-func EnableName(renderer *render.Renderer) ContentOption {
-	return func(info os.FileInfo) string {
-		if info.IsDir() {
-			return renderer.Dir(info.Name())
-		} else if info.Mode()&os.ModeSymlink != 0 {
-			return renderer.Symlink(info.Name())
-		} else {
-			return renderer.ByExt(info.Name())
-		}
-	}
+type Name struct {
+	Icon     bool
+	Classify bool // --classify / -F
+	FileType bool // --file-type
+	Renderer *render.Renderer
+	parent   string
 }
 
-func EnableIconName(renderer *render.Renderer, parent string) ContentOption {
+func (n *Name) SetParent(parent string) *Name {
+	n.parent = parent
+	return n
+}
+
+func (n *Name) UnsetIcon() *Name {
+	n.Icon = false
+	return n
+}
+
+func (n *Name) UnsetClassify() *Name {
+	n.Classify = false
+	return n
+}
+
+func (n *Name) UnsetFileType() *Name {
+	n.FileType = false
+	return n
+}
+
+func (n *Name) SetIcon() *Name {
+	n.Icon = true
+	return n
+}
+
+func (n *Name) SetClassify() *Name {
+	n.Classify = true
+	return n
+}
+
+// SetFileType set file type, should set Classify first
+// if Classify is false, FileType will be ignored
+func (n *Name) SetFileType() *Name {
+	n.FileType = true
+	return n
+}
+
+func (n *Name) SetRenderer(Renderer *render.Renderer) *Name {
+	n.Renderer = Renderer
+	return n
+}
+
+func NewNameEnable() *Name {
+	return &Name{}
+}
+
+func (n *Name) Enable() ContentOption {
+	/*
+		 -F      Display a slash (`/') immediately after each pathname that is a
+				 directory, an asterisk (`*') after each that is executable, an at
+				 sign (`@') after each symbolic link, a percent sign (`%') after
+				 each whiteout, an equal sign (`=') after each socket, and a
+				 vertical bar (`|') after each that is a FIFO.
+	*/
+
 	return func(info os.FileInfo) string {
-		if info.IsDir() {
-			return renderer.DirIcon(info.Name())
-		} else if info.Mode()&os.ModeSymlink != 0 {
-			return renderer.SymlinkIcon(info.Name(), parent)
+		buffer := bytebufferpool.Get()
+		defer bytebufferpool.Put(buffer)
+		str := info.Name()
+		mode := info.Mode()
+
+		if n.Icon {
+			if info.IsDir() {
+				str = n.Renderer.DirIcon(str)
+			} else if mode&os.ModeSymlink != 0 {
+				if n.Classify {
+					str = n.Renderer.SymlinkIconPlus(str, n.parent, "@")
+				} else {
+					str = n.Renderer.SymlinkIcon(str, n.parent)
+				}
+			} else if mode&os.ModeNamedPipe != 0 {
+				str = n.Renderer.PipeIcon(str)
+			} else if mode&os.ModeSocket != 0 {
+				str = n.Renderer.SocketIcon(str)
+			} else {
+				str = n.Renderer.ByExtIcon(str)
+			}
 		} else {
-			return renderer.ByExtIcon(info.Name())
+			if info.IsDir() {
+				str = n.Renderer.Dir(str)
+			} else if mode&os.ModeSymlink != 0 {
+				if n.Classify {
+					str = n.Renderer.SymlinkPlus(str, n.parent, "@")
+				} else {
+					str = n.Renderer.Symlink(str, n.parent)
+				}
+			} else if mode&os.ModeNamedPipe != 0 {
+				str = n.Renderer.Pipe(str)
+			} else if mode&os.ModeSocket != 0 {
+				str = n.Renderer.Socket(str)
+			} else {
+				str = n.Renderer.ByExt(str)
+			}
 		}
+
+		if n.Classify {
+			if info.IsDir() {
+				str += "/"
+			} else if mode&os.ModeSymlink != 0 {
+				goto end
+			} else if mode&os.ModeNamedPipe != 0 {
+				str += "|"
+			} else if mode&os.ModeSocket != 0 {
+				str += "="
+			} else if (!n.FileType) && (mode&0111 != 0) {
+				str += "*"
+			}
+		}
+
+	end:
+		return str
 	}
 }
 

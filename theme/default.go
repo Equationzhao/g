@@ -90,10 +90,6 @@ var DefaultTheme = Theme{
 		Color: White,
 		Icon:  "\uea62",
 	},
-	"symlink": Style{
-		Color: Purple,
-		Icon:  "\ueb15",
-	},
 	"link": Style{
 		Color: Purple,
 		Icon:  "\ueb15",
@@ -264,7 +260,7 @@ var DefaultTheme = Theme{
 	},
 	"xml": Style{
 		Color: Cyan,
-		Icon:  "謹",
+		Icon:  "\ue796",
 	},
 	"cson": Style{
 		Color: Cyan,
@@ -769,5 +765,18 @@ var DefaultTheme = Theme{
 	"dll": Style{
 		Color: Cyan,
 		Icon:  "\uF121",
+	},
+
+	"pipe": Style{
+		Color: Cyan,
+		Icon:  "\uF124",
+	},
+	"socket": Style{
+		Color: Cyan,
+		Icon:  "\uF1E6",
+	},
+	"symlink": Style{
+		Color: Purple,
+		Icon:  "\ueb15",
 	},
 }

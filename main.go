@@ -12,6 +12,7 @@ import (
 	"github.com/Equationzhao/g/tree"
 	"github.com/urfave/cli/v2"
 	"os"
+	"strings"
 )
 
 var typeFunc = make([]*filter.TypeFunc, 0)
@@ -19,6 +20,7 @@ var contentFunc = make([]filter.ContentOption, 0)
 var r = render.NewRenderer(theme.DefaultTheme, theme.DefaultInfoTheme)
 var p = printer.NewFitTerminal()
 var timeFormat = "02.Jan'06 15:04"
+var returnCode = 0
 
 const version = "v0.2.1"
 
@@ -27,64 +29,46 @@ func init() {
 }
 
 func main() {
+	defer func() {
+		os.Exit(returnCode)
+	}()
+
+	cli.AppHelpTemplate = fmt.Sprintf(`%s
+REPO:
+	https://github.com/Equationzhao/g
+
+`, cli.AppHelpTemplate)
 
 	app := &cli.App{
-		Name:      "gverything",
+		Name:      "g",
 		Usage:     "a powerful ls",
 		UsageText: "g [options] [path]",
-		Version:   version,
+		Copyright: `Copyright (C) 2023 Equationzhao. MIT License
+This is free software: you are free to change and redistribute it.
+There is NO  WARRANTY, to the extent permitted by law.`,
+		Version: version,
+		Authors: []*cli.Author{
+			{
+				Name:  "Equationzhao",
+				Email: "equationzhao@foxmail.com",
+			},
+		},
+		SliceFlagSeparator: ",",
+		HideHelpCommand:    true,
+		HideVersion:        true,
+		Writer:             os.Stdout,
+		OnUsageError: func(cCtx *cli.Context, err error, isSubcommand bool) error {
+			fmt.Fprintf(cCtx.App.Writer, "%s %s: %s %s\n", theme.Error, cCtx.App.Name, err, theme.Reset)
+			return nil
+		},
 		Flags: []cli.Flag{
-			&cli.BoolFlag{
-				Name:    "tree",
-				Aliases: []string{"t"},
-				Usage:   "list in tree",
-			},
-			&cli.IntFlag{
-				Name:        "depth",
-				Usage:       "tree limit depth, negative -> infinity",
-				DefaultText: "infinity",
-				Value:       -1,
-			},
-			&cli.BoolFlag{
-				Name:    "show-hidden",
-				Aliases: []string{"sh", "a"},
-				Usage:   "show hidden files",
-				Action: func(context *cli.Context, b bool) error {
-					if b {
-						// remove filter.RemoveHidden
-						newFF := make([]*filter.TypeFunc, 0, len(typeFunc))
-						for _, typeFunc := range typeFunc {
-							if typeFunc != &filter.RemoveHidden {
-								newFF = append(newFF, typeFunc)
-							}
-						}
-						typeFunc = newFF
-					}
-					return nil
-				},
-			},
-			&cli.BoolFlag{
-				Name:    "A",
-				Aliases: []string{"almost-all"},
-				Usage:   "do not list implied . and ..",
-				Action: func(context *cli.Context, b bool) error {
-					if b {
-						// remove filter.RemoveHidden
-						newFF := make([]*filter.TypeFunc, 0, len(typeFunc))
-						for _, typeFunc := range typeFunc {
-							if typeFunc != &filter.RemoveHidden {
-								newFF = append(newFF, typeFunc)
-							}
-						}
-						typeFunc = newFF
-					}
-					return nil
-				},
-			},
+
+			// VIEW
 			&cli.StringFlag{
-				Name:    "time-style",
-				Usage:   "time/date format with -l",
-				EnvVars: []string{"TIME_STYLE"},
+				Name:        "time-style",
+				Usage:       "time/date format with -l",
+				EnvVars:     []string{"TIME_STYLE"},
+				DefaultText: "+%d.%b'%y %H:%M (like 02.Jan'06 15:04)",
 				Action: func(context *cli.Context, s string) error {
 					/*
 						The TIME_STYLE argument can be full-iso, long-iso, iso, locale, or  +FORMAT.   FORMAT
@@ -93,6 +77,11 @@ func main() {
 						'posix-' takes effect only outside the POSIX locale.  Also the TIME_STYLE environment
 						variable sets the default style to use.
 					*/
+					if strings.HasPrefix(s, "+") {
+						timeFormat = timeparse.Transform(s)
+						return nil
+					}
+
 					switch s {
 					case "full-iso":
 						timeFormat = "2006-01-02 15:04:05.000000000 -0700"
@@ -101,25 +90,30 @@ func main() {
 					case "locale":
 						timeFormat = "Jan 02 15:04"
 					default:
-						timeFormat = timeparse.Transform(s)
+						returnCode = 2
+						return errors.New("invalid time-style")
 					}
 					return nil
 				},
+				Category: "VIEW",
 			},
 			&cli.BoolFlag{
-				Name:  "full-time",
-				Usage: "like -all/l --time-style=full-iso",
+				Name:               "full-time",
+				Usage:              "like -all/l --time-style=full-iso",
+				DisableDefaultText: true,
 				Action: func(context *cli.Context, b bool) error {
 					if b {
 						timeFormat = "2006-01-02 15:04:05.000000000 -0700"
 					}
 					return nil
 				},
+				Category: "VIEW",
 			},
 			&cli.BoolFlag{
-				Name:    "show-perm",
-				Aliases: []string{"sp"},
-				Usage:   "show permission",
+				Name:               "show-perm",
+				Aliases:            []string{"sp"},
+				Usage:              "show permission",
+				DisableDefaultText: true,
 				Action: func(context *cli.Context, b bool) error {
 					if b {
 						contentFunc = append(contentFunc, filter.EnableFileMode(r))
@@ -129,11 +123,13 @@ func main() {
 					}
 					return nil
 				},
+				Category: "VIEW",
 			},
 			&cli.BoolFlag{
-				Name:    "show-size",
-				Aliases: []string{"ss"},
-				Usage:   "show file/dir size",
+				Name:               "show-size",
+				Aliases:            []string{"ss"},
+				Usage:              "show file/dir size",
+				DisableDefaultText: true,
 				Action: func(context *cli.Context, b bool) error {
 					if b {
 						contentFunc = append(contentFunc, filter.EnableSize(filter.Auto, r))
@@ -143,11 +139,13 @@ func main() {
 					}
 					return nil
 				},
+				Category: "VIEW",
 			},
 			&cli.BoolFlag{
-				Name:    "show-owner",
-				Aliases: []string{"so", "author"},
-				Usage:   "show owner",
+				Name:               "show-owner",
+				Aliases:            []string{"so", "author"},
+				Usage:              "show owner",
+				DisableDefaultText: true,
 				Action: func(context *cli.Context, b bool) error {
 					if b {
 						contentFunc = append(contentFunc, filter.EnableOwner(r))
@@ -157,22 +155,14 @@ func main() {
 					}
 					return nil
 				},
+				Category: "VIEW",
 			},
+
 			&cli.BoolFlag{
-				Name:    "B",
-				Aliases: []string{"ignore-backups"},
-				Usage:   "do not list implied entries ending with ~",
-				Action: func(context *cli.Context, b bool) error {
-					if b {
-						typeFunc = append(typeFunc, &filter.RemoveBackups)
-					}
-					return nil
-				},
-			},
-			&cli.BoolFlag{
-				Name:    "show-group",
-				Aliases: []string{"sg"},
-				Usage:   "show group",
+				Name:               "show-group",
+				Aliases:            []string{"sg"},
+				Usage:              "show group",
+				DisableDefaultText: true,
 				Action: func(context *cli.Context, b bool) error {
 					if b {
 						contentFunc = append(contentFunc, filter.EnableGroup(r))
@@ -182,11 +172,13 @@ func main() {
 					}
 					return nil
 				},
+				Category: "VIEW",
 			},
 			&cli.BoolFlag{
-				Name:    "show-time",
-				Aliases: []string{"st"},
-				Usage:   "show time",
+				Name:               "show-time",
+				Aliases:            []string{"st"},
+				Usage:              "show time",
+				DisableDefaultText: true,
 				Action: func(context *cli.Context, b bool) error {
 					if b {
 						contentFunc = append(contentFunc, filter.EnableTime(timeFormat, r))
@@ -196,16 +188,36 @@ func main() {
 					}
 					return nil
 				},
+				Category: "VIEW",
 			},
 			&cli.BoolFlag{
-				Name:    "show-icon",
-				Usage:   "show icon",
-				Aliases: []string{"si"},
+				Name:               "show-icon",
+				Usage:              "show icon",
+				Aliases:            []string{"si", "icons"},
+				DisableDefaultText: true,
+				Category:           "VIEW",
+			},
+
+			// DISPLAY
+			&cli.BoolFlag{
+				Name:               "tree",
+				Aliases:            []string{"t"},
+				Usage:              "list in tree",
+				DisableDefaultText: true,
+				Category:           "DISPLAY",
+			},
+			&cli.IntFlag{
+				Name:        "depth",
+				Usage:       "tree limit depth, negative -> infinity",
+				DefaultText: "infinity",
+				Value:       -1,
+				Category:    "DISPLAY",
 			},
 			&cli.BoolFlag{
-				Name:    "byline",
-				Aliases: []string{"bl", "1"},
-				Usage:   "print by line",
+				Name:               "byline",
+				Aliases:            []string{"bl", "1", "oneline", "single-column"},
+				Usage:              "print by line",
+				DisableDefaultText: true,
 				Action: func(context *cli.Context, b bool) error {
 					if b {
 						if _, ok := p.(*printer.Byline); !ok {
@@ -214,11 +226,13 @@ func main() {
 					}
 					return nil
 				},
+				Category: "DISPLAY",
 			},
 			&cli.BoolFlag{
-				Name:    "zero",
-				Aliases: []string{"0"},
-				Usage:   "end each output line with NUL, not newline",
+				Name:               "zero",
+				Aliases:            []string{"0"},
+				Usage:              "end each output line with NUL, not newline",
+				DisableDefaultText: true,
 				Action: func(context *cli.Context, b bool) error {
 					if b {
 						if _, ok := p.(*printer.Zero); !ok {
@@ -227,10 +241,12 @@ func main() {
 					}
 					return nil
 				},
+				Category: "DISPLAY",
 			},
 			&cli.BoolFlag{
-				Name:  "m",
-				Usage: "fill width with a comma separated list of entries",
+				Name:               "m",
+				Usage:              "fill width with a comma separated list of entries",
+				DisableDefaultText: true,
 				Action: func(context *cli.Context, b bool) error {
 					if b {
 						if _, ok := p.(*printer.Byline); !ok {
@@ -239,10 +255,12 @@ func main() {
 					}
 					return nil
 				},
+				Category: "DISPLAY",
 			},
 			&cli.BoolFlag{
-				Name:  "x",
-				Usage: "list entries by lines instead of by columns",
+				Name:               "x",
+				Usage:              "list entries by lines instead of by columns",
+				DisableDefaultText: true,
 				Action: func(context *cli.Context, b bool) error {
 					if b {
 						if _, ok := p.(*printer.Across); !ok {
@@ -251,32 +269,13 @@ func main() {
 					}
 					return nil
 				},
+				Category: "DISPLAY",
 			},
 			&cli.BoolFlag{
-				Name:    "all",
-				Aliases: []string{"la", "l"},
-				Usage:   "show all info/use a long listing format",
-				Action: func(context *cli.Context, b bool) error {
-					if b {
-						// remove filter.RemoveHidden
-						newFF := make([]*filter.TypeFunc, 0, len(typeFunc))
-						for _, typeFunc := range typeFunc {
-							if typeFunc != &filter.RemoveHidden {
-								newFF = append(newFF, typeFunc)
-							}
-						}
-						typeFunc = newFF
-						contentFunc = append(contentFunc, filter.EnableFileMode(r), filter.EnableSize(filter.Auto, r), filter.EnableOwner(r), filter.EnableGroup(r), filter.EnableTime(timeFormat, r))
-						if _, ok := p.(*printer.Byline); !ok {
-							p = printer.NewByline()
-						}
-					}
-					return nil
-				},
-			},
-			&cli.BoolFlag{
-				Name:  "C",
-				Usage: "list entries by columns",
+				Name:               "C",
+				Aliases:            []string{"vertical"},
+				Usage:              "list entries by columns (default)",
+				DisableDefaultText: true,
 				Action: func(context *cli.Context, b bool) error {
 					if b {
 						if _, ok := p.(*printer.FitTerminal); !ok {
@@ -285,10 +284,12 @@ func main() {
 					}
 					return nil
 				},
+				Category: "DISPLAY",
 			},
 			&cli.StringFlag{
-				Name:  "format",
-				Usage: "across  -x,  commas  -m, horizontal -x, long -l, single-column -1, verbose -l, vertical -C",
+				Name:        "format",
+				DefaultText: "C",
+				Usage:       "across  -x,  commas  -m, horizontal -x, long -l, single-column -1, verbose -l, vertical -C",
 				Action: func(context *cli.Context, s string) error {
 					switch s {
 					case "across", "x", "horizontal":
@@ -315,12 +316,13 @@ func main() {
 					}
 					return nil
 				},
+				Category: "DISPLAY",
 			},
+
 			&cli.StringFlag{
-				Name:        "theme",
-				Aliases:     []string{"th"},
-				DefaultText: "default",
-				Usage:       "apply theme `path/to/theme`",
+				Name:    "theme",
+				Aliases: []string{"th"},
+				Usage:   "apply theme `path/to/theme`",
 				Action: func(context *cli.Context, s string) error {
 					err := theme.GetTheme(s)
 					if err != nil {
@@ -328,10 +330,51 @@ func main() {
 					}
 					return nil
 				},
+				Category: "DISPLAY",
 			},
 			&cli.BoolFlag{
-				Name:  "g",
-				Usage: "like -all/l, but do not list owner",
+				Name:               "d",
+				Aliases:            []string{"directory", "list-dirs"},
+				DisableDefaultText: true,
+				Usage:              "list directories themselves, not their contents",
+				Category:           "DISPLAY",
+			},
+			&cli.BoolFlag{
+				Name:               "F",
+				Aliases:            []string{"classify"},
+				DisableDefaultText: true,
+				Usage:              "append indicator (one of */=>@|) to entries",
+				Category:           "DISPLAY",
+			},
+			&cli.BoolFlag{
+				Name:               "file-type",
+				Aliases:            []string{"ft"},
+				DisableDefaultText: true,
+				Usage:              "likewise, except do not append '*'",
+				Category:           "DISPLAY",
+			},
+
+			&cli.BoolFlag{
+				Name:               "lh",
+				Aliases:            []string{"human-readable"},
+				DisableDefaultText: true,
+				Usage:              "show human readable size",
+				Action: func(context *cli.Context, b bool) error {
+					if b {
+						contentFunc = append(contentFunc, filter.EnableFileMode(r), filter.EnableSize(filter.Auto, r), filter.EnableOwner(r), filter.EnableGroup(r), filter.EnableTime(timeFormat, r))
+						if _, ok := p.(*printer.Byline); !ok {
+							p = printer.NewByline()
+						}
+					}
+					return nil
+				},
+				Category: "FILTERING",
+			},
+			&cli.BoolFlag{
+				Name:               "show-hidden",
+				Aliases:            []string{"sh", "a"},
+				DisableDefaultText: true,
+				Usage:              "show hidden files",
 				Action: func(context *cli.Context, b bool) error {
 					if b {
 						// remove filter.RemoveHidden
@@ -342,17 +385,100 @@ func main() {
 							}
 						}
 						typeFunc = newFF
-						contentFunc = append(contentFunc, filter.EnableFileMode(r), filter.EnableSize(filter.Auto, r), filter.EnableOwner(r), filter.EnableTime(timeFormat, r))
-						if _, ok := p.(*printer.Byline); !ok {
-							p = printer.NewByline()
-						}
 					}
 					return nil
 				},
+				Category: "FILTERING",
+			},
+			&cli.StringSliceFlag{
+				Name:    "show-only-ext",
+				Aliases: []string{"se", "ext"},
+				Usage:   "show file which has target ext, eg: --show-only-ext=go,java",
+				Action: func(context *cli.Context, s []string) error {
+					if len(s) > 0 {
+						f := filter.ExtOnly(s...)
+						typeFunc = append(typeFunc, &f)
+					}
+					return nil
+				},
+				Category: "FILTERING",
+			},
+			&cli.StringSliceFlag{
+				Name:    "show-no-ext",
+				Aliases: []string{"sne", "noext"},
+				Usage:   "show file which doesn't have target ext",
+				Action: func(context *cli.Context, s []string) error {
+					if len(s) > 0 {
+						f := filter.RemoveByExt(s...)
+						typeFunc = append(typeFunc, &f)
+					}
+					return nil
+				},
+				Category: "FILTERING",
 			},
 			&cli.BoolFlag{
-				Name:  "o",
-				Usage: "like -all/l, but do not list group information",
+				Name:               "show-no-dir",
+				Aliases:            []string{"nd", "nodir"},
+				DisableDefaultText: true,
+				Usage:              "do not show directory",
+				Action: func(context *cli.Context, b bool) error {
+					if b {
+						typeFunc = append(typeFunc, &filter.RemoveDir)
+					}
+					return nil
+				},
+				Category: "FILTERING",
+			},
+			&cli.BoolFlag{
+				Name:               "show-only-dir",
+				Aliases:            []string{"sd", "dir"},
+				DisableDefaultText: true,
+				Usage:              "show directory only",
+				Action: func(context *cli.Context, b bool) error {
+					if b {
+						typeFunc = append(typeFunc, &filter.DirOnly)
+					}
+					return nil
+				},
+				Category: "FILTERING",
+			},
+			&cli.BoolFlag{
+				Name:               "B",
+				Aliases:            []string{"ignore-backups"},
+				DisableDefaultText: true,
+				Usage:              "do not list implied entries ending with ~",
+				Action: func(context *cli.Context, b bool) error {
+					if b {
+						typeFunc = append(typeFunc, &filter.RemoveBackups)
+					}
+					return nil
+				},
+				Category: "FILTERING",
+			},
+			&cli.BoolFlag{
+				Name:               "A",
+				Aliases:            []string{"almost-all"},
+				DisableDefaultText: true,
+				Usage:              "do not list implied . and ..",
+				Action: func(context *cli.Context, b bool) error {
+					if b {
+						// remove filter.RemoveHidden
+						newFF := make([]*filter.TypeFunc, 0, len(typeFunc))
+						for _, typeFunc := range typeFunc {
+							if typeFunc != &filter.RemoveHidden {
+								newFF = append(newFF, typeFunc)
+							}
+						}
+						typeFunc = newFF
+					}
+					return nil
+				},
+				Category: "FILTERING",
+			},
+			&cli.BoolFlag{
+				Name:               "o",
+				DisableDefaultText: true,
+				Usage:              "like -all/l, but do not list group information",
 				Action: func(context *cli.Context, b bool) error {
 					if b {
 						// remove filter.RemoveHidden
@@ -370,57 +496,77 @@ func main() {
 					}
 					return nil
 				},
+				Category: "FILTERING",
 			},
 			&cli.BoolFlag{
-				Name:    "lh",
-				Aliases: []string{"human-readable"},
-				Usage:   "show human readable size",
+				Name:               "g",
+				DisableDefaultText: true,
+				Usage:              "like -all/l, but do not list owner",
 				Action: func(context *cli.Context, b bool) error {
 					if b {
-						contentFunc = append(contentFunc, filter.EnableFileMode(r), filter.EnableSize(filter.Auto, r), filter.EnableOwner(r), filter.EnableGroup(r), filter.EnableTime(timeFormat, r))
+						// remove filter.RemoveHidden
+						newFF := make([]*filter.TypeFunc, 0, len(typeFunc))
+						for _, typeFunc := range typeFunc {
+							if typeFunc != &filter.RemoveHidden {
+								newFF = append(newFF, typeFunc)
+							}
+						}
+						typeFunc = newFF
+						contentFunc = append(contentFunc, filter.EnableFileMode(r), filter.EnableSize(filter.Auto, r), filter.EnableOwner(r), filter.EnableTime(timeFormat, r))
 						if _, ok := p.(*printer.Byline); !ok {
 							p = printer.NewByline()
 						}
 					}
 					return nil
 				},
-			},
-			&cli.StringSliceFlag{
-				Name:    "show-with-ext",
-				Aliases: []string{"se", "ext"},
-				Usage:   "show file which has target ext",
-				Action: func(context *cli.Context, s []string) error {
-					if len(s) > 0 {
-						f := filter.ExtOnly(s...)
-						typeFunc = append(typeFunc, &f)
-					}
-					return nil
-				},
+				Category: "FILTERING",
 			},
 			&cli.BoolFlag{
-				Name:    "show-only-dir",
-				Aliases: []string{"sd", "dir"},
-				Usage:   "show directory only",
+				Name:               "G",
+				DisableDefaultText: true,
+				Aliases:            []string{"no-group"},
+				Usage:              "in a long listing, don't print group names",
+				Category:           "FILTERING",
+			},
+			&cli.BoolFlag{
+				Name:               "all",
+				Aliases:            []string{"la", "l"},
+				Usage:              "show all info/use a long listing format",
+				DisableDefaultText: true,
 				Action: func(context *cli.Context, b bool) error {
 					if b {
-						typeFunc = append(typeFunc, &filter.DirOnly)
+						// remove filter.RemoveHidden
+						newFF := make([]*filter.TypeFunc, 0, len(typeFunc))
+						for _, typeFunc := range typeFunc {
+							if typeFunc != &filter.RemoveHidden {
+								newFF = append(newFF, typeFunc)
+							}
+						}
+						typeFunc = newFF
+						contentFunc = append(contentFunc, filter.EnableFileMode(r), filter.EnableSize(filter.Auto, r), filter.EnableOwner(r))
+						if !context.Bool("G") {
+							contentFunc = append(contentFunc, filter.EnableGroup(r))
+						}
+						contentFunc = append(contentFunc, filter.EnableTime(timeFormat, r))
+
+						if _, ok := p.(*printer.Byline); !ok {
+							p = printer.NewByline()
+						}
 					}
 					return nil
 				},
-			},
-			&cli.BoolFlag{
-				Name:    "d",
-				Aliases: []string{"directory"},
-				Usage:   "list directories themselves, not their contents",
-			},
-			&cli.BoolFlag{
-				Name:    "F",
-				Aliases: []string{"file"},
+				Category: "FILTERING",
 			},
 		},
-		HideHelpCommand: true,
 		Action: func(context *cli.Context) error {
+			var (
+				minorErr   = false
+				seriousErr = false
+			)
+
 			path := context.Args().Slice()
+
+			// if no path, use current path
 			if len(path) == 0 {
 				path = append(path, ".")
 			}
@@ -437,9 +583,11 @@ func main() {
 					s, err := tree.NewTreeString(path[i], depth, filter.NewTypeFilter(typeFunc...), r)
 					if errors.Is(err, os.ErrNotExist) {
 						fmt.Printf("%s g: No such file or directory: %s %s\n", theme.Error, err.(*os.PathError).Path, theme.Reset)
+						seriousErr = true
 						continue
 					} else if err != nil {
 						fmt.Println(theme.Error+err.Error()+theme.Reset, err)
+						seriousErr = true
 						continue
 					}
 					fmt.Println(s.MakeTreeStr())
@@ -452,12 +600,25 @@ func main() {
 				}
 			} else {
 				startDir, _ := os.Getwd()
-				// flag: if show-icon or all is set
-				flagsi := context.Bool("show-icon") || context.Bool("all")
+
 				// flag: if d is set
 				flagd := context.Bool("d")
 				// flag: if A is set
 				flagA := context.Bool("A")
+
+				nameToDisplay := filter.NewNameEnable().SetRenderer(r)
+				if context.Bool("show-icon") || context.Bool("all") {
+					nameToDisplay.SetIcon()
+				}
+				if context.Bool("F") {
+					nameToDisplay.SetClassify()
+				}
+				if context.Bool("file-type") {
+					nameToDisplay.SetClassify()
+					nameToDisplay.SetFileType()
+				}
+				contentFunc = append(contentFunc, nameToDisplay.Enable())
+
 				for i := 0; i < len(path); i++ {
 					if len(path) > 1 {
 						fmt.Printf("%s:\n", path[i])
@@ -474,6 +635,7 @@ func main() {
 						stat, err := os.Stat(path[i])
 						if err != nil {
 							fmt.Printf("%s g: %s %s\n", theme.Error, err.Error(), theme.Reset)
+							seriousErr = true
 							continue
 						}
 						if stat.IsDir() {
@@ -485,6 +647,7 @@ func main() {
 								_ = os.Chdir(path[i])
 								if err != nil {
 									fmt.Printf("%s g: %s %s\n", theme.Error, err.Error(), theme.Reset)
+									seriousErr = true
 									continue
 								}
 								path[i] = "."
@@ -495,12 +658,7 @@ func main() {
 						}
 					}
 
-					// if flagsi->add flagsi, else->add default
-					if flagsi {
-						contentFunc = append(contentFunc, filter.EnableIconName(r, path[i]))
-					} else {
-						contentFunc = append(contentFunc, filter.EnableName(r))
-					}
+					nameToDisplay.SetParent(path[i])
 
 					var d []os.DirEntry
 					var err error
@@ -542,24 +700,36 @@ func main() {
 					stringSlice := filter.NewContentFilter(contentFunc...).GetStringSlice(infos)
 					p.Print(stringSlice...)
 
-					// remove the last func
+					// switch back to start dir
 					if i != len(path)-1 {
 						//goland:noinspection GoPrintFunctions
 						fmt.Println("\n") //nolint:govet
-						contentFunc = contentFunc[:len(contentFunc)-1]
 						_ = os.Chdir(startDir)
 					}
 				}
 			}
+
+			if seriousErr {
+				returnCode = 2
+			} else if minorErr {
+				returnCode = 1
+			}
+
 			return nil
-		},
-		Authors: []*cli.Author{
-			{
-				Name:  "Equationzhao",
-				Email: "equationzhao@foxmail.com",
-			},
 		},
 	}
 
-	_ = app.Run(os.Args)
+	if doc {
+		md, _ := os.Create("g.md")
+		s, _ := app.ToMarkdown()
+		_, _ = fmt.Fprintln(md, s)
+		man, _ := os.Create("g.1")
+		s, _ = app.ToMan()
+		_, _ = fmt.Fprintln(man, s)
+	} else {
+		err := app.Run(os.Args)
+		if err != nil {
+			fmt.Printf("%s g: %s %s\n", theme.Error, err.Error(), theme.Reset)
+		}
+	}
 }

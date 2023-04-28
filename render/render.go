@@ -53,6 +53,9 @@ func (r *Renderer) FileMode(toRender string) string {
 }
 
 func (r *Renderer) Size(toRender string) string {
+	if strings.HasSuffix(toRender, "-") {
+		return r.infoByName(toRender, "-")
+	}
 	return r.infoByName(toRender, "size")
 }
 
@@ -129,7 +132,7 @@ func (r *Renderer) ByExtIcon(toRender string) string {
 	return bb.String()
 }
 
-func (r *Renderer) SymlinkIcon(toRender string, path string) string {
+func (r *Renderer) SymlinkIconPlus(toRender string, path string, plus string) string {
 	icon := r.Icon("symlink")
 	bb := bytebufferpool.Get()
 	defer bytebufferpool.Put(bb)
@@ -140,13 +143,62 @@ func (r *Renderer) SymlinkIcon(toRender string, path string) string {
 	if err != nil {
 		symlinks = err.Error()
 	}
-	_, _ = bb.WriteString(toRender + " -> " + symlinks)
+	_, _ = bb.WriteString(toRender + plus + " -> " + symlinks)
 	_, _ = bb.WriteString(r.theme["reset"].Color)
 	return bb.String()
 }
 
-func (r *Renderer) Symlink(toRender string) string {
+func (r *Renderer) SymlinkIcon(toRender string, path string) string {
+	return r.SymlinkIconPlus(toRender, path, "")
+}
+
+func (r *Renderer) SymlinkPlus(toRender string, path string, plus string) string {
+	bb := bytebufferpool.Get()
+	defer bytebufferpool.Put(bb)
+	_, _ = bb.WriteString(r.theme["symlink"].Color)
+	symlinks, err := filepath.EvalSymlinks(filepath.Join(path, toRender))
+	if err != nil {
+		symlinks = err.Error()
+	}
+	_, _ = bb.WriteString(toRender + plus + " -> " + symlinks)
+	_, _ = bb.WriteString(r.theme["reset"].Color)
+	return bb.String()
+}
+
+func (r *Renderer) Symlink(toRender string, path string) string {
+	return r.SymlinkPlus(toRender, path, "")
+}
+
+func (r *Renderer) PipeIcon(toRender string) string {
+	icon := r.Icon("pipe")
+	bb := bytebufferpool.Get()
+	defer bytebufferpool.Put(bb)
+	_, _ = bb.WriteString(r.theme["pipe"].Color)
+	_, _ = bb.WriteString(icon)
+	_, _ = bb.WriteString(" ")
+	_, _ = bb.WriteString(toRender)
+	_, _ = bb.WriteString(r.theme["reset"].Color)
+	return bb.String()
+}
+
+func (r *Renderer) Pipe(toRender string) string {
 	return r.byName(toRender, "symlink")
+}
+
+func (r *Renderer) SocketIcon(toRender string) string {
+	icon := r.Icon("socket")
+	bb := bytebufferpool.Get()
+	defer bytebufferpool.Put(bb)
+	_, _ = bb.WriteString(r.theme["socket"].Color)
+	_, _ = bb.WriteString(icon)
+	_, _ = bb.WriteString(" ")
+	_, _ = bb.WriteString(toRender)
+	_, _ = bb.WriteString(r.theme["reset"].Color)
+	return bb.String()
+}
+
+func (r *Renderer) Socket(toRender string) string {
+	return r.byName(toRender, "socket")
 }
 
 func (r *Renderer) Executable(toRender string) string {

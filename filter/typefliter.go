@@ -6,6 +6,11 @@ import (
 	"strings"
 )
 
+const (
+	keep   = true
+	remove = false
+)
+
 type TypeFilter struct {
 	tfs []*TypeFunc
 }
@@ -31,7 +36,7 @@ func (tf *TypeFilter) Filter(e []os.FileInfo) (res []os.FileInfo) {
 }
 
 func alwaysTrue(e os.FileInfo) bool {
-	return true
+	return keep
 }
 
 // TypeFunc return true -> Keep
@@ -50,12 +55,17 @@ var DirOnly = func(e os.FileInfo) bool {
 //
 //	eg:
 //		a.go b.c c.rs d.cxx dir
-//		RemoveByExt("go")
+//		RemoveByExt([]string{"go", "cxx"})
 //	result:
-//		b.c c.rs d.cxx dir
-var RemoveByExt = func(ext string) TypeFunc {
+//		b.c c.rs dir
+var RemoveByExt = func(ext ...string) TypeFunc {
 	return func(e os.FileInfo) bool {
-		return !strings.HasSuffix(e.Name(), "."+ext)
+		for _, exti := range ext {
+			if strings.HasSuffix(e.Name(), "."+exti) {
+				return remove
+			}
+		}
+		return keep
 	}
 }
 
@@ -63,11 +73,11 @@ var ExtOnly = func(ext ...string) TypeFunc {
 	return func(e os.FileInfo) bool {
 		for _, exti := range ext {
 			if strings.HasSuffix(e.Name(), "."+exti) {
-				return true
+				return keep
 			}
 		}
 
-		return false
+		return remove
 	}
 }
 

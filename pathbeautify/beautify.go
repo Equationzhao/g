@@ -25,7 +25,8 @@ func Transform(path *string) {
 		runtime.GOOS == "windows" {
 			*path = cached.GetUserHomeDir()
 		}
-
+	case string(filepath.Separator):
+		return
 	default:
 		// ~/a/b/c
 		if strings.HasPrefix(*path, "~") {
@@ -59,7 +60,6 @@ func Transform(path *string) {
 		if matchDots {
 			const parent = ".."
 			buffer := bytebufferpool.Get()
-			defer bytebufferpool.Put(buffer)
 			for i := 0; i < times; i++ {
 				_, _ = buffer.WriteString(parent)
 				_ = buffer.WriteByte(filepath.Separator)
@@ -69,6 +69,7 @@ func Transform(path *string) {
 			}
 
 			*path = buffer.String()
+			bytebufferpool.Put(buffer)
 		}
 
 	}
