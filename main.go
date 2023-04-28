@@ -8,6 +8,7 @@ import (
 	"github.com/Equationzhao/g/printer"
 	"github.com/Equationzhao/g/render"
 	"github.com/Equationzhao/g/theme"
+	"github.com/Equationzhao/g/timeparse"
 	"github.com/Equationzhao/g/tree"
 	"github.com/urfave/cli/v2"
 	"os"
@@ -16,7 +17,7 @@ import (
 var typeFunc = make([]*filter.TypeFunc, 0)
 var contentFunc = make([]filter.ContentOption, 0)
 var r = render.NewRenderer(theme.DefaultTheme, theme.DefaultInfoTheme)
-var p printer.Printer = printer.NewFitTerminal()
+var p = printer.NewFitTerminal()
 var timeFormat = "02.Jan'06 15:04"
 
 const version = "v0.2.1"
@@ -81,7 +82,7 @@ func main() {
 				},
 			},
 			&cli.StringFlag{
-				Name:    "time-format",
+				Name:    "time-style",
 				Usage:   "time/date format with -l",
 				EnvVars: []string{"TIME_STYLE"},
 				Action: func(context *cli.Context, s string) error {
@@ -100,7 +101,7 @@ func main() {
 					case "locale":
 						timeFormat = "Jan 02 15:04"
 					default:
-
+						timeFormat = timeparse.Transform(s)
 					}
 					return nil
 				},
@@ -512,7 +513,7 @@ func main() {
 						goto final
 					}
 
-					// if -A(almost-all) is not set, add the "." info
+					// if -A(almost-all) is not set, add the "."/".." info
 					if !flagA {
 						statCurrent, err := os.Stat(".")
 						if err != nil {
