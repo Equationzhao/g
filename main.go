@@ -22,7 +22,7 @@ var p = printer.NewFitTerminal()
 var timeFormat = "02.Jan'06 15:04"
 var returnCode = 0
 
-const version = "v0.2.1"
+const version = "v0.3.0"
 
 func init() {
 	typeFunc = append(typeFunc, &filter.RemoveHidden)
