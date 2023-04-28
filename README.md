@@ -70,6 +70,11 @@ limit depth in tree
 ```bash
 g -t -d=<level> path
 ```
+
+## More options
+[g.md](g.md)
+
+
 ## custom theme
 
 [theme](THEME.md)

@@ -12,6 +12,7 @@ import (
 	"github.com/Equationzhao/g/tree"
 	"github.com/urfave/cli/v2"
 	"os"
+	"path/filepath"
 	"strings"
 )
 
@@ -723,7 +724,7 @@ There is NO  WARRANTY, to the extent permitted by law.`,
 		md, _ := os.Create("g.md")
 		s, _ := app.ToMarkdown()
 		_, _ = fmt.Fprintln(md, s)
-		man, _ := os.Create("g.1")
+		man, _ := os.Create(filepath.Join("man", "g.1"))
 		s, _ = app.ToMan()
 		_, _ = fmt.Fprintln(man, s)
 	} else {

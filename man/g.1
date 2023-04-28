@@ -1,0 +1,162 @@
+.nh
+.TH g 8
+
+.SH NAME
+.PP
+g - a powerful ls
+
+
+.SH SYNOPSIS
+.PP
+g
+
+.PP
+.RS
+
+.nf
+[--all|--la|-l]
+[--byline|--bl|-1|--oneline|--single-column]
+[--depth]=[value]
+[--file-type|--ft]
+[--format]=[value]
+[--full-time]
+[--lh|--human-readable]
+[--show-group|--sg]
+[--show-hidden|--sh|-a]
+[--show-icon|--si|--icons]
+[--show-no-dir|--nd|--nodir]
+[--show-no-ext|--sne|--noext]=[value]
+[--show-only-dir|--sd|--dir]
+[--show-only-ext|--se|--ext]=[value]
+[--show-owner|--so|--author]
+[--show-perm|--sp]
+[--show-size|--ss]
+[--show-time|--st]
+[--theme|--th]=[value]
+[--time-style]=[value]
+[--tree|-t]
+[--zero|-0]
+[-A|--almost-all]
+[-B|--ignore-backups]
+[-C|--vertical]
+[-F|--classify]
+[-G|--no-group]
+[-d|--directory|--list-dirs]
+[-g]
+[-m]
+[-o]
+[-x]
+
+.fi
+.RE
+
+.PP
+\fBUsage\fP:
+
+.PP
+.RS
+
+.nf
+g [options] [path]
+
+.fi
+.RE
+
+
+.SH GLOBAL OPTIONS
+.PP
+\fB--all, --la, -l\fP: show all info/use a long listing format
+
+.PP
+\fB--byline, --bl, -1, --oneline, --single-column\fP: print by line
+
+.PP
+\fB--depth\fP="": tree limit depth, negative -> infinity (default: -1)
+
+.PP
+\fB--file-type, --ft\fP: likewise, except do not append '*'
+
+.PP
+\fB--format\fP="": across  -x,  commas  -m, horizontal -x, long -l, single-column -1, verbose -l, vertical -C
+
+.PP
+\fB--full-time\fP: like -all/l --time-style=full-iso
+
+.PP
+\fB--lh, --human-readable\fP: show human readable size
+
+.PP
+\fB--show-group, --sg\fP: show group
+
+.PP
+\fB--show-hidden, --sh, -a\fP: show hidden files
+
+.PP
+\fB--show-icon, --si, --icons\fP: show icon
+
+.PP
+\fB--show-no-dir, --nd, --nodir\fP: do not show directory
+
+.PP
+\fB--show-no-ext, --sne, --noext\fP="": show file which doesn't have target ext
+
+.PP
+\fB--show-only-dir, --sd, --dir\fP: show directory only
+
+.PP
+\fB--show-only-ext, --se, --ext\fP="": show file which has target ext, eg: --show-only-ext=go,java
+
+.PP
+\fB--show-owner, --so, --author\fP: show owner
+
+.PP
+\fB--show-perm, --sp\fP: show permission
+
+.PP
+\fB--show-size, --ss\fP: show file/dir size
+
+.PP
+\fB--show-time, --st\fP: show time
+
+.PP
+\fB--theme, --th\fP="": apply theme \fB\fCpath/to/theme\fR
+
+.PP
+\fB--time-style\fP="": time/date format with -l
+
+.PP
+\fB--tree, -t\fP: list in tree
+
+.PP
+\fB--zero, -0\fP: end each output line with NUL, not newline
+
+.PP
+\fB-A, --almost-all\fP: do not list implied . and ..
+
+.PP
+\fB-B, --ignore-backups\fP: do not list implied entries ending with ~
+
+.PP
+\fB-C, --vertical\fP: list entries by columns (default)
+
+.PP
+\fB-F, --classify\fP: append indicator (one of */=>@|) to entries
+
+.PP
+\fB-G, --no-group\fP: in a long listing, don't print group names
+
+.PP
+\fB-d, --directory, --list-dirs\fP: list directories themselves, not their contents
+
+.PP
+\fB-g\fP: like -all/l, but do not list owner
+
+.PP
+\fB-m\fP: fill width with a comma separated list of entries
+
+.PP
+\fB-o\fP: like -all/l, but do not list group information
+
+.PP
+\fB-x\fP: list entries by lines instead of by columns
+
