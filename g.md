@@ -25,6 +25,7 @@ g
 [--show-perm|--sp]
 [--show-size|--ss]
 [--show-time|--st]
+[--show-total-size|--ts]
 [--theme|--th]=[value]
 [--time-style]=[value]
 [--tree|-t]
@@ -85,9 +86,11 @@ g [options] [path]
 
 **--show-time, --st**: show time
 
+**--show-total-size, --ts**: show total size
+
 **--theme, --th**="": apply theme `path/to/theme`
 
-**--time-style**="": time/date format with -l
+**--time-style**="": time/date format with -l, Valid timestamp styles are `default', `iso`, `long iso`, `full-iso`, `locale`, custom `+FORMAT` like date(1).
 
 **--tree, -t**: list in tree
 
