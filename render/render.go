@@ -285,3 +285,7 @@ func (r *Renderer) byName(toRender string, name string) string {
 func (r *Renderer) Icon(name string) string {
 	return r.theme[name].Icon
 }
+
+func (r *Renderer) Git(name string) string {
+	return r.infoTheme["git_modified"].Color + name + r.infoTheme["reset"].Color
+}
