@@ -34,6 +34,10 @@ func Transform(path *string) {
 			*path = home + (*path)[1:]
 		}
 
+		if strings.HasPrefix(*path, string(filepath.Separator)) {
+			return
+		}
+
 		// .....?
 		// start from 3, aka ...
 		matchDots := true
