@@ -1,19 +1,26 @@
 package filter
 
 import (
-	"github.com/Equationzhao/g/render"
-	"github.com/valyala/bytebufferpool"
 	"os"
 	"sort"
 	"strconv"
 	"strings"
 	"sync"
+	"sync/atomic"
+
+	"github.com/Equationzhao/g/render"
+	"github.com/valyala/bytebufferpool"
 )
 
 // fileMode size owner group time name
 
 type ContentFilter struct {
-	options []ContentOption
+	options          []ContentOption
+	wgOwner, wgGroup *sync.WaitGroup
+}
+
+func (cf *ContentFilter) AppendTo(options ...ContentOption) {
+	cf.options = append(cf.options, options...)
 }
 
 type ContentOption func(info os.FileInfo) string
@@ -25,10 +32,10 @@ func EnableFileMode(renderer *render.Renderer) ContentOption {
 	}
 }
 
-type Size int
+type SizeUnit int
 
 const (
-	Bit Size = iota
+	Bit SizeUnit = iota
 	B
 	KB
 	MB
@@ -44,10 +51,13 @@ const (
 // if s is shorter than length, fill blank from left
 // if s is longer than length, panic
 func fillBlank(s string, length int) string {
+	if len(s) > length {
+		return s
+	}
 	return strings.Repeat(" ", length-len(s)) + s
 }
 
-func convert2Size(size Size) string {
+func convert2Size(size SizeUnit) string {
 	switch size {
 	case Bit:
 		return "bit"
@@ -72,47 +82,89 @@ func convert2Size(size Size) string {
 	}
 }
 
-func EnableSize(size Size, renderer *render.Renderer) ContentOption {
-	return func(info os.FileInfo) string {
-		v := float64(info.Size())
-		var res string
-		switch size {
-		case Bit:
-			res = strconv.FormatInt(int64(v*8), 10)
-		case B:
-			res = strconv.FormatInt(int64(v), 10)
-		case KB:
-			res = strconv.FormatFloat(v/1024.0, 'f', 0, 64)
-		case MB:
-			res = strconv.FormatFloat(v/1024.0/1024.0, 'f', 1, 64)
-		case GB:
-			res = strconv.FormatFloat(v/1024.0/1024.0/1024.0, 'f', 1, 64)
-		case TB:
-			res = strconv.FormatFloat(v/1024.0/1024.0/1024.0/1024.0, 'f', 1, 64)
-		case PB:
-			res = strconv.FormatFloat(v/1024.0/1024.0/1024.0/1024.0/1024.0, 'f', 1, 64)
-		case EB:
-			res = strconv.FormatFloat(v/1024.0/1024.0/1024.0/1024.0/1024.0/1024.0, 'f', 1, 64)
-		case ZB:
-			res = strconv.FormatFloat(v/1024.0/1024.0/1024.0/1024.0/1024.0/1024.0/1024.0, 'f', 1, 64)
-		case Auto:
-			for i := B; i <= ZB; i++ {
-				if v < 1000 {
-					res = strconv.FormatFloat(v, 'f', 1, 64)
-					if res == "0.0" {
-						res = "-"
-					} else {
-						res += convert2Size(i)
-					}
-					return renderer.Size(fillBlank(res, 7))
+type Size struct {
+	total       atomic.Int64
+	enableTotal bool
+	sizeUint    SizeUnit
+	renderer    *render.Renderer
+}
+
+func (s *Size) SizeUint() SizeUnit {
+	return s.sizeUint
+}
+
+func (s *Size) SetEnableTotal() {
+	s.enableTotal = true
+}
+
+func (s *Size) DisableTotal() {
+	s.enableTotal = false
+}
+
+func (s *Size) Total() (size int64, ok bool) {
+	if s.enableTotal {
+		return s.total.Load(), s.enableTotal
+	}
+	return 0, false
+}
+
+func (s *Size) Reset() {
+	if s.enableTotal {
+		s.total.Store(0)
+	}
+}
+
+func (s *Size) Size2String(n int64, blank int) string {
+	var res string
+	v := float64(n)
+	switch s.sizeUint {
+	case Bit:
+		res = strconv.FormatInt(int64(v*8), 10)
+	case B:
+		res = strconv.FormatInt(int64(v), 10)
+	case KB:
+		res = strconv.FormatFloat(v/1024.0, 'f', 0, 64)
+	case MB:
+		res = strconv.FormatFloat(v/1024.0/1024.0, 'f', 1, 64)
+	case GB:
+		res = strconv.FormatFloat(v/1024.0/1024.0/1024.0, 'f', 1, 64)
+	case TB:
+		res = strconv.FormatFloat(v/1024.0/1024.0/1024.0/1024.0, 'f', 1, 64)
+	case PB:
+		res = strconv.FormatFloat(v/1024.0/1024.0/1024.0/1024.0/1024.0, 'f', 1, 64)
+	case EB:
+		res = strconv.FormatFloat(v/1024.0/1024.0/1024.0/1024.0/1024.0/1024.0, 'f', 1, 64)
+	case ZB:
+		res = strconv.FormatFloat(v/1024.0/1024.0/1024.0/1024.0/1024.0/1024.0/1024.0, 'f', 1, 64)
+	case Auto:
+		for i := B; i <= ZB; i++ {
+			if v < 1000 {
+				res = strconv.FormatFloat(v, 'f', 1, 64)
+				if res == "0.0" {
+					res = "-"
+				} else {
+					res += convert2Size(i)
 				}
-				v /= 1024
+				return s.renderer.Size(fillBlank(res, blank))
 			}
-			panic("too large")
-		default:
-			panic("invalid " + strconv.Itoa(int(size)))
+			v /= 1024
 		}
-		return renderer.Size(fillBlank(res, 7))
+		panic("too large")
+	default:
+		panic("invalid size uint" + strconv.Itoa(int(s.sizeUint)))
+	}
+	return s.renderer.Size(fillBlank(res, blank))
+}
+
+func (s *Size) EnableSize(size SizeUnit, renderer *render.Renderer) ContentOption {
+	s.sizeUint = size
+	s.renderer = renderer
+	return func(info os.FileInfo) string {
+		v := info.Size()
+		if s.enableTotal {
+			s.total.Add(v)
+		}
+		return s.Size2String(v, 7)
 	}
 }
 
@@ -234,7 +286,7 @@ func (n *Name) Enable() ContentOption {
 				str += "|"
 			} else if mode&os.ModeSocket != 0 {
 				str += "="
-			} else if (!n.FileType) && (mode&0111 != 0) {
+			} else if (!n.FileType) && (mode&0o111 != 0) {
 				str += "*"
 			}
 		}
@@ -245,7 +297,7 @@ func (n *Name) Enable() ContentOption {
 }
 
 func NewContentFilter(options ...ContentOption) *ContentFilter {
-	return &ContentFilter{options: options}
+	return &ContentFilter{options: options, wgGroup: new(sync.WaitGroup), wgOwner: new(sync.WaitGroup)}
 }
 
 type ContentFunc func(entry os.FileInfo) bool
@@ -314,6 +366,8 @@ func (cf *ContentFilter) GetStringSlice(e []os.FileInfo) []string {
 
 	wg := sync.WaitGroup{}
 	wg.Add(len(e))
+	cf.wgOwner.Add(len(e))
+	cf.wgGroup.Add(len(e))
 	for i, entry := range e {
 		go func(entry os.FileInfo, i int) {
 			options := cf.options[:len(cf.options)-1]

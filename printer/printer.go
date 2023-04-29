@@ -3,13 +3,14 @@ package printer
 import (
 	"bufio"
 	"fmt"
-	"github.com/acarl005/stripansi"
-	"github.com/olekukonko/ts"
 	"io"
 	"math"
 	"os"
 	"strings"
 	"unicode/utf8"
+
+	"github.com/acarl005/stripansi"
+	"github.com/olekukonko/ts"
 )
 
 var Output io.Writer = os.Stdout

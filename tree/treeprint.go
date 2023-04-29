@@ -25,10 +25,11 @@ package tree
 
 import (
 	"fmt"
-	"github.com/valyala/bytebufferpool"
 	"io"
 	"strings"
 	"sync"
+
+	"github.com/valyala/bytebufferpool"
 )
 
 // value defines any value
@@ -80,7 +81,7 @@ func (n *node) String() string {
 	buf := bytebufferpool.Get()
 	defer bytebufferpool.Put(buf)
 	level := 0
-	var levelsEnded = make(map[int]bool, len(n.Nodes))
+	levelsEnded := make(map[int]bool, len(n.Nodes))
 	if n.Root == nil {
 		_, _ = buf.WriteString(fmt.Sprintf("%v", n.Value))
 		_ = buf.WriteByte('\n')
@@ -99,7 +100,6 @@ func (n *node) String() string {
 }
 
 func printNodes(wr io.Writer, level int, levelsEnded map[int]bool, nodes []*node) {
-
 	for i, node := range nodes {
 		edge := EdgeTypeMid
 		if i == len(nodes)-1 {
@@ -114,7 +114,6 @@ func printNodes(wr io.Writer, level int, levelsEnded map[int]bool, nodes []*node
 }
 
 func printValues(wr io.Writer, level int, levelsEnded map[int]bool, edge EdgeType, node *node) {
-
 	for i := 0; i < level; i++ {
 		if levelsEnded[i] {
 			_, _ = wr.Write([]byte(strings.Repeat(" ", IndentSize+1)))

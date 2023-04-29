@@ -1,10 +1,11 @@
 package render
 
 import (
-	"github.com/Equationzhao/g/theme"
-	"github.com/valyala/bytebufferpool"
 	"path/filepath"
 	"strings"
+
+	"github.com/Equationzhao/g/theme"
+	"github.com/valyala/bytebufferpool"
 )
 
 type Renderer struct {
@@ -75,7 +76,18 @@ func (r *Renderer) Owner(toRender string) string {
 }
 
 func (r *Renderer) Group(toRender string) string {
-	return r.infoByName(toRender, "group")
+	bb := bytebufferpool.Get()
+	defer bytebufferpool.Put(bb)
+	toRenderNoSpace := strings.Replace(toRender, " ", "", -1)
+	if toRenderNoSpace == "root" {
+		_, _ = bb.WriteString(r.infoTheme["root"].Color)
+	} else {
+		_, _ = bb.WriteString(r.infoTheme["group"].Color)
+	}
+
+	_, _ = bb.WriteString(toRender)
+	_, _ = bb.WriteString(r.infoTheme["reset"].Color)
+	return bb.String()
 }
 
 func (r *Renderer) Time(toRender string) string {

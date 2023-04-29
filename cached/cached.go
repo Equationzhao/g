@@ -5,8 +5,10 @@ import (
 	"sync"
 )
 
-var syncHomedir sync.Once
-var userHomeDir string
+var (
+	syncHomedir sync.Once
+	userHomeDir string
+)
 
 func GetUserHomeDir() string {
 	syncHomedir.Do(func() {

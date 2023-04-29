@@ -7,8 +7,10 @@ import (
 	"sync"
 )
 
-type Uid = string
-type Username = string
+type (
+	Uid      = string
+	Username = string
+)
 
 // usernameMap is a map from Uid to Username
 // current not contained because it is cached in user.Current()
@@ -24,7 +26,6 @@ func NewUsernameMap() *usernameMap {
 }
 
 func (m *usernameMap) Get(u Uid) Username {
-
 	if c, _ := user.Current(); c.Uid == u {
 		return c.Username
 	}
@@ -49,11 +50,12 @@ func (m *usernameMap) Get(u Uid) Username {
 			return targetUser.Username
 		}
 	}
-
 }
 
-type Gid = string
-type Groupname = string
+type (
+	Gid       = string
+	Groupname = string
+)
 
 // groupnameMap is a map from Gid to Groupname
 type groupnameMap struct {
@@ -68,7 +70,6 @@ func NewGroupnameMap() *groupnameMap {
 }
 
 func (m *groupnameMap) Get(g Gid) Groupname {
-
 	m.mutex.RLock()
 	if username, ok := m.m[g]; ok {
 		m.mutex.RUnlock()
@@ -89,5 +90,4 @@ func (m *groupnameMap) Get(g Gid) Groupname {
 			return targetUser.Name
 		}
 	}
-
 }

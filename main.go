@@ -3,6 +3,10 @@ package main
 import (
 	"errors"
 	"fmt"
+	"os"
+	"path/filepath"
+	"strings"
+
 	"github.com/Equationzhao/g/filter"
 	"github.com/Equationzhao/g/pathbeautify"
 	"github.com/Equationzhao/g/printer"
@@ -11,19 +15,20 @@ import (
 	"github.com/Equationzhao/g/timeparse"
 	"github.com/Equationzhao/g/tree"
 	"github.com/urfave/cli/v2"
-	"os"
-	"path/filepath"
-	"strings"
 )
 
-var typeFunc = make([]*filter.TypeFunc, 0)
-var contentFunc = make([]filter.ContentOption, 0)
-var r = render.NewRenderer(theme.DefaultTheme, theme.DefaultInfoTheme)
-var p = printer.NewFitTerminal()
-var timeFormat = "02.Jan'06 15:04"
-var returnCode = 0
+var (
+	typeFunc      = make([]*filter.TypeFunc, 0)
+	contentFunc   = make([]filter.ContentOption, 0)
+	r             = render.NewRenderer(theme.DefaultTheme, theme.DefaultInfoTheme)
+	p             = printer.NewFitTerminal()
+	timeFormat    = "02.Jan'06 15:04"
+	returnCode    = 0
+	sizeEnabler   = filter.Size{}
+	contentFilter = filter.NewContentFilter()
+)
 
-const version = "v0.3.0"
+const version = "v0.3.1"
 
 func init() {
 	typeFunc = append(typeFunc, &filter.RemoveHidden)
@@ -37,8 +42,8 @@ func main() {
 	cli.AppHelpTemplate = fmt.Sprintf(`%s
 REPO:
 	https://github.com/Equationzhao/g
-
-`, cli.AppHelpTemplate)
+%s
+`, cli.AppHelpTemplate, version)
 
 	app := &cli.App{
 		Name:      "g",
@@ -63,11 +68,10 @@ There is NO  WARRANTY, to the extent permitted by law.`,
 			return nil
 		},
 		Flags: []cli.Flag{
-
 			// VIEW
 			&cli.StringFlag{
 				Name:        "time-style",
-				Usage:       "time/date format with -l",
+				Usage:       "time/date format with -l, Valid timestamp styles are `default', `iso`, `long iso`, `full-iso`, `locale`, custom `+FORMAT` like date(1).",
 				EnvVars:     []string{"TIME_STYLE"},
 				DefaultText: "+%d.%b'%y %H:%M (like 02.Jan'06 15:04)",
 				Action: func(context *cli.Context, s string) error {
@@ -90,6 +94,10 @@ There is NO  WARRANTY, to the extent permitted by law.`,
 						timeFormat = "2006-01-02 15:04"
 					case "locale":
 						timeFormat = "Jan 02 15:04"
+					case "iso":
+						timeFormat = "01-02 15:04"
+					case "default":
+						timeFormat = "02.Jan'06 15:04"
 					default:
 						returnCode = 2
 						return errors.New("invalid time-style")
@@ -133,7 +141,7 @@ There is NO  WARRANTY, to the extent permitted by law.`,
 				DisableDefaultText: true,
 				Action: func(context *cli.Context, b bool) error {
 					if b {
-						contentFunc = append(contentFunc, filter.EnableSize(filter.Auto, r))
+						contentFunc = append(contentFunc, sizeEnabler.EnableSize(filter.Auto, r))
 						if _, ok := p.(*printer.Byline); !ok {
 							p = printer.NewByline()
 						}
@@ -149,7 +157,7 @@ There is NO  WARRANTY, to the extent permitted by law.`,
 				DisableDefaultText: true,
 				Action: func(context *cli.Context, b bool) error {
 					if b {
-						contentFunc = append(contentFunc, filter.EnableOwner(r))
+						contentFunc = append(contentFunc, contentFilter.EnableOwner(r))
 						if _, ok := p.(*printer.Byline); !ok {
 							p = printer.NewByline()
 						}
@@ -166,7 +174,7 @@ There is NO  WARRANTY, to the extent permitted by law.`,
 				DisableDefaultText: true,
 				Action: func(context *cli.Context, b bool) error {
 					if b {
-						contentFunc = append(contentFunc, filter.EnableGroup(r))
+						contentFunc = append(contentFunc, contentFilter.EnableGroup(r))
 						if _, ok := p.(*printer.Byline); !ok {
 							p = printer.NewByline()
 						}
@@ -197,6 +205,19 @@ There is NO  WARRANTY, to the extent permitted by law.`,
 				Aliases:            []string{"si", "icons"},
 				DisableDefaultText: true,
 				Category:           "VIEW",
+			},
+			&cli.BoolFlag{
+				Name:               "show-total-size",
+				Usage:              "show total size",
+				Aliases:            []string{"ts"},
+				DisableDefaultText: true,
+				Category:           "VIEW",
+				Action: func(context *cli.Context, b bool) error {
+					if b {
+						sizeEnabler.SetEnableTotal()
+					}
+					return nil
+				},
 			},
 
 			// DISPLAY
@@ -302,7 +323,7 @@ There is NO  WARRANTY, to the extent permitted by law.`,
 							p = printer.NewCommaPrint()
 						}
 					case "long", "l", "verbose":
-						contentFunc = append(contentFunc, filter.EnableFileMode(r), filter.EnableSize(filter.Auto, r), filter.EnableOwner(r), filter.EnableGroup(r), filter.EnableTime(timeFormat, r))
+						contentFunc = append(contentFunc, filter.EnableFileMode(r), sizeEnabler.EnableSize(filter.Auto, r), contentFilter.EnableOwner(r), contentFilter.EnableGroup(r), filter.EnableTime(timeFormat, r))
 						if _, ok := p.(*printer.Byline); !ok {
 							p = printer.NewByline()
 						}
@@ -362,7 +383,7 @@ There is NO  WARRANTY, to the extent permitted by law.`,
 				Usage:              "show human readable size",
 				Action: func(context *cli.Context, b bool) error {
 					if b {
-						contentFunc = append(contentFunc, filter.EnableFileMode(r), filter.EnableSize(filter.Auto, r), filter.EnableOwner(r), filter.EnableGroup(r), filter.EnableTime(timeFormat, r))
+						contentFunc = append(contentFunc, filter.EnableFileMode(r), sizeEnabler.EnableSize(filter.Auto, r), contentFilter.EnableOwner(r), contentFilter.EnableGroup(r), filter.EnableTime(timeFormat, r))
 						if _, ok := p.(*printer.Byline); !ok {
 							p = printer.NewByline()
 						}
@@ -490,7 +511,7 @@ There is NO  WARRANTY, to the extent permitted by law.`,
 							}
 						}
 						typeFunc = newFF
-						contentFunc = append(contentFunc, filter.EnableFileMode(r), filter.EnableSize(filter.Auto, r), filter.EnableGroup(r), filter.EnableTime(timeFormat, r))
+						contentFunc = append(contentFunc, filter.EnableFileMode(r), sizeEnabler.EnableSize(filter.Auto, r), contentFilter.EnableGroup(r), filter.EnableTime(timeFormat, r))
 						if _, ok := p.(*printer.Byline); !ok {
 							p = printer.NewByline()
 						}
@@ -513,7 +534,7 @@ There is NO  WARRANTY, to the extent permitted by law.`,
 							}
 						}
 						typeFunc = newFF
-						contentFunc = append(contentFunc, filter.EnableFileMode(r), filter.EnableSize(filter.Auto, r), filter.EnableOwner(r), filter.EnableTime(timeFormat, r))
+						contentFunc = append(contentFunc, filter.EnableFileMode(r), sizeEnabler.EnableSize(filter.Auto, r), contentFilter.EnableOwner(r), filter.EnableTime(timeFormat, r))
 						if _, ok := p.(*printer.Byline); !ok {
 							p = printer.NewByline()
 						}
@@ -544,9 +565,10 @@ There is NO  WARRANTY, to the extent permitted by law.`,
 							}
 						}
 						typeFunc = newFF
-						contentFunc = append(contentFunc, filter.EnableFileMode(r), filter.EnableSize(filter.Auto, r), filter.EnableOwner(r))
+						sizeEnabler.SetEnableTotal()
+						contentFunc = append(contentFunc, filter.EnableFileMode(r), sizeEnabler.EnableSize(filter.Auto, r), contentFilter.EnableOwner(r))
 						if !context.Bool("G") {
-							contentFunc = append(contentFunc, filter.EnableGroup(r))
+							contentFunc = append(contentFunc, contentFilter.EnableGroup(r))
 						}
 						contentFunc = append(contentFunc, filter.EnableTime(timeFormat, r))
 
@@ -698,7 +720,13 @@ There is NO  WARRANTY, to the extent permitted by law.`,
 					infos = filter.NewTypeFilter(typeFunc...).Filter(infos)
 
 				final:
-					stringSlice := filter.NewContentFilter(contentFunc...).GetStringSlice(infos)
+					contentFilter.AppendTo(contentFunc...)
+					stringSlice := contentFilter.GetStringSlice(infos)
+
+					// if -l/show-total-size is set, add total size
+					if total, ok := sizeEnabler.Total(); ok {
+						p.Print(fmt.Sprintf("  total %s", sizeEnabler.Size2String(total, 0)))
+					}
 					p.Print(stringSlice...)
 
 					// switch back to start dir
@@ -706,6 +734,7 @@ There is NO  WARRANTY, to the extent permitted by law.`,
 						//goland:noinspection GoPrintFunctions
 						fmt.Println("\n") //nolint:govet
 						_ = os.Chdir(startDir)
+						sizeEnabler.Reset()
 					}
 				}
 			}
