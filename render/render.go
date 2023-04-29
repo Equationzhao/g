@@ -1,10 +1,13 @@
 package render
 
 import (
-	"github.com/Equationzhao/g/theme"
-	"github.com/valyala/bytebufferpool"
+	"errors"
+	"io/fs"
 	"path/filepath"
 	"strings"
+
+	"github.com/Equationzhao/g/theme"
+	"github.com/valyala/bytebufferpool"
 )
 
 type Renderer struct {
@@ -75,7 +78,18 @@ func (r *Renderer) Owner(toRender string) string {
 }
 
 func (r *Renderer) Group(toRender string) string {
-	return r.infoByName(toRender, "group")
+	bb := bytebufferpool.Get()
+	defer bytebufferpool.Put(bb)
+	toRenderNoSpace := strings.Replace(toRender, " ", "", -1)
+	if toRenderNoSpace == "root" {
+		_, _ = bb.WriteString(r.infoTheme["root"].Color)
+	} else {
+		_, _ = bb.WriteString(r.infoTheme["group"].Color)
+	}
+
+	_, _ = bb.WriteString(toRender)
+	_, _ = bb.WriteString(r.infoTheme["reset"].Color)
+	return bb.String()
 }
 
 func (r *Renderer) Time(toRender string) string {
@@ -132,6 +146,8 @@ func (r *Renderer) ByExtIcon(toRender string) string {
 	return bb.String()
 }
 
+// SymlinkIconPlus returns the icon and the name of the file
+// ! refactor this: dereference symlink outside method and make it as parameter or render it in a different method
 func (r *Renderer) SymlinkIconPlus(toRender string, path string, plus string) string {
 	icon := r.Icon("symlink")
 	bb := bytebufferpool.Get()
@@ -141,9 +157,19 @@ func (r *Renderer) SymlinkIconPlus(toRender string, path string, plus string) st
 	_, _ = bb.WriteString(" ")
 	symlinks, err := filepath.EvalSymlinks(filepath.Join(path, toRender))
 	if err != nil {
+		var pathErr *fs.PathError
+		if errors.As(err, &pathErr) {
+			_, _ = bb.WriteString(toRender + plus)
+			_, _ = bb.WriteString(theme.Error)
+			_, _ = bb.WriteString(" -> " + pathErr.Path)
+			_, _ = bb.WriteString(r.theme["reset"].Color)
+			return bb.String()
+		}
 		symlinks = err.Error()
 	}
-	_, _ = bb.WriteString(toRender + plus + " -> " + symlinks)
+	_, _ = bb.WriteString(toRender + plus)
+	_, _ = bb.WriteString(theme.Success)
+	_, _ = bb.WriteString(" -> " + symlinks)
 	_, _ = bb.WriteString(r.theme["reset"].Color)
 	return bb.String()
 }
@@ -152,15 +178,27 @@ func (r *Renderer) SymlinkIcon(toRender string, path string) string {
 	return r.SymlinkIconPlus(toRender, path, "")
 }
 
+// SymlinkPlus returns the icon and the name of the file
+// ! refactor this: dereference symlink outside method and make it as parameter or render it in a different method
 func (r *Renderer) SymlinkPlus(toRender string, path string, plus string) string {
 	bb := bytebufferpool.Get()
 	defer bytebufferpool.Put(bb)
 	_, _ = bb.WriteString(r.theme["symlink"].Color)
 	symlinks, err := filepath.EvalSymlinks(filepath.Join(path, toRender))
 	if err != nil {
+		var pathErr *fs.PathError
+		if errors.As(err, &pathErr) {
+			_, _ = bb.WriteString(toRender + plus)
+			_, _ = bb.WriteString(theme.Error)
+			_, _ = bb.WriteString(" -> " + pathErr.Path)
+			_, _ = bb.WriteString(r.theme["reset"].Color)
+			return bb.String()
+		}
 		symlinks = err.Error()
 	}
-	_, _ = bb.WriteString(toRender + plus + " -> " + symlinks)
+	_, _ = bb.WriteString(toRender + plus)
+	_, _ = bb.WriteString(theme.Success)
+	_, _ = bb.WriteString(" -> " + symlinks)
 	_, _ = bb.WriteString(r.theme["reset"].Color)
 	return bb.String()
 }

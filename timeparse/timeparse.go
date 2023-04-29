@@ -100,11 +100,12 @@ Transform
 		alphabetic time zone abbreviation (e.g., EDT)
 */
 
-var replacer *strings.Replacer
-var replacerInit sync.Once
+var (
+	replacer     *strings.Replacer
+	replacerInit sync.Once
+)
 
 func Transform(format string) (goFormat string) {
-
 	replacerInit.Do(func() {
 		replacer = strings.NewReplacer(
 			`%%`, "%",

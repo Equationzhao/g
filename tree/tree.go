@@ -1,12 +1,13 @@
 package tree
 
 import (
-	"github.com/Equationzhao/g/filter"
-	"github.com/Equationzhao/g/render"
 	"os"
 	"path/filepath"
 	"sync"
 	"sync/atomic"
+
+	"github.com/Equationzhao/g/filter"
+	"github.com/Equationzhao/g/render"
 )
 
 type statistic struct {
@@ -77,7 +78,6 @@ func expand(node tree, depthLimit int, wg *sync.WaitGroup, parent string, s *sta
 	for _, v := range d {
 		if v.IsDir() {
 			info, err := v.Info()
-
 			if err != nil {
 				node.AddNode(err.Error())
 				return

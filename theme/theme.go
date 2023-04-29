@@ -1,8 +1,9 @@
 package theme
 
 import (
-	"gopkg.in/ini.v1"
 	"strings"
+
+	"gopkg.in/ini.v1"
 )
 
 type Style struct {

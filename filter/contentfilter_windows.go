@@ -27,12 +27,12 @@
 package filter
 
 import (
-	"github.com/Equationzhao/g/render"
 	"os"
 	"sync"
 	"syscall"
-	"time"
 	"unsafe"
+
+	"github.com/Equationzhao/g/render"
 )
 
 var (
@@ -41,16 +41,36 @@ var (
 	procGetSecurityDescriptorOwner = libadvapi32.NewProc("GetSecurityDescriptorOwner")
 )
 
-func EnableOwner(renderer *render.Renderer) ContentOption {
+func (cf *ContentFilter) EnableOwner(renderer *render.Renderer) ContentOption {
 	m := sync.RWMutex{}
 	longestOwner := 0
 	return func(info os.FileInfo) string {
 		path := info.Name()
+		wait := func(res string) string {
+			cf.wgOwner.Wait()
+			return renderer.Owner(fillBlank(res, longestOwner))
+		}
+
+		done := func(name string) {
+			defer cf.wgOwner.Done()
+			m.RLock()
+			if len(name) > longestOwner {
+				m.RUnlock()
+				m.Lock()
+				if len(name) > longestOwner {
+					longestOwner = len(name)
+				}
+				m.Unlock()
+			} else {
+				m.RUnlock()
+			}
+		}
 
 		var needed uint32
 		fromString, err := syscall.UTF16PtrFromString(path)
 		if err != nil {
-			return ""
+			done("unknown")
+			return wait("unknown")
 		}
 		_, _, _ = procGetFileSecurity.Call(
 			uintptr(unsafe.Pointer(fromString)),
@@ -59,6 +79,12 @@ func EnableOwner(renderer *render.Renderer) ContentOption {
 			0,
 			uintptr(unsafe.Pointer(&needed)))
 		buf := make([]byte, needed)
+
+		if needed == 0 {
+			done("unknown")
+			return wait("unknown")
+		}
+
 		r1, _, err := procGetFileSecurity.Call(
 			uintptr(unsafe.Pointer(fromString)),
 			0x00000001, /* OWNER_SECURITY_INFORMATION */
@@ -66,7 +92,8 @@ func EnableOwner(renderer *render.Renderer) ContentOption {
 			uintptr(needed),
 			uintptr(unsafe.Pointer(&needed)))
 		if r1 == 0 && err != nil {
-			return renderer.Owner(fillBlank("", longestOwner))
+			done("unknown")
+			return wait("unknown")
 		}
 		var ownerDefaulted uint32
 		var sid *syscall.SID
@@ -75,42 +102,50 @@ func EnableOwner(renderer *render.Renderer) ContentOption {
 			uintptr(unsafe.Pointer(&sid)),
 			uintptr(unsafe.Pointer(&ownerDefaulted)))
 		if r1 == 0 && err != nil {
-			return renderer.Owner(fillBlank("", longestOwner))
+			done("unknown")
+			return wait("unknown")
 		}
 		name, _, _, err := sid.LookupAccount("")
 		if r1 == 0 && err != nil {
-			return renderer.Owner(fillBlank("", longestOwner))
+			done("unknown")
+			return wait("unknown")
 		}
-
-		m.RLock()
-		if len(name) > longestOwner {
-			m.RUnlock()
-			m.Lock()
-			if len(name) > longestOwner {
-				longestOwner = len(name)
-			}
-			m.Unlock()
-		} else {
-			m.RUnlock()
-		}
-
-		time.Sleep(time.Microsecond * 5)
-
-		return renderer.Owner(fillBlank(name, longestOwner))
-
+		done(name)
+		return wait(name)
 	}
 }
 
-func EnableGroup(renderer *render.Renderer) ContentOption {
+func (cf *ContentFilter) EnableGroup(renderer *render.Renderer) ContentOption {
 	m := sync.RWMutex{}
 	longestGroup := 0
 	return func(info os.FileInfo) string {
 		path := info.Name()
 
+		wait := func(name string) string {
+			cf.wgGroup.Wait()
+			return renderer.Group(fillBlank(name, longestGroup))
+		}
+
+		done := func(name string) {
+			defer cf.wgGroup.Done()
+			m.RLock()
+			if len(name) > longestGroup {
+				m.RUnlock()
+				m.Lock()
+				if len(name) > longestGroup {
+					longestGroup = len(name)
+				}
+				m.Unlock()
+			} else {
+				m.RUnlock()
+			}
+		}
+
 		var needed uint32
 		fromString, err := syscall.UTF16PtrFromString(path)
 		if err != nil {
-			return ""
+			done("unknown")
+			return wait("unknown")
 		}
 		_, _, _ = procGetFileSecurity.Call(
 			uintptr(unsafe.Pointer(fromString)),
@@ -118,6 +153,12 @@ func EnableGroup(renderer *render.Renderer) ContentOption {
 			0,
 			0,
 			uintptr(unsafe.Pointer(&needed)))
+
+		if needed == 0 {
+			done("unknown")
+			return wait("unknown")
+		}
+
 		buf := make([]byte, needed)
 		r1, _, err := procGetFileSecurity.Call(
 			uintptr(unsafe.Pointer(fromString)),
@@ -126,7 +167,8 @@ func EnableGroup(renderer *render.Renderer) ContentOption {
 			uintptr(needed),
 			uintptr(unsafe.Pointer(&needed)))
 		if r1 == 0 && err != nil {
-			return renderer.Owner(fillBlank("", longestGroup))
+			done("unknown")
+			return wait("unknown")
 		}
 		var ownerDefaulted uint32
 		var sid *syscall.SID
@@ -135,28 +177,16 @@ func EnableGroup(renderer *render.Renderer) ContentOption {
 			uintptr(unsafe.Pointer(&sid)),
 			uintptr(unsafe.Pointer(&ownerDefaulted)))
 		if r1 == 0 && err != nil {
-			return renderer.Owner(fillBlank("", longestGroup))
+			done("unknown")
+			return wait("unknown")
 		}
 		_, name, _, err := sid.LookupAccount("")
 		if r1 == 0 && err != nil {
-			return renderer.Owner(fillBlank("", longestGroup))
+			done("unknown")
+			return wait("unknown")
 		}
 
-		m.RLock()
-		if len(name) > longestGroup {
-			m.RUnlock()
-			m.Lock()
-			if len(name) > longestGroup {
-				longestGroup = len(name)
-			}
-			m.Unlock()
-		} else {
-			m.RUnlock()
-		}
-
-		time.Sleep(time.Microsecond * 5)
-
-		return renderer.Owner(fillBlank(name, longestGroup))
-
+		done(name)
+		return wait(name)
 	}
 }

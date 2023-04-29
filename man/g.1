@@ -32,6 +32,7 @@ g
 [--show-perm|--sp]
 [--show-size|--ss]
 [--show-time|--st]
+[--show-total-size|--ts]
 [--theme|--th]=[value]
 [--time-style]=[value]
 [--tree|-t]
@@ -119,10 +120,13 @@ g [options] [path]
 \fB--show-time, --st\fP: show time
 
 .PP
+\fB--show-total-size, --ts\fP: show total size
+
+.PP
 \fB--theme, --th\fP="": apply theme \fB\fCpath/to/theme\fR
 
 .PP
-\fB--time-style\fP="": time/date format with -l
+\fB--time-style\fP="": time/date format with -l, Valid timestamp styles are \fB\fCdefault',\fRiso\fB\fC,\fRlong iso\fB\fC,\fRfull-iso\fB\fC,\fRlocale\fB\fC, custom\fR+FORMAT` like date(1).
 
 .PP
 \fB--tree, -t\fP: list in tree

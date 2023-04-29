@@ -1,11 +1,12 @@
 package pathbeautify
 
 import (
-	"github.com/Equationzhao/g/cached"
-	"github.com/valyala/bytebufferpool"
 	"path/filepath"
 	"runtime"
 	"strings"
+
+	"github.com/Equationzhao/g/cached"
+	"github.com/valyala/bytebufferpool"
 )
 
 // Transform ~ to $HOME
@@ -25,13 +26,15 @@ func Transform(path *string) {
 		runtime.GOOS == "windows" {
 			*path = cached.GetUserHomeDir()
 		}
-	case string(filepath.Separator):
-		return
 	default:
 		// ~/a/b/c
 		if strings.HasPrefix(*path, "~") {
 			home := cached.GetUserHomeDir()
 			*path = home + (*path)[1:]
+		}
+
+		if strings.HasPrefix(*path, string(filepath.Separator)) {
+			return
 		}
 
 		// .....?
