@@ -28,7 +28,7 @@ var (
 	contentFilter = filter.NewContentFilter()
 )
 
-const version = "v0.3.1"
+const version = "v0.4.0"
 
 func init() {
 	typeFunc = append(typeFunc, &filter.RemoveHidden)
@@ -219,6 +219,13 @@ There is NO  WARRANTY, to the extent permitted by law.`,
 					}
 					return nil
 				},
+			},
+			&cli.BoolFlag{
+				Name:               "git-status",
+				Usage:              "show git status",
+				Aliases:            []string{"gs"},
+				DisableDefaultText: true,
+				Category:           "VIEW",
 			},
 
 			// DISPLAY
@@ -640,6 +647,9 @@ There is NO  WARRANTY, to the extent permitted by law.`,
 				if context.Bool("file-type") {
 					nameToDisplay.SetClassify()
 					nameToDisplay.SetFileType()
+				}
+				if context.Bool("git-status") {
+					nameToDisplay.SetGit()
 				}
 				contentFunc = append(contentFunc, nameToDisplay.Enable())
 				typeFilter := filter.NewTypeFilter(typeFunc...)

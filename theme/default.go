@@ -1,18 +1,21 @@
 package theme
 
 const (
-	Black   = "\033[1;30m"
-	Red     = "\033[1;31m"
-	Green   = "\033[1;32m"
-	Yellow  = "\033[1;33m"
-	Blue    = "\033[1;34m"
-	Purple  = "\033[1;35m"
-	Cyan    = "\033[1;36m"
-	White   = "\033[1;37m"
-	Reset   = "\033[0m"
-	Success = "\033[1;32m"
-	Error   = "\033[1;31m"
-	Warn    = "\033[1;33m"
+	Black     = "\033[1;30m"
+	Red       = "\033[1;31m"
+	Green     = "\033[1;32m"
+	Yellow    = "\033[1;33m"
+	Blue      = "\033[1;34m"
+	Purple    = "\033[1;35m"
+	Cyan      = "\033[1;36m"
+	White     = "\033[1;37m"
+	Reset     = "\033[0m"
+	Success   = "\033[1;32m"
+	Error     = "\033[1;31m"
+	Warn      = "\033[1;33m"
+	Underline = "\033[4m"
+	Bold      = "\033[1m"
+	Reverse   = "\033[7m"
 )
 
 var DefaultInfoTheme = Theme{
@@ -63,6 +66,9 @@ var DefaultInfoTheme = Theme{
 	},
 	"root": Style{
 		Color: Red,
+	},
+	"git_modified": Style{
+		Color: Yellow + Bold + Underline,
 	},
 }
 

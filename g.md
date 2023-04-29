@@ -13,6 +13,7 @@ g
 [--file-type|--ft]
 [--format]=[value]
 [--full-time]
+[--git-status|--gs]
 [--lh|--human-readable]
 [--show-group|--sg]
 [--show-hidden|--sh|-a]
@@ -61,6 +62,8 @@ g [options] [path]
 **--format**="": across  -x,  commas  -m, horizontal -x, long -l, single-column -1, verbose -l, vertical -C
 
 **--full-time**: like -all/l --time-style=full-iso
+
+**--git-status, --gs**: show git status
 
 **--lh, --human-readable**: show human readable size
 

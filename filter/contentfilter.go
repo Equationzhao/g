@@ -1,13 +1,17 @@
 package filter
 
 import (
+	"bufio"
 	"os"
+	"os/exec"
+	"path/filepath"
 	"sort"
 	"strconv"
 	"strings"
 	"sync"
 	"sync/atomic"
 
+	"github.com/Equationzhao/g/cached"
 	"github.com/Equationzhao/g/render"
 	"github.com/valyala/bytebufferpool"
 )
@@ -178,16 +182,20 @@ func EnableTime(format string, renderer *render.Renderer) ContentOption {
 	}
 }
 
-type Name struct {
-	Icon     bool
-	Classify bool // --classify / -F
-	FileType bool // --file-type
-	Renderer *render.Renderer
-	parent   string
-}
+type (
+	fileGits    = []fileGit
+	gitRepoPath = string
+	Name        struct {
+		Icon, Classify, FileType, git bool
+		Renderer                      *render.Renderer
+		parent                        string
+		GitCache                      *cached.CacheMap[gitRepoPath, fileGits]
+	}
+)
 
-func (n *Name) SetParent(parent string) *Name {
-	n.parent = parent
+func (n *Name) UnsetGit() *Name {
+	n.git = false
+	n.GitCache = nil
 	return n
 }
 
@@ -206,6 +214,12 @@ func (n *Name) UnsetFileType() *Name {
 	return n
 }
 
+func (n *Name) SetGit() *Name {
+	n.git = true
+	n.GitCache = cached.NewCacheMap[gitRepoPath, fileGits]()
+	return n
+}
+
 func (n *Name) SetIcon() *Name {
 	n.Icon = true
 	return n
@@ -213,6 +227,11 @@ func (n *Name) SetIcon() *Name {
 
 func (n *Name) SetClassify() *Name {
 	n.Classify = true
+	return n
+}
+
+func (n *Name) SetParent(parent string) *Name {
+	n.parent = parent
 	return n
 }
 
@@ -232,6 +251,89 @@ func NewNameEnable() *Name {
 	return &Name{}
 }
 
+// getShortGitStatus read the git status of the repository located at path
+func getShortGitStatus(repoPath gitRepoPath) (string, error) {
+	out, err := exec.Command("git", "-C", repoPath, "status", "-s", "-b", "--porcelain").Output()
+	return string(out), err
+}
+
+type status int
+
+const (
+	GitModified  = iota + 1 // M
+	GitAdded                // A
+	GitDeleted              // D
+	GitRenamed              // R
+	GitCopied               // C
+	GitUntracked            // ?
+	GitIgnored              // !
+)
+
+type fileGit struct {
+	name   string
+	status status
+}
+
+func (f *fileGit) setYFromXY(XY string) {
+	set := func(Y string) {
+		switch Y {
+		case "M":
+			f.status = GitModified
+		case "A":
+			f.status = GitAdded
+		case "D":
+			f.status = GitDeleted
+		case "R":
+			f.status = GitRenamed
+		case "C":
+			f.status = GitCopied
+		case "?":
+			f.status = GitUntracked
+		case "!":
+			f.status = GitIgnored
+		}
+	}
+
+	switch len(XY) {
+	case 1:
+		set(XY)
+	case 2:
+		Y := XY[1:]
+		set(Y)
+	default:
+		return
+	}
+}
+
+// parseShort parses a git status output command
+// It is compatible with the short version of the git status command
+// modified from https://le-gall.bzh/post/go/parsing-git-status-with-go/ author: Sébastien Le Gall
+func parseShort(r string) (res fileGits) {
+	s := bufio.NewScanner(strings.NewReader(r))
+
+	// Extract branch name
+	for s.Scan() {
+		// Skip any empty line
+		if len(s.Text()) < 1 {
+			continue
+		}
+		break
+	}
+
+	fg := fileGit{}
+	for s.Scan() {
+		if len(s.Text()) < 1 {
+			continue
+		}
+		XyName := strings.Fields(s.Text())
+		fg.setYFromXY(XyName[0])
+		fg.name = XyName[1]
+		res = append(res, fg)
+	}
+
+	return
+}
+
 func (n *Name) Enable() ContentOption {
 	/*
 		 -F      Display a slash (`/') immediately after each pathname that is a
@@ -241,11 +343,48 @@ func (n *Name) Enable() ContentOption {
 				 vertical bar (`|') after each that is a FIFO.
 	*/
 
+	isOrIsParentOf := func(parent, child string) bool {
+		if parent == child {
+			return true
+		}
+		if strings.HasPrefix(child, filepath.Join(parent, "")) {
+			return true
+		}
+		return false
+	}
+
+	getFromCache := func(repoPath gitRepoPath) *fileGits {
+		value, _ := n.GitCache.GetOrInit(repoPath, func() *fileGits {
+			res := make(fileGits, 0)
+			out, err := getShortGitStatus(repoPath)
+			if err == nil {
+				res = parseShort(out)
+			}
+			return &res
+		})
+		return value
+	}
+
 	return func(info os.FileInfo) string {
 		buffer := bytebufferpool.Get()
 		defer bytebufferpool.Put(buffer)
 		str := info.Name()
 		mode := info.Mode()
+
+		if n.git {
+			FilesStatus := *getFromCache(n.parent)
+			for _, status := range FilesStatus {
+				if isOrIsParentOf(str, status.name) {
+					if status.status == GitModified || status.status == GitRenamed || status.status == GitCopied {
+						str = n.Renderer.GitModified(str)
+						break
+					} else if status.status == GitUntracked {
+						str = n.Renderer.GitModified(str)
+						break
+					}
+				}
+			}
+		}
 
 		if n.Icon {
 			if info.IsDir() {

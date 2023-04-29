@@ -105,7 +105,7 @@ func expand(node tree, depthLimit int, wg *sync.WaitGroup, parent string, s *sta
 			if renderer != nil {
 				wg.Add(1)
 				go func() {
-					node.AddNode(renderer.Symlink(info.Name(), parent))
+					node.AddNode(renderer.SymlinkIcon(info.Name(), parent))
 					wg.Done()
 				}()
 			} else {
