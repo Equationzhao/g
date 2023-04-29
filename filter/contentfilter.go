@@ -23,6 +23,10 @@ func (cf *ContentFilter) AppendTo(options ...ContentOption) {
 	cf.options = append(cf.options, options...)
 }
 
+func (cf *ContentFilter) SetOptions(options ...ContentOption) {
+	cf.options = options
+}
+
 type ContentOption func(info os.FileInfo) string
 
 // EnableFileMode return file mode like -rwxrwxrwx/drwxrwxrwx

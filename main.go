@@ -42,6 +42,7 @@ func main() {
 	cli.AppHelpTemplate = fmt.Sprintf(`%s
 REPO:
 	https://github.com/Equationzhao/g
+
 %s
 `, cli.AppHelpTemplate, version)
 
@@ -641,7 +642,7 @@ There is NO  WARRANTY, to the extent permitted by law.`,
 					nameToDisplay.SetFileType()
 				}
 				contentFunc = append(contentFunc, nameToDisplay.Enable())
-
+				typeFilter := filter.NewTypeFilter(typeFunc...)
 				for i := 0; i < len(path); i++ {
 					if len(path) > 1 {
 						fmt.Printf("%s:\n", path[i])
@@ -717,10 +718,10 @@ There is NO  WARRANTY, to the extent permitted by law.`,
 					}
 
 					// remove non-display items
-					infos = filter.NewTypeFilter(typeFunc...).Filter(infos)
+					infos = typeFilter.Filter(infos)
 
 				final:
-					contentFilter.AppendTo(contentFunc...)
+					contentFilter.SetOptions(contentFunc...)
 					stringSlice := contentFilter.GetStringSlice(infos)
 
 					// if -l/show-total-size is set, add total size
