@@ -684,7 +684,7 @@ There is NO  WARRANTY, to the extent permitted by law.`,
 					if path[i] != "." {
 						stat, err := os.Stat(path[i])
 						if err != nil {
-							fmt.Printf("%s g: %s %s\n", theme.Error, err.Error(), theme.Reset)
+							fmt.Println(makeErrorStr(err.Error()))
 							seriousErr = true
 							continue
 						}
@@ -696,7 +696,7 @@ There is NO  WARRANTY, to the extent permitted by law.`,
 							} else {
 								_ = os.Chdir(path[i])
 								if err != nil {
-									fmt.Printf("%s g: %s %s\n", theme.Error, err.Error(), theme.Reset)
+									fmt.Println(makeErrorStr(err.Error()))
 									seriousErr = true
 									continue
 								}
@@ -725,11 +725,13 @@ There is NO  WARRANTY, to the extent permitted by law.`,
 					if !flagA {
 						statCurrent, err := os.Stat(".")
 						if err != nil {
-							fmt.Println(err)
+							seriousErr = true
+							fmt.Println(makeErrorStr(err.Error()))
 						}
 						statParent, err := os.Stat("..")
 						if err != nil {
-							fmt.Println(err)
+							minorErr = true
+							fmt.Println(makeErrorStr(err.Error()))
 						}
 						infos = append(infos, statCurrent, statParent)
 					}
@@ -737,7 +739,8 @@ There is NO  WARRANTY, to the extent permitted by law.`,
 					for _, v := range d {
 						info, err := v.Info()
 						if err != nil {
-							fmt.Println(err)
+							minorErr = true
+							fmt.Println(makeErrorStr(err.Error()))
 						} else {
 							infos = append(infos, info)
 						}
@@ -760,7 +763,10 @@ There is NO  WARRANTY, to the extent permitted by law.`,
 					if i != len(path)-1 {
 						//goland:noinspection GoPrintFunctions
 						fmt.Println("\n") //nolint:govet
-						_ = os.Chdir(startDir)
+						err = os.Chdir(startDir)
+						if err != nil {
+							seriousErr = true
+						}
 						sizeEnabler.Reset()
 					}
 				}
@@ -789,4 +795,8 @@ There is NO  WARRANTY, to the extent permitted by law.`,
 			fmt.Printf("%s g: %s %s\n", theme.Error, err.Error(), theme.Reset)
 		}
 	}
+}
+
+func makeErrorStr(msg string) string {
+	return fmt.Sprintf("%s g: %s %s", theme.Error, msg, theme.Reset)
 }
