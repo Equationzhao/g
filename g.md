@@ -13,6 +13,7 @@ g
 [--file-type|--ft]
 [--format]=[value]
 [--full-time]
+[--git-status-style|--gss]=[value]
 [--git-status|--gs]
 [--lh|--human-readable]
 [--show-group|--sg]
@@ -63,7 +64,9 @@ g [options] [path]
 
 **--full-time**: like -all/l --time-style=full-iso
 
-**--git-status, --gs**: show git status
+**--git-status, --gs**: show git status: ? untracked, + added, ! deleted, ~ modified, | renamed, = copied, $ ignored
+
+**--git-status-style, --gss**="": git status style: colored-symbol: {? untracked, + added, ! deleted, ~ modified, | renamed, = copied, $ ignored} colored-dot
 
 **--lh, --human-readable**: show human readable size
 

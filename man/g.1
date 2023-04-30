@@ -20,6 +20,7 @@ g
 [--file-type|--ft]
 [--format]=[value]
 [--full-time]
+[--git-status-style|--gss]=[value]
 [--git-status|--gs]
 [--lh|--human-readable]
 [--show-group|--sg]
@@ -85,7 +86,10 @@ g [options] [path]
 \fB--full-time\fP: like -all/l --time-style=full-iso
 
 .PP
-\fB--git-status, --gs\fP: show git status
+\fB--git-status, --gs\fP: show git status: ? untracked, + added, ! deleted, ~ modified, | renamed, = copied, $ ignored
+
+.PP
+\fB--git-status-style, --gss\fP="": git status style: colored-symbol: {? untracked, + added, ! deleted, ~ modified, | renamed, = copied, $ ignored} colored-dot
 
 .PP
 \fB--lh, --human-readable\fP: show human readable size
