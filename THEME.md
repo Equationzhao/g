@@ -38,3 +38,7 @@ icon = 📄
 ```bash
 g -theme=path/to/theme [other options] path
 ```
+
+## default theme
+
+see [default](theme/default.ini)
