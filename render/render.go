@@ -142,7 +142,7 @@ func (r *Renderer) ByExtIcon(toRender string) string {
 	_, _ = bb.WriteString(icon)
 	_, _ = bb.WriteString(" ")
 	_, _ = bb.WriteString(toRender)
-	_, _ = bb.WriteString(r.theme["reset"].Color)
+	_, _ = bb.WriteString(r.infoTheme["reset"].Color)
 	return bb.String()
 }
 
@@ -162,7 +162,7 @@ func (r *Renderer) SymlinkIconPlus(toRender string, path string, plus string) st
 			_, _ = bb.WriteString(toRender + plus)
 			_, _ = bb.WriteString(theme.Error)
 			_, _ = bb.WriteString(" -> " + pathErr.Path)
-			_, _ = bb.WriteString(r.theme["reset"].Color)
+			_, _ = bb.WriteString(r.infoTheme["reset"].Color)
 			return bb.String()
 		}
 		symlinks = err.Error()
@@ -170,7 +170,7 @@ func (r *Renderer) SymlinkIconPlus(toRender string, path string, plus string) st
 	_, _ = bb.WriteString(toRender + plus)
 	_, _ = bb.WriteString(theme.Success)
 	_, _ = bb.WriteString(" -> " + symlinks)
-	_, _ = bb.WriteString(r.theme["reset"].Color)
+	_, _ = bb.WriteString(r.infoTheme["reset"].Color)
 	return bb.String()
 }
 
@@ -191,7 +191,7 @@ func (r *Renderer) SymlinkPlus(toRender string, path string, plus string) string
 			_, _ = bb.WriteString(toRender + plus)
 			_, _ = bb.WriteString(theme.Error)
 			_, _ = bb.WriteString(" -> " + pathErr.Path)
-			_, _ = bb.WriteString(r.theme["reset"].Color)
+			_, _ = bb.WriteString(r.infoTheme["reset"].Color)
 			return bb.String()
 		}
 		symlinks = err.Error()
@@ -199,7 +199,7 @@ func (r *Renderer) SymlinkPlus(toRender string, path string, plus string) string
 	_, _ = bb.WriteString(toRender + plus)
 	_, _ = bb.WriteString(theme.Success)
 	_, _ = bb.WriteString(" -> " + symlinks)
-	_, _ = bb.WriteString(r.theme["reset"].Color)
+	_, _ = bb.WriteString(r.infoTheme["reset"].Color)
 	return bb.String()
 }
 
@@ -215,7 +215,7 @@ func (r *Renderer) PipeIcon(toRender string) string {
 	_, _ = bb.WriteString(icon)
 	_, _ = bb.WriteString(" ")
 	_, _ = bb.WriteString(toRender)
-	_, _ = bb.WriteString(r.theme["reset"].Color)
+	_, _ = bb.WriteString(r.infoTheme["reset"].Color)
 	return bb.String()
 }
 
@@ -231,7 +231,7 @@ func (r *Renderer) SocketIcon(toRender string) string {
 	_, _ = bb.WriteString(icon)
 	_, _ = bb.WriteString(" ")
 	_, _ = bb.WriteString(toRender)
-	_, _ = bb.WriteString(r.theme["reset"].Color)
+	_, _ = bb.WriteString(r.infoTheme["reset"].Color)
 	return bb.String()
 }
 
@@ -286,6 +286,62 @@ func (r *Renderer) Icon(name string) string {
 	return r.theme[name].Icon
 }
 
+func (r *Renderer) gitByStatus(name string, status string) string {
+	return r.infoTheme[status].Color + r.infoTheme[status].Icon + r.infoTheme["reset"].Color + " " + name
+}
+
 func (r *Renderer) GitModified(name string) string {
-	return r.infoTheme["git_modified"].Color + name + r.infoTheme["reset"].Color
+	return r.gitByStatus(name, "git_modified_dot")
+}
+
+func (r *Renderer) GitUntracked(name string) string {
+	return r.gitByStatus(name, "git_untracked_dot")
+}
+
+func (r *Renderer) GitAdded(name string) string {
+	return r.gitByStatus(name, "git_added_dot")
+}
+
+func (r *Renderer) GitRenamed(name string) string {
+	return r.gitByStatus(name, "git_renamed_dot")
+}
+
+func (r *Renderer) GitDeleted(name string) string {
+	return r.gitByStatus(name, "git_deleted_dot")
+}
+
+func (r *Renderer) GitIgnored(name string) string {
+	return r.gitByStatus(name, "git_ignore_dot")
+}
+
+func (r *Renderer) GitCopied(name string) string {
+	return r.gitByStatus(name, "git_copied_dot")
+}
+
+func (r *Renderer) GitModifiedSym(name string) string {
+	return r.gitByStatus(name, "git_modified_sym")
+}
+
+func (r *Renderer) GitUntrackedSym(name string) string {
+	return r.gitByStatus(name, "git_untracked_sym")
+}
+
+func (r *Renderer) GitAddedSym(name string) string {
+	return r.gitByStatus(name, "git_added_sym")
+}
+
+func (r *Renderer) GitRenamedSym(name string) string {
+	return r.gitByStatus(name, "git_renamed_sym")
+}
+
+func (r *Renderer) GitDeletedSym(name string) string {
+	return r.gitByStatus(name, "git_deleted_sym")
+}
+
+func (r *Renderer) GitIgnoredSym(name string) string {
+	return r.gitByStatus(name, "git_ignore_sym")
+}
+
+func (r *Renderer) GitCopiedSym(name string) string {
+	return r.gitByStatus(name, "git_copied_sym")
 }

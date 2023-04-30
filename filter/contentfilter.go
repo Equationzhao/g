@@ -183,6 +183,7 @@ func EnableTime(format string, renderer *render.Renderer) ContentOption {
 }
 
 type (
+	gitStyle    int
 	fileGits    = []fileGit
 	gitRepoPath = string
 	Name        struct {
@@ -190,7 +191,14 @@ type (
 		Renderer                      *render.Renderer
 		parent                        string
 		GitCache                      *cached.CacheMap[gitRepoPath, fileGits]
+		GitStyle                      gitStyle
 	}
+)
+
+const (
+	GitStyleDot = iota
+	GitStyleSym
+	GitStyleDefault = GitStyleDot
 )
 
 func (n *Name) UnsetGit() *Name {
@@ -253,20 +261,40 @@ func NewNameEnable() *Name {
 
 // getShortGitStatus read the git status of the repository located at path
 func getShortGitStatus(repoPath gitRepoPath) (string, error) {
-	out, err := exec.Command("git", "-C", repoPath, "status", "-s", "-b", "--porcelain").Output()
+	out, err := exec.Command("git", "-C", repoPath, "status", "-s", "--porcelain").Output()
 	return string(out), err
 }
 
 type status int
 
+func (s status) String() string {
+	switch s {
+	case GitModified:
+		return "~"
+	case GitAdded:
+		return "+"
+	case GitDeleted:
+		return "!"
+	case GitRenamed:
+		return "|"
+	case GitCopied:
+		return "="
+	case GitUntracked:
+		return "?"
+	case GitIgnored:
+		return "!"
+	}
+	return ""
+}
+
 const (
-	GitModified  = iota + 1 // M
-	GitAdded                // A
-	GitDeleted              // D
-	GitRenamed              // R
-	GitCopied               // C
-	GitUntracked            // ?
-	GitIgnored              // !
+	GitModified  status = iota + 1 // M ~
+	GitAdded                       // A +
+	GitDeleted                     // D !
+	GitRenamed                     // R |
+	GitCopied                      // C =
+	GitUntracked                   // ? ?
+	GitIgnored                     // ! !
 )
 
 type fileGit struct {
@@ -368,23 +396,9 @@ func (n *Name) Enable() ContentOption {
 	return func(info os.FileInfo) string {
 		buffer := bytebufferpool.Get()
 		defer bytebufferpool.Put(buffer)
-		str := info.Name()
+		name := info.Name()
+		str := name
 		mode := info.Mode()
-
-		if n.git {
-			FilesStatus := *getFromCache(n.parent)
-			for _, status := range FilesStatus {
-				if isOrIsParentOf(str, status.name) {
-					if status.status == GitModified || status.status == GitRenamed || status.status == GitCopied {
-						str = n.Renderer.GitModified(str)
-						break
-					} else if status.status == GitUntracked {
-						str = n.Renderer.GitModified(str)
-						break
-					}
-				}
-			}
-		}
 
 		if n.Icon {
 			if info.IsDir() {
@@ -420,6 +434,16 @@ func (n *Name) Enable() ContentOption {
 			}
 		}
 
+		if n.git {
+			FilesStatus := *getFromCache(n.parent)
+			for _, status := range FilesStatus {
+				if isOrIsParentOf(name, status.name) {
+					str = n.GitByName(str, status.status.String(), n.GitStyle)
+					break
+				}
+			}
+		}
+
 		if n.Classify {
 			if info.IsDir() {
 				str += "/"
@@ -437,6 +461,61 @@ func (n *Name) Enable() ContentOption {
 	end:
 		return str
 	}
+}
+
+func (n *Name) GitByName(name string, status string, style gitStyle) string {
+	switch status {
+	case "~":
+		switch style {
+		case GitStyleDot:
+			return n.Renderer.GitModified(name)
+		case GitStyleSym:
+			return n.Renderer.GitModifiedSym(name)
+		}
+	case "?":
+		switch style {
+		case GitStyleDot:
+			return n.Renderer.GitUntracked(name)
+		case GitStyleSym:
+			return n.Renderer.GitUntrackedSym(name)
+		}
+	case "+":
+		switch style {
+		case GitStyleDot:
+			return n.Renderer.GitAdded(name)
+		case GitStyleSym:
+			return n.Renderer.GitAddedSym(name)
+		}
+	case "|":
+		switch style {
+		case GitStyleDot:
+			return n.Renderer.GitRenamed(name)
+		case GitStyleSym:
+			return n.Renderer.GitRenamedSym(name)
+		}
+	case "!":
+		switch style {
+		case GitStyleDot:
+			return n.Renderer.GitDeleted(name)
+		case GitStyleSym:
+			return n.Renderer.GitDeletedSym(name)
+		}
+	case "=":
+		switch style {
+		case GitStyleDot:
+			return n.Renderer.GitCopied(name)
+		case GitStyleSym:
+			return n.Renderer.GitCopiedSym(name)
+		}
+	case "$":
+		switch style {
+		case GitStyleDot:
+			return n.Renderer.GitIgnored(name)
+		case GitStyleSym:
+			return n.Renderer.GitIgnoredSym(name)
+		}
+	}
+	return ""
 }
 
 func NewContentFilter(options ...ContentOption) *ContentFilter {

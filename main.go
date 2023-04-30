@@ -222,10 +222,16 @@ There is NO  WARRANTY, to the extent permitted by law.`,
 			},
 			&cli.BoolFlag{
 				Name:               "git-status",
-				Usage:              "show git status",
+				Usage:              "show git status: ? untracked, + added, ! deleted, ~ modified, | renamed, = copied, $ ignored",
 				Aliases:            []string{"gs"},
 				DisableDefaultText: true,
 				Category:           "VIEW",
+			},
+			&cli.StringFlag{
+				Name:     "git-status-style",
+				Usage:    "git status style: colored-symbol: {? untracked, + added, ! deleted, ~ modified, | renamed, = copied, $ ignored} colored-dot",
+				Aliases:  []string{"gss"},
+				Category: "VIEW",
 			},
 
 			// DISPLAY
@@ -651,6 +657,16 @@ There is NO  WARRANTY, to the extent permitted by law.`,
 				if context.Bool("git-status") {
 					nameToDisplay.SetGit()
 				}
+				s := context.String("git-status-style")
+				switch s {
+				case "symbol", "sym":
+					nameToDisplay.GitStyle = filter.GitStyleSym
+				case "dot", ".":
+					nameToDisplay.GitStyle = filter.GitStyleDot
+				default:
+					nameToDisplay.GitStyle = filter.GitStyleDefault
+				}
+
 				contentFunc = append(contentFunc, nameToDisplay.Enable())
 				typeFilter := filter.NewTypeFilter(typeFunc...)
 				for i := 0; i < len(path); i++ {
