@@ -190,7 +190,7 @@ type (
 		Icon, Classify, FileType, git bool
 		Renderer                      *render.Renderer
 		parent                        string
-		GitCache                      *cached.Map[gitRepoPath, fileGits]
+		GitCache                      *cached.Map[gitRepoPath, *fileGits]
 		GitStyle                      gitStyle
 	}
 )
@@ -224,7 +224,7 @@ func (n *Name) UnsetFileType() *Name {
 
 func (n *Name) SetGit() *Name {
 	n.git = true
-	n.GitCache = cached.NewCacheMap[gitRepoPath, fileGits](20)
+	n.GitCache = cached.NewCacheMap[gitRepoPath, *fileGits](20)
 	return n
 }
 
