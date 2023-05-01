@@ -51,6 +51,9 @@ const (
 	PB
 	EB
 	ZB
+	YB
+	BB
+	NB
 	Auto
 )
 
@@ -84,6 +87,12 @@ func convert2Size(size SizeUnit) string {
 		return "EB"
 	case ZB:
 		return "ZB"
+	case YB:
+		return "YB"
+	case BB:
+		return "BB"
+	case NB:
+		return "NB"
 	default:
 		panic("unknown size")
 	}
@@ -143,6 +152,12 @@ func (s *Size) Size2String(n int64, blank int) string {
 		res = strconv.FormatFloat(v/1024.0/1024.0/1024.0/1024.0/1024.0/1024.0, 'f', 1, 64)
 	case ZB:
 		res = strconv.FormatFloat(v/1024.0/1024.0/1024.0/1024.0/1024.0/1024.0/1024.0, 'f', 1, 64)
+	case YB:
+		res = strconv.FormatFloat(v/1024.0/1024.0/1024.0/1024.0/1024.0/1024.0/1024.0/1024.0, 'f', 1, 64)
+	case BB:
+		res = strconv.FormatFloat(v/1024.0/1024.0/1024.0/1024.0/1024.0/1024.0/1024.0/1024.0/1024.0, 'f', 1, 64)
+	case NB:
+		res = strconv.FormatFloat(v/1024.0/1024.0/1024.0/1024.0/1024.0/1024.0/1024.0/1024.0/1024.0/1024.0, 'f', 1, 64)
 	case Auto:
 		for i := B; i <= ZB; i++ {
 			if v < 1000 {
@@ -348,7 +363,7 @@ func parseShort(r string) (res fileGits) {
 	}
 
 	fg := fileGit{}
-	for s.Scan() {
+	for true {
 		if len(s.Text()) < 1 {
 			continue
 		}
@@ -356,6 +371,9 @@ func parseShort(r string) (res fileGits) {
 		fg.setYFromXY(XyName[0])
 		fg.name = XyName[1]
 		res = append(res, fg)
+		if !s.Scan() {
+			break
+		}
 	}
 
 	return
