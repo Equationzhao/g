@@ -3,9 +3,10 @@ module github.com/Equationzhao/g
 go 1.20
 
 require (
+	github.com/Equationzhao/tsmap v0.0.2
 	github.com/acarl005/stripansi v0.0.0-20180116102854-5a71ef0e047d
 	github.com/olekukonko/ts v0.0.0-20171002115256-78ecb04241c0
-	github.com/urfave/cli/v2 v2.25.1
+	github.com/urfave/cli/v2 v2.25.2
 	github.com/valyala/bytebufferpool v1.0.0
 	gopkg.in/ini.v1 v1.67.0
 )
