@@ -311,7 +311,7 @@ func (r *Renderer) GitDeleted(name string) string {
 }
 
 func (r *Renderer) GitIgnored(name string) string {
-	return r.gitByStatus(name, "git_ignore_dot")
+	return r.gitByStatus(name, "git_ignored_dot")
 }
 
 func (r *Renderer) GitCopied(name string) string {
@@ -339,7 +339,7 @@ func (r *Renderer) GitDeletedSym(name string) string {
 }
 
 func (r *Renderer) GitIgnoredSym(name string) string {
-	return r.gitByStatus(name, "git_ignore_sym")
+	return r.gitByStatus(name, "git_ignored_sym")
 }
 
 func (r *Renderer) GitCopiedSym(name string) string {

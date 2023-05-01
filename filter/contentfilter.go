@@ -261,7 +261,7 @@ func NewNameEnable() *Name {
 
 // getShortGitStatus read the git status of the repository located at path
 func getShortGitStatus(repoPath gitRepoPath) (string, error) {
-	out, err := exec.Command("git", "-C", repoPath, "status", "-s", "--porcelain").Output()
+	out, err := exec.Command("git", "-C", repoPath, "status", "-s", "--ignored", "--porcelain").Output()
 	return string(out), err
 }
 
@@ -274,7 +274,7 @@ func (s status) String() string {
 	case GitAdded:
 		return "+"
 	case GitDeleted:
-		return "!"
+		return "-"
 	case GitRenamed:
 		return "|"
 	case GitCopied:
@@ -290,7 +290,7 @@ func (s status) String() string {
 const (
 	GitModified  status = iota + 1 // M ~
 	GitAdded                       // A +
-	GitDeleted                     // D !
+	GitDeleted                     // D -
 	GitRenamed                     // R |
 	GitCopied                      // C =
 	GitUntracked                   // ? ?
@@ -375,7 +375,7 @@ func (n *Name) Enable() ContentOption {
 		if parent == child {
 			return true
 		}
-		if strings.HasPrefix(child, filepath.Join(parent, "")) {
+		if strings.HasPrefix(child, parent+string(filepath.Separator)) {
 			return true
 		}
 		return false
@@ -493,7 +493,7 @@ func (n *Name) GitByName(name string, status string, style gitStyle) string {
 		case GitStyleSym:
 			return n.Renderer.GitRenamedSym(name)
 		}
-	case "!":
+	case "-":
 		switch style {
 		case GitStyleDot:
 			return n.Renderer.GitDeleted(name)
@@ -507,7 +507,7 @@ func (n *Name) GitByName(name string, status string, style gitStyle) string {
 		case GitStyleSym:
 			return n.Renderer.GitCopiedSym(name)
 		}
-	case "$":
+	case "!":
 		switch style {
 		case GitStyleDot:
 			return n.Renderer.GitIgnored(name)
