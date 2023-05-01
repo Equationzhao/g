@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"os"
 	"os/exec"
-	"path/filepath"
 	"sort"
 	"strconv"
 	"strings"
@@ -375,7 +374,7 @@ func (n *Name) Enable() ContentOption {
 		if parent == child {
 			return true
 		}
-		if strings.HasPrefix(child, parent+string(filepath.Separator)) {
+		if strings.HasPrefix(child, parent+"/") { // should not use filepath.Separator
 			return true
 		}
 		return false
