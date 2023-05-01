@@ -1,7 +1,7 @@
 # g 
 <div style="text-align: center;"><img src="logo.jpg" width="400"  alt="logo"/></div>
 
-<div style="text-align: center;">a powerful ls</div>
+>   a powerful ls
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/Equationzhao/g)](https://goreportcard.com/report/github.com/Equationzhao/g)
 
@@ -80,9 +80,14 @@ g -t -depth=<level> path
 [theme](THEME.md)
 
 ## install
-
+go version required >= 1.20
 ```bash
 go install github.com/Equationzhao/g@latest
+```
+
+Archlinux user can install from AUR
+```bash
+yay -S g-ls
 ```
 
 ## logo
