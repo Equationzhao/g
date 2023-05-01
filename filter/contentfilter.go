@@ -364,11 +364,11 @@ func parseShort(r string) (res fileGits) {
 
 func (n *Name) Enable() ContentOption {
 	/*
-		 -F      Display a slash (`/') immediately after each pathname that is a
-				 directory, an asterisk (`*') after each that is executable, an at
-				 sign (`@') after each symbolic link, a percent sign (`%') after
-				 each whiteout, an equal sign (`=') after each socket, and a
-				 vertical bar (`|') after each that is a FIFO.
+		 -F      Display a slash (`/`) immediately after each pathname that is a
+				 directory, an asterisk (`*`) after each that is executable, an at
+				 sign (`@`) after each symbolic link, a percent sign (`%`) after
+				 each whiteout, an equal sign (`=`) after each socket, and a
+				 vertical bar (`|`) after each that is a FIFO.
 	*/
 
 	isOrIsParentOf := func(parent, child string) bool {
