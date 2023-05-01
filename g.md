@@ -56,11 +56,11 @@ g [options] [path]
 
 **--byline, --bl, -1, --oneline, --single-column**: print by line
 
-**--depth**="": tree limit depth, negative -> infinity (default: -1)
+**--depth**="": tree limit depth, negative -> infinity (default: infinity)
 
 **--file-type, --ft**: likewise, except do not append '*'
 
-**--format**="": across  -x,  commas  -m, horizontal -x, long -l, single-column -1, verbose -l, vertical -C
+**--format**="": across  -x,  commas  -m, horizontal -x, long -l, single-column -1, verbose -l, vertical -C (default: C)
 
 **--full-time**: like -all/l --time-style=full-iso
 
@@ -96,7 +96,7 @@ g [options] [path]
 
 **--theme, --th**="": apply theme `path/to/theme`
 
-**--time-style**="": time/date format with -l, Valid timestamp styles are `default', `iso`, `long iso`, `full-iso`, `locale`, custom `+FORMAT` like date(1).
+**--time-style**="": time/date format with -l, Valid timestamp styles are `default', `iso`, `long iso`, `full-iso`, `locale`, custom `+FORMAT` like date(1). (default: +%d.%b'%y %H:%M (like 02.Jan'06 15:04))
 
 **--tree, -t**: list in tree
 
