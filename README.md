@@ -1,7 +1,7 @@
 # g 
 <div style="text-align: center;"><img src="logo.jpg" width="400"  alt="logo"/></div>
 
-<div style="text-align: center;">a powerful ls</div>
+>   a powerful ls
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/Equationzhao/g)](https://goreportcard.com/report/github.com/Equationzhao/g)
 
