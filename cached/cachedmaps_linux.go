@@ -4,7 +4,8 @@ package cached
 
 import (
 	"os/user"
-	"sync"
+
+	"github.com/Equationzhao/tsmap"
 )
 
 type (
@@ -15,13 +16,12 @@ type (
 // usernameMap is a map from Uid to Username
 // current not contained because it is cached in user.Current()
 type usernameMap struct {
-	m     map[Uid]Username
-	mutex sync.RWMutex
+	m *tsmap.Map[Uid, Username]
 }
 
 func NewUsernameMap() *usernameMap {
 	return &usernameMap{
-		m: make(map[Uid]Username),
+		m: tsmap.NewTSMap[Uid, Username](20),
 	}
 }
 
@@ -30,26 +30,14 @@ func (m *usernameMap) Get(u Uid) Username {
 		return c.Username
 	}
 
-	m.mutex.RLock()
-	if username, ok := m.m[u]; ok {
-		m.mutex.RUnlock()
-		return username
-	} else {
-		m.mutex.RUnlock()
-		m.mutex.Lock()
-		if username, ok = m.m[u]; ok {
-			m.mutex.Unlock()
-			return username
-		} else {
-			targetUser, err := user.LookupId(u)
-			if err != nil {
-				targetUser.Username = "uid:" + u
-			}
-			m.m[u] = targetUser.Username
-			m.mutex.Unlock()
-			return targetUser.Username
+	v, _ := m.m.GetOrInit(u, func() Groupname {
+		targetUser, err := user.LookupId(u)
+		if err != nil {
+			targetUser.Username = "uid:" + u
 		}
-	}
+		return targetUser.Username
+	})
+	return v
 }
 
 type (
@@ -59,35 +47,22 @@ type (
 
 // groupnameMap is a map from Gid to Groupname
 type groupnameMap struct {
-	m     map[Gid]Groupname
-	mutex sync.RWMutex
+	m *tsmap.Map[Gid, Groupname]
 }
 
 func NewGroupnameMap() *groupnameMap {
 	return &groupnameMap{
-		m: make(map[Gid]Groupname),
+		m: tsmap.NewTSMap[Gid, Groupname](20),
 	}
 }
 
 func (m *groupnameMap) Get(g Gid) Groupname {
-	m.mutex.RLock()
-	if username, ok := m.m[g]; ok {
-		m.mutex.RUnlock()
-		return username
-	} else {
-		m.mutex.RUnlock()
-		m.mutex.Lock()
-		if username, ok = m.m[g]; ok {
-			m.mutex.Unlock()
-			return username
-		} else {
-			targetUser, err := user.LookupGroupId(g)
-			if err != nil {
-				targetUser.Name = "gid:" + g
-			}
-			m.m[g] = targetUser.Name
-			m.mutex.Unlock()
-			return targetUser.Name
+	v, _ := m.m.GetOrInit(g, func() Groupname {
+		targetUser, err := user.LookupGroupId(g)
+		if err != nil {
+			targetUser.Name = "gid:" + g
 		}
-	}
+		return targetUser.Name
+	})
+	return v
 }
