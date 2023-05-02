@@ -11,9 +11,11 @@ var (
 	IgnoredInitOnce sync.Once
 )
 
+const shardSize = 20
+
 func GetCache() *cached.Map[GitRepoPath, *FileGits] {
 	IgnoredInitOnce.Do(func() {
-		ignored = cached.NewCacheMap[GitRepoPath, *FileGits](20)
+		ignored = cached.NewCacheMap[GitRepoPath, *FileGits](shardSize)
 	})
 	return ignored
 }
