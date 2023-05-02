@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"runtime/debug"
 	"strings"
+	"time"
 
 	"github.com/Equationzhao/g/filter"
 	"github.com/Equationzhao/g/pathbeautify"
@@ -14,6 +16,7 @@ import (
 	"github.com/Equationzhao/g/theme"
 	"github.com/Equationzhao/g/timeparse"
 	"github.com/Equationzhao/g/tree"
+	"github.com/Equationzhao/versionchecker"
 	"github.com/urfave/cli/v2"
 )
 
@@ -26,25 +29,39 @@ var (
 	returnCode    = 0
 	sizeEnabler   = filter.Size{}
 	contentFilter = filter.NewContentFilter()
+	compiledAt    = ""
 )
 
-const version = "v0.4.0"
+var version = versionchecker.Version{
+	Major: 0,
+	Minor: 4,
+	Patch: 1,
+	Owner: "Equationzhao",
+	Repo:  "g",
+}
 
 func init() {
 	typeFunc = append(typeFunc, &filter.RemoveHidden)
+	if compiledAt == "" {
+		compiledAt = time.Now().Format(timeFormat)
+	}
+}
+
+type Err4Exit struct{}
+
+func (c Err4Exit) Error() string {
+	panic("should not call this")
 }
 
 func main() {
 	defer func() {
+		if err := recover(); err != nil {
+			fmt.Println(version.Info())
+			fmt.Println(makeErrorStr(fmt.Sprint(err)))
+			fmt.Println(makeErrorStr(string(debug.Stack())))
+		}
 		os.Exit(returnCode)
 	}()
-
-	cli.AppHelpTemplate = fmt.Sprintf(`%s
-REPO:
-	https://github.com/Equationzhao/g
-
-%s
-`, cli.AppHelpTemplate, version)
 
 	app := &cli.App{
 		Name:      "g",
@@ -52,23 +69,53 @@ REPO:
 		UsageText: "g [options] [path]",
 		Copyright: `Copyright (C) 2023 Equationzhao. MIT License
 This is free software: you are free to change and redistribute it.
-There is NO  WARRANTY, to the extent permitted by law.`,
-		Version: version,
+There is NO WARRANTY, to the extent permitted by law.`,
+		Version: version.Info(),
 		Authors: []*cli.Author{
 			{
 				Name:  "Equationzhao",
 				Email: "equationzhao@foxmail.com",
 			},
 		},
-		SliceFlagSeparator: ",",
-		HideHelpCommand:    true,
-		HideVersion:        true,
-		Writer:             os.Stdout,
+		SliceFlagSeparator:   ",",
+		HideHelpCommand:      true,
+		EnableBashCompletion: true,
+		Writer:               os.Stdout,
 		OnUsageError: func(cCtx *cli.Context, err error, isSubcommand bool) error {
-			fmt.Fprintf(cCtx.App.Writer, "%s %s: %s %s\n", theme.Error, cCtx.App.Name, err, theme.Reset)
+			_, _ = fmt.Fprint(cCtx.App.Writer, makeErrorStr(fmt.Sprintf("%s %s: %s %s\n", theme.Error, cCtx.App.Name, err, theme.Reset)))
 			return nil
 		},
+
 		Flags: []cli.Flag{
+			&cli.BoolFlag{
+				Name:     "check-new-version",
+				Usage:    "check if there's new release",
+				Category: "software info",
+				Action: func(context *cli.Context, b bool) error {
+					if b {
+						done := make(chan struct{})
+						go func() {
+							latestVersion, hasNew, err := version.CheckUpgrade()
+							if err != nil {
+								done <- struct{}{}
+								return
+							}
+							if hasNew {
+								fmt.Println("new version", latestVersion.Info(), "is available")
+								done <- struct{}{}
+							}
+						}()
+						select {
+						case <-done:
+						case <-time.After(2 * time.Second):
+						}
+						return Err4Exit{}
+					}
+					return nil
+				},
+				DisableDefaultText: true,
+			},
+
 			// VIEW
 			&cli.StringFlag{
 				Name:        "time-style",
@@ -229,7 +276,7 @@ There is NO  WARRANTY, to the extent permitted by law.`,
 			},
 			&cli.StringFlag{
 				Name:     "git-status-style",
-				Usage:    "git status style: colored-symbol: {? untracked, + added, ! deleted, ~ modified, | renamed, = copied, $ ignored} colored-dot",
+				Usage:    "git status style: colored-symbol: {? untracked, + added, - deleted, ~ modified, | renamed, = copied, ! ignored} colored-dot",
 				Aliases:  []string{"gss"},
 				Category: "VIEW",
 			},
@@ -594,7 +641,14 @@ There is NO  WARRANTY, to the extent permitted by law.`,
 				},
 				Category: "FILTERING",
 			},
+			&cli.BoolFlag{
+				Name:               "hide-git-ignore",
+				Aliases:            []string{"gi", "hgi"},
+				Usage:              "hide git ignored file/dir",
+				DisableDefaultText: true,
+			},
 		},
+
 		Action: func(context *cli.Context) error {
 			var (
 				minorErr   = false
@@ -669,6 +723,13 @@ There is NO  WARRANTY, to the extent permitted by law.`,
 
 				contentFunc = append(contentFunc, nameToDisplay.Enable())
 				typeFilter := filter.NewTypeFilter(typeFunc...)
+
+				gitignore := context.Bool("hide-git-ignore")
+				removeGitIgnore := new(filter.TypeFunc)
+				if gitignore {
+					typeFilter.AppendTo(removeGitIgnore)
+				}
+
 				for i := 0; i < len(path); i++ {
 					if len(path) > 1 {
 						fmt.Printf("%s:\n", path[i])
@@ -700,7 +761,6 @@ There is NO  WARRANTY, to the extent permitted by law.`,
 									seriousErr = true
 									continue
 								}
-								path[i] = "."
 							}
 						} else {
 							infos = append(infos, stat)
@@ -708,15 +768,13 @@ There is NO  WARRANTY, to the extent permitted by law.`,
 						}
 					}
 
-					nameToDisplay.SetParent(path[i])
-
 					var d []os.DirEntry
 					var err error
 					if isFile {
 						goto final
 					}
 
-					d, err = os.ReadDir(path[i])
+					d, err = os.ReadDir(".")
 					if err != nil {
 						goto final
 					}
@@ -746,6 +804,10 @@ There is NO  WARRANTY, to the extent permitted by law.`,
 						}
 					}
 
+					if gitignore {
+						*removeGitIgnore = filter.RemoveGitIgnore(path[i])
+					}
+					nameToDisplay.SetParent(path[i])
 					// remove non-display items
 					infos = typeFilter.Filter(infos)
 
@@ -782,6 +844,34 @@ There is NO  WARRANTY, to the extent permitted by law.`,
 		},
 	}
 
+	cli.VersionPrinter = func(cCtx *cli.Context) {
+		fmt.Println(cCtx.App.Name, "-", cCtx.App.Usage)
+		fmt.Println(version.Info())
+	}
+
+	cli.VersionFlag = &cli.BoolFlag{
+		Name:               "version",
+		Aliases:            []string{"v"},
+		Usage:              "print the version",
+		DisableDefaultText: true,
+		Category:           "software info",
+	}
+
+	cli.HelpFlag = &cli.BoolFlag{
+		Name:               "help",
+		Aliases:            []string{"h"},
+		Usage:              "show help",
+		DisableDefaultText: true,
+		Category:           "software info",
+	}
+
+	cli.AppHelpTemplate = fmt.Sprintf(`%s
+REPO:
+	https://github.com/Equationzhao/g
+
+%s compiled at %s
+`, cli.AppHelpTemplate, version.Info(), compiledAt)
+
 	if doc {
 		md, _ := os.Create("g.md")
 		s, _ := app.ToMarkdown()
@@ -792,7 +882,9 @@ There is NO  WARRANTY, to the extent permitted by law.`,
 	} else {
 		err := app.Run(os.Args)
 		if err != nil {
-			fmt.Printf("%s g: %s %s\n", theme.Error, err.Error(), theme.Reset)
+			if !errors.Is(err, Err4Exit{}) {
+				fmt.Printf("%s g: %s %s\n", theme.Error, err.Error(), theme.Reset)
+			}
 		}
 	}
 }

@@ -54,11 +54,11 @@ var DefaultInfoTheme = Theme{
 		Icon:  "\uf111",
 	},
 	"git_renamed_dot": Style{
-		Color: Yellow,
+		Color: Blue,
 		Icon:  "\uf111",
 	},
 	"git_copied_dot": Style{
-		Color: Yellow,
+		Color: Purple,
 		Icon:  "\uf111",
 	},
 	"git_deleted_dot": Style{
@@ -70,7 +70,7 @@ var DefaultInfoTheme = Theme{
 		Icon:  "\uF111",
 	},
 	"git_untracked_dot": Style{
-		Color: Red,
+		Color: Cyan,
 		Icon:  "\uF111",
 	},
 	"git_ignored_dot": Style{
@@ -82,28 +82,28 @@ var DefaultInfoTheme = Theme{
 		Icon:  "~",
 	},
 	"git_renamed_sym": Style{
-		Color: Yellow,
+		Color: Blue,
 		Icon:  "|",
 	},
 	"git_copied_sym": Style{
-		Color: Yellow,
+		Color: Purple,
 		Icon:  "=",
 	},
 	"git_deleted_sym": Style{
 		Color: Red,
-		Icon:  "!",
+		Icon:  "-",
 	},
 	"git_added_sym": Style{
 		Color: Green,
 		Icon:  "+",
 	},
 	"git_untracked_sym": Style{
-		Color: Red,
+		Color: Cyan,
 		Icon:  "?",
 	},
 	"git_ignored_sym": Style{
 		Color: Black,
-		Icon:  "$",
+		Icon:  "!",
 	},
 }
 
@@ -115,6 +115,14 @@ var DefaultTheme = Theme{
 	"home": {
 		Color: Blue,
 		Icon:  "\ue617",
+	},
+	"desktop": {
+		Color: Blue,
+		Icon:  "\uf108",
+	},
+	"downloads": {
+		Color: Blue,
+		Icon:  "\uf498",
 	},
 	"exe": Style{
 		Color: Green,
@@ -152,6 +160,14 @@ var DefaultTheme = Theme{
 		Color: Cyan,
 		Icon:  "\uE7A8",
 	},
+	"cargo.lock": {
+		Color: Cyan,
+		Icon:  "\uE7A8",
+	},
+	"cargo.toml": {
+		Color: Cyan,
+		Icon:  "\uE7A8",
+	},
 	"c": Style{
 		Color: Cyan,
 		Icon:  "\uE61E",
@@ -171,6 +187,10 @@ var DefaultTheme = Theme{
 	"cxx": Style{
 		Color: Cyan,
 		Icon:  "\uE61D",
+	},
+	"include": Style{
+		Color: Cyan,
+		Icon:  "\ue5fc",
 	},
 	"h": Style{
 		Color: Cyan,
@@ -324,13 +344,13 @@ var DefaultTheme = Theme{
 		Color: Cyan,
 		Icon:  "\uE60B",
 	},
-	"gitignore": Style{
-		Color: Cyan,
-		Icon:  "\uF1D3",
-	},
 	"git": Style{
 		Color: Cyan,
 		Icon:  "\uF1D3",
+	},
+	"gitignore": {
+		Color: Black,
+		Icon:  "\uf1d3",
 	},
 	"asm": Style{
 		Color: Cyan,
@@ -547,6 +567,10 @@ var DefaultTheme = Theme{
 	"ai": Style{
 		Color: Cyan,
 		Icon:  "\uE7B4",
+	},
+	"music": Style{
+		Color: Cyan,
+		Icon:  "",
 	},
 	"mp3": Style{
 		Color: Cyan,
@@ -800,6 +824,10 @@ var DefaultTheme = Theme{
 		Color: Cyan,
 		Icon:  "\uE5FC",
 	},
+	"share": Style{
+		Color: Cyan,
+		Icon:  "\uf064",
+	},
 	"idea": Style{
 		Color: Cyan,
 		Icon:  "\uE7B5",
@@ -812,7 +840,6 @@ var DefaultTheme = Theme{
 		Color: Cyan,
 		Icon:  "\uF121",
 	},
-
 	"pipe": Style{
 		Color: Cyan,
 		Icon:  "\uF124",
@@ -825,4 +852,5 @@ var DefaultTheme = Theme{
 		Color: Purple,
 		Icon:  "\ueb15",
 	},
+	"swp": Style{},
 }

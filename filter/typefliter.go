@@ -4,6 +4,8 @@ import (
 	"os"
 	"regexp"
 	"strings"
+
+	"github.com/Equationzhao/g/git"
 )
 
 const (
@@ -13,6 +15,10 @@ const (
 
 type TypeFilter struct {
 	tfs []*TypeFunc
+}
+
+func (tf *TypeFilter) AppendTo(typeFunc ...*TypeFunc) {
+	tf.tfs = append(tf.tfs, typeFunc...)
 }
 
 func NewTypeFilter(tfs ...*TypeFunc) *TypeFilter {
@@ -113,4 +119,29 @@ var HiddenOnly = func(e os.FileInfo) bool {
 
 var RemoveBackups = func(e os.FileInfo) bool {
 	return !strings.HasSuffix(e.Name(), "~")
+}
+
+var RemoveGitIgnore = func(repoPath git.GitRepoPath) TypeFunc {
+	isOrIsParentOf := func(parent, child string) bool {
+		if parent == child {
+			return true
+		}
+		if strings.HasPrefix(child, parent+"/") { // should not use filepath.Separator
+			return true
+		}
+		return false
+	}
+	return func(e os.FileInfo) (ok bool) {
+		ignoredCache := git.GetCache()
+		actual, _ := ignoredCache.GetOrInit(repoPath, git.DefaultInit(repoPath))
+		ok = true
+		for _, fileGit := range *actual {
+			if fileGit.Status == git.GitIgnored {
+				if isOrIsParentOf(e.Name(), fileGit.Name) {
+					ok = false
+				}
+			}
+		}
+		return
+	}
 }

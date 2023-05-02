@@ -1,10 +1,7 @@
 package filter
 
 import (
-	"bufio"
 	"os"
-	"os/exec"
-	"path/filepath"
 	"sort"
 	"strconv"
 	"strings"
@@ -12,6 +9,7 @@ import (
 	"sync/atomic"
 
 	"github.com/Equationzhao/g/cached"
+	"github.com/Equationzhao/g/git"
 	"github.com/Equationzhao/g/render"
 	"github.com/valyala/bytebufferpool"
 )
@@ -52,6 +50,9 @@ const (
 	PB
 	EB
 	ZB
+	YB
+	BB
+	NB
 	Auto
 )
 
@@ -85,6 +86,12 @@ func convert2Size(size SizeUnit) string {
 		return "EB"
 	case ZB:
 		return "ZB"
+	case YB:
+		return "YB"
+	case BB:
+		return "BB"
+	case NB:
+		return "NB"
 	default:
 		panic("unknown size")
 	}
@@ -144,6 +151,12 @@ func (s *Size) Size2String(n int64, blank int) string {
 		res = strconv.FormatFloat(v/1024.0/1024.0/1024.0/1024.0/1024.0/1024.0, 'f', 1, 64)
 	case ZB:
 		res = strconv.FormatFloat(v/1024.0/1024.0/1024.0/1024.0/1024.0/1024.0/1024.0, 'f', 1, 64)
+	case YB:
+		res = strconv.FormatFloat(v/1024.0/1024.0/1024.0/1024.0/1024.0/1024.0/1024.0/1024.0, 'f', 1, 64)
+	case BB:
+		res = strconv.FormatFloat(v/1024.0/1024.0/1024.0/1024.0/1024.0/1024.0/1024.0/1024.0/1024.0, 'f', 1, 64)
+	case NB:
+		res = strconv.FormatFloat(v/1024.0/1024.0/1024.0/1024.0/1024.0/1024.0/1024.0/1024.0/1024.0/1024.0, 'f', 1, 64)
 	case Auto:
 		for i := B; i <= ZB; i++ {
 			if v < 1000 {
@@ -183,27 +196,26 @@ func EnableTime(format string, renderer *render.Renderer) ContentOption {
 }
 
 type (
-	gitStyle    int
-	fileGits    = []fileGit
-	gitRepoPath = string
-	Name        struct {
+	Name struct {
 		Icon, Classify, FileType, git bool
 		Renderer                      *render.Renderer
 		parent                        string
-		GitCache                      *cached.Map[gitRepoPath, *fileGits]
+		GitCache                      *cached.Map[git.GitRepoPath, *git.FileGits]
 		GitStyle                      gitStyle
 	}
 )
 
+type gitStyle int
+
 const (
-	GitStyleDot = iota
+	GitStyleDot gitStyle = iota
 	GitStyleSym
 	GitStyleDefault = GitStyleDot
 )
 
 func (n *Name) UnsetGit() *Name {
 	n.git = false
-	n.GitCache = nil
+	git.FreeCache()
 	return n
 }
 
@@ -224,7 +236,7 @@ func (n *Name) UnsetFileType() *Name {
 
 func (n *Name) SetGit() *Name {
 	n.git = true
-	n.GitCache = cached.NewCacheMap[gitRepoPath, *fileGits](20)
+	n.GitCache = git.GetCache()
 	return n
 }
 
@@ -259,137 +271,27 @@ func NewNameEnable() *Name {
 	return &Name{}
 }
 
-// getShortGitStatus read the git status of the repository located at path
-func getShortGitStatus(repoPath gitRepoPath) (string, error) {
-	out, err := exec.Command("git", "-C", repoPath, "status", "-s", "--porcelain").Output()
-	return string(out), err
-}
-
-type status int
-
-func (s status) String() string {
-	switch s {
-	case GitModified:
-		return "~"
-	case GitAdded:
-		return "+"
-	case GitDeleted:
-		return "!"
-	case GitRenamed:
-		return "|"
-	case GitCopied:
-		return "="
-	case GitUntracked:
-		return "?"
-	case GitIgnored:
-		return "!"
-	}
-	return ""
-}
-
-const (
-	GitModified  status = iota + 1 // M ~
-	GitAdded                       // A +
-	GitDeleted                     // D !
-	GitRenamed                     // R |
-	GitCopied                      // C =
-	GitUntracked                   // ? ?
-	GitIgnored                     // ! !
-)
-
-type fileGit struct {
-	name   string
-	status status
-}
-
-func (f *fileGit) setYFromXY(XY string) {
-	set := func(Y string) {
-		switch Y {
-		case "M":
-			f.status = GitModified
-		case "A":
-			f.status = GitAdded
-		case "D":
-			f.status = GitDeleted
-		case "R":
-			f.status = GitRenamed
-		case "C":
-			f.status = GitCopied
-		case "?":
-			f.status = GitUntracked
-		case "!":
-			f.status = GitIgnored
-		}
-	}
-
-	switch len(XY) {
-	case 1:
-		set(XY)
-	case 2:
-		Y := XY[1:]
-		set(Y)
-	default:
-		return
-	}
-}
-
-// parseShort parses a git status output command
-// It is compatible with the short version of the git status command
-// modified from https://le-gall.bzh/post/go/parsing-git-status-with-go/ author: Sébastien Le Gall
-func parseShort(r string) (res fileGits) {
-	s := bufio.NewScanner(strings.NewReader(r))
-
-	// Extract branch name
-	for s.Scan() {
-		// Skip any empty line
-		if len(s.Text()) < 1 {
-			continue
-		}
-		break
-	}
-
-	fg := fileGit{}
-	for s.Scan() {
-		if len(s.Text()) < 1 {
-			continue
-		}
-		XyName := strings.Fields(s.Text())
-		fg.setYFromXY(XyName[0])
-		fg.name = XyName[1]
-		res = append(res, fg)
-	}
-
-	return
-}
-
 func (n *Name) Enable() ContentOption {
 	/*
-		 -F      Display a slash (`/') immediately after each pathname that is a
-				 directory, an asterisk (`*') after each that is executable, an at
-				 sign (`@') after each symbolic link, a percent sign (`%') after
-				 each whiteout, an equal sign (`=') after each socket, and a
-				 vertical bar (`|') after each that is a FIFO.
+		 -F      Display a slash (`/`) immediately after each pathname that is a
+				 directory, an asterisk (`*`) after each that is executable, an at
+				 sign (`@`) after each symbolic link, a percent sign (`%`) after
+				 each whiteout, an equal sign (`=`) after each socket, and a
+				 vertical bar (`|`) after each that is a FIFO.
 	*/
 
 	isOrIsParentOf := func(parent, child string) bool {
 		if parent == child {
 			return true
 		}
-		if strings.HasPrefix(child, filepath.Join(parent, "")) {
+		if strings.HasPrefix(child, parent+"/") { // should not use filepath.Separator
 			return true
 		}
 		return false
 	}
 
-	getFromCache := func(repoPath gitRepoPath) *fileGits {
-		value, _ := n.GitCache.GetOrInit(repoPath, func() *fileGits {
-			res := make(fileGits, 0)
-			out, err := getShortGitStatus(repoPath)
-			if err == nil {
-				res = parseShort(out)
-			}
-			return &res
-		})
+	getFromCache := func(repoPath git.GitRepoPath) *git.FileGits {
+		value, _ := n.GitCache.GetOrInit(repoPath, git.DefaultInit(repoPath))
 		return value
 	}
 
@@ -437,8 +339,8 @@ func (n *Name) Enable() ContentOption {
 		if n.git {
 			FilesStatus := *getFromCache(n.parent)
 			for _, status := range FilesStatus {
-				if isOrIsParentOf(name, status.name) {
-					str = n.GitByName(str, status.status.String(), n.GitStyle)
+				if isOrIsParentOf(name, status.Name) {
+					str = n.GitByName(str, status.Status.String(), n.GitStyle)
 					break
 				}
 			}
@@ -493,7 +395,7 @@ func (n *Name) GitByName(name string, status string, style gitStyle) string {
 		case GitStyleSym:
 			return n.Renderer.GitRenamedSym(name)
 		}
-	case "!":
+	case "-":
 		switch style {
 		case GitStyleDot:
 			return n.Renderer.GitDeleted(name)
@@ -507,7 +409,7 @@ func (n *Name) GitByName(name string, status string, style gitStyle) string {
 		case GitStyleSym:
 			return n.Renderer.GitCopiedSym(name)
 		}
-	case "$":
+	case "!":
 		switch style {
 		case GitStyleDot:
 			return n.Renderer.GitIgnored(name)
