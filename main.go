@@ -13,6 +13,7 @@ import (
 	"github.com/Equationzhao/g/pathbeautify"
 	"github.com/Equationzhao/g/printer"
 	"github.com/Equationzhao/g/render"
+	"github.com/Equationzhao/g/sorter"
 	"github.com/Equationzhao/g/theme"
 	"github.com/Equationzhao/g/timeparse"
 	"github.com/Equationzhao/g/tree"
@@ -30,12 +31,13 @@ var (
 	sizeEnabler   = filter.Size{}
 	contentFilter = filter.NewContentFilter()
 	compiledAt    = ""
+	sort          = sorter.NewSorter()
 )
 
 var version = versionchecker.Version{
 	Major: 0,
 	Minor: 4,
-	Patch: 1,
+	Patch: 2,
 	Owner: "Equationzhao",
 	Repo:  "g",
 }
@@ -133,7 +135,7 @@ There is NO WARRANTY, to the extent permitted by law.`,
 						variable sets the default style to use.
 					*/
 					if strings.HasPrefix(s, "+") {
-						s := s[1:]
+						s := s[1:] // remove +
 						timeFormat = timeparse.Transform(s)
 						return nil
 					}
@@ -272,7 +274,7 @@ There is NO WARRANTY, to the extent permitted by law.`,
 			},
 			&cli.BoolFlag{
 				Name:               "git-status",
-				Usage:              "show git status: ? untracked, + added, ! deleted, ~ modified, | renamed, = copied, $ ignored",
+				Usage:              "show git status: ? untracked, + added, ! deleted, ~ modified, | renamed, = copied, $ ignored [if git is installed]",
 				Aliases:            []string{"gs"},
 				DisableDefaultText: true,
 				Category:           "VIEW",
@@ -647,8 +649,63 @@ There is NO WARRANTY, to the extent permitted by law.`,
 			&cli.BoolFlag{
 				Name:               "hide-git-ignore",
 				Aliases:            []string{"gi", "hgi"},
-				Usage:              "hide git ignored file/dir",
+				Usage:              "hide git ignored file/dir [if git is installed]",
 				DisableDefaultText: true,
+				Category:           "FILTERING",
+			},
+
+			&cli.StringSliceFlag{
+				Name:    "sort",
+				Aliases: []string{"SORT_FIELD"},
+				Usage:   "sort by field, default: ascending",
+				Action: func(context *cli.Context, slice []string) error {
+					sorter.WithSize(len(slice))(sort)
+					for _, s := range slice {
+						switch s {
+						case "name-descend": // sort by name
+							sort.AddOption(sorter.ByNameDescend)
+						case "name": // sort by name
+							sort.AddOption(sorter.ByNameAscend)
+						case "size-descend": // sort by size
+							sort.AddOption(sorter.BySizeDescend)
+						case "size": // sort by size
+							sort.AddOption(sorter.BySizeAscend)
+						case "time-descend": // sort by time
+							sort.AddOption(sorter.ByTimeDescend)
+						case "time": // sort by time
+							sort.AddOption(sorter.ByTimeAscend)
+						case "extension-descend": // sort by extension
+							sort.AddOption(sorter.ByExtensionDescend)
+						case "extension": // sort by extension
+							sort.AddOption(sorter.ByExtensionAscend)
+						case "group-descend": // sort by groupname
+							sort.AddOption(sorter.ByGroupDescend)
+						case "group": // sort by groupname
+							sort.AddOption(sorter.ByGroupAscend)
+						case "owner-descend": // sort by owner
+							sort.AddOption(sorter.ByOwnerDescend)
+						case "owner": // sort by owner
+							sort.AddOption(sorter.ByOwnerAscend)
+						default:
+							return fmt.Errorf("unknown sort field: %s", s)
+						}
+					}
+					return nil
+				},
+				Category: "SORTING",
+			},
+			&cli.BoolFlag{
+				Name:               "sort-reverse",
+				Aliases:            []string{"sr"},
+				Usage:              "reverse the order of the sort",
+				DisableDefaultText: true,
+				Action: func(context *cli.Context, b bool) error {
+					if b {
+						sort.Reverse()
+					}
+					return nil
+				},
+				Category: "SORTING",
 			},
 		},
 
@@ -732,6 +789,12 @@ There is NO WARRANTY, to the extent permitted by law.`,
 				if gitignore {
 					typeFilter.AppendTo(removeGitIgnore)
 				}
+
+				// set sort func
+				if sort.Len() == 0 {
+					sort.AddOption(sorter.Default)
+				}
+				contentFilter.SetSortFunc(sort.Build())
 
 				for i := 0; i < len(path); i++ {
 					if len(path) > 1 {
@@ -886,6 +949,9 @@ REPO:
 		err := app.Run(os.Args)
 		if err != nil {
 			if !errors.Is(err, Err4Exit{}) {
+				if returnCode == 0 {
+					returnCode = 1
+				}
 				fmt.Printf("%s g: %s %s\n", theme.Error, err.Error(), theme.Reset)
 			}
 		}

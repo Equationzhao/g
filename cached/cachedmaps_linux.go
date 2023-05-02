@@ -66,3 +66,16 @@ func (m *groupnameMap) Get(g Gid) Groupname {
 	})
 	return v
 }
+
+var (
+	mainGroupnameMap = NewGroupnameMap()
+	mainUsernameMap  = NewUsernameMap()
+)
+
+func GetGroupname(g Gid) Groupname {
+	return mainGroupnameMap.Get(g)
+}
+
+func GetUsername(u Uid) Groupname {
+	return mainUsernameMap.Get(u)
+}

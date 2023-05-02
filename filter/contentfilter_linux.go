@@ -15,7 +15,6 @@ import (
 func (cf *ContentFilter) EnableOwner(renderer *render.Renderer) ContentOption {
 	m := sync.RWMutex{}
 	longestOwner := 0
-	cache := cached.NewUsernameMap()
 	return func(info os.FileInfo) string {
 		wait := func(res string) string {
 			cf.wgOwner.Wait()
@@ -37,7 +36,7 @@ func (cf *ContentFilter) EnableOwner(renderer *render.Renderer) ContentOption {
 			}
 		}
 		uid := strconv.FormatInt(int64(info.Sys().(*syscall.Stat_t).Uid), 10)
-		name := cache.Get(uid)
+		name := cached.GetUsername(uid)
 
 		m.RLock()
 		if len(name) > longestOwner {
@@ -58,7 +57,6 @@ func (cf *ContentFilter) EnableOwner(renderer *render.Renderer) ContentOption {
 func (cf *ContentFilter) EnableGroup(renderer *render.Renderer) ContentOption {
 	m := sync.RWMutex{}
 	longestGroup := 0
-	cache := cached.NewGroupnameMap()
 	return func(info os.FileInfo) string {
 		wait := func(name string) string {
 			cf.wgGroup.Wait()
@@ -80,7 +78,7 @@ func (cf *ContentFilter) EnableGroup(renderer *render.Renderer) ContentOption {
 			}
 		}
 		gid := strconv.FormatInt(int64(info.Sys().(*syscall.Stat_t).Gid), 10)
-		name := cache.Get(gid)
+		name := cached.GetGroupname(gid)
 
 		m.RLock()
 		if len(name) > longestGroup {

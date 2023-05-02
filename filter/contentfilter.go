@@ -19,6 +19,11 @@ import (
 type ContentFilter struct {
 	options          []ContentOption
 	wgOwner, wgGroup *sync.WaitGroup
+	sortFunc         func(a, b os.FileInfo) bool
+}
+
+func (cf *ContentFilter) SetSortFunc(sortFunc func(a, b os.FileInfo) bool) {
+	cf.sortFunc = sortFunc
 }
 
 func (cf *ContentFilter) AppendTo(options ...ContentOption) {
@@ -421,55 +426,10 @@ func (n *Name) GitByName(name string, status string, style gitStyle) string {
 }
 
 func NewContentFilter(options ...ContentOption) *ContentFilter {
-	return &ContentFilter{options: options, wgGroup: new(sync.WaitGroup), wgOwner: new(sync.WaitGroup)}
+	return &ContentFilter{options: options, wgGroup: new(sync.WaitGroup), wgOwner: new(sync.WaitGroup), sortFunc: nil}
 }
 
 type ContentFunc func(entry os.FileInfo) bool
-
-func isHidden(info os.FileInfo) bool {
-	return strings.HasPrefix(info.Name(), ".")
-}
-
-func isLink(info os.FileInfo) bool {
-	return info.Mode()&os.ModeSymlink != 0
-}
-
-func isHiddenDir(info os.FileInfo) bool {
-	return info.IsDir() && isHidden(info)
-}
-
-func compareFileInfo(a, b os.FileInfo) bool {
-	hdA := isHiddenDir(a)
-	hdB := isHiddenDir(b)
-	if hdA != hdB {
-		// hidden dir comes first
-		return hdA
-	}
-	// same hidden dir status
-	dA := a.IsDir()
-	dB := b.IsDir()
-	if dA != dB {
-		// dir comes first
-		return dA
-	}
-	// same dir status
-	lA := isLink(a)
-	lB := isLink(b)
-	switch {
-	case lA && lB:
-		// both are links, compare name
-		return a.Name() < b.Name()
-	case lA:
-		// a is link, b is not link, b comes first
-		return false
-	case lB:
-		// a is not link, b is link, a comes first
-		return true
-	default:
-		// neither are links, compare name
-		return a.Name() < b.Name()
-	}
-}
 
 func (cf *ContentFilter) GetStringSlice(e []os.FileInfo) []string {
 	resBuffers := make([]*bytebufferpool.ByteBuffer, len(e))
@@ -485,7 +445,11 @@ func (cf *ContentFilter) GetStringSlice(e []os.FileInfo) []string {
 	}()
 
 	sort.Slice(e, func(i, j int) bool {
-		return compareFileInfo(e[i], e[j])
+		if cf.sortFunc != nil {
+			return cf.sortFunc(e[i], e[j])
+		} else {
+			return true
+		}
 	})
 
 	wg := sync.WaitGroup{}

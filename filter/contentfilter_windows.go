@@ -33,6 +33,7 @@ import (
 	"unsafe"
 
 	"github.com/Equationzhao/g/render"
+	"github.com/Equationzhao/g/usergroup_windows"
 )
 
 var (
@@ -119,13 +120,10 @@ func (cf *ContentFilter) EnableGroup(renderer *render.Renderer) ContentOption {
 	m := sync.RWMutex{}
 	longestGroup := 0
 	return func(info os.FileInfo) string {
-		path := info.Name()
-
 		wait := func(name string) string {
 			cf.wgGroup.Wait()
 			return renderer.Group(fillBlank(name, longestGroup))
 		}
-
 		done := func(name string) {
 			defer cf.wgGroup.Done()
 			m.RLock()
@@ -141,51 +139,51 @@ func (cf *ContentFilter) EnableGroup(renderer *render.Renderer) ContentOption {
 			}
 		}
 
-		var needed uint32
-		fromString, err := syscall.UTF16PtrFromString(path)
-		if err != nil {
-			done("unknown")
-			return wait("unknown")
-		}
-		_, _, _ = procGetFileSecurity.Call(
-			uintptr(unsafe.Pointer(fromString)),
-			0x00000001, /* OWNER_SECURITY_INFORMATION */
-			0,
-			0,
-			uintptr(unsafe.Pointer(&needed)))
-
-		if needed == 0 {
-			done("unknown")
-			return wait("unknown")
-		}
-
-		buf := make([]byte, needed)
-		r1, _, err := procGetFileSecurity.Call(
-			uintptr(unsafe.Pointer(fromString)),
-			0x00000001, /* OWNER_SECURITY_INFORMATION */
-			uintptr(unsafe.Pointer(&buf[0])),
-			uintptr(needed),
-			uintptr(unsafe.Pointer(&needed)))
-		if r1 == 0 && err != nil {
-			done("unknown")
-			return wait("unknown")
-		}
-		var ownerDefaulted uint32
-		var sid *syscall.SID
-		r1, _, err = procGetSecurityDescriptorOwner.Call(
-			uintptr(unsafe.Pointer(&buf[0])),
-			uintptr(unsafe.Pointer(&sid)),
-			uintptr(unsafe.Pointer(&ownerDefaulted)))
-		if r1 == 0 && err != nil {
-			done("unknown")
-			return wait("unknown")
-		}
-		_, name, _, err := sid.LookupAccount("")
-		if r1 == 0 && err != nil {
-			done("unknown")
-			return wait("unknown")
-		}
-
+		// var needed uint32
+		// fromString, err := syscall.UTF16PtrFromString(path)
+		// if err != nil {
+		// 	done("unknown")
+		// 	return wait("unknown")
+		// }
+		// _, _, _ = procGetFileSecurity.Call(
+		// 	uintptr(unsafe.Pointer(fromString)),
+		// 	0x00000001, /* OWNER_SECURITY_INFORMATION */
+		// 	0,
+		// 	0,
+		// 	uintptr(unsafe.Pointer(&needed)))
+		//
+		// if needed == 0 {
+		// 	done("unknown")
+		// 	return wait("unknown")
+		// }
+		//
+		// buf := make([]byte, needed)
+		// r1, _, err := procGetFileSecurity.Call(
+		// 	uintptr(unsafe.Pointer(fromString)),
+		// 	0x00000001, /* OWNER_SECURITY_INFORMATION */
+		// 	uintptr(unsafe.Pointer(&buf[0])),
+		// 	uintptr(needed),
+		// 	uintptr(unsafe.Pointer(&needed)))
+		// if r1 == 0 && err != nil {
+		// 	done("unknown")
+		// 	return wait("unknown")
+		// }
+		// var ownerDefaulted uint32
+		// var sid *syscall.SID
+		// r1, _, err = procGetSecurityDescriptorOwner.Call(
+		// 	uintptr(unsafe.Pointer(&buf[0])),
+		// 	uintptr(unsafe.Pointer(&sid)),
+		// 	uintptr(unsafe.Pointer(&ownerDefaulted)))
+		// if r1 == 0 && err != nil {
+		// 	done("unknown")
+		// 	return wait("unknown")
+		// }
+		// _, name, _, err := sid.LookupAccount("")
+		// if r1 == 0 && err != nil {
+		// 	done("unknown")
+		// 	return wait("unknown")
+		// }
+		name := usergroup_windows.Group(info)
 		done(name)
 		return wait(name)
 	}
