@@ -103,6 +103,8 @@ There is NO WARRANTY, to the extent permitted by law.`,
 							if hasNew {
 								fmt.Println("new version", latestVersion.Info(), "is available")
 								done <- struct{}{}
+							} else {
+								done <- struct{}{}
 							}
 						}()
 						select {
