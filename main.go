@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"runtime/debug"
 	"strings"
 	"time"
 
@@ -54,6 +55,11 @@ func (c Err4Exit) Error() string {
 
 func main() {
 	defer func() {
+		if err := recover(); err != nil {
+			fmt.Println(version.Info())
+			fmt.Println(makeErrorStr(fmt.Sprint(err)))
+			fmt.Println(makeErrorStr(string(debug.Stack())))
+		}
 		os.Exit(returnCode)
 	}()
 
@@ -635,7 +641,14 @@ There is NO WARRANTY, to the extent permitted by law.`,
 				},
 				Category: "FILTERING",
 			},
+			&cli.BoolFlag{
+				Name:               "hide-git-ignore",
+				Aliases:            []string{"gi", "hgi"},
+				Usage:              "hide git ignored file/dir",
+				DisableDefaultText: true,
+			},
 		},
+
 		Action: func(context *cli.Context) error {
 			var (
 				minorErr   = false
@@ -710,6 +723,13 @@ There is NO WARRANTY, to the extent permitted by law.`,
 
 				contentFunc = append(contentFunc, nameToDisplay.Enable())
 				typeFilter := filter.NewTypeFilter(typeFunc...)
+
+				gitignore := context.Bool("hide-git-ignore")
+				removeGitIgnore := new(filter.TypeFunc)
+				if gitignore {
+					typeFilter.AppendTo(removeGitIgnore)
+				}
+
 				for i := 0; i < len(path); i++ {
 					if len(path) > 1 {
 						fmt.Printf("%s:\n", path[i])
@@ -741,7 +761,6 @@ There is NO WARRANTY, to the extent permitted by law.`,
 									seriousErr = true
 									continue
 								}
-								path[i] = "."
 							}
 						} else {
 							infos = append(infos, stat)
@@ -749,15 +768,13 @@ There is NO WARRANTY, to the extent permitted by law.`,
 						}
 					}
 
-					nameToDisplay.SetParent(path[i])
-
 					var d []os.DirEntry
 					var err error
 					if isFile {
 						goto final
 					}
 
-					d, err = os.ReadDir(path[i])
+					d, err = os.ReadDir(".")
 					if err != nil {
 						goto final
 					}
@@ -787,6 +804,10 @@ There is NO WARRANTY, to the extent permitted by law.`,
 						}
 					}
 
+					if gitignore {
+						*removeGitIgnore = filter.RemoveGitIgnore(path[i])
+					}
+					nameToDisplay.SetParent(path[i])
 					// remove non-display items
 					infos = typeFilter.Filter(infos)
 
