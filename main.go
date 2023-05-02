@@ -133,6 +133,7 @@ There is NO WARRANTY, to the extent permitted by law.`,
 						variable sets the default style to use.
 					*/
 					if strings.HasPrefix(s, "+") {
+						s := s[1:]
 						timeFormat = timeparse.Transform(s)
 						return nil
 					}
