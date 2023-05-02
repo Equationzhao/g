@@ -9,12 +9,14 @@ g
 ```
 [--all|--la|-l]
 [--byline|--bl|-1|--oneline|--single-column]
+[--check-new-version]
 [--depth]=[value]
 [--file-type|--ft]
 [--format]=[value]
 [--full-time]
 [--git-status-style|--gss]=[value]
 [--git-status|--gs]
+[--hide-git-ignore|--gi|--hgi]
 [--lh|--human-readable]
 [--show-group|--sg]
 [--show-hidden|--sh|-a]
@@ -56,6 +58,8 @@ g [options] [path]
 
 **--byline, --bl, -1, --oneline, --single-column**: print by line
 
+**--check-new-version**: check if there's new release
+
 **--depth**="": tree limit depth, negative -> infinity (default: infinity)
 
 **--file-type, --ft**: likewise, except do not append '*'
@@ -66,7 +70,9 @@ g [options] [path]
 
 **--git-status, --gs**: show git status: ? untracked, + added, ! deleted, ~ modified, | renamed, = copied, $ ignored
 
-**--git-status-style, --gss**="": git status style: colored-symbol: {? untracked, + added, ! deleted, ~ modified, | renamed, = copied, $ ignored} colored-dot
+**--git-status-style, --gss**="": git status style: colored-symbol: {? untracked, + added, - deleted, ~ modified, | renamed, = copied, ! ignored} colored-dot
+
+**--hide-git-ignore, --gi, --hgi**: hide git ignored file/dir
 
 **--lh, --human-readable**: show human readable size
 

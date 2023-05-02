@@ -16,12 +16,14 @@ g
 .nf
 [--all|--la|-l]
 [--byline|--bl|-1|--oneline|--single-column]
+[--check-new-version]
 [--depth]=[value]
 [--file-type|--ft]
 [--format]=[value]
 [--full-time]
 [--git-status-style|--gss]=[value]
 [--git-status|--gs]
+[--hide-git-ignore|--gi|--hgi]
 [--lh|--human-readable]
 [--show-group|--sg]
 [--show-hidden|--sh|-a]
@@ -74,6 +76,9 @@ g [options] [path]
 \fB--byline, --bl, -1, --oneline, --single-column\fP: print by line
 
 .PP
+\fB--check-new-version\fP: check if there's new release
+
+.PP
 \fB--depth\fP="": tree limit depth, negative -> infinity (default: infinity)
 
 .PP
@@ -89,7 +94,10 @@ g [options] [path]
 \fB--git-status, --gs\fP: show git status: ? untracked, + added, ! deleted, ~ modified, | renamed, = copied, $ ignored
 
 .PP
-\fB--git-status-style, --gss\fP="": git status style: colored-symbol: {? untracked, + added, ! deleted, ~ modified, | renamed, = copied, $ ignored} colored-dot
+\fB--git-status-style, --gss\fP="": git status style: colored-symbol: {? untracked, + added, - deleted, ~ modified, | renamed, = copied, ! ignored} colored-dot
+
+.PP
+\fB--hide-git-ignore, --gi, --hgi\fP: hide git ignored file/dir
 
 .PP
 \fB--lh, --human-readable\fP: show human readable size
