@@ -7,7 +7,7 @@
 [![wakatime](https://wakatime.com/badge/github/Equationzhao/g.svg)](https://wakatime.com/badge/github/Equationzhao/g)
 ## Screenshots
 
-![image](https://user-images.githubusercontent.com/75521101/233822292-f692869a-015c-48b1-a3bb-38a2199159ed.png)
+![image](./how-g-works.gif)
 
 ## usage
 

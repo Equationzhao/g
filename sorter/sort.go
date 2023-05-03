@@ -4,6 +4,8 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/Equationzhao/g/osbased"
 )
 
 func ByNameDescend(a, b os.FileInfo) bool {
@@ -232,4 +234,32 @@ func compareFileInfo(a, b os.FileInfo) bool {
 		// neither are links, compare name
 		return a.Name() < b.Name()
 	}
+}
+
+func byGroupName(a, b os.FileInfo, Ascend bool) bool {
+	if Ascend {
+		return strings.ToLower(osbased.Group(a)) < strings.ToLower(osbased.Group(b))
+	}
+	return strings.ToLower(osbased.Group(a)) > strings.ToLower(osbased.Group(b))
+}
+
+func byUserName(a, b os.FileInfo, Ascend bool) bool {
+	if Ascend {
+		return strings.ToLower(osbased.Owner(a)) < strings.ToLower(osbased.Owner(b))
+	}
+	return strings.ToLower(osbased.Owner(a)) > strings.ToLower(osbased.Owner(b))
+}
+
+func byGroupCaseSensitiveName(a, b os.FileInfo, Ascend bool) bool {
+	if Ascend {
+		return osbased.Group(a) < osbased.Group(b)
+	}
+	return osbased.Group(a) > osbased.Group(b)
+}
+
+func byUserCaseSensitiveName(a, b os.FileInfo, Ascend bool) bool {
+	if Ascend {
+		return osbased.Owner(a) < osbased.Owner(b)
+	}
+	return osbased.Owner(a) > osbased.Owner(b)
 }

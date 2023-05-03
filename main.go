@@ -32,6 +32,7 @@ var (
 	contentFilter = filter.NewContentFilter()
 	compiledAt    = ""
 	sort          = sorter.NewSorter()
+	timeType      = "mod"
 )
 
 var version = versionchecker.Version{
@@ -52,7 +53,39 @@ func init() {
 type Err4Exit struct{}
 
 func (c Err4Exit) Error() string {
-	panic("should not call this")
+	panic("it's an error defined to exit app, should not call this")
+}
+
+func initHelpTemp() {
+	cli.AppHelpTemplate = fmt.Sprintf(`%s
+REPO:
+	https://github.com/Equationzhao/g
+
+%s compiled at %s
+`, cli.AppHelpTemplate, version.Info(), compiledAt)
+}
+
+func _VersionHelpFlags() {
+	cli.VersionPrinter = func(cCtx *cli.Context) {
+		fmt.Println(cCtx.App.Name, "-", cCtx.App.Usage)
+		fmt.Println(version.Info())
+	}
+
+	cli.VersionFlag = &cli.BoolFlag{
+		Name:               "version",
+		Aliases:            []string{"v"},
+		Usage:              "print the version",
+		DisableDefaultText: true,
+		Category:           "software info",
+	}
+
+	cli.HelpFlag = &cli.BoolFlag{
+		Name:               "help",
+		Aliases:            []string{"h"},
+		Usage:              "show help",
+		DisableDefaultText: true,
+		Category:           "software info",
+	}
 }
 
 func main() {
@@ -79,16 +112,54 @@ There is NO WARRANTY, to the extent permitted by law.`,
 				Email: "equationzhao@foxmail.com",
 			},
 		},
-		SliceFlagSeparator:   ",",
-		HideHelpCommand:      true,
-		EnableBashCompletion: true,
-		Writer:               os.Stdout,
+		SliceFlagSeparator: ",",
+		HideHelpCommand:    true,
+		Writer:             os.Stdout,
 		OnUsageError: func(cCtx *cli.Context, err error, isSubcommand bool) error {
 			_, _ = fmt.Fprint(cCtx.App.Writer, makeErrorStr(fmt.Sprintf("%s %s: %s %s\n", theme.Error, cCtx.App.Name, err, theme.Reset)))
 			return nil
 		},
 
 		Flags: []cli.Flag{
+			&cli.StringFlag{
+				Name:        "time-type",
+				Aliases:     []string{"tt"},
+				Usage:       "time type, mod, create, access",
+				EnvVars:     []string{"TIME_TYPE"},
+				DefaultText: "mod",
+				Action: func(context *cli.Context, s string) error {
+					if s == "mod" || s == "create" || s == "access" {
+						timeType = s
+						return nil
+					} else {
+						returnCode = 1
+						return errors.New("invalid time type")
+					}
+				},
+			},
+			&cli.BoolFlag{
+				Name:               "uid",
+				Usage:              "show uid instead of username [sid in windows]",
+				DisableDefaultText: true,
+				Action: func(context *cli.Context, b bool) error {
+					if b {
+						filter.Uid = true
+					}
+					return nil
+				},
+			},
+			&cli.BoolFlag{
+				Name:               "gid",
+				Usage:              "show gid instead of groupname [sid in windows]",
+				DisableDefaultText: true,
+				Action: func(context *cli.Context, b bool) error {
+					if b {
+						filter.Gid = true
+					}
+					return nil
+				},
+			},
+
 			&cli.BoolFlag{
 				Name:     "check-new-version",
 				Usage:    "check if there's new release",
@@ -103,7 +174,7 @@ There is NO WARRANTY, to the extent permitted by law.`,
 								return
 							}
 							if hasNew {
-								fmt.Println("new version", latestVersion.Info(), "is available")
+								_, _ = fmt.Fprintln(os.Stderr, "new version", latestVersion.Info(), "is available")
 								done <- struct{}{}
 							} else {
 								done <- struct{}{}
@@ -152,7 +223,7 @@ There is NO WARRANTY, to the extent permitted by law.`,
 					case "default":
 						timeFormat = "02.Jan'06 15:04"
 					default:
-						returnCode = 2
+						returnCode = 1
 						return errors.New("invalid time-style")
 					}
 					return nil
@@ -243,7 +314,7 @@ There is NO WARRANTY, to the extent permitted by law.`,
 				DisableDefaultText: true,
 				Action: func(context *cli.Context, b bool) error {
 					if b {
-						contentFunc = append(contentFunc, filter.EnableTime(timeFormat, r))
+						contentFunc = append(contentFunc, filter.EnableTime(timeFormat, r, timeType))
 						if _, ok := p.(*printer.Byline); !ok {
 							p = printer.NewByline()
 						}
@@ -389,7 +460,7 @@ There is NO WARRANTY, to the extent permitted by law.`,
 							p = printer.NewCommaPrint()
 						}
 					case "long", "l", "verbose":
-						contentFunc = append(contentFunc, filter.EnableFileMode(r), sizeEnabler.EnableSize(filter.Auto, r), contentFilter.EnableOwner(r), contentFilter.EnableGroup(r), filter.EnableTime(timeFormat, r))
+						contentFunc = append(contentFunc, filter.EnableFileMode(r), sizeEnabler.EnableSize(filter.Auto, r), contentFilter.EnableOwner(r), contentFilter.EnableGroup(r), filter.EnableTime(timeFormat, r, timeType))
 						if _, ok := p.(*printer.Byline); !ok {
 							p = printer.NewByline()
 						}
@@ -449,7 +520,7 @@ There is NO WARRANTY, to the extent permitted by law.`,
 				Usage:              "show human readable size",
 				Action: func(context *cli.Context, b bool) error {
 					if b {
-						contentFunc = append(contentFunc, filter.EnableFileMode(r), sizeEnabler.EnableSize(filter.Auto, r), contentFilter.EnableOwner(r), contentFilter.EnableGroup(r), filter.EnableTime(timeFormat, r))
+						contentFunc = append(contentFunc, filter.EnableFileMode(r), sizeEnabler.EnableSize(filter.Auto, r), contentFilter.EnableOwner(r), contentFilter.EnableGroup(r), filter.EnableTime(timeFormat, r, timeType))
 						if _, ok := p.(*printer.Byline); !ok {
 							p = printer.NewByline()
 						}
@@ -577,7 +648,7 @@ There is NO WARRANTY, to the extent permitted by law.`,
 							}
 						}
 						typeFunc = newFF
-						contentFunc = append(contentFunc, filter.EnableFileMode(r), sizeEnabler.EnableSize(filter.Auto, r), contentFilter.EnableGroup(r), filter.EnableTime(timeFormat, r))
+						contentFunc = append(contentFunc, filter.EnableFileMode(r), sizeEnabler.EnableSize(filter.Auto, r), contentFilter.EnableGroup(r), filter.EnableTime(timeFormat, r, timeType))
 						if _, ok := p.(*printer.Byline); !ok {
 							p = printer.NewByline()
 						}
@@ -600,7 +671,7 @@ There is NO WARRANTY, to the extent permitted by law.`,
 							}
 						}
 						typeFunc = newFF
-						contentFunc = append(contentFunc, filter.EnableFileMode(r), sizeEnabler.EnableSize(filter.Auto, r), contentFilter.EnableOwner(r), filter.EnableTime(timeFormat, r))
+						contentFunc = append(contentFunc, filter.EnableFileMode(r), sizeEnabler.EnableSize(filter.Auto, r), contentFilter.EnableOwner(r), filter.EnableTime(timeFormat, r, timeType))
 						if _, ok := p.(*printer.Byline); !ok {
 							p = printer.NewByline()
 						}
@@ -636,7 +707,7 @@ There is NO WARRANTY, to the extent permitted by law.`,
 						if !context.Bool("G") {
 							contentFunc = append(contentFunc, contentFilter.EnableGroup(r))
 						}
-						contentFunc = append(contentFunc, filter.EnableTime(timeFormat, r))
+						contentFunc = append(contentFunc, filter.EnableTime(timeFormat, r, timeType))
 
 						if _, ok := p.(*printer.Byline); !ok {
 							p = printer.NewByline()
@@ -842,7 +913,7 @@ There is NO WARRANTY, to the extent permitted by law.`,
 					if path[i] != "." {
 						stat, err := os.Stat(path[i])
 						if err != nil {
-							fmt.Println(makeErrorStr(err.Error()))
+							_, _ = fmt.Fprintln(os.Stderr, makeErrorStr(err.Error()))
 							seriousErr = true
 							continue
 						}
@@ -854,7 +925,7 @@ There is NO WARRANTY, to the extent permitted by law.`,
 							} else {
 								_ = os.Chdir(path[i])
 								if err != nil {
-									fmt.Println(makeErrorStr(err.Error()))
+									_, _ = fmt.Fprintln(os.Stderr, makeErrorStr(err.Error()))
 									seriousErr = true
 									continue
 								}
@@ -881,12 +952,12 @@ There is NO WARRANTY, to the extent permitted by law.`,
 						statCurrent, err := os.Stat(".")
 						if err != nil {
 							seriousErr = true
-							fmt.Println(makeErrorStr(err.Error()))
+							_, _ = fmt.Fprintln(os.Stderr, makeErrorStr(err.Error()))
 						}
 						statParent, err := os.Stat("..")
 						if err != nil {
 							minorErr = true
-							fmt.Println(makeErrorStr(err.Error()))
+							_, _ = fmt.Fprintln(os.Stderr, makeErrorStr(err.Error()))
 						}
 						infos = append(infos, statCurrent, statParent)
 					}
@@ -895,7 +966,7 @@ There is NO WARRANTY, to the extent permitted by law.`,
 						info, err := v.Info()
 						if err != nil {
 							minorErr = true
-							fmt.Println(makeErrorStr(err.Error()))
+							_, _ = fmt.Fprintln(os.Stderr, makeErrorStr(err.Error()))
 						} else {
 							infos = append(infos, info)
 						}
@@ -941,33 +1012,9 @@ There is NO WARRANTY, to the extent permitted by law.`,
 		},
 	}
 
-	cli.VersionPrinter = func(cCtx *cli.Context) {
-		fmt.Println(cCtx.App.Name, "-", cCtx.App.Usage)
-		fmt.Println(version.Info())
-	}
+	initHelpTemp()
 
-	cli.VersionFlag = &cli.BoolFlag{
-		Name:               "version",
-		Aliases:            []string{"v"},
-		Usage:              "print the version",
-		DisableDefaultText: true,
-		Category:           "software info",
-	}
-
-	cli.HelpFlag = &cli.BoolFlag{
-		Name:               "help",
-		Aliases:            []string{"h"},
-		Usage:              "show help",
-		DisableDefaultText: true,
-		Category:           "software info",
-	}
-
-	cli.AppHelpTemplate = fmt.Sprintf(`%s
-REPO:
-	https://github.com/Equationzhao/g
-
-%s compiled at %s
-`, cli.AppHelpTemplate, version.Info(), compiledAt)
+	_VersionHelpFlags()
 
 	if doc {
 		md, _ := os.Create("g.md")
@@ -983,12 +1030,12 @@ REPO:
 				if returnCode == 0 {
 					returnCode = 1
 				}
-				fmt.Printf("%s g: %s %s\n", theme.Error, err.Error(), theme.Reset)
+				_, _ = fmt.Fprintf(os.Stderr, "%s %s %s", theme.Error, err.Error(), theme.Reset)
 			}
 		}
 	}
 }
 
 func makeErrorStr(msg string) string {
-	return fmt.Sprintf("%s g: %s %s", theme.Error, msg, theme.Reset)
+	return fmt.Sprintf("%s g: %s %s\n", theme.Error, msg, theme.Reset)
 }

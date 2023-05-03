@@ -7,9 +7,11 @@ import (
 	"strings"
 	"sync"
 	"sync/atomic"
+	"time"
 
 	"github.com/Equationzhao/g/cached"
 	"github.com/Equationzhao/g/git"
+	"github.com/Equationzhao/g/osbased"
 	"github.com/Equationzhao/g/render"
 	"github.com/valyala/bytebufferpool"
 )
@@ -194,9 +196,19 @@ func (s *Size) EnableSize(size SizeUnit, renderer *render.Renderer) ContentOptio
 	}
 }
 
-func EnableTime(format string, renderer *render.Renderer) ContentOption {
+func EnableTime(format string, renderer *render.Renderer, mod string) ContentOption {
 	return func(info os.FileInfo) string {
-		return renderer.Time(info.ModTime().Format(format))
+		// get mod time/ create time/ access time
+		var t time.Time
+		switch mod {
+		case "mod":
+			t = osbased.ModTime(info)
+		case "create":
+			t = osbased.CreateTime(info)
+		case "access":
+			t = osbased.AccessTime(info)
+		}
+		return renderer.Time(t.Format(format))
 	}
 }
 
@@ -423,6 +435,78 @@ func (n *Name) GitByName(name string, status string, style gitStyle) string {
 		}
 	}
 	return ""
+}
+
+var (
+	Uid = false
+	Gid = false
+)
+
+func (cf *ContentFilter) EnableOwner(renderer *render.Renderer) ContentOption {
+	m := sync.RWMutex{}
+	longestOwner := 0
+	return func(info os.FileInfo) string {
+		wait := func(res string) string {
+			cf.wgOwner.Wait()
+			return renderer.Owner(fillBlank(res, longestOwner))
+		}
+
+		done := func(name string) {
+			defer cf.wgOwner.Done()
+			m.RLock()
+			if len(name) > longestOwner {
+				m.RUnlock()
+				m.Lock()
+				if len(name) > longestOwner {
+					longestOwner = len(name)
+				}
+				m.Unlock()
+			} else {
+				m.RUnlock()
+			}
+		}
+		name := ""
+		if Uid {
+			name = osbased.OwnerID(info)
+		} else {
+			name = osbased.Owner(info)
+		}
+		done(name)
+		return wait(name)
+	}
+}
+
+func (cf *ContentFilter) EnableGroup(renderer *render.Renderer) ContentOption {
+	m := sync.RWMutex{}
+	longestGroup := 0
+	return func(info os.FileInfo) string {
+		wait := func(name string) string {
+			cf.wgGroup.Wait()
+			return renderer.Group(fillBlank(name, longestGroup))
+		}
+		done := func(name string) {
+			defer cf.wgGroup.Done()
+			m.RLock()
+			if len(name) > longestGroup {
+				m.RUnlock()
+				m.Lock()
+				if len(name) > longestGroup {
+					longestGroup = len(name)
+				}
+				m.Unlock()
+			} else {
+				m.RUnlock()
+			}
+		}
+		name := ""
+		if Gid {
+			name = osbased.GroupID(info)
+		} else {
+			name = osbased.Group(info)
+		}
+		done(name)
+		return wait(name)
+	}
 }
 
 func NewContentFilter(options ...ContentOption) *ContentFilter {
