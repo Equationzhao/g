@@ -519,7 +519,7 @@ There is NO WARRANTY, to the extent permitted by law.`,
 			},
 			&cli.BoolFlag{
 				Name:               "show-only-dir",
-				Aliases:            []string{"sd", "dir"},
+				Aliases:            []string{"sd", "dir", "only-dir"},
 				DisableDefaultText: true,
 				Usage:              "show directory only",
 				Action: func(context *cli.Context, b bool) error {
@@ -657,35 +657,51 @@ There is NO WARRANTY, to the extent permitted by law.`,
 			&cli.StringSliceFlag{
 				Name:    "sort",
 				Aliases: []string{"SORT_FIELD"},
-				Usage:   "sort by field, default: ascending",
+				Usage:   "sort by field, default: ascending and case insensitive, field beginning with Uppercase is case sensitive, available fields: name,size,time,owner,group,extension. following `-descend` to sort descending",
 				Action: func(context *cli.Context, slice []string) error {
 					sorter.WithSize(len(slice))(sort)
 					for _, s := range slice {
 						switch s {
-						case "name-descend": // sort by name
+						case "name-descend":
 							sort.AddOption(sorter.ByNameDescend)
-						case "name": // sort by name
+						case "name":
 							sort.AddOption(sorter.ByNameAscend)
-						case "size-descend": // sort by size
+						case "Name":
+							sort.AddOption(sorter.ByNameCaseSensitiveAscend)
+						case "Name-descend":
+							sort.AddOption(sorter.ByNameCaseSensitiveDescend)
+						case "size-descend":
 							sort.AddOption(sorter.BySizeDescend)
-						case "size": // sort by size
+						case "size":
 							sort.AddOption(sorter.BySizeAscend)
-						case "time-descend": // sort by time
+						case "time-descend":
 							sort.AddOption(sorter.ByTimeDescend)
-						case "time": // sort by time
+						case "time":
 							sort.AddOption(sorter.ByTimeAscend)
-						case "extension-descend": // sort by extension
+						case "extension-descend", "ext-descend":
 							sort.AddOption(sorter.ByExtensionDescend)
-						case "extension": // sort by extension
+						case "extension", "ext":
 							sort.AddOption(sorter.ByExtensionAscend)
-						case "group-descend": // sort by groupname
+						case "Extension-descend", "Ext-descend":
+							sort.AddOption(sorter.ByExtensionCaseSensitiveDescend)
+						case "Extension", "Ext":
+							sort.AddOption(sorter.ByExtensionCaseSensitiveAscend)
+						case "group-descend":
 							sort.AddOption(sorter.ByGroupDescend)
-						case "group": // sort by groupname
+						case "group":
 							sort.AddOption(sorter.ByGroupAscend)
-						case "owner-descend": // sort by owner
+						case "Group-descend":
+							sort.AddOption(sorter.ByGroupCaseSensitiveDescend)
+						case "Group":
+							sort.AddOption(sorter.ByGroupCaseSensitiveAscend)
+						case "owner-descend":
 							sort.AddOption(sorter.ByOwnerDescend)
-						case "owner": // sort by owner
+						case "owner":
 							sort.AddOption(sorter.ByOwnerAscend)
+						case "Owner-descend":
+							sort.AddOption(sorter.ByOwnerCaseSensitiveDescend)
+						case "Owner":
+							sort.AddOption(sorter.ByOwnerCaseSensitiveAscend)
 						default:
 							return fmt.Errorf("unknown sort field: %s", s)
 						}
@@ -702,6 +718,21 @@ There is NO WARRANTY, to the extent permitted by law.`,
 				Action: func(context *cli.Context, b bool) error {
 					if b {
 						sort.Reverse()
+					}
+					return nil
+				},
+				Category: "SORTING",
+			},
+			&cli.BoolFlag{
+				Name:               "dir-first",
+				Aliases:            []string{"df"},
+				Usage:              "List directories before other files",
+				DisableDefaultText: true,
+				Action: func(context *cli.Context, b bool) error {
+					if b {
+						sort.DirFirst()
+					} else {
+						sort.UnsetDirFirst()
 					}
 					return nil
 				},

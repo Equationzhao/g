@@ -18,6 +18,7 @@ g
 [--byline|--bl|-1|--oneline|--single-column]
 [--check-new-version]
 [--depth]=[value]
+[--dir-first|--df]
 [--file-type|--ft]
 [--format]=[value]
 [--full-time]
@@ -30,13 +31,15 @@ g
 [--show-icon|--si|--icons]
 [--show-no-dir|--nd|--nodir]
 [--show-no-ext|--sne|--noext]=[value]
-[--show-only-dir|--sd|--dir]
+[--show-only-dir|--sd|--dir|--only-dir]
 [--show-only-ext|--se|--ext]=[value]
 [--show-owner|--so|--author]
 [--show-perm|--sp]
 [--show-size|--ss]
 [--show-time|--st]
 [--show-total-size|--ts]
+[--sort-reverse|--sr]
+[--sort|--SORT_FIELD]=[value]
 [--theme|--th]=[value]
 [--time-style]=[value]
 [--tree|-t]
@@ -82,6 +85,9 @@ g [options] [path]
 \fB--depth\fP="": tree limit depth, negative -> infinity (default: infinity)
 
 .PP
+\fB--dir-first, --df\fP: List directories before other files
+
+.PP
 \fB--file-type, --ft\fP: likewise, except do not append '*'
 
 .PP
@@ -91,13 +97,13 @@ g [options] [path]
 \fB--full-time\fP: like -all/l --time-style=full-iso
 
 .PP
-\fB--git-status, --gs\fP: show git status: ? untracked, + added, ! deleted, ~ modified, | renamed, = copied, $ ignored
+\fB--git-status, --gs\fP: show git status: ? untracked, + added, ! deleted, ~ modified, | renamed, = copied, $ ignored [if git is installed]
 
 .PP
 \fB--git-status-style, --gss\fP="": git status style: colored-symbol: {? untracked, + added, - deleted, ~ modified, | renamed, = copied, ! ignored} colored-dot
 
 .PP
-\fB--hide-git-ignore, --gi, --hgi\fP: hide git ignored file/dir
+\fB--hide-git-ignore, --gi, --hgi\fP: hide git ignored file/dir [if git is installed]
 
 .PP
 \fB--lh, --human-readable\fP: show human readable size
@@ -118,7 +124,7 @@ g [options] [path]
 \fB--show-no-ext, --sne, --noext\fP="": show file which doesn't have target ext
 
 .PP
-\fB--show-only-dir, --sd, --dir\fP: show directory only
+\fB--show-only-dir, --sd, --dir, --only-dir\fP: show directory only
 
 .PP
 \fB--show-only-ext, --se, --ext\fP="": show file which has target ext, eg: --show-only-ext=go,java
@@ -137,6 +143,12 @@ g [options] [path]
 
 .PP
 \fB--show-total-size, --ts\fP: show total size
+
+.PP
+\fB--sort, --SORT_FIELD\fP="": sort by field, default: ascending and case insensitive, field beginning with Uppercase is case sensitive, available fields: name,size,time,owner,group,extension. following \fB\fC-descend\fR to sort descending
+
+.PP
+\fB--sort-reverse, --sr\fP: reverse the order of the sort
 
 .PP
 \fB--theme, --th\fP="": apply theme \fB\fCpath/to/theme\fR

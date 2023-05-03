@@ -11,6 +11,7 @@ g
 [--byline|--bl|-1|--oneline|--single-column]
 [--check-new-version]
 [--depth]=[value]
+[--dir-first|--df]
 [--file-type|--ft]
 [--format]=[value]
 [--full-time]
@@ -23,13 +24,15 @@ g
 [--show-icon|--si|--icons]
 [--show-no-dir|--nd|--nodir]
 [--show-no-ext|--sne|--noext]=[value]
-[--show-only-dir|--sd|--dir]
+[--show-only-dir|--sd|--dir|--only-dir]
 [--show-only-ext|--se|--ext]=[value]
 [--show-owner|--so|--author]
 [--show-perm|--sp]
 [--show-size|--ss]
 [--show-time|--st]
 [--show-total-size|--ts]
+[--sort-reverse|--sr]
+[--sort|--SORT_FIELD]=[value]
 [--theme|--th]=[value]
 [--time-style]=[value]
 [--tree|-t]
@@ -62,17 +65,19 @@ g [options] [path]
 
 **--depth**="": tree limit depth, negative -> infinity (default: infinity)
 
+**--dir-first, --df**: List directories before other files
+
 **--file-type, --ft**: likewise, except do not append '*'
 
 **--format**="": across  -x,  commas  -m, horizontal -x, long -l, single-column -1, verbose -l, vertical -C (default: C)
 
 **--full-time**: like -all/l --time-style=full-iso
 
-**--git-status, --gs**: show git status: ? untracked, + added, ! deleted, ~ modified, | renamed, = copied, $ ignored
+**--git-status, --gs**: show git status: ? untracked, + added, ! deleted, ~ modified, | renamed, = copied, $ ignored [if git is installed]
 
 **--git-status-style, --gss**="": git status style: colored-symbol: {? untracked, + added, - deleted, ~ modified, | renamed, = copied, ! ignored} colored-dot
 
-**--hide-git-ignore, --gi, --hgi**: hide git ignored file/dir
+**--hide-git-ignore, --gi, --hgi**: hide git ignored file/dir [if git is installed]
 
 **--lh, --human-readable**: show human readable size
 
@@ -86,7 +91,7 @@ g [options] [path]
 
 **--show-no-ext, --sne, --noext**="": show file which doesn't have target ext
 
-**--show-only-dir, --sd, --dir**: show directory only
+**--show-only-dir, --sd, --dir, --only-dir**: show directory only
 
 **--show-only-ext, --se, --ext**="": show file which has target ext, eg: --show-only-ext=go,java
 
@@ -99,6 +104,10 @@ g [options] [path]
 **--show-time, --st**: show time
 
 **--show-total-size, --ts**: show total size
+
+**--sort, --SORT_FIELD**="": sort by field, default: ascending and case insensitive, field beginning with Uppercase is case sensitive, available fields: name,size,time,owner,group,extension. following `-descend` to sort descending
+
+**--sort-reverse, --sr**: reverse the order of the sort
 
 **--theme, --th**="": apply theme `path/to/theme`
 
