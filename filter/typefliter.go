@@ -2,10 +2,10 @@ package filter
 
 import (
 	"os"
-	"regexp"
 	"strings"
 
 	"github.com/Equationzhao/g/git"
+	"github.com/gobwas/glob"
 )
 
 const (
@@ -25,7 +25,7 @@ func NewTypeFilter(tfs ...*TypeFunc) *TypeFilter {
 	return &TypeFilter{tfs: tfs}
 }
 
-func (tf *TypeFilter) Filter(e []os.FileInfo) (res []os.FileInfo) {
+func (tf *TypeFilter) Filter(e ...os.FileInfo) (res []os.FileInfo) {
 	for _, entry := range e {
 		ok := true
 		for _, funcPtr := range tf.tfs {
@@ -39,10 +39,6 @@ func (tf *TypeFilter) Filter(e []os.FileInfo) (res []os.FileInfo) {
 		}
 	}
 	return res
-}
-
-func alwaysTrue(e os.FileInfo) bool {
-	return keep
 }
 
 // TypeFunc return true -> Keep
@@ -66,8 +62,8 @@ var DirOnly = func(e os.FileInfo) bool {
 //		b.c c.rs dir
 var RemoveByExt = func(ext ...string) TypeFunc {
 	return func(e os.FileInfo) bool {
-		for _, exti := range ext {
-			if strings.HasSuffix(e.Name(), "."+exti) {
+		for _, extI := range ext {
+			if strings.HasSuffix(e.Name(), "."+extI) {
 				return remove
 			}
 		}
@@ -77,8 +73,8 @@ var RemoveByExt = func(ext ...string) TypeFunc {
 
 var ExtOnly = func(ext ...string) TypeFunc {
 	return func(e os.FileInfo) bool {
-		for _, exti := range ext {
-			if strings.HasSuffix(e.Name(), "."+exti) {
+		for _, extI := range ext {
+			if strings.HasSuffix(e.Name(), "."+extI) {
 				return keep
 			}
 		}
@@ -87,26 +83,50 @@ var ExtOnly = func(ext ...string) TypeFunc {
 	}
 }
 
-var RemoveRegexp = func(regexpression string) TypeFunc {
-	compiled, err := regexp.Compile(regexpression)
-	if err != nil {
-		return alwaysTrue
+// RemoveGlob if all pattern complied successfully, return a func and nil error,
+// if match any one, the fn will return false, else return false
+// if error occurred, return nil func and error
+var RemoveGlob = func(globPattern ...string) (TypeFunc, error) {
+	compiled := make([]glob.Glob, 0, len(globPattern))
+	for _, v := range globPattern {
+		compile, err := glob.Compile(v)
+		if err != nil {
+			return nil, err
+		}
+		compiled = append(compiled, compile)
 	}
 
 	return func(e os.FileInfo) bool {
-		return !compiled.Match([]byte(regexpression))
-	}
+		for _, r := range compiled {
+			if r.Match(e.Name()) {
+				return remove
+			}
+		}
+		return keep
+	}, nil
 }
 
-var RegexpOnly = func(regexpression string) TypeFunc {
-	compiled, err := regexp.Compile(regexpression)
-	if err != nil {
-		return alwaysTrue
+// GlobOnly if all pattern complied successfully, return a func and nil error,
+// if match any one, the fn will return true, else return false
+// if error occurred, return nil func and error
+var GlobOnly = func(globPattern ...string) (TypeFunc, error) {
+	compiled := make([]glob.Glob, 0, len(globPattern))
+	for _, v := range globPattern {
+		compile, err := glob.Compile(v)
+		if err != nil {
+			return nil, err
+		}
+		compiled = append(compiled, compile)
 	}
 
 	return func(e os.FileInfo) bool {
-		return compiled.Match([]byte(regexpression))
-	}
+		for _, r := range compiled {
+			if r.Match(e.Name()) {
+				return keep
+			}
+		}
+		return remove
+	}, nil
 }
 
 var RemoveHidden = func(e os.FileInfo) bool {

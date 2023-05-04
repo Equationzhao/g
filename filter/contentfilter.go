@@ -1,6 +1,13 @@
 package filter
 
 import (
+	"crypto/md5"
+	"crypto/sha1"
+	"crypto/sha256"
+	"crypto/sha512"
+	"fmt"
+	"hash"
+	"io"
 	"os"
 	"sort"
 	"strconv"
@@ -13,22 +20,27 @@ import (
 	"github.com/Equationzhao/g/git"
 	"github.com/Equationzhao/g/osbased"
 	"github.com/Equationzhao/g/render"
+	"github.com/Equationzhao/tsmap"
 	"github.com/valyala/bytebufferpool"
 )
 
 // fileMode size owner group time name
 
 type ContentFilter struct {
-	options          []ContentOption
-	wgOwner, wgGroup *sync.WaitGroup
-	sortFunc         func(a, b os.FileInfo) bool
+	options                 []ContentOption
+	wgOwner, wgGroup, wgSum *sync.WaitGroup
+	sortFunc                func(a, b os.FileInfo) bool
+}
+
+func (cf *ContentFilter) SortFunc() func(a, b os.FileInfo) bool {
+	return cf.sortFunc
 }
 
 func (cf *ContentFilter) SetSortFunc(sortFunc func(a, b os.FileInfo) bool) {
 	cf.sortFunc = sortFunc
 }
 
-func (cf *ContentFilter) AppendTo(options ...ContentOption) {
+func (cf *ContentFilter) AppendToOptions(options ...ContentOption) {
 	cf.options = append(cf.options, options...)
 }
 
@@ -48,7 +60,7 @@ func EnableFileMode(renderer *render.Renderer) ContentOption {
 type SizeUnit int
 
 const (
-	Bit SizeUnit = iota
+	Bit SizeUnit = iota + 1
 	B
 	KB
 	MB
@@ -445,26 +457,26 @@ var (
 func (cf *ContentFilter) EnableOwner(renderer *render.Renderer) ContentOption {
 	m := sync.RWMutex{}
 	longestOwner := 0
-	return func(info os.FileInfo) string {
-		wait := func(res string) string {
-			cf.wgOwner.Wait()
-			return renderer.Owner(fillBlank(res, longestOwner))
-		}
+	wait := func(res string) string {
+		cf.wgOwner.Wait()
+		return renderer.Owner(fillBlank(res, longestOwner))
+	}
 
-		done := func(name string) {
-			defer cf.wgOwner.Done()
-			m.RLock()
+	done := func(name string) {
+		defer cf.wgOwner.Done()
+		m.RLock()
+		if len(name) > longestOwner {
+			m.RUnlock()
+			m.Lock()
 			if len(name) > longestOwner {
-				m.RUnlock()
-				m.Lock()
-				if len(name) > longestOwner {
-					longestOwner = len(name)
-				}
-				m.Unlock()
-			} else {
-				m.RUnlock()
+				longestOwner = len(name)
 			}
+			m.Unlock()
+		} else {
+			m.RUnlock()
 		}
+	}
+	return func(info os.FileInfo) string {
 		name := ""
 		if Uid {
 			name = osbased.OwnerID(info)
@@ -510,7 +522,13 @@ func (cf *ContentFilter) EnableGroup(renderer *render.Renderer) ContentOption {
 }
 
 func NewContentFilter(options ...ContentOption) *ContentFilter {
-	return &ContentFilter{options: options, wgGroup: new(sync.WaitGroup), wgOwner: new(sync.WaitGroup), sortFunc: nil}
+	return &ContentFilter{
+		options:  options,
+		wgGroup:  new(sync.WaitGroup),
+		wgOwner:  new(sync.WaitGroup),
+		wgSum:    new(sync.WaitGroup),
+		sortFunc: nil,
+	}
 }
 
 type ContentFunc func(entry os.FileInfo) bool
@@ -559,4 +577,124 @@ func (cf *ContentFilter) GetStringSlice(e []os.FileInfo) []string {
 	}
 
 	return res
+}
+
+func (cf *ContentFilter) GetExtraAndNameStringSlice(e ...os.FileInfo) []tsmap.Pair[string, string] {
+	resBuffers := make([]*bytebufferpool.ByteBuffer, 2*len(e))
+
+	for i := range resBuffers {
+		resBuffers[i] = bytebufferpool.Get()
+	}
+
+	defer func() {
+		for i := range resBuffers {
+			bytebufferpool.Put(resBuffers[i])
+		}
+	}()
+
+	sort.Slice(e, func(i, j int) bool {
+		if cf.sortFunc != nil {
+			return cf.sortFunc(e[i], e[j])
+		} else {
+			return true
+		}
+	})
+
+	wg := sync.WaitGroup{}
+	wg.Add(len(e))
+	cf.wgOwner.Add(len(e))
+	cf.wgGroup.Add(len(e))
+	cf.wgSum.Add(len(e))
+	for i, entry := range e {
+		go func(entry os.FileInfo, i int) {
+			options := cf.options[:len(cf.options)-1]
+			for j := range options {
+				_, _ = resBuffers[i].WriteString(options[j](entry))
+				_ = resBuffers[i].WriteByte(' ')
+			}
+			// the last one should not follow by space
+			_, _ = resBuffers[i+len(e)].WriteString(cf.options[len(cf.options)-1](entry))
+			wg.Done()
+		}(entry, i)
+	}
+	res := make([]tsmap.Pair[string, string], 0, len(e))
+	wg.Wait()
+
+	/*
+		buffers layout:
+			extra extra extra ... |half|  name name name ...
+	*/
+	bufLen := len(resBuffers)
+	for i := 0; i < bufLen/2; i++ {
+		res = append(res, tsmap.MakePair(resBuffers[i].String(), resBuffers[i+bufLen/2].String()))
+	}
+
+	return res
+}
+
+type SumType int
+
+const (
+	SumTypeMd5 SumType = iota + 1
+	SumTypeSha1
+	SumTypeSha256
+	SumTypeSha512
+)
+
+func (cf *ContentFilter) EnableSum(sumTypes ...SumType) ContentOption {
+	length := 0
+	for _, t := range sumTypes {
+		switch t {
+		case SumTypeMd5:
+			length += 32
+		case SumTypeSha1:
+			length += 40
+		case SumTypeSha256:
+			length += 64
+		case SumTypeSha512:
+			length += 128
+		}
+	}
+	length += len(sumTypes) - 1
+
+	return func(info os.FileInfo) string {
+		if info.IsDir() {
+			return fillBlank("", length)
+		}
+		pwd, _ := os.Getwd()
+		_ = pwd
+
+		file, err := os.Open(info.Name())
+		if err != nil {
+			return fillBlank("", length)
+		}
+		defer file.Close()
+		hashes := make([]hash.Hash, 0, len(sumTypes))
+		writers := make([]io.Writer, 0, len(sumTypes))
+		for _, t := range sumTypes {
+			var hashed hash.Hash
+			switch t {
+			case SumTypeMd5:
+				hashed = md5.New()
+			case SumTypeSha1:
+				hashed = sha1.New()
+			case SumTypeSha256:
+				hashed = sha256.New()
+			case SumTypeSha512:
+				hashed = sha512.New()
+			}
+			writers = append(writers, hashed)
+			hashes = append(hashes, hashed)
+		}
+		multiWriter := io.MultiWriter(writers...)
+		if _, err := io.Copy(multiWriter, file); err != nil {
+			return fillBlank("", length)
+		}
+		sums := make([]string, 0, len(hashes))
+		for _, h := range hashes {
+			sums = append(sums, fmt.Sprintf("%x", h.Sum(nil)))
+		}
+		sumsStr := strings.Join(sums, " ")
+		return fillBlank(sumsStr, length)
+	}
 }

@@ -17,8 +17,11 @@ import (
 	"github.com/Equationzhao/g/theme"
 	"github.com/Equationzhao/g/timeparse"
 	"github.com/Equationzhao/g/tree"
-	"github.com/Equationzhao/versionchecker"
 	"github.com/urfave/cli/v2"
+	versionInfo "go.szostok.io/version"
+	vp "go.szostok.io/version/printer"
+	"go.szostok.io/version/style"
+	"go.szostok.io/version/upgrade"
 )
 
 var (
@@ -35,13 +38,7 @@ var (
 	timeType      = "mod"
 )
 
-var version = versionchecker.Version{
-	Major: 0,
-	Minor: 4,
-	Patch: 2,
-	Owner: "Equationzhao",
-	Repo:  "g",
-}
+var version = "0.4.0"
 
 func init() {
 	typeFunc = append(typeFunc, &filter.RemoveHidden)
@@ -62,13 +59,31 @@ REPO:
 	https://github.com/Equationzhao/g
 
 %s compiled at %s
-`, cli.AppHelpTemplate, version.Info(), compiledAt)
+`, cli.AppHelpTemplate, versionInfo.Get().Version, compiledAt)
 }
 
 func _VersionHelpFlags() {
+	repos := "https://github.com/Equationzhao/g"
+	info := versionInfo.Get()
+	info.Version = version
+	info.BuildDate = compiledAt
+	info.ExtraFields = repos
+	format := style.Formatting{
+		Header: style.Header{
+			Prefix: "💡 ",
+			FormatPrimitive: style.FormatPrimitive{
+				Color:   "Green",
+				Options: []string{"Bold"},
+			},
+		},
+	}
+
+	c := vp.New(vp.WithPrettyFormatting(&format))
 	cli.VersionPrinter = func(cCtx *cli.Context) {
-		fmt.Println(cCtx.App.Name, "-", cCtx.App.Usage)
-		fmt.Println(version.Info())
+		info.Meta = versionInfo.Meta{
+			CLIName: cCtx.App.Name + " - " + cCtx.App.Usage,
+		}
+		_ = c.PrintInfo(os.Stdout, info)
 	}
 
 	cli.VersionFlag = &cli.BoolFlag{
@@ -91,7 +106,7 @@ func _VersionHelpFlags() {
 func main() {
 	defer func() {
 		if err := recover(); err != nil {
-			fmt.Println(version.Info())
+			fmt.Println(version)
 			fmt.Println(makeErrorStr(fmt.Sprint(err)))
 			fmt.Println(makeErrorStr(string(debug.Stack())))
 		}
@@ -105,7 +120,7 @@ func main() {
 		Copyright: `Copyright (C) 2023 Equationzhao. MIT License
 This is free software: you are free to change and redistribute it.
 There is NO WARRANTY, to the extent permitted by law.`,
-		Version: version.Info(),
+		Version: version,
 		Authors: []*cli.Author{
 			{
 				Name:  "Equationzhao",
@@ -114,13 +129,30 @@ There is NO WARRANTY, to the extent permitted by law.`,
 		},
 		SliceFlagSeparator: ",",
 		HideHelpCommand:    true,
-		Writer:             os.Stdout,
 		OnUsageError: func(cCtx *cli.Context, err error, isSubcommand bool) error {
-			_, _ = fmt.Fprint(cCtx.App.Writer, makeErrorStr(fmt.Sprintf("%s %s: %s %s\n", theme.Error, cCtx.App.Name, err, theme.Reset)))
+			_, _ = fmt.Println(makeErrorStr(fmt.Sprintf("%s %s: %s %s", theme.Error, cCtx.App.Name, err, theme.Reset)))
 			return nil
 		},
 
 		Flags: []cli.Flag{
+			&cli.BoolFlag{
+				Name:     "check-new-version",
+				Usage:    "check if there's new release",
+				Category: "software info",
+				Action: func(context *cli.Context, b bool) error {
+					if b {
+						fmt.Println(context.App.Name + " - " + context.App.Usage)
+						upgrade.WithUpdateCheckTimeout(1 * time.Second)
+						notice := upgrade.NewGitHubDetector("Equationzhao", "g")
+						_ = notice.PrintIfFoundGreater(os.Stderr, version)
+						return Err4Exit{}
+					}
+					return nil
+				},
+				DisableDefaultText: true,
+			},
+
+			// VIEW
 			&cli.StringFlag{
 				Name:        "time-type",
 				Aliases:     []string{"tt"},
@@ -136,6 +168,7 @@ There is NO WARRANTY, to the extent permitted by law.`,
 						return errors.New("invalid time type")
 					}
 				},
+				Category: "VIEW",
 			},
 			&cli.BoolFlag{
 				Name:               "uid",
@@ -147,6 +180,7 @@ There is NO WARRANTY, to the extent permitted by law.`,
 					}
 					return nil
 				},
+				Category: "VIEW",
 			},
 			&cli.BoolFlag{
 				Name:               "gid",
@@ -158,40 +192,21 @@ There is NO WARRANTY, to the extent permitted by law.`,
 					}
 					return nil
 				},
+				Category: "VIEW",
 			},
-
 			&cli.BoolFlag{
-				Name:     "check-new-version",
-				Usage:    "check if there's new release",
-				Category: "software info",
+				Name:               "numeric",
+				Usage:              " List numeric user and group IDs instead of name [sid in windows]",
+				DisableDefaultText: true,
 				Action: func(context *cli.Context, b bool) error {
 					if b {
-						done := make(chan struct{})
-						go func() {
-							latestVersion, hasNew, err := version.CheckUpgrade()
-							if err != nil {
-								done <- struct{}{}
-								return
-							}
-							if hasNew {
-								_, _ = fmt.Fprintln(os.Stderr, "new version", latestVersion.Info(), "is available")
-								done <- struct{}{}
-							} else {
-								done <- struct{}{}
-							}
-						}()
-						select {
-						case <-done:
-						case <-time.After(2 * time.Second):
-						}
-						return Err4Exit{}
+						filter.Gid = true
+						filter.Uid = true
 					}
 					return nil
 				},
-				DisableDefaultText: true,
+				Category: "VIEW",
 			},
-
-			// VIEW
 			&cli.StringFlag{
 				Name:        "time-style",
 				Usage:       "time/date format with -l, Valid timestamp styles are `default', `iso`, `long iso`, `full-iso`, `locale`, custom `+FORMAT` like date(1).",
@@ -339,6 +354,47 @@ There is NO WARRANTY, to the extent permitted by law.`,
 				Action: func(context *cli.Context, b bool) error {
 					if b {
 						sizeEnabler.SetEnableTotal()
+					}
+					return nil
+				},
+			},
+			&cli.StringSliceFlag{
+				Name:     "checksum-algorithm",
+				Usage:    "show checksum of file with algorithm: md5, sha1, sha256, sha512",
+				Aliases:  []string{"ca"},
+				Value:    cli.NewStringSlice("sha1"),
+				Category: "VIEW",
+			},
+			&cli.BoolFlag{
+				Name:               "checksum",
+				Usage:              "show checksum of file with algorithm: md5, sha1, sha256, sha512",
+				Aliases:            []string{"cs"},
+				DisableDefaultText: true,
+				Category:           "VIEW",
+				Action: func(context *cli.Context, b bool) error {
+					ss := context.StringSlice("checksum-algorithm")
+					if ss == nil {
+						ss = []string{"sha1"}
+					}
+					sums := make([]filter.SumType, 0, len(ss))
+					for _, s := range ss {
+						switch s {
+						case "md5":
+							sums = append(sums, filter.SumTypeMd5)
+						case "sha1":
+							sums = append(sums, filter.SumTypeSha1)
+						case "sha256":
+							sums = append(sums, filter.SumTypeSha256)
+						case "sha512":
+							sums = append(sums, filter.SumTypeSha512)
+						}
+					}
+
+					if b {
+						contentFunc = append(contentFunc, contentFilter.EnableSum(sums...))
+						if _, ok := p.(*printer.Byline); !ok {
+							p = printer.NewByline()
+						}
 					}
 					return nil
 				},
@@ -513,6 +569,38 @@ There is NO WARRANTY, to the extent permitted by law.`,
 				Category:           "DISPLAY",
 			},
 
+			&cli.StringSliceFlag{
+				Name:    "ignore-glob",
+				Aliases: []string{"I"},
+				Usage:   "ignore Glob patterns",
+				Action: func(context *cli.Context, s []string) error {
+					if len(s) > 0 {
+						f, err := filter.RemoveGlob(s...)
+						if err != nil {
+							return err
+						}
+						typeFunc = append(typeFunc, &f)
+					}
+					return nil
+				},
+				Category: "FILTERING",
+			},
+			&cli.StringSliceFlag{
+				Name:    "match-glob",
+				Aliases: []string{"M"},
+				Usage:   "match Glob patterns",
+				Action: func(context *cli.Context, s []string) error {
+					if len(s) > 0 {
+						f, err := filter.GlobOnly(s...)
+						if err != nil {
+							return err
+						}
+						typeFunc = append(typeFunc, &f)
+					}
+					return nil
+				},
+				Category: "FILTERING",
+			},
 			&cli.BoolFlag{
 				Name:               "lh",
 				Aliases:            []string{"human-readable"},
@@ -819,10 +907,54 @@ There is NO WARRANTY, to the extent permitted by law.`,
 
 			path := context.Args().Slice()
 
+			nameToDisplay := filter.NewNameEnable().SetRenderer(r)
+			if context.Bool("show-icon") || context.Bool("all") {
+				nameToDisplay.SetIcon()
+			}
+			if context.Bool("F") {
+				nameToDisplay.SetClassify()
+			}
+			if context.Bool("file-type") {
+				nameToDisplay.SetClassify()
+				nameToDisplay.SetFileType()
+			}
+			if context.Bool("git-status") {
+				nameToDisplay.SetGit()
+			}
+
+			{
+				s := context.String("git-status-style")
+				switch s {
+				case "symbol", "sym":
+					nameToDisplay.GitStyle = filter.GitStyleSym
+				case "dot", ".":
+					nameToDisplay.GitStyle = filter.GitStyleDot
+				default:
+					nameToDisplay.GitStyle = filter.GitStyleDefault
+				}
+			}
+
+			contentFunc = append(contentFunc, nameToDisplay.Enable())
+			typeFilter := filter.NewTypeFilter(typeFunc...)
+
+			gitignore := context.Bool("hide-git-ignore")
+			removeGitIgnore := new(filter.TypeFunc)
+			if gitignore {
+				typeFilter.AppendTo(removeGitIgnore)
+			}
+
+			// set sort func
+			if sort.Len() == 0 {
+				sort.AddOption(sorter.Default)
+			}
+			contentFilter.SetSortFunc(sort.Build())
+			contentFilter.SetOptions(contentFunc...)
+
 			// if no path, use current path
 			if len(path) == 0 {
 				path = append(path, ".")
 			}
+			contentFilter.SetOptions(contentFunc...)
 
 			if context.Bool("tree") {
 				depth := context.Int("depth")
@@ -833,13 +965,13 @@ There is NO WARRANTY, to the extent permitted by law.`,
 
 					pathbeautify.Transform(&path[i])
 
-					s, err := tree.NewTreeString(path[i], depth, filter.NewTypeFilter(typeFunc...), r)
+					s, err := tree.NewTreeString(path[i], depth, typeFilter, contentFilter)
 					if errors.Is(err, os.ErrNotExist) {
-						fmt.Printf("%s g: No such file or directory: %s %s\n", theme.Error, err.(*os.PathError).Path, theme.Reset)
+						fmt.Printf(makeErrorStr(fmt.Sprintf("No such file or directory: %s", err.(*os.PathError).Path)))
 						seriousErr = true
 						continue
 					} else if err != nil {
-						fmt.Println(theme.Error+err.Error()+theme.Reset, err)
+						fmt.Println(makeErrorStr(err.Error()))
 						seriousErr = true
 						continue
 					}
@@ -858,45 +990,6 @@ There is NO WARRANTY, to the extent permitted by law.`,
 				flagd := context.Bool("d")
 				// flag: if A is set
 				flagA := context.Bool("A")
-
-				nameToDisplay := filter.NewNameEnable().SetRenderer(r)
-				if context.Bool("show-icon") || context.Bool("all") {
-					nameToDisplay.SetIcon()
-				}
-				if context.Bool("F") {
-					nameToDisplay.SetClassify()
-				}
-				if context.Bool("file-type") {
-					nameToDisplay.SetClassify()
-					nameToDisplay.SetFileType()
-				}
-				if context.Bool("git-status") {
-					nameToDisplay.SetGit()
-				}
-				s := context.String("git-status-style")
-				switch s {
-				case "symbol", "sym":
-					nameToDisplay.GitStyle = filter.GitStyleSym
-				case "dot", ".":
-					nameToDisplay.GitStyle = filter.GitStyleDot
-				default:
-					nameToDisplay.GitStyle = filter.GitStyleDefault
-				}
-
-				contentFunc = append(contentFunc, nameToDisplay.Enable())
-				typeFilter := filter.NewTypeFilter(typeFunc...)
-
-				gitignore := context.Bool("hide-git-ignore")
-				removeGitIgnore := new(filter.TypeFunc)
-				if gitignore {
-					typeFilter.AppendTo(removeGitIgnore)
-				}
-
-				// set sort func
-				if sort.Len() == 0 {
-					sort.AddOption(sorter.Default)
-				}
-				contentFilter.SetSortFunc(sort.Build())
 
 				for i := 0; i < len(path); i++ {
 					if len(path) > 1 {
@@ -931,6 +1024,8 @@ There is NO WARRANTY, to the extent permitted by law.`,
 								}
 							}
 						} else {
+							parent := filepath.Dir(path[i])
+							_ = os.Chdir(parent)
 							infos = append(infos, stat)
 							isFile = true
 						}
@@ -977,10 +1072,9 @@ There is NO WARRANTY, to the extent permitted by law.`,
 					}
 					nameToDisplay.SetParent(path[i])
 					// remove non-display items
-					infos = typeFilter.Filter(infos)
+					infos = typeFilter.Filter(infos...)
 
 				final:
-					contentFilter.SetOptions(contentFunc...)
 					stringSlice := contentFilter.GetStringSlice(infos)
 
 					// if -l/show-total-size is set, add total size

@@ -39,18 +39,48 @@ type value = string
 type tree interface {
 	// AddNode adds a new node to a branch.
 	AddNode(v value) tree
+	AddInfoNode(prefix, postfix string, v value) tree
 	// AddBranch adds a new branch node (a level deeper).
 	AddBranch(v value) tree
-
+	AddInfoBranch(prefix, postfix string, v value) tree
 	// String renders the tree or subtree as a string.
 	String() string
 }
 
 type node struct {
-	Root  *node
-	Nodes []*node
-	Value value
-	m     sync.RWMutex
+	PreExtra, PostExtra string
+	Root                *node
+	Nodes               []*node
+	Value               value
+	m                   sync.RWMutex
+}
+
+func (n *node) AddInfoNode(prefix, postfix string, v value) tree {
+	newNode := &node{
+		Root:      n,
+		Value:     v,
+		Nodes:     make([]*node, 0, nodeSize),
+		PreExtra:  prefix,
+		PostExtra: postfix,
+	}
+	n.m.Lock()
+	defer n.m.Unlock()
+	n.Nodes = append(n.Nodes, newNode)
+	return n
+}
+
+func (n *node) AddInfoBranch(prefix, postfix string, v value) tree {
+	branch := &node{
+		Root:      n,
+		Value:     v,
+		Nodes:     make([]*node, 0, nodeSize),
+		PreExtra:  prefix,
+		PostExtra: postfix,
+	}
+	n.m.Lock()
+	defer n.m.Unlock()
+	n.Nodes = append(n.Nodes, branch)
+	return branch
 }
 
 func (n *node) AddNode(v value) tree {
@@ -83,7 +113,13 @@ func (n *node) String() string {
 	level := 0
 	levelsEnded := make(map[int]bool, len(n.Nodes))
 	if n.Root == nil {
+		if n.PreExtra != "" {
+			_, _ = buf.WriteString(n.PreExtra)
+		}
 		_, _ = buf.WriteString(fmt.Sprintf("%v", n.Value))
+		if n.PostExtra != "" {
+			_, _ = buf.WriteString(n.PostExtra)
+		}
 		_ = buf.WriteByte('\n')
 	} else {
 		edge := EdgeTypeMid
@@ -114,6 +150,10 @@ func printNodes(wr io.Writer, level int, levelsEnded map[int]bool, nodes []*node
 }
 
 func printValues(wr io.Writer, level int, levelsEnded map[int]bool, edge EdgeType, node *node) {
+	if node.PreExtra != "" {
+		_, _ = fmt.Fprintf(wr, "%s", node.PreExtra)
+	}
+
 	for i := 0; i < level; i++ {
 		if levelsEnded[i] {
 			_, _ = wr.Write([]byte(strings.Repeat(" ", IndentSize+1)))
@@ -125,6 +165,9 @@ func printValues(wr io.Writer, level int, levelsEnded map[int]bool, edge EdgeTyp
 	val := node.Value
 
 	_, _ = fmt.Fprintf(wr, "%s %s\n", edge, val)
+	if node.PostExtra != "" {
+		_, _ = fmt.Fprintf(wr, "%s", node.PostExtra)
+	}
 }
 
 type EdgeType string
@@ -148,4 +191,8 @@ func New() tree {
 // NewWithRoot Generates new tree with the given root value
 func NewWithRoot(root value) tree {
 	return &node{Value: root, Nodes: make([]*node, 0, nodeSize)}
+}
+
+func NewWithExtraInfoRoot(prefix, postfix, root string) tree {
+	return &node{Value: root, Nodes: make([]*node, 0, nodeSize), PreExtra: prefix, PostExtra: postfix}
 }
