@@ -1,27 +1,51 @@
 package filter
 
 import (
+	"crypto/md5"
+	"crypto/sha1"
+	"crypto/sha256"
+	"crypto/sha512"
+	"fmt"
+	"hash"
+	"io"
 	"os"
 	"sort"
 	"strconv"
 	"strings"
 	"sync"
 	"sync/atomic"
+	"time"
 
 	"github.com/Equationzhao/g/cached"
 	"github.com/Equationzhao/g/git"
+	"github.com/Equationzhao/g/osbased"
 	"github.com/Equationzhao/g/render"
+	"github.com/Equationzhao/tsmap"
 	"github.com/valyala/bytebufferpool"
 )
 
 // fileMode size owner group time name
 
 type ContentFilter struct {
-	options          []ContentOption
-	wgOwner, wgGroup *sync.WaitGroup
+	options                  []ContentOption
+	wgOwner, wgGroup, wgSize *sync.WaitGroup
+	sortFunc                 func(a, b os.FileInfo) bool
+	sizeEnabler              *sizeEnabler
 }
 
-func (cf *ContentFilter) AppendTo(options ...ContentOption) {
+func (cf *ContentFilter) SizeEnabler() *sizeEnabler {
+	return cf.sizeEnabler
+}
+
+func (cf *ContentFilter) SortFunc() func(a, b os.FileInfo) bool {
+	return cf.sortFunc
+}
+
+func (cf *ContentFilter) SetSortFunc(sortFunc func(a, b os.FileInfo) bool) {
+	cf.sortFunc = sortFunc
+}
+
+func (cf *ContentFilter) AppendToOptions(options ...ContentOption) {
 	cf.options = append(cf.options, options...)
 }
 
@@ -38,10 +62,12 @@ func EnableFileMode(renderer *render.Renderer) ContentOption {
 	}
 }
 
-type SizeUnit int
+type SizeUnit float64
 
+const Unknown SizeUnit = -1
 const (
-	Bit SizeUnit = iota
+	Auto SizeUnit = iota
+	Bit  SizeUnit = 1.0 << (10 * iota)
 	B
 	KB
 	MB
@@ -53,7 +79,6 @@ const (
 	YB
 	BB
 	NB
-	Auto
 )
 
 // fill blank
@@ -66,7 +91,7 @@ func fillBlank(s string, length int) string {
 	return strings.Repeat(" ", length-len(s)) + s
 }
 
-func convert2Size(size SizeUnit) string {
+func Convert2SizeString(size SizeUnit) string {
 	switch size {
 	case Bit:
 		return "bit"
@@ -93,78 +118,111 @@ func convert2Size(size SizeUnit) string {
 	case NB:
 		return "NB"
 	default:
-		panic("unknown size")
+		return "unknown"
 	}
 }
 
-type Size struct {
+func ConvertFromSizeString(size string) SizeUnit {
+	switch size {
+	case "bit", "Bit", "BIT":
+		return Bit
+	case "B", "b":
+		return B
+	case "KB", "kb", "Kb":
+		return KB
+	case "MB", "mb", "Mb":
+		return MB
+	case "GB", "gb", "Gb":
+		return GB
+	case "TB", "tb", "Tb":
+		return TB
+	case "PB", "pb", "Pb":
+		return PB
+	case "EB", "eb", "Eb":
+		return EB
+	case "ZB", "zb", "Zb":
+		return ZB
+	case "YB", "yb", "Yb":
+		return YB
+	case "BB", "bb", "Bb":
+		return BB
+	case "NB", "nb", "Nb":
+		return NB
+	default:
+		return Unknown
+	}
+}
+
+type sizeEnabler struct {
 	total       atomic.Int64
 	enableTotal bool
 	sizeUint    SizeUnit
 	renderer    *render.Renderer
+	wg          *sync.WaitGroup
 }
 
-func (s *Size) SizeUint() SizeUnit {
+func (s *sizeEnabler) SizeUint() SizeUnit {
 	return s.sizeUint
 }
 
-func (s *Size) SetEnableTotal() {
+func (s *sizeEnabler) SetEnableTotal() {
 	s.enableTotal = true
 }
 
-func (s *Size) DisableTotal() {
+func (s *sizeEnabler) DisableTotal() {
 	s.enableTotal = false
 }
 
-func (s *Size) Total() (size int64, ok bool) {
+func (s *sizeEnabler) Total() (size int64, ok bool) {
 	if s.enableTotal {
 		return s.total.Load(), s.enableTotal
 	}
 	return 0, false
 }
 
-func (s *Size) Reset() {
+func (s *sizeEnabler) Reset() {
 	if s.enableTotal {
 		s.total.Store(0)
 	}
 }
 
-func (s *Size) Size2String(n int64, blank int) string {
+func (s *sizeEnabler) Size2String(b int64, blank int) string {
 	var res string
-	v := float64(n)
+	v := float64(b)
 	switch s.sizeUint {
 	case Bit:
 		res = strconv.FormatInt(int64(v*8), 10)
 	case B:
 		res = strconv.FormatInt(int64(v), 10)
 	case KB:
-		res = strconv.FormatFloat(v/1024.0, 'f', 0, 64)
+		fallthrough
 	case MB:
-		res = strconv.FormatFloat(v/1024.0/1024.0, 'f', 1, 64)
+		fallthrough
 	case GB:
-		res = strconv.FormatFloat(v/1024.0/1024.0/1024.0, 'f', 1, 64)
+		fallthrough
 	case TB:
-		res = strconv.FormatFloat(v/1024.0/1024.0/1024.0/1024.0, 'f', 1, 64)
+		fallthrough
 	case PB:
-		res = strconv.FormatFloat(v/1024.0/1024.0/1024.0/1024.0/1024.0, 'f', 1, 64)
+		fallthrough
 	case EB:
-		res = strconv.FormatFloat(v/1024.0/1024.0/1024.0/1024.0/1024.0/1024.0, 'f', 1, 64)
+		fallthrough
 	case ZB:
-		res = strconv.FormatFloat(v/1024.0/1024.0/1024.0/1024.0/1024.0/1024.0/1024.0, 'f', 1, 64)
+		fallthrough
 	case YB:
-		res = strconv.FormatFloat(v/1024.0/1024.0/1024.0/1024.0/1024.0/1024.0/1024.0/1024.0, 'f', 1, 64)
+		fallthrough
 	case BB:
-		res = strconv.FormatFloat(v/1024.0/1024.0/1024.0/1024.0/1024.0/1024.0/1024.0/1024.0/1024.0, 'f', 1, 64)
+		fallthrough
 	case NB:
-		res = strconv.FormatFloat(v/1024.0/1024.0/1024.0/1024.0/1024.0/1024.0/1024.0/1024.0/1024.0/1024.0, 'f', 1, 64)
+		res = fmt.Sprintf("%g", v*float64(B)/float64(s.sizeUint))
+
 	case Auto:
-		for i := B; i <= ZB; i++ {
-			if v < 1000 {
+		for i := B; i <= ZB; i *= 1024 {
+			if v < 1024 {
 				res = strconv.FormatFloat(v, 'f', 1, 64)
 				if res == "0.0" {
 					res = "-"
 				} else {
-					res += convert2Size(i)
+					res += Convert2SizeString(i)
 				}
 				return s.renderer.Size(fillBlank(res, blank))
 			}
@@ -174,12 +232,54 @@ func (s *Size) Size2String(n int64, blank int) string {
 	default:
 		panic("invalid size uint" + strconv.Itoa(int(s.sizeUint)))
 	}
+
+	if res == "0" {
+		res = "-"
+	} else {
+		res += Convert2SizeString(s.sizeUint)
+	}
 	return s.renderer.Size(fillBlank(res, blank))
 }
 
-func (s *Size) EnableSize(size SizeUnit, renderer *render.Renderer) ContentOption {
+func (s *sizeEnabler) EnableSize(size SizeUnit, renderer *render.Renderer) ContentOption {
 	s.sizeUint = size
 	s.renderer = renderer
+
+	if size != Auto {
+		longestSize := 0
+		m := sync.RWMutex{}
+		done := func(size string) {
+			defer s.wg.Done()
+			m.RLock()
+			if longestSize >= len(size) {
+				m.RUnlock()
+				return
+			}
+			m.RUnlock()
+			m.Lock()
+			if longestSize < len(size) {
+				longestSize = len(size)
+			}
+			m.Unlock()
+			return
+		}
+
+		wait := func(size string) string {
+			s.wg.Wait()
+			return fillBlank(size, longestSize)
+		}
+
+		return func(info os.FileInfo) string {
+			v := info.Size()
+			if s.enableTotal {
+				s.total.Add(v)
+			}
+			size := s.Size2String(v, 0)
+			done(size)
+			return wait(size)
+		}
+	}
+
 	return func(info os.FileInfo) string {
 		v := info.Size()
 		if s.enableTotal {
@@ -189,9 +289,19 @@ func (s *Size) EnableSize(size SizeUnit, renderer *render.Renderer) ContentOptio
 	}
 }
 
-func EnableTime(format string, renderer *render.Renderer) ContentOption {
+func EnableTime(format string, renderer *render.Renderer, mod string) ContentOption {
 	return func(info os.FileInfo) string {
-		return renderer.Time(info.ModTime().Format(format))
+		// get mod time/ create time/ access time
+		var t time.Time
+		switch mod {
+		case "mod":
+			t = osbased.ModTime(info)
+		case "create":
+			t = osbased.CreateTime(info)
+		case "access":
+			t = osbased.AccessTime(info)
+		}
+		return renderer.Time(t.Format(format))
 	}
 }
 
@@ -420,56 +530,100 @@ func (n *Name) GitByName(name string, status string, style gitStyle) string {
 	return ""
 }
 
+var (
+	Uid = false
+	Gid = false
+)
+
+func (cf *ContentFilter) EnableOwner(renderer *render.Renderer) ContentOption {
+	m := sync.RWMutex{}
+	longestOwner := 0
+
+	wait := func(res string) string {
+		cf.wgOwner.Wait()
+		return renderer.Owner(fillBlank(res, longestOwner))
+	}
+
+	done := func(name string) {
+		defer cf.wgOwner.Done()
+		m.RLock()
+		if len(name) > longestOwner {
+			m.RUnlock()
+			m.Lock()
+			if len(name) > longestOwner {
+				longestOwner = len(name)
+			}
+			m.Unlock()
+		} else {
+			m.RUnlock()
+		}
+	}
+	return func(info os.FileInfo) string {
+		name := ""
+		if Uid {
+			name = osbased.OwnerID(info)
+		} else {
+			name = osbased.Owner(info)
+		}
+		done(name)
+		return wait(name)
+	}
+}
+
+func (cf *ContentFilter) EnableGroup(renderer *render.Renderer) ContentOption {
+	m := sync.RWMutex{}
+	longestGroup := 0
+
+	wait := func(name string) string {
+		cf.wgGroup.Wait()
+		return renderer.Group(fillBlank(name, longestGroup))
+	}
+
+	done := func(name string) {
+		defer cf.wgGroup.Done()
+		m.RLock()
+		if len(name) > longestGroup {
+			m.RUnlock()
+			m.Lock()
+			if len(name) > longestGroup {
+				longestGroup = len(name)
+			}
+			m.Unlock()
+		} else {
+			m.RUnlock()
+		}
+	}
+	return func(info os.FileInfo) string {
+		name := ""
+		if Gid {
+			name = osbased.GroupID(info)
+		} else {
+			name = osbased.Group(info)
+		}
+		done(name)
+		return wait(name)
+	}
+}
+
 func NewContentFilter(options ...ContentOption) *ContentFilter {
-	return &ContentFilter{options: options, wgGroup: new(sync.WaitGroup), wgOwner: new(sync.WaitGroup)}
+	c := &ContentFilter{
+		options:  options,
+		wgGroup:  new(sync.WaitGroup),
+		wgOwner:  new(sync.WaitGroup),
+		wgSize:   new(sync.WaitGroup),
+		sortFunc: nil,
+	}
+	c.sizeEnabler = &sizeEnabler{
+		total:       atomic.Int64{},
+		enableTotal: false,
+		sizeUint:    0,
+		renderer:    nil,
+		wg:          c.wgSize,
+	}
+	return c
 }
 
 type ContentFunc func(entry os.FileInfo) bool
-
-func isHidden(info os.FileInfo) bool {
-	return strings.HasPrefix(info.Name(), ".")
-}
-
-func isLink(info os.FileInfo) bool {
-	return info.Mode()&os.ModeSymlink != 0
-}
-
-func isHiddenDir(info os.FileInfo) bool {
-	return info.IsDir() && isHidden(info)
-}
-
-func compareFileInfo(a, b os.FileInfo) bool {
-	hdA := isHiddenDir(a)
-	hdB := isHiddenDir(b)
-	if hdA != hdB {
-		// hidden dir comes first
-		return hdA
-	}
-	// same hidden dir status
-	dA := a.IsDir()
-	dB := b.IsDir()
-	if dA != dB {
-		// dir comes first
-		return dA
-	}
-	// same dir status
-	lA := isLink(a)
-	lB := isLink(b)
-	switch {
-	case lA && lB:
-		// both are links, compare name
-		return a.Name() < b.Name()
-	case lA:
-		// a is link, b is not link, b comes first
-		return false
-	case lB:
-		// a is not link, b is link, a comes first
-		return true
-	default:
-		// neither are links, compare name
-		return a.Name() < b.Name()
-	}
-}
 
 func (cf *ContentFilter) GetStringSlice(e []os.FileInfo) []string {
 	resBuffers := make([]*bytebufferpool.ByteBuffer, len(e))
@@ -485,13 +639,18 @@ func (cf *ContentFilter) GetStringSlice(e []os.FileInfo) []string {
 	}()
 
 	sort.Slice(e, func(i, j int) bool {
-		return compareFileInfo(e[i], e[j])
+		if cf.sortFunc != nil {
+			return cf.sortFunc(e[i], e[j])
+		} else {
+			return true
+		}
 	})
 
 	wg := sync.WaitGroup{}
 	wg.Add(len(e))
 	cf.wgOwner.Add(len(e))
 	cf.wgGroup.Add(len(e))
+	cf.wgSize.Add(len(e))
 	for i, entry := range e {
 		go func(entry os.FileInfo, i int) {
 			options := cf.options[:len(cf.options)-1]
@@ -511,4 +670,124 @@ func (cf *ContentFilter) GetStringSlice(e []os.FileInfo) []string {
 	}
 
 	return res
+}
+
+func (cf *ContentFilter) GetExtraAndNameStringSlice(e ...os.FileInfo) []tsmap.Pair[string, string] {
+	resBuffers := make([]*bytebufferpool.ByteBuffer, 2*len(e))
+
+	for i := range resBuffers {
+		resBuffers[i] = bytebufferpool.Get()
+	}
+
+	defer func() {
+		for i := range resBuffers {
+			bytebufferpool.Put(resBuffers[i])
+		}
+	}()
+
+	sort.Slice(e, func(i, j int) bool {
+		if cf.sortFunc != nil {
+			return cf.sortFunc(e[i], e[j])
+		} else {
+			return true
+		}
+	})
+
+	wg := sync.WaitGroup{}
+	wg.Add(len(e))
+	cf.wgOwner.Add(len(e))
+	cf.wgGroup.Add(len(e))
+	cf.wgSize.Add(len(e))
+	for i, entry := range e {
+		go func(entry os.FileInfo, i int) {
+			options := cf.options[:len(cf.options)-1]
+			for j := range options {
+				_, _ = resBuffers[i].WriteString(options[j](entry))
+				_ = resBuffers[i].WriteByte(' ')
+			}
+			// the last one should not follow by space
+			_, _ = resBuffers[i+len(e)].WriteString(cf.options[len(cf.options)-1](entry))
+			wg.Done()
+		}(entry, i)
+	}
+	res := make([]tsmap.Pair[string, string], 0, len(e))
+	wg.Wait()
+
+	/*
+		buffers layout:
+			extra extra extra ... |half|  name name name ...
+	*/
+	bufLen := len(resBuffers)
+	for i := 0; i < bufLen/2; i++ {
+		res = append(res, tsmap.MakePair(resBuffers[i].String(), resBuffers[i+bufLen/2].String()))
+	}
+
+	return res
+}
+
+type SumType int
+
+const (
+	SumTypeMd5 SumType = iota + 1
+	SumTypeSha1
+	SumTypeSha256
+	SumTypeSha512
+)
+
+func (cf *ContentFilter) EnableSum(sumTypes ...SumType) ContentOption {
+	length := 0
+	for _, t := range sumTypes {
+		switch t {
+		case SumTypeMd5:
+			length += 32
+		case SumTypeSha1:
+			length += 40
+		case SumTypeSha256:
+			length += 64
+		case SumTypeSha512:
+			length += 128
+		}
+	}
+	length += len(sumTypes) - 1
+
+	return func(info os.FileInfo) string {
+		if info.IsDir() {
+			return fillBlank("", length)
+		}
+		pwd, _ := os.Getwd()
+		_ = pwd
+
+		file, err := os.Open(info.Name())
+		if err != nil {
+			return fillBlank("", length)
+		}
+		defer file.Close()
+		hashes := make([]hash.Hash, 0, len(sumTypes))
+		writers := make([]io.Writer, 0, len(sumTypes))
+		for _, t := range sumTypes {
+			var hashed hash.Hash
+			switch t {
+			case SumTypeMd5:
+				hashed = md5.New()
+			case SumTypeSha1:
+				hashed = sha1.New()
+			case SumTypeSha256:
+				hashed = sha256.New()
+			case SumTypeSha512:
+				hashed = sha512.New()
+			}
+			writers = append(writers, hashed)
+			hashes = append(hashes, hashed)
+		}
+		multiWriter := io.MultiWriter(writers...)
+		if _, err := io.Copy(multiWriter, file); err != nil {
+			return fillBlank("", length)
+		}
+		sums := make([]string, 0, len(hashes))
+		for _, h := range hashes {
+			sums = append(sums, fmt.Sprintf("%x", h.Sum(nil)))
+		}
+		sumsStr := strings.Join(sums, " ")
+		return fillBlank(sumsStr, length)
+	}
 }

@@ -3,11 +3,11 @@ package tree
 import (
 	"os"
 	"path/filepath"
+	"sort"
 	"sync"
 	"sync/atomic"
 
 	"github.com/Equationzhao/g/filter"
-	"github.com/Equationzhao/g/render"
 )
 
 type statistic struct {
@@ -32,26 +32,31 @@ func (n *Tree) MakeTreeStr() string {
 	return n.tree.String()
 }
 
-func NewTreeString(entry string, depthLimit int, typeFilter *filter.TypeFilter, renderer *render.Renderer) (*Tree, error) {
-	n := &Tree{tree: NewWithRoot(entry)}
-
-	var wg sync.WaitGroup
+func NewTreeString(entry string, depthLimit int, typeFilter *filter.TypeFilter, contentFilter *filter.ContentFilter) (*Tree, error) {
 	stat, err := os.Stat(entry)
 	if err != nil {
 		return nil, err
 	}
+	cm := sync.Mutex{}
+	cm.Lock()
+	ExtraName := contentFilter.GetExtraAndNameStringSlice(stat)
+	cm.Unlock()
+	n := &Tree{tree: NewWithExtraInfoRoot(ExtraName[0].Key(), "", ExtraName[0].Value())}
+
+	var wg sync.WaitGroup
+
 	if stat.IsDir() {
 		n.stat.directory.Add(1)
 	} else {
 		n.stat.file.Add(1)
 	}
 
-	expand(n.tree, depthLimit, &wg, entry, &n.stat, typeFilter, renderer)
+	expand(n.tree, depthLimit, &wg, entry, &n.stat, typeFilter, contentFilter, &cm)
 	wg.Wait()
 	return n, nil
 }
 
-func expand(node tree, depthLimit int, wg *sync.WaitGroup, parent string, s *statistic, typeFilter *filter.TypeFilter, renderer *render.Renderer) {
+func expand(node tree, depthLimit int, wg *sync.WaitGroup, parent string, s *statistic, typeFilter *filter.TypeFilter, contentFilter *filter.ContentFilter, cm *sync.Mutex) {
 	if depthLimit == 0 {
 		return
 	}
@@ -72,49 +77,45 @@ func expand(node tree, depthLimit int, wg *sync.WaitGroup, parent string, s *sta
 	}
 
 	if typeFilter != nil {
-		infos = typeFilter.Filter(infos)
+		infos = typeFilter.Filter(infos...)
 	}
 
-	for _, v := range d {
+	sort.Slice(infos, func(i, j int) bool {
+		if contentFilter.SortFunc() != nil {
+			return contentFilter.SortFunc()(infos[i], infos[j])
+		} else {
+			return true
+		}
+	})
+
+	for _, v := range infos {
 		if v.IsDir() {
-			info, err := v.Info()
-			if err != nil {
-				node.AddNode(err.Error())
-				return
-			}
 			v := v
 			wg.Add(1)
+
+			s.directory.Add(1)
+			var name, extra string
+			if contentFilter != nil {
+				cm.Lock()
+				en := contentFilter.GetExtraAndNameStringSlice(v)[0]
+				cm.Unlock()
+				name = en.Value()
+				extra = en.Key()
+			} else {
+				name = v.Name()
+			}
+			newBranch := node.AddInfoBranch(extra, "", name)
 			go func() {
-				s.directory.Add(1)
-				var name string
-				if renderer != nil {
-					name = renderer.DirIcon(v.Name())
-				} else {
-					name = v.Name()
-				}
-				expand(node.AddBranch(name), depthLimit-1, wg, filepath.Join(parent, info.Name()), s, typeFilter, renderer)
+				expand(newBranch, depthLimit-1, wg, filepath.Join(parent, v.Name()), s, typeFilter, contentFilter, cm)
 				wg.Done()
 			}()
-		} else if v.Type()&os.ModeSymlink != 0 {
-			info, err := v.Info()
-			if err != nil {
-				node.AddNode(err.Error())
-				return
-			}
-			s.file.Add(1)
-			if renderer != nil {
-				wg.Add(1)
-				go func() {
-					node.AddNode(renderer.SymlinkIcon(info.Name(), parent))
-					wg.Done()
-				}()
-			} else {
-				node.AddNode(v.Name())
-			}
 		} else {
 			s.file.Add(1)
-			if renderer != nil {
-				node.AddNode(renderer.ByExtIcon(v.Name()))
+			if contentFilter != nil {
+				cm.Lock()
+				en := contentFilter.GetExtraAndNameStringSlice(v)[0]
+				cm.Unlock()
+				node.AddInfoNode(en.Key(), "", en.Value())
 			} else {
 				node.AddNode(v.Name())
 			}

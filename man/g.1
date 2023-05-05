@@ -17,29 +17,41 @@ g
 [--all|--la|-l]
 [--byline|--bl|-1|--oneline|--single-column]
 [--check-new-version]
+[--checksum-algorithm|--ca]=[value]
+[--checksum|--cs]
 [--depth]=[value]
+[--dir-first|--df]
 [--file-type|--ft]
 [--format]=[value]
 [--full-time]
+[--gid]
 [--git-status-style|--gss]=[value]
 [--git-status|--gs]
 [--hide-git-ignore|--gi|--hgi]
+[--ignore-glob|-I]=[value]
 [--lh|--human-readable]
+[--match-glob|-M]=[value]
+[--numeric]
 [--show-group|--sg]
 [--show-hidden|--sh|-a]
 [--show-icon|--si|--icons]
 [--show-no-dir|--nd|--nodir]
 [--show-no-ext|--sne|--noext]=[value]
-[--show-only-dir|--sd|--dir]
+[--show-only-dir|--sd|--dir|--only-dir]
 [--show-only-ext|--se|--ext]=[value]
 [--show-owner|--so|--author]
 [--show-perm|--sp]
 [--show-size|--ss]
 [--show-time|--st]
 [--show-total-size|--ts]
+[--size-unit|--su]=[value]
+[--sort-reverse|--sr]
+[--sort|--SORT_FIELD]=[value]
 [--theme|--th]=[value]
 [--time-style]=[value]
+[--time-type|--tt]=[value]
 [--tree|-t]
+[--uid]
 [--zero|-0]
 [-A|--almost-all]
 [-B|--ignore-backups]
@@ -79,7 +91,16 @@ g [options] [path]
 \fB--check-new-version\fP: check if there's new release
 
 .PP
+\fB--checksum, --cs\fP: show checksum of file with algorithm: md5, sha1, sha256, sha512
+
+.PP
+\fB--checksum-algorithm, --ca\fP="": show checksum of file with algorithm: md5, sha1, sha256, sha512 (default: "sha1")
+
+.PP
 \fB--depth\fP="": tree limit depth, negative -> infinity (default: infinity)
+
+.PP
+\fB--dir-first, --df\fP: List directories before other files
 
 .PP
 \fB--file-type, --ft\fP: likewise, except do not append '*'
@@ -91,16 +112,28 @@ g [options] [path]
 \fB--full-time\fP: like -all/l --time-style=full-iso
 
 .PP
-\fB--git-status, --gs\fP: show git status: ? untracked, + added, ! deleted, ~ modified, | renamed, = copied, $ ignored
+\fB--gid\fP: show gid instead of groupname [sid in windows]
+
+.PP
+\fB--git-status, --gs\fP: show git status: ? untracked, + added, ! deleted, ~ modified, | renamed, = copied, $ ignored [if git is installed]
 
 .PP
 \fB--git-status-style, --gss\fP="": git status style: colored-symbol: {? untracked, + added, - deleted, ~ modified, | renamed, = copied, ! ignored} colored-dot
 
 .PP
-\fB--hide-git-ignore, --gi, --hgi\fP: hide git ignored file/dir
+\fB--hide-git-ignore, --gi, --hgi\fP: hide git ignored file/dir [if git is installed]
+
+.PP
+\fB--ignore-glob, -I\fP="": ignore Glob patterns
 
 .PP
 \fB--lh, --human-readable\fP: show human readable size
+
+.PP
+\fB--match-glob, -M\fP="": match Glob patterns
+
+.PP
+\fB--numeric\fP:  List numeric user and group IDs instead of name [sid in windows]
 
 .PP
 \fB--show-group, --sg\fP: show group
@@ -118,7 +151,7 @@ g [options] [path]
 \fB--show-no-ext, --sne, --noext\fP="": show file which doesn't have target ext
 
 .PP
-\fB--show-only-dir, --sd, --dir\fP: show directory only
+\fB--show-only-dir, --sd, --dir, --only-dir\fP: show directory only
 
 .PP
 \fB--show-only-ext, --se, --ext\fP="": show file which has target ext, eg: --show-only-ext=go,java
@@ -139,13 +172,28 @@ g [options] [path]
 \fB--show-total-size, --ts\fP: show total size
 
 .PP
+\fB--size-unit, --su\fP="": size unit, b, k, m, g, t, p, e, z, y, auto (default: auto)
+
+.PP
+\fB--sort, --SORT_FIELD\fP="": sort by field, default: ascending and case insensitive, field beginning with Uppercase is case sensitive, available fields: name,size,time,owner,group,extension. following \fB\fC-descend\fR to sort descending
+
+.PP
+\fB--sort-reverse, --sr\fP: reverse the order of the sort
+
+.PP
 \fB--theme, --th\fP="": apply theme \fB\fCpath/to/theme\fR
 
 .PP
 \fB--time-style\fP="": time/date format with -l, Valid timestamp styles are \fB\fCdefault',\fRiso\fB\fC,\fRlong iso\fB\fC,\fRfull-iso\fB\fC,\fRlocale\fB\fC, custom\fR+FORMAT` like date(1). (default: +%d.%b'%y %H:%M (like 02.Jan'06 15:04))
 
 .PP
+\fB--time-type, --tt\fP="": time type, mod, create, access (default: mod)
+
+.PP
 \fB--tree, -t\fP: list in tree
+
+.PP
+\fB--uid\fP: show uid instead of username [sid in windows]
 
 .PP
 \fB--zero, -0\fP: end each output line with NUL, not newline
