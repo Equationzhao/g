@@ -96,6 +96,10 @@ g [options] [path]
 
 **--ignore-glob, -I**="": ignore Glob patterns
 
+**--git-status-style, --gss**="": git status style: colored-symbol: {? untracked, + added, - deleted, ~ modified, | renamed, = copied, ! ignored} colored-dot
+
+**--hide-git-ignore, --gi, --hgi**: hide git ignored file/dir
+
 **--lh, --human-readable**: show human readable size
 
 **--match-glob, -M**="": match Glob patterns
