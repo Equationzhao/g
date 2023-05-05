@@ -92,19 +92,21 @@ func expand(node tree, depthLimit int, wg *sync.WaitGroup, parent string, s *sta
 		if v.IsDir() {
 			v := v
 			wg.Add(1)
+
+			s.directory.Add(1)
+			var name, extra string
+			if contentFilter != nil {
+				cm.Lock()
+				en := contentFilter.GetExtraAndNameStringSlice(v)[0]
+				cm.Unlock()
+				name = en.Value()
+				extra = en.Key()
+			} else {
+				name = v.Name()
+			}
+			newBranch := node.AddInfoBranch(extra, "", name)
 			go func() {
-				s.directory.Add(1)
-				var name, extra string
-				if contentFilter != nil {
-					cm.Lock()
-					en := contentFilter.GetExtraAndNameStringSlice(v)[0]
-					cm.Unlock()
-					name = en.Value()
-					extra = en.Key()
-				} else {
-					name = v.Name()
-				}
-				expand(node.AddInfoBranch(extra, "", name), depthLimit-1, wg, filepath.Join(parent, v.Name()), s, typeFilter, contentFilter, cm)
+				expand(newBranch, depthLimit-1, wg, filepath.Join(parent, v.Name()), s, typeFilter, contentFilter, cm)
 				wg.Done()
 			}()
 		} else {
