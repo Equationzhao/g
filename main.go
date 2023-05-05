@@ -38,7 +38,7 @@ var (
 	sizeUint      = filter.Auto
 )
 
-var version = "0.4.2"
+var version = "0.5.0"
 
 func init() {
 	typeFunc = append(typeFunc, &filter.RemoveHidden)
