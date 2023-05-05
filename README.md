@@ -90,5 +90,12 @@ Archlinux user can install from AUR
 yay -S g-ls
 ```
 
+windows Scoop
+```bash
+scoop install https://raw.githubusercontent.com/Equationzhao/g/master/scoop/g.json
+```
+
+or just download from release page
+
 ## logo
 created by bing
