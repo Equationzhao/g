@@ -908,7 +908,7 @@ There is NO WARRANTY, to the extent permitted by law.`,
 		SliceFlagSeparator: ",",
 		HideHelpCommand:    true,
 		OnUsageError: func(cCtx *cli.Context, err error, isSubcommand bool) error {
-			_, _ = fmt.Println(makeErrorStr(fmt.Sprintf("%s %s: %s %s", theme.Error, cCtx.App.Name, err, theme.Reset)))
+			_, _ = fmt.Println(makeErrorStr(err.Error()))
 			return nil
 		},
 		Flags: make([]cli.Flag, 0, len(viewFlag)+len(filteringFlag)+len(sortingFlags)+len(displayFlag)+5),
