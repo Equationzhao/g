@@ -10,15 +10,21 @@ g
 [--all|--la|-l]
 [--byline|--bl|-1|--oneline|--single-column]
 [--check-new-version]
+[--checksum-algorithm|--ca]=[value]
+[--checksum|--cs]
 [--depth]=[value]
 [--dir-first|--df]
 [--file-type|--ft]
 [--format]=[value]
 [--full-time]
+[--gid]
 [--git-status-style|--gss]=[value]
 [--git-status|--gs]
 [--hide-git-ignore|--gi|--hgi]
+[--ignore-glob|-I]=[value]
 [--lh|--human-readable]
+[--match-glob|-M]=[value]
+[--numeric]
 [--show-group|--sg]
 [--show-hidden|--sh|-a]
 [--show-icon|--si|--icons]
@@ -31,11 +37,14 @@ g
 [--show-size|--ss]
 [--show-time|--st]
 [--show-total-size|--ts]
+[--size-unit|--su]=[value]
 [--sort-reverse|--sr]
 [--sort|--SORT_FIELD]=[value]
 [--theme|--th]=[value]
 [--time-style]=[value]
+[--time-type|--tt]=[value]
 [--tree|-t]
+[--uid]
 [--zero|-0]
 [-A|--almost-all]
 [-B|--ignore-backups]
@@ -63,6 +72,10 @@ g [options] [path]
 
 **--check-new-version**: check if there's new release
 
+**--checksum, --cs**: show checksum of file with algorithm: md5, sha1, sha256, sha512
+
+**--checksum-algorithm, --ca**="": show checksum of file with algorithm: md5, sha1, sha256, sha512 (default: "sha1")
+
 **--depth**="": tree limit depth, negative -> infinity (default: infinity)
 
 **--dir-first, --df**: List directories before other files
@@ -73,13 +86,21 @@ g [options] [path]
 
 **--full-time**: like -all/l --time-style=full-iso
 
+**--gid**: show gid instead of groupname [sid in windows]
+
 **--git-status, --gs**: show git status: ? untracked, + added, ! deleted, ~ modified, | renamed, = copied, $ ignored [if git is installed]
 
 **--git-status-style, --gss**="": git status style: colored-symbol: {? untracked, + added, - deleted, ~ modified, | renamed, = copied, ! ignored} colored-dot
 
 **--hide-git-ignore, --gi, --hgi**: hide git ignored file/dir [if git is installed]
 
+**--ignore-glob, -I**="": ignore Glob patterns
+
 **--lh, --human-readable**: show human readable size
+
+**--match-glob, -M**="": match Glob patterns
+
+**--numeric**:  List numeric user and group IDs instead of name [sid in windows]
 
 **--show-group, --sg**: show group
 
@@ -105,6 +126,8 @@ g [options] [path]
 
 **--show-total-size, --ts**: show total size
 
+**--size-unit, --su**="": size unit, b, k, m, g, t, p, e, z, y, auto (default: auto)
+
 **--sort, --SORT_FIELD**="": sort by field, default: ascending and case insensitive, field beginning with Uppercase is case sensitive, available fields: name,size,time,owner,group,extension. following `-descend` to sort descending
 
 **--sort-reverse, --sr**: reverse the order of the sort
@@ -113,7 +136,11 @@ g [options] [path]
 
 **--time-style**="": time/date format with -l, Valid timestamp styles are `default', `iso`, `long iso`, `full-iso`, `locale`, custom `+FORMAT` like date(1). (default: +%d.%b'%y %H:%M (like 02.Jan'06 15:04))
 
+**--time-type, --tt**="": time type, mod, create, access (default: mod)
+
 **--tree, -t**: list in tree
+
+**--uid**: show uid instead of username [sid in windows]
 
 **--zero, -0**: end each output line with NUL, not newline
 
