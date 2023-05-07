@@ -785,7 +785,7 @@ func (cf *ContentFilter) EnableSum(sumTypes ...SumType) ContentOption {
 		}
 		sums := make([]string, 0, len(hashes))
 		for _, h := range hashes {
-			sums = append(sums, fmt.Sprintf("%x", h.Sum(nil)))
+			sums = append(sums, string(h.Sum(nil)))
 		}
 		sumsStr := strings.Join(sums, " ")
 		return fillBlank(sumsStr, length)
