@@ -31,6 +31,9 @@ var DefaultInfoTheme = Theme{
 	"-": Style{
 		Color: White,
 	},
+	"inode": Style{
+		Color: Purple,
+	},
 	"time": Style{
 		Color: Blue,
 	},

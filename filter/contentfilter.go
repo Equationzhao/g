@@ -24,17 +24,22 @@ import (
 	"github.com/valyala/bytebufferpool"
 )
 
+type LengthFixed interface {
+	Done()
+	Wait()
+	Add(delta int)
+}
+
 // fileMode size owner group time name
 
 type ContentFilter struct {
-	options                  []ContentOption
-	wgOwner, wgGroup, wgSize *sync.WaitGroup
-	sortFunc                 func(a, b os.FileInfo) bool
-	sizeEnabler              *sizeEnabler
+	options  []ContentOption
+	wgs      []LengthFixed
+	sortFunc func(a, b os.FileInfo) bool
 }
 
-func (cf *ContentFilter) SizeEnabler() *sizeEnabler {
-	return cf.sizeEnabler
+func (cf *ContentFilter) AppendToLengthFixed(fixed ...LengthFixed) {
+	cf.wgs = append(cf.wgs, fixed...)
 }
 
 func (cf *ContentFilter) SortFunc() func(a, b os.FileInfo) bool {
@@ -59,6 +64,48 @@ type ContentOption func(info os.FileInfo) string
 func EnableFileMode(renderer *render.Renderer) ContentOption {
 	return func(info os.FileInfo) string {
 		return renderer.FileMode(fillBlank(info.Mode().String(), 12))
+	}
+}
+
+type InodeEnabler struct {
+	*sync.WaitGroup
+	renderer *render.Renderer
+}
+
+func NewInodeEnabler() *InodeEnabler {
+	return &InodeEnabler{
+		WaitGroup: new(sync.WaitGroup),
+	}
+}
+
+func (i InodeEnabler) Enable(renderer *render.Renderer) ContentOption {
+	m := sync.RWMutex{}
+	longestInode := 0
+
+	wait := func(res string) string {
+		i.Wait()
+		return renderer.Inode(fillBlank(res, longestInode))
+	}
+
+	done := func(name string) {
+		defer i.Done()
+		m.RLock()
+		if len(name) > longestInode {
+			m.RUnlock()
+			m.Lock()
+			if len(name) > longestInode {
+				longestInode = len(name)
+			}
+			m.Unlock()
+		} else {
+			m.RUnlock()
+		}
+	}
+
+	return func(info os.FileInfo) string {
+		str := osbased.Inode(info)
+		done(str)
+		return wait(str)
 	}
 }
 
@@ -153,40 +200,46 @@ func ConvertFromSizeString(size string) SizeUnit {
 	}
 }
 
-type sizeEnabler struct {
+type SizeEnabler struct {
 	total       atomic.Int64
 	enableTotal bool
 	sizeUint    SizeUnit
 	renderer    *render.Renderer
-	wg          *sync.WaitGroup
+	*sync.WaitGroup
 }
 
-func (s *sizeEnabler) SizeUint() SizeUnit {
+func NewSizeEnabler() *SizeEnabler {
+	return &SizeEnabler{
+		WaitGroup: new(sync.WaitGroup),
+	}
+}
+
+func (s *SizeEnabler) SizeUint() SizeUnit {
 	return s.sizeUint
 }
 
-func (s *sizeEnabler) SetEnableTotal() {
+func (s *SizeEnabler) SetEnableTotal() {
 	s.enableTotal = true
 }
 
-func (s *sizeEnabler) DisableTotal() {
+func (s *SizeEnabler) DisableTotal() {
 	s.enableTotal = false
 }
 
-func (s *sizeEnabler) Total() (size int64, ok bool) {
+func (s *SizeEnabler) Total() (size int64, ok bool) {
 	if s.enableTotal {
 		return s.total.Load(), s.enableTotal
 	}
 	return 0, false
 }
 
-func (s *sizeEnabler) Reset() {
+func (s *SizeEnabler) Reset() {
 	if s.enableTotal {
 		s.total.Store(0)
 	}
 }
 
-func (s *sizeEnabler) Size2String(b int64, blank int) string {
+func (s *SizeEnabler) Size2String(b int64, blank int) string {
 	var res string
 	v := float64(b)
 	switch s.sizeUint {
@@ -241,7 +294,7 @@ func (s *sizeEnabler) Size2String(b int64, blank int) string {
 	return s.renderer.Size(fillBlank(res, blank))
 }
 
-func (s *sizeEnabler) EnableSize(size SizeUnit, renderer *render.Renderer) ContentOption {
+func (s *SizeEnabler) EnableSize(size SizeUnit, renderer *render.Renderer) ContentOption {
 	s.sizeUint = size
 	s.renderer = renderer
 
@@ -249,7 +302,7 @@ func (s *sizeEnabler) EnableSize(size SizeUnit, renderer *render.Renderer) Conte
 		longestSize := 0
 		m := sync.RWMutex{}
 		done := func(size string) {
-			defer s.wg.Done()
+			defer s.Done()
 			m.RLock()
 			if longestSize >= len(size) {
 				m.RUnlock()
@@ -265,7 +318,7 @@ func (s *sizeEnabler) EnableSize(size SizeUnit, renderer *render.Renderer) Conte
 		}
 
 		wait := func(size string) string {
-			s.wg.Wait()
+			s.Wait()
 			return fillBlank(size, longestSize)
 		}
 
@@ -539,13 +592,15 @@ func (cf *ContentFilter) EnableOwner(renderer *render.Renderer) ContentOption {
 	m := sync.RWMutex{}
 	longestOwner := 0
 
+	wg := new(sync.WaitGroup)
+	cf.wgs = append(cf.wgs, wg)
 	wait := func(res string) string {
-		cf.wgOwner.Wait()
+		wg.Wait()
 		return renderer.Owner(fillBlank(res, longestOwner))
 	}
 
 	done := func(name string) {
-		defer cf.wgOwner.Done()
+		defer wg.Done()
 		m.RLock()
 		if len(name) > longestOwner {
 			m.RUnlock()
@@ -574,13 +629,15 @@ func (cf *ContentFilter) EnableGroup(renderer *render.Renderer) ContentOption {
 	m := sync.RWMutex{}
 	longestGroup := 0
 
+	wg := new(sync.WaitGroup)
+	cf.wgs = append(cf.wgs, wg)
 	wait := func(name string) string {
-		cf.wgGroup.Wait()
+		wg.Wait()
 		return renderer.Group(fillBlank(name, longestGroup))
 	}
 
 	done := func(name string) {
-		defer cf.wgGroup.Done()
+		defer wg.Done()
 		m.RLock()
 		if len(name) > longestGroup {
 			m.RUnlock()
@@ -593,6 +650,7 @@ func (cf *ContentFilter) EnableGroup(renderer *render.Renderer) ContentOption {
 			m.RUnlock()
 		}
 	}
+
 	return func(info os.FileInfo) string {
 		name := ""
 		if Gid {
@@ -608,18 +666,10 @@ func (cf *ContentFilter) EnableGroup(renderer *render.Renderer) ContentOption {
 func NewContentFilter(options ...ContentOption) *ContentFilter {
 	c := &ContentFilter{
 		options:  options,
-		wgGroup:  new(sync.WaitGroup),
-		wgOwner:  new(sync.WaitGroup),
-		wgSize:   new(sync.WaitGroup),
 		sortFunc: nil,
+		wgs:      make([]LengthFixed, 0),
 	}
-	c.sizeEnabler = &sizeEnabler{
-		total:       atomic.Int64{},
-		enableTotal: false,
-		sizeUint:    0,
-		renderer:    nil,
-		wg:          c.wgSize,
-	}
+
 	return c
 }
 
@@ -648,9 +698,9 @@ func (cf *ContentFilter) GetStringSlice(e []os.FileInfo) []string {
 
 	wg := sync.WaitGroup{}
 	wg.Add(len(e))
-	cf.wgOwner.Add(len(e))
-	cf.wgGroup.Add(len(e))
-	cf.wgSize.Add(len(e))
+	for i := range cf.wgs {
+		cf.wgs[i].Add(len(e))
+	}
 	for i, entry := range e {
 		go func(entry os.FileInfo, i int) {
 			options := cf.options[:len(cf.options)-1]
@@ -695,9 +745,9 @@ func (cf *ContentFilter) GetExtraAndNameStringSlice(e ...os.FileInfo) []tsmap.Pa
 
 	wg := sync.WaitGroup{}
 	wg.Add(len(e))
-	cf.wgOwner.Add(len(e))
-	cf.wgGroup.Add(len(e))
-	cf.wgSize.Add(len(e))
+	for i := range cf.wgs {
+		cf.wgs[i].Add(len(e))
+	}
 	for i, entry := range e {
 		go func(entry os.FileInfo, i int) {
 			options := cf.options[:len(cf.options)-1]
