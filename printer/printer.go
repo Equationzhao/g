@@ -173,7 +173,7 @@ func (c *CommaPrint) Print(s ...string) {
 	for i := range r {
 		r[i] += ","
 	}
-	c.printRow(&s)
+	c.printRowWithNoSpace(&s)
 }
 
 type Across struct {
@@ -188,6 +188,23 @@ func NewAcross() *Across {
 
 func (a *Across) Print(s ...string) {
 	a.printRow(&s)
+}
+
+func (a *Across) printRowWithNoSpace(strs *[]string) {
+	defer a.Flush()
+	width := getTermWidth()
+
+	maxLength := 0
+	for _, str := range *strs {
+		maxLength += runewidth.StringWidth(stripansi.Strip(str))
+		if maxLength <= width {
+			_, _ = a.WriteString(str)
+		} else {
+			_, _ = a.WriteString("\n" + str)
+			maxLength = runewidth.StringWidth(stripansi.Strip(str))
+		}
+	}
+	_ = a.WriteByte('\n')
 }
 
 func (a *Across) printRow(strs *[]string) {
