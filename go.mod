@@ -6,6 +6,7 @@ require (
 	github.com/Equationzhao/tsmap v0.0.4
 	github.com/acarl005/stripansi v0.0.0-20180116102854-5a71ef0e047d
 	github.com/gobwas/glob v0.2.3
+	github.com/mattn/go-runewidth v0.0.14
 	github.com/olekukonko/ts v0.0.0-20171002115256-78ecb04241c0
 	github.com/urfave/cli/v2 v2.25.3
 	github.com/valyala/bytebufferpool v1.0.0
@@ -33,7 +34,6 @@ require (
 	github.com/lucasb-eyer/go-colorful v1.2.0 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.18 // indirect
-	github.com/mattn/go-runewidth v0.0.14 // indirect
 	github.com/mitchellh/copystructure v1.2.0 // indirect
 	github.com/mitchellh/reflectwalk v1.0.2 // indirect
 	github.com/muesli/termenv v0.15.1 // indirect
