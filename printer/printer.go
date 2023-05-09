@@ -7,9 +7,9 @@ import (
 	"math"
 	"os"
 	"strings"
-	"unicode/utf8"
 
 	"github.com/acarl005/stripansi"
+	"github.com/mattn/go-runewidth"
 	"github.com/olekukonko/ts"
 )
 
@@ -56,11 +56,11 @@ func (f *FitTerminal) printColumns(strs *[]string) {
 
 	maxLength := 0
 	// also keep track of each individual length to easily calculate padding
-	var lengths []int
+	lengths := make([]int, 0, len(*strs))
 	for _, str := range *strs {
 		colorless := stripansi.Strip(str)
 		// len() is insufficient here, as it counts emojis as 4 characters each
-		length := utf8.RuneCountInString(colorless)
+		length := runewidth.StringWidth(colorless)
 		maxLength = max(maxLength, length)
 		lengths = append(lengths, length)
 	}
@@ -159,12 +159,12 @@ func max(a int, b int) int {
 }
 
 type CommaPrint struct {
-	*bufio.Writer
+	*Across
 }
 
 func NewCommaPrint() *CommaPrint {
 	return &CommaPrint{
-		Writer: bufio.NewWriter(Output),
+		Across: NewAcross(),
 	}
 }
 
@@ -173,60 +173,7 @@ func (c *CommaPrint) Print(s ...string) {
 	for i := range r {
 		r[i] += ","
 	}
-	c.printColumns(&s)
-}
-
-func (c *CommaPrint) printColumns(strs *[]string) {
-	defer c.Flush()
-
-	maxLength := 0
-	// also keep track of each individual length to easily calculate padding
-	var lengths []int
-	for _, str := range *strs {
-		colorless := stripansi.Strip(str)
-		// len() is insufficient here, as it counts emojis as 4 characters each
-		length := utf8.RuneCountInString(colorless)
-		maxLength = max(maxLength, length)
-		lengths = append(lengths, length)
-	}
-
-	// see how wide the terminal is
-	width := getTermWidth()
-	// calculate the dimensions of the columns
-	numCols, numRows := calculateTableSize(width, 0, maxLength, len(*strs))
-
-	// if we're forced into a single column, fall back to simple printing (one per line)
-	if numCols == 1 {
-		for _, str := range *strs {
-			_, _ = c.WriteString(str)
-			_ = c.WriteByte('\n')
-		}
-		return
-	}
-
-	// `i` will be a left-to-right index. this will need to get converted to a top-to-bottom index
-	for i := 0; i < numCols*numRows; i++ {
-		// treat output like a "table" with (x, y) coordinates as an intermediate representation
-		// first calculate (x, y) from i
-		x, y := rowIndexToTableCoords(i, numCols)
-		// then convey (x, y) to `j`, the top-to-bottom index
-		j := tableCoordsToColIndex(x, y, numRows)
-
-		// try to access the array, but the table might have more cells than array elements, so only try to access if within bounds
-		str := ""
-		if j < len(lengths) {
-			str = (*strs)[j]
-		}
-
-		// print the item itself
-		_, _ = c.WriteString(str)
-		// if we're at the last column, print a line break
-		if x+1 == numCols {
-			_ = c.WriteByte('\n')
-		} else {
-			_, _ = c.WriteString(" ")
-		}
-	}
+	c.printRowWithNoSpace(&s)
 }
 
 type Across struct {
@@ -243,6 +190,23 @@ func (a *Across) Print(s ...string) {
 	a.printRow(&s)
 }
 
+func (a *Across) printRowWithNoSpace(strs *[]string) {
+	defer a.Flush()
+	width := getTermWidth()
+
+	maxLength := 0
+	for _, str := range *strs {
+		maxLength += runewidth.StringWidth(stripansi.Strip(str))
+		if maxLength <= width {
+			_, _ = a.WriteString(str)
+		} else {
+			_, _ = a.WriteString("\n" + str)
+			maxLength = runewidth.StringWidth(stripansi.Strip(str))
+		}
+	}
+	_ = a.WriteByte('\n')
+}
+
 func (a *Across) printRow(strs *[]string) {
 	defer a.Flush()
 	width := getTermWidth()
@@ -253,7 +217,8 @@ func (a *Across) printRow(strs *[]string) {
 	maxLength := 0
 	for i, str := range *strs {
 		colorless := stripansi.Strip(str)
-		strLen[i] = utf8.RuneCountInString(colorless)
+		strLen[i] = runewidth.StringWidth(colorless)
+
 		maxLength = max(maxLength, strLen[i])
 	}
 

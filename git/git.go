@@ -48,19 +48,19 @@ func (f *FileGit) setYFromXY(XY string) {
 	set := func(Y string) {
 		switch Y {
 		case "M":
-			f.Status = GitModified
+			f.Status = Modified
 		case "A":
-			f.Status = GitAdded
+			f.Status = Added
 		case "D":
-			f.Status = GitDeleted
+			f.Status = Deleted
 		case "R":
-			f.Status = GitRenamed
+			f.Status = Renamed
 		case "C":
-			f.Status = GitCopied
+			f.Status = Copied
 		case "?":
-			f.Status = GitUntracked
+			f.Status = Untracked
 		case "!":
-			f.Status = GitIgnored
+			f.Status = Ignored
 		}
 	}
 
@@ -88,13 +88,13 @@ func GetShortGitStatus(repoPath GitRepoPath) (string, error) {
 type Status int
 
 const (
-	GitModified  Status = iota + 1 // M ~
-	GitAdded                       // A +
-	GitDeleted                     // D -
-	GitRenamed                     // R |
-	GitCopied                      // C =
-	GitUntracked                   // ? ?
-	GitIgnored                     // ! !
+	Modified  Status = iota + 1 // M ~
+	Added                       // A +
+	Deleted                     // D -
+	Renamed                     // R |
+	Copied                      // C =
+	Untracked                   // ? ?
+	Ignored                     // ! !
 )
 
 // ParseShort parses a git status output command
@@ -113,7 +113,7 @@ func ParseShort(r string) (res FileGits) {
 	}
 
 	fg := FileGit{}
-	for true {
+	for {
 		if len(s.Text()) < 1 {
 			continue
 		}
@@ -131,19 +131,19 @@ func ParseShort(r string) (res FileGits) {
 
 func (s Status) String() string {
 	switch s {
-	case GitModified:
+	case Modified:
 		return "~"
-	case GitAdded:
+	case Added:
 		return "+"
-	case GitDeleted:
+	case Deleted:
 		return "-"
-	case GitRenamed:
+	case Renamed:
 		return "|"
-	case GitCopied:
+	case Copied:
 		return "="
-	case GitUntracked:
+	case Untracked:
 		return "?"
-	case GitIgnored:
+	case Ignored:
 		return "!"
 	}
 	return ""

@@ -345,3 +345,7 @@ func (r *Renderer) GitIgnoredSym(name string) string {
 func (r *Renderer) GitCopiedSym(name string) string {
 	return r.gitByStatus(name, "git_copied_sym")
 }
+
+func (r *Renderer) Inode(inode string) string {
+	return r.infoByName(inode, "inode")
+}

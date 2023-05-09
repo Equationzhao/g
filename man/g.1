@@ -29,13 +29,14 @@ g
 [--git-status|--gs]
 [--hide-git-ignore|--gi|--hgi]
 [--ignore-glob|-I]=[value]
+[--inode|-i]
 [--lh|--human-readable]
 [--match-glob|-M]=[value]
 [--numeric]
 [--show-group|--sg]
 [--show-hidden|--sh|-a]
 [--show-icon|--si|--icons]
-[--show-no-dir|--nd|--nodir]
+[--show-no-dir|--nd|--nodir|--no-dir]
 [--show-no-ext|--sne|--noext]=[value]
 [--show-only-dir|--sd|--dir|--only-dir]
 [--show-only-ext|--se|--ext]=[value]
@@ -127,6 +128,9 @@ g [options] [path]
 \fB--ignore-glob, -I\fP="": ignore Glob patterns
 
 .PP
+\fB--inode, -i\fP: show inode[linux only]
+
+.PP
 \fB--lh, --human-readable\fP: show human readable size
 
 .PP
@@ -145,7 +149,7 @@ g [options] [path]
 \fB--show-icon, --si, --icons\fP: show icon
 
 .PP
-\fB--show-no-dir, --nd, --nodir\fP: do not show directory
+\fB--show-no-dir, --nd, --nodir, --no-dir\fP: do not show directory
 
 .PP
 \fB--show-no-ext, --sne, --noext\fP="": show file which doesn't have target ext
