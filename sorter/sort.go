@@ -113,8 +113,8 @@ type FileSortFunc = func(a, b os.FileInfo) bool
 
 type Sorter struct {
 	reverse  bool
-	option   []FileSortFunc
 	dirFirst bool
+	option   []FileSortFunc
 }
 
 func (s *Sorter) DirFirst() {
@@ -139,12 +139,17 @@ func WithSize(size int) Option {
 
 func WithSortOption(option ...FileSortFunc) Option {
 	return func(s *Sorter) {
-		s.option = option
+		s.option = append(s.option, option...)
 	}
 }
 
 func NewSorter(option ...Option) *Sorter {
-	a := Sorter{}
+	a := Sorter{
+		reverse:  false,
+		dirFirst: false,
+		option:   make([]FileSortFunc, 0, 10),
+	}
+
 	for _, opt := range option {
 		opt(&a)
 	}
@@ -185,9 +190,9 @@ func (s *Sorter) Build() FileSortFunc {
 
 		if s.reverse {
 			return !result
-		} else {
-			return result
 		}
+		return result
+
 	}
 }
 

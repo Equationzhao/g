@@ -141,7 +141,7 @@ There is NO WARRANTY, to the extent permitted by law.`,
 
 					s, err := tree.NewTreeString(path[i], depth, typeFilter, contentFilter)
 					if errors.Is(err, os.ErrNotExist) {
-						fmt.Printf(MakeErrorStr(fmt.Sprintf("No such file or directory: %s", err.(*os.PathError).Path)))
+						fmt.Print(MakeErrorStr(fmt.Sprintf("No such file or directory: %s", err.(*os.PathError).Path)))
 						seriousErr = true
 						continue
 					} else if err != nil {

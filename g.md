@@ -22,13 +22,14 @@ g
 [--git-status|--gs]
 [--hide-git-ignore|--gi|--hgi]
 [--ignore-glob|-I]=[value]
+[--inode|-i]
 [--lh|--human-readable]
 [--match-glob|-M]=[value]
 [--numeric]
 [--show-group|--sg]
 [--show-hidden|--sh|-a]
 [--show-icon|--si|--icons]
-[--show-no-dir|--nd|--nodir]
+[--show-no-dir|--nd|--nodir|--no-dir]
 [--show-no-ext|--sne|--noext]=[value]
 [--show-only-dir|--sd|--dir|--only-dir]
 [--show-only-ext|--se|--ext]=[value]
@@ -96,9 +97,7 @@ g [options] [path]
 
 **--ignore-glob, -I**="": ignore Glob patterns
 
-**--git-status-style, --gss**="": git status style: colored-symbol: {? untracked, + added, - deleted, ~ modified, | renamed, = copied, ! ignored} colored-dot
-
-**--hide-git-ignore, --gi, --hgi**: hide git ignored file/dir
+**--inode, -i**: show inode[linux only]
 
 **--lh, --human-readable**: show human readable size
 
@@ -112,7 +111,7 @@ g [options] [path]
 
 **--show-icon, --si, --icons**: show icon
 
-**--show-no-dir, --nd, --nodir**: do not show directory
+**--show-no-dir, --nd, --nodir, --no-dir**: do not show directory
 
 **--show-no-ext, --sne, --noext**="": show file which doesn't have target ext
 

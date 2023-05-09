@@ -56,7 +56,7 @@ func (f *FitTerminal) printColumns(strs *[]string) {
 
 	maxLength := 0
 	// also keep track of each individual length to easily calculate padding
-	var lengths []int
+	lengths := make([]int, 0, len(*strs))
 	for _, str := range *strs {
 		colorless := stripansi.Strip(str)
 		// len() is insufficient here, as it counts emojis as 4 characters each

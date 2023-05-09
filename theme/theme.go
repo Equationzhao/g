@@ -33,38 +33,38 @@ type Style struct {
 
 type Theme map[string]Style
 
-var info = []string{"d", "l", "b", "c", "p", "s", "r", "w", "x", "-", "time", "size", "owner", "group", "git_modified_dot", "git_renamed_dot", "git_copied_dot", "git_deleted_dot", "git_added_dot", "git_untracked_dot", "git_ignored_dot", "git_modified_sym", "git_renamed_sym", "git_copied_sym", "git_deleted_sym", "git_added_sym", "git_untracked_sym", "git_ignored_sym"}
+// var info = []string{"d", "l", "b", "c", "p", "s", "r", "w", "x", "-", "time", "size", "owner", "group", "git_modified_dot", "git_renamed_dot", "git_copied_dot", "git_deleted_dot", "git_added_dot", "git_untracked_dot", "git_ignored_dot", "git_modified_sym", "git_renamed_sym", "git_copied_sym", "git_deleted_sym", "git_added_sym", "git_untracked_sym", "git_ignored_sym"}
 
-func color2str(color string) string {
-	switch color {
-	case Red:
-		return "red"
-	case Green:
-		return "green"
-	case Yellow:
-		return "yellow"
-	case Blue:
-		return "blue"
-	case Purple:
-		return "purple"
-	case Cyan:
-		return "cyan"
-	case White:
-		return "white"
-	case Black:
-		return "black"
-	case Reset:
-		return "reset"
-	case Underline:
-		return "underline"
-	case Bold:
-		return "bold"
-	case Reverse:
-		return "reverse"
-	default:
-		return ""
-	}
-}
+// func color2str(color string) string {
+// 	switch color {
+// 	case Red:
+// 		return "red"
+// 	case Green:
+// 		return "green"
+// 	case Yellow:
+// 		return "yellow"
+// 	case Blue:
+// 		return "blue"
+// 	case Purple:
+// 		return "purple"
+// 	case Cyan:
+// 		return "cyan"
+// 	case White:
+// 		return "white"
+// 	case Black:
+// 		return "black"
+// 	case Reset:
+// 		return "reset"
+// 	case Underline:
+// 		return "underline"
+// 	case Bold:
+// 		return "bold"
+// 	case Reverse:
+// 		return "reverse"
+// 	default:
+// 		return ""
+// 	}
+// }
 
 func str2color(str string) string {
 	switch str {
@@ -95,7 +95,7 @@ func str2color(str string) string {
 	case "reverse", "Reverse":
 		return Reverse
 	default:
-		str = strings.Replace(str, " ", "", -1)
+		str = strings.ReplaceAll(str, " ", "")
 		if strings.HasPrefix(str, "Reverse+") || strings.HasPrefix(str, "reverse+") {
 			return Reverse + str2color(str[8:])
 		}
@@ -157,7 +157,7 @@ func GetTheme(path string) error {
 		if section.Name() == "DEFAULT" || section.Name() == "info" {
 			keys := section.Keys()
 			for _, v := range keys {
-				o, _ := DefaultInfoTheme[v.Name()]
+				o := DefaultInfoTheme[v.Name()]
 				o.Color = str2color(v.String())
 				DefaultInfoTheme[v.Name()] = o
 			}

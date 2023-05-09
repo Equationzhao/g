@@ -69,7 +69,6 @@ func EnableFileMode(renderer *render.Renderer) ContentOption {
 
 type InodeEnabler struct {
 	*sync.WaitGroup
-	renderer *render.Renderer
 }
 
 func NewInodeEnabler() *InodeEnabler {
@@ -78,7 +77,7 @@ func NewInodeEnabler() *InodeEnabler {
 	}
 }
 
-func (i InodeEnabler) Enable(renderer *render.Renderer) ContentOption {
+func (i *InodeEnabler) Enable(renderer *render.Renderer) ContentOption {
 	m := sync.RWMutex{}
 	longestInode := 0
 
@@ -210,7 +209,11 @@ type SizeEnabler struct {
 
 func NewSizeEnabler() *SizeEnabler {
 	return &SizeEnabler{
-		WaitGroup: new(sync.WaitGroup),
+		total:       atomic.Int64{},
+		enableTotal: false,
+		sizeUint:    Auto,
+		renderer:    nil,
+		WaitGroup:   new(sync.WaitGroup),
 	}
 }
 
@@ -314,7 +317,6 @@ func (s *SizeEnabler) EnableSize(size SizeUnit, renderer *render.Renderer) Conte
 				longestSize = len(size)
 			}
 			m.Unlock()
-			return
 		}
 
 		wait := func(size string) string {
@@ -425,8 +427,8 @@ func (n *Name) SetFileType() *Name {
 	return n
 }
 
-func (n *Name) SetRenderer(Renderer *render.Renderer) *Name {
-	n.Renderer = Renderer
+func (n *Name) SetRenderer(renderer *render.Renderer) *Name {
+	n.Renderer = renderer
 	return n
 }
 
