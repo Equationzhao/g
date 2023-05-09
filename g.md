@@ -54,9 +54,9 @@ g
 [-G|--no-group]
 [-d|--directory|--list-dirs]
 [-g]
-[-m]
+[-m|--comma]
 [-o]
-[-x]
+[-x|--col|--across|--horizontal]
 ```
 
 **Usage**:
@@ -161,10 +161,10 @@ g [options] [path]
 
 **-g**: like -all/l, but do not list owner
 
-**-m**: fill width with a comma separated list of entries
+**-m, --comma**: fill width with a comma separated list of entries
 
 **-o**: like -all/l, but do not list group information
 
-**-x**: list entries by lines instead of by columns
+**-x, --col, --across, --horizontal**: list entries by lines instead of by columns
 
 
