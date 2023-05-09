@@ -207,6 +207,10 @@ type SizeEnabler struct {
 	*sync.WaitGroup
 }
 
+func (s *SizeEnabler) SetRenderer(renderer *render.Renderer) {
+	s.renderer = renderer
+}
+
 func NewSizeEnabler() *SizeEnabler {
 	return &SizeEnabler{
 		total:       atomic.Int64{},
@@ -297,9 +301,8 @@ func (s *SizeEnabler) Size2String(b int64, blank int) string {
 	return s.renderer.Size(fillBlank(res, blank))
 }
 
-func (s *SizeEnabler) EnableSize(size SizeUnit, renderer *render.Renderer) ContentOption {
+func (s *SizeEnabler) EnableSize(size SizeUnit) ContentOption {
 	s.sizeUint = size
-	s.renderer = renderer
 
 	if size != Auto {
 		longestSize := 0
