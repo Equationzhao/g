@@ -31,7 +31,7 @@ var (
 	timeFormat    = "02.Jan'06 15:04"
 	ReturnCode    = 0
 	contentFilter = filter.NewContentFilter()
-	compiledAt    = ""
+	CompiledAt    = ""
 	sort          = sorter.NewSorter()
 	timeType      = "mod"
 	sizeUint      = filter.Auto
@@ -45,8 +45,15 @@ var G *cli.App
 
 func init() {
 	typeFunc = append(typeFunc, &filter.RemoveHidden)
-	if compiledAt == "" {
-		compiledAt = time.Now().Format(timeFormat)
+	if CompiledAt == "" {
+		CompiledAt = time.Now().Format(timeFormat)
+	} else {
+		CompiledAtTime, err := time.Parse("2006-01-02-15:04:05", CompiledAt)
+		if err != nil {
+			CompiledAt = time.Now().Format(timeFormat)
+		} else {
+			CompiledAt = CompiledAtTime.UTC().Format(timeFormat)
+		}
 	}
 	sizeEnabler.SetRenderer(r)
 	wgs = append(wgs, sizeEnabler)
@@ -318,14 +325,14 @@ REPO:
 	https://github.com/Equationzhao/g
 
 %s compiled at %s
-`, cli.AppHelpTemplate, versionInfo.Get().Version, compiledAt)
+`, cli.AppHelpTemplate, versionInfo.Get().Version, CompiledAt)
 }
 
 func initVersionHelpFlags() {
 	repos := "https://github.com/Equationzhao/g"
 	info := versionInfo.Get()
 	info.Version = Version
-	info.BuildDate = compiledAt
+	info.BuildDate = CompiledAt
 	info.ExtraFields = repos
 	format := style.Formatting{
 		Header: style.Header{
