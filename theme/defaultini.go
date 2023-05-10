@@ -1,5 +1,3 @@
-//go:build theme
-
 package theme
 
 import (
@@ -41,9 +39,18 @@ func init() {
 
 	for _, k := range default_ {
 		section := defaultThemeIni.Section(k.key)
-		section.NewKey("color", color2str(k.value.(Style).Color))
-		section.NewKey("icon", k.value.(Style).Icon)
+		_, err := section.NewKey("color", color2str(k.value.(Style).Color))
+		if err != nil {
+			println(err.Error())
+		}
+		_, err = section.NewKey("icon", k.value.(Style).Icon)
+		if err != nil {
+			println(err.Error())
+		}
 	}
 
-	defaultThemeIni.SaveTo(filepath.Join("theme", "default.ini"))
+	err := defaultThemeIni.SaveTo(filepath.Join("theme", "default.ini"))
+	if err != nil {
+		println(err.Error())
+	}
 }

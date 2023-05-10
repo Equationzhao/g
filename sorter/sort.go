@@ -192,7 +192,6 @@ func (s *Sorter) Build() FileSortFunc {
 			return !result
 		}
 		return result
-
 	}
 }
 

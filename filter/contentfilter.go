@@ -139,6 +139,10 @@ func fillBlank(s string, length int) string {
 
 func Convert2SizeString(size SizeUnit) string {
 	switch size {
+	case Unknown:
+		return "?"
+	case Auto:
+		return ""
 	case Bit:
 		return "bit"
 	case B:
