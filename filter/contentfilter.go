@@ -813,8 +813,6 @@ func (cf *ContentFilter) EnableSum(sumTypes ...SumType) ContentOption {
 		if info.IsDir() {
 			return fillBlank("", length)
 		}
-		pwd, _ := os.Getwd()
-		_ = pwd
 
 		file, err := os.Open(info.Name())
 		if err != nil {
