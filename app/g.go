@@ -325,7 +325,7 @@ REPO:
 	https://github.com/Equationzhao/g
 
 %s compiled at %s
-`, cli.AppHelpTemplate, versionInfo.Get().Version, CompiledAt)
+`, cli.AppHelpTemplate, Version, CompiledAt)
 }
 
 func initVersionHelpFlags() {
