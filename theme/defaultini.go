@@ -1,3 +1,5 @@
+//go:build theme
+
 package theme
 
 import (
