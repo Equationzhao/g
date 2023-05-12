@@ -39,7 +39,7 @@ var (
 	wgs           = make([]filter.LengthFixed, 0, 1)
 )
 
-var Version = "0.5.1"
+var Version = "0.5.2"
 
 var G *cli.App
 
