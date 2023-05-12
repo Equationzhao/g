@@ -139,6 +139,10 @@ func fillBlank(s string, length int) string {
 
 func Convert2SizeString(size SizeUnit) string {
 	switch size {
+	case Unknown:
+		return "?"
+	case Auto:
+		return ""
 	case Bit:
 		return "bit"
 	case B:
@@ -809,8 +813,6 @@ func (cf *ContentFilter) EnableSum(sumTypes ...SumType) ContentOption {
 		if info.IsDir() {
 			return fillBlank("", length)
 		}
-		pwd, _ := os.Getwd()
-		_ = pwd
 
 		file, err := os.Open(info.Name())
 		if err != nil {
@@ -840,7 +842,7 @@ func (cf *ContentFilter) EnableSum(sumTypes ...SumType) ContentOption {
 		}
 		sums := make([]string, 0, len(hashes))
 		for _, h := range hashes {
-			sums = append(sums, string(h.Sum(nil)))
+			sums = append(sums, fmt.Sprintf("%x", h.Sum(nil)))
 		}
 		sumsStr := strings.Join(sums, " ")
 		return fillBlank(sumsStr, length)

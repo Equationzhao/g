@@ -94,7 +94,7 @@ Transform
 		+hh:mm numeric timezone (e.g., -04:00)
 	%::z
 		+hh:mm:ss numeric time zone (e.g., -04:00:00)
-	%:::z
+	%:::z not implemented
 		numeric time zone with : to necessary precision (e.g., -04, +05:30)
 	%Z
 		alphabetic time zone abbreviation (e.g., EDT)
@@ -139,7 +139,6 @@ func Transform(format string) (goFormat string) {
 			`%z`, "-0700",
 			`%:z`, "-07:00",
 			`%::z`, "-07:00:00",
-			`%:::z`, "-07",
 			`%Z`, "MST",
 		)
 	})
