@@ -1,3 +1,0 @@
-[submodule "aur/g-ls"]
-	path = aur/g-ls
-	url = ssh://aur@aur.archlinux.org/g-ls.git
