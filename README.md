@@ -82,7 +82,7 @@ g -t -depth=<level> path
 ## install
 go version required >= 1.20
 ```bash
-go install github.com/Equationzhao/g@latest
+go install -ldflags="-s -w -v -X main.compiledAt=$(date +%Y%m%d%H%M%S)"  github.com/Equationzhao/g@latest
 ```
 
 Archlinux user can install from AUR
