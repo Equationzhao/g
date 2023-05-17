@@ -19,6 +19,7 @@ func main() {
 		}
 		os.Exit(ReturnCode)
 	}()
+	Version = "0.5.3"
 
 	if doc {
 		md, _ := os.Create("g.md")
