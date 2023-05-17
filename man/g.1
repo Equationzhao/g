@@ -24,6 +24,7 @@ g
 [--file-type|--ft]
 [--format]=[value]
 [--full-time]
+[--fuzzy|--fz|-f]
 [--gid]
 [--git-status-style|--gss]=[value]
 [--git-status|--gs]
@@ -31,8 +32,11 @@ g
 [--ignore-glob|-I]=[value]
 [--inode|-i]
 [--lh|--human-readable]
+[--list-index|--li]
 [--match-glob|-M]=[value]
 [--numeric]
+[--rebuild-index|--ri]
+[--remove-index]=[value]
 [--show-group|--sg]
 [--show-hidden|--sh|-a]
 [--show-icon|--si|--icons]
@@ -113,6 +117,9 @@ g [options] [path]
 \fB--full-time\fP: like -all/l --time-style=full-iso
 
 .PP
+\fB--fuzzy, --fz, -f\fP: fuzzy search
+
+.PP
 \fB--gid\fP: show gid instead of groupname [sid in windows]
 
 .PP
@@ -134,10 +141,19 @@ g [options] [path]
 \fB--lh, --human-readable\fP: show human readable size
 
 .PP
+\fB--list-index, --li\fP: list index
+
+.PP
 \fB--match-glob, -M\fP="": match Glob patterns
 
 .PP
 \fB--numeric\fP:  List numeric user and group IDs instead of name [sid in windows]
+
+.PP
+\fB--rebuild-index, --ri\fP: rebuild index
+
+.PP
+\fB--remove-index\fP="": remove paths from index
 
 .PP
 \fB--show-group, --sg\fP: show group
