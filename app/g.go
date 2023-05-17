@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/Equationzhao/g/filter"
+	"github.com/Equationzhao/g/index"
 	"github.com/Equationzhao/g/pathbeautify"
 	"github.com/Equationzhao/g/printer"
 	"github.com/Equationzhao/g/render"
@@ -78,7 +79,7 @@ There is NO WARRANTY, to the extent permitted by law.`,
 			_, _ = fmt.Println(MakeErrorStr(err.Error()))
 			return nil
 		},
-		Flags: make([]cli.Flag, 0, len(viewFlag)+len(filteringFlag)+len(sortingFlags)+len(displayFlag)+5),
+		Flags: make([]cli.Flag, 0, len(viewFlag)+len(filteringFlag)+len(sortingFlags)+len(displayFlag)+len(indexFlags)),
 		Action: func(context *cli.Context) error {
 			var (
 				minorErr   = false
@@ -101,6 +102,8 @@ There is NO WARRANTY, to the extent permitted by law.`,
 			if context.Bool("git-status") {
 				nameToDisplay.SetGit()
 			}
+
+			fuzzy := context.Bool("fuzzy")
 
 			{
 				s := context.String("git-status-style")
@@ -145,17 +148,39 @@ There is NO WARRANTY, to the extent permitted by law.`,
 					}
 
 					pathbeautify.Transform(&path[i])
+					if fuzzy {
+						_, err := os.Stat(path[i])
+						if err != nil {
+							if newPath, b := fuzzyPath(fuzzy, path[i]); b != nil {
+								_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(err.Error()))
+								minorErr = true
+							} else {
+								path[i] = newPath
+							}
+						}
+					}
 
 					s, err := tree.NewTreeString(path[i], depth, typeFilter, contentFilter)
-					if errors.Is(err, os.ErrNotExist) {
-						fmt.Print(MakeErrorStr(fmt.Sprintf("No such file or directory: %s", err.(*os.PathError).Path)))
+					if pathErr := new(os.PathError); errors.As(err, &pathErr) {
+						_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(fmt.Sprintf("No such file or directory: %s", pathErr.Path)))
 						seriousErr = true
 						continue
 					} else if err != nil {
-						fmt.Println(MakeErrorStr(err.Error()))
+						_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(err.Error()))
 						seriousErr = true
 						continue
 					}
+
+					absPath, err := filepath.Abs(path[i])
+					if err != nil {
+						minorErr = true
+					} else {
+						if err = fuzzyUpdate(fuzzy, absPath); err != nil {
+							_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(err.Error()))
+							minorErr = true
+						}
+					}
+
 					fmt.Println(s.MakeTreeStr())
 					fmt.Printf("\n%d directories, %d files\n", s.Directory(), s.File())
 
@@ -187,9 +212,37 @@ There is NO WARRANTY, to the extent permitted by law.`,
 					if path[i] != "." {
 						stat, err := os.Stat(path[i])
 						if err != nil {
-							_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(err.Error()))
-							seriousErr = true
-							continue
+							if fuzzy {
+								if newPath, err := fuzzyPath(fuzzy, path[i]); err != nil {
+									_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(err.Error()))
+									minorErr = true
+								} else {
+									path[i] = newPath
+									stat, err = os.Stat(path[i])
+									if err != nil {
+										if pathErr := new(os.PathError); errors.As(err, &pathErr) {
+											_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(fmt.Sprintf("No such file or directory: %s", pathErr.Path)))
+											seriousErr = true
+											continue
+										} else {
+											_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(err.Error()))
+											seriousErr = true
+											continue
+										}
+									}
+									fmt.Println(path[i])
+								}
+							} else {
+								if pathErr := new(os.PathError); errors.As(err, &pathErr) {
+									_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(fmt.Sprintf("No such file or directory: %s", pathErr.Path)))
+									seriousErr = true
+									continue
+								} else {
+									_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(err.Error()))
+									seriousErr = true
+									continue
+								}
+							}
 						}
 						if stat.IsDir() {
 							if flagd {
@@ -197,11 +250,17 @@ There is NO WARRANTY, to the extent permitted by law.`,
 								infos = append(infos, stat)
 								isFile = true
 							} else {
-								_ = os.Chdir(path[i])
+								err = os.Chdir(path[i])
 								if err != nil {
-									_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(err.Error()))
-									seriousErr = true
-									continue
+									if pathErr := new(os.PathError); errors.As(err, &pathErr) {
+										_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(fmt.Sprintf("No such file or directory: %s", pathErr.Path)))
+										seriousErr = true
+										continue
+									} else {
+										_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(err.Error()))
+										seriousErr = true
+										continue
+									}
 								}
 							}
 						} else {
@@ -212,8 +271,16 @@ There is NO WARRANTY, to the extent permitted by law.`,
 						}
 					}
 
+					absPath, err := filepath.Abs(".")
+					if err != nil {
+						minorErr = true
+					}
+					if err = fuzzyUpdate(fuzzy, absPath); err != nil {
+						_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(err.Error()))
+						minorErr = true
+					}
+
 					var d []os.DirEntry
-					var err error
 					if isFile {
 						goto final
 					}
@@ -227,13 +294,23 @@ There is NO WARRANTY, to the extent permitted by law.`,
 					if !flagA {
 						statCurrent, err := os.Stat(".")
 						if err != nil {
-							seriousErr = true
-							_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(err.Error()))
+							if pathErr := new(os.PathError); errors.As(err, &pathErr) {
+								_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(fmt.Sprintf("No such file or directory: %s", pathErr.Path)))
+								seriousErr = true
+							} else {
+								_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(err.Error()))
+								seriousErr = true
+							}
 						}
 						statParent, err := os.Stat("..")
 						if err != nil {
-							minorErr = true
-							_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(err.Error()))
+							if pathErr := new(os.PathError); errors.As(err, &pathErr) {
+								_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(fmt.Sprintf("No such file or directory: %s", pathErr.Path)))
+								minorErr = true
+							} else {
+								_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(err.Error()))
+								minorErr = true
+							}
 						}
 						infos = append(infos, statCurrent, statParent)
 					}
@@ -241,8 +318,13 @@ There is NO WARRANTY, to the extent permitted by law.`,
 					for _, v := range d {
 						info, err := v.Info()
 						if err != nil {
-							minorErr = true
-							_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(err.Error()))
+							if pathErr := new(os.PathError); errors.As(err, &pathErr) {
+								_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(fmt.Sprintf("No such file or directory: %s", pathErr.Path)))
+								minorErr = true
+							} else {
+								minorErr = true
+								_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(err.Error()))
+							}
 						} else {
 							infos = append(infos, info)
 						}
@@ -307,10 +389,30 @@ There is NO WARRANTY, to the extent permitted by law.`,
 	G.Flags = append(G.Flags, displayFlag...)
 	G.Flags = append(G.Flags, filteringFlag...)
 	G.Flags = append(G.Flags, sortingFlags...)
+	G.Flags = append(G.Flags, indexFlags...)
 
 	initHelpTemp()
 
 	initVersionHelpFlags()
+}
+
+func fuzzyUpdate(fuzzy bool, path string) error {
+	err := index.Update(path)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// fuzzyPath returns the fuzzy path
+// if error, return empty string and error
+func fuzzyPath(fuzzy bool, path string) (newPath string, minorErr error) {
+	fuzzed, err := index.FuzzySearch(path)
+	if err == nil {
+		return fuzzed, nil
+	} else {
+		return "", err
+	}
 }
 
 type Err4Exit struct{}
@@ -534,7 +636,6 @@ var viewFlag = []cli.Flag{
 		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
 			if b {
-
 				contentFunc = append(contentFunc, sizeEnabler.EnableSize(sizeUint))
 				if _, ok := p.(*printer.Byline); !ok {
 					p = printer.NewByline()
@@ -1071,6 +1172,70 @@ var filteringFlag = []cli.Flag{
 		Usage:              "hide git ignored file/dir [if git is installed]",
 		DisableDefaultText: true,
 		Category:           "FILTERING",
+	},
+}
+
+var indexFlags = []cli.Flag{
+	&cli.BoolFlag{
+		Name:               "rebuild-index",
+		Aliases:            []string{"ri"},
+		Usage:              "rebuild index",
+		DisableDefaultText: true,
+		Category:           "Index",
+		Action: func(context *cli.Context, b bool) error {
+			if b {
+				err := index.RebuildIndex()
+				if err != nil {
+					return err
+				}
+			}
+			return Err4Exit{}
+		},
+	},
+	&cli.BoolFlag{
+		Name:               "fuzzy",
+		Aliases:            []string{"fz", "f"},
+		Usage:              "fuzzy search",
+		DisableDefaultText: true,
+		Category:           "Index",
+	},
+	&cli.StringSliceFlag{
+		Name:     "remove-index",
+		Usage:    "remove paths from index",
+		Category: "Index",
+		Action: func(context *cli.Context, i []string) error {
+			var errSum error = nil
+			for _, s := range i {
+				err := index.Delete(s)
+				if err != nil {
+					errSum = errors.Join(errSum, err)
+				}
+			}
+			if errSum != nil {
+				return errSum
+			} else {
+				return Err4Exit{}
+			}
+		},
+	},
+	&cli.BoolFlag{
+		Name:               "list-index",
+		Aliases:            []string{"li"},
+		Usage:              "list index",
+		DisableDefaultText: true,
+		Category:           "Index",
+		Action: func(context *cli.Context, b bool) error {
+			if b {
+				keys, values, err := index.All()
+				if err != nil {
+					return err
+				}
+				for i := 0; i < len(keys); i++ {
+					fmt.Println(string(keys[i]), string(values[i]))
+				}
+			}
+			return Err4Exit{}
+		},
 	},
 }
 

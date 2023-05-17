@@ -17,6 +17,7 @@ g
 [--file-type|--ft]
 [--format]=[value]
 [--full-time]
+[--fuzzy|--fz|-f]
 [--gid]
 [--git-status-style|--gss]=[value]
 [--git-status|--gs]
@@ -24,8 +25,11 @@ g
 [--ignore-glob|-I]=[value]
 [--inode|-i]
 [--lh|--human-readable]
+[--list-index|--li]
 [--match-glob|-M]=[value]
 [--numeric]
+[--rebuild-index|--ri]
+[--remove-index]=[value]
 [--show-group|--sg]
 [--show-hidden|--sh|-a]
 [--show-icon|--si|--icons]
@@ -87,6 +91,8 @@ g [options] [path]
 
 **--full-time**: like -all/l --time-style=full-iso
 
+**--fuzzy, --fz, -f**: fuzzy search
+
 **--gid**: show gid instead of groupname [sid in windows]
 
 **--git-status, --gs**: show git status: ? untracked, + added, ! deleted, ~ modified, | renamed, = copied, $ ignored [if git is installed]
@@ -101,9 +107,15 @@ g [options] [path]
 
 **--lh, --human-readable**: show human readable size
 
+**--list-index, --li**: list index
+
 **--match-glob, -M**="": match Glob patterns
 
 **--numeric**:  List numeric user and group IDs instead of name [sid in windows]
+
+**--rebuild-index, --ri**: rebuild index
+
+**--remove-index**="": remove paths from index
 
 **--show-group, --sg**: show group
 
