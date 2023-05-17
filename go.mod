@@ -12,6 +12,7 @@ require (
 	github.com/syndtr/goleveldb v1.0.0
 	github.com/urfave/cli/v2 v2.25.3
 	github.com/valyala/bytebufferpool v1.0.0
+	github.com/xrash/smetrics v0.0.0-20201216005158-039620a65673
 	go.szostok.io/version v1.2.0
 	gopkg.in/ini.v1 v1.67.0
 )
@@ -44,7 +45,6 @@ require (
 	github.com/shopspring/decimal v1.3.1 // indirect
 	github.com/spf13/cast v1.5.1 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
-	github.com/xrash/smetrics v0.0.0-20201216005158-039620a65673 // indirect
 	golang.org/x/crypto v0.9.0 // indirect
 	golang.org/x/sys v0.8.0 // indirect
 	golang.org/x/xerrors v0.0.0-20220907171357-04be3eba64a2 // indirect
