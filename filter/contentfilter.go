@@ -731,6 +731,11 @@ func (cf *ContentFilter) GetStringSlice(e []os.FileInfo) []string {
 	return res
 }
 
+// GetExtraAndNameStringSlice returns a slice of string which contains extra information and name of the file
+/*
+	buffers layout:
+		extra extra extra ... |half|  name name name ...
+*/
 func (cf *ContentFilter) GetExtraAndNameStringSlice(e ...os.FileInfo) []tsmap.Pair[string, string] {
 	resBuffers := make([]*bytebufferpool.ByteBuffer, 2*len(e))
 
