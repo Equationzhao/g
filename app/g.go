@@ -148,14 +148,30 @@ There is NO WARRANTY, to the extent permitted by law.`,
 					}
 
 					pathbeautify.Transform(&path[i])
+
+					// fuzzy search
 					if fuzzy {
 						_, err := os.Stat(path[i])
 						if err != nil {
 							if newPath, b := fuzzyPath(fuzzy, path[i]); b != nil {
 								_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(err.Error()))
 								minorErr = true
+								continue
 							} else {
 								path[i] = newPath
+								_, err = os.Stat(path[i])
+								if err != nil {
+									if pathErr := new(os.PathError); errors.As(err, &pathErr) {
+										_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(fmt.Sprintf("No such file or directory: %s", pathErr.Path)))
+										seriousErr = true
+										continue
+									} else {
+										_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(err.Error()))
+										seriousErr = true
+										continue
+									}
+								}
+								fmt.Println(path[i])
 							}
 						}
 					}
@@ -1198,6 +1214,7 @@ var indexFlags = []cli.Flag{
 		Usage:              "fuzzy search",
 		DisableDefaultText: true,
 		Category:           "Index",
+		EnvVars:            []string{"G_FZF"},
 	},
 	&cli.StringSliceFlag{
 		Name:     "remove-index",

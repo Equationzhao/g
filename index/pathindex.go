@@ -2,65 +2,85 @@ package index
 
 import (
 	"fmt"
-	"math"
 	"os"
 	"path/filepath"
-	"strconv"
+	"strings"
 	"sync"
+	"sync/atomic"
 
+	"github.com/junegunn/fzf/src/algo"
+	"github.com/junegunn/fzf/src/util"
 	"github.com/syndtr/goleveldb/leveldb"
-	"github.com/xrash/smetrics"
 )
+
+type once struct {
+	m    sync.Mutex
+	done uint32
+}
+
+func (o *once) Do(fn func() error) error {
+	if atomic.LoadUint32(&o.done) == 1 {
+		return nil
+	}
+	return o.doSlow(fn)
+}
+
+func (o *once) doSlow(fn func() error) error {
+	o.m.Lock()
+	defer o.m.Unlock()
+	var err error
+	if o.done == 0 {
+		err = fn()
+		if err == nil {
+			atomic.StoreUint32(&o.done, 1)
+		}
+	}
+	return err
+}
 
 var (
 	db        *leveldb.DB
-	initOnce  sync.Once
-	closeOnce sync.Once
-	errInit   error
-	errClose  error
+	initOnce  once
+	closeOnce once
 	indexPath string
 )
 
 func getDB() (*leveldb.DB, error) {
-	initOnce.Do(func() {
-		errInit = nil
+	err := initOnce.Do(func() error {
 		var err error
 		indexPath, err = os.UserConfigDir()
 		if err != nil {
-			errInit = err
-			initOnce = sync.Once{}
-			return
+			return err
 		}
 		indexPath = filepath.Join(indexPath, "g", "index")
 		err = os.MkdirAll(indexPath, os.ModePerm)
 		if err != nil {
-			errInit = err
-			initOnce = sync.Once{}
-			return
+			return err
 		}
 		db, err = leveldb.OpenFile(indexPath, nil)
 		if err != nil {
-			errInit = err
-			initOnce = sync.Once{}
-			return
+			return err
 		}
+		return nil
 	})
-	return db, errInit
+	return db, err
 }
 
-func close() error {
-	closeOnce.Do(func() {
-		errClose = nil
+func Close() error {
+	return closeDB()
+}
+
+func closeDB() error {
+	err := closeOnce.Do(func() error {
 		if db != nil {
 			err := db.Close()
 			if err != nil {
-				errClose = err
-				closeOnce = sync.Once{}
-				return
+				return err
 			}
 		}
+		return nil
 	})
-	return errClose
+	return err
 }
 
 type ErrUpdate struct {
@@ -68,37 +88,7 @@ type ErrUpdate struct {
 }
 
 func (e ErrUpdate) Error() string {
-	return fmt.Sprint("failed to update `", string(e.key), "`")
-}
-
-func FuzzySearch(key string) (string, error) {
-	db, err := getDB()
-	if err != nil {
-		return "", err
-	}
-	iter := db.NewIterator(nil, nil)
-	defer iter.Release()
-	result := key
-	times := 0
-	highest := 0.0
-	for iter.Next() {
-		base := filepath.Base(string(iter.Key()))
-		score := smetrics.JaroWinkler(key, base, 0.7, 4)
-		times, err = strconv.Atoi(string(iter.Value()))
-		if err != nil {
-			continue
-		}
-		score *= math.Sqrt(float64(times))
-		if smetrics.Soundex(key) == smetrics.Soundex(base) {
-			score *= 1.5
-		}
-		if score > highest {
-			highest = score
-			result = string(iter.Key())
-		}
-	}
-
-	return result, nil
+	return fmt.Sprint("failed to update `", e.key, "`")
 }
 
 func Update(key string) error {
@@ -106,20 +96,16 @@ func Update(key string) error {
 	if err != nil {
 		return err
 	}
-	times := 0
-	data, err := db.Get([]byte(key), nil)
+	_, err = db.Get([]byte(key), nil)
 	if err != nil {
 		err := db.Put([]byte(key), []byte("1"), nil)
 		if err != nil {
 			return err
 		}
 	} else {
-		times, err = strconv.Atoi(string(data))
-		if err != nil {
-			return err
-		}
+		return nil
 	}
-	return db.Put([]byte(key), []byte(strconv.Itoa(times+1)), nil)
+	return nil
 }
 
 func Delete(key string) error {
@@ -155,4 +141,38 @@ func All() ([]string, []string, error) {
 		values = append(values, string(iter.Value()))
 	}
 	return keys, values, nil
+}
+
+func FuzzySearch(key string) (string, error) {
+	db, err := getDB()
+	if err != nil {
+		return "", err
+	}
+	iter := db.NewIterator(nil, nil)
+	defer iter.Release()
+	result := key
+	// times := 0
+	highest := 0
+	for iter.Next() {
+		input := util.ToChars([]byte(strings.ToLower(string(iter.Key()))))
+		pattern := algo.NormalizeRunes([]rune(strings.ToLower(key)))
+		res, _ := algo.FuzzyMatchV2(false, true, true, &input, pattern, true, nil)
+		score := res.Score
+		// base := filepath.Base(string(iter.Key()))
+		// score := smetrics.JaroWinkler(key, base, 0.7, 4)
+		// times, err = strconv.Atoi(string(iter.Value()))
+		// if err != nil {
+		// 	continue
+		// }
+		// score *= math.Sqrt(float64(times))
+		// if smetrics.Soundex(key) == smetrics.Soundex(base) {
+		// 	score *= 1.5
+		// }
+		if score > highest {
+			highest = score
+			result = string(iter.Key())
+		}
+	}
+
+	return result, nil
 }
