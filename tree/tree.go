@@ -71,7 +71,7 @@ func expand(node tree, depthLimit int, wg *sync.WaitGroup, parent string, s *sta
 		info, err := entry.Info()
 		if err != nil {
 			node.AddNode(err.Error())
-			return
+			continue
 		}
 		infos = append(infos, info)
 	}

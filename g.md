@@ -29,6 +29,7 @@ g
 [--match-glob|-M]=[value]
 [--numeric]
 [--rebuild-index|--ri]
+[--recurse|-R]
 [--remove-index]=[value]
 [--show-group|--sg]
 [--show-hidden|--sh|-a]
@@ -81,7 +82,7 @@ g [options] [path]
 
 **--checksum-algorithm, --ca**="": show checksum of file with algorithm: md5, sha1, sha256, sha512 (default: "sha1")
 
-**--depth**="": tree limit depth, negative -> infinity (default: infinity)
+**--depth**="": limit recursive depth, negative -> infinity (default: infinity)
 
 **--dir-first, --df**: List directories before other files
 
@@ -114,6 +115,8 @@ g [options] [path]
 **--numeric**:  List numeric user and group IDs instead of name [sid in windows]
 
 **--rebuild-index, --ri**: rebuild index
+
+**--recurse, -R**: recurse into directories
 
 **--remove-index**="": remove paths from index
 
@@ -153,7 +156,7 @@ g [options] [path]
 
 **--time-type, --tt**="": time type, mod, create, access (default: mod)
 
-**--tree, -t**: list in tree
+**--tree, -t**: recursively list in tree
 
 **--uid**: show uid instead of username [sid in windows]
 
