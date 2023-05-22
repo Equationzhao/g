@@ -38,9 +38,10 @@ var (
 	sizeUint      = filter.Auto
 	sizeEnabler   = filter.NewSizeEnabler()
 	wgs           = make([]filter.LengthFixed, 0, 1)
+	depthLimitMap = make(map[string]int)
 )
 
-var Version = "0.5.3"
+var Version = "0.5.4"
 
 var G *cli.App
 
@@ -104,6 +105,17 @@ There is NO WARRANTY, to the extent permitted by law.`,
 			}
 
 			fuzzy := context.Bool("fuzzy")
+			if fuzzy {
+				defer func() {
+					for i := 0; i < 10; i++ {
+						err := index.Close()
+						if err != nil {
+							continue
+						}
+						return
+					}
+				}()
+			}
 
 			{
 				s := context.String("git-status-style")
@@ -148,14 +160,30 @@ There is NO WARRANTY, to the extent permitted by law.`,
 					}
 
 					pathbeautify.Transform(&path[i])
+
+					// fuzzy search
 					if fuzzy {
 						_, err := os.Stat(path[i])
 						if err != nil {
-							if newPath, b := fuzzyPath(fuzzy, path[i]); b != nil {
+							if newPath, b := fuzzyPath(path[i]); b != nil {
 								_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(err.Error()))
 								minorErr = true
+								continue
 							} else {
 								path[i] = newPath
+								_, err = os.Stat(path[i])
+								if err != nil {
+									if pathErr := new(os.PathError); errors.As(err, &pathErr) {
+										_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(fmt.Sprintf("No such file or directory: %s", pathErr.Path)))
+										seriousErr = true
+										continue
+									} else {
+										_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(err.Error()))
+										seriousErr = true
+										continue
+									}
+								}
+								fmt.Println(path[i])
 							}
 						}
 					}
@@ -175,7 +203,7 @@ There is NO WARRANTY, to the extent permitted by law.`,
 					if err != nil {
 						minorErr = true
 					} else {
-						if err = fuzzyUpdate(fuzzy, absPath); err != nil {
+						if err = fuzzyUpdate(absPath); err != nil {
 							_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(err.Error()))
 							minorErr = true
 						}
@@ -196,6 +224,8 @@ There is NO WARRANTY, to the extent permitted by law.`,
 				flagd := context.Bool("d")
 				// flag: if A is set
 				flagA := context.Bool("A")
+				flagR := context.Bool("R")
+				depth := context.Int("depth")
 
 				for i := 0; i < len(path); i++ {
 					if len(path) > 1 {
@@ -213,7 +243,7 @@ There is NO WARRANTY, to the extent permitted by law.`,
 						stat, err := os.Stat(path[i])
 						if err != nil {
 							if fuzzy {
-								if newPath, err := fuzzyPath(fuzzy, path[i]); err != nil {
+								if newPath, err := fuzzyPath(path[i]); err != nil {
 									_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(err.Error()))
 									minorErr = true
 								} else {
@@ -275,7 +305,7 @@ There is NO WARRANTY, to the extent permitted by law.`,
 					if err != nil {
 						minorErr = true
 					}
-					if err = fuzzyUpdate(fuzzy, absPath); err != nil {
+					if err = fuzzyUpdate(absPath); err != nil {
 						_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(err.Error()))
 						minorErr = true
 					}
@@ -337,6 +367,31 @@ There is NO WARRANTY, to the extent permitted by law.`,
 					// remove non-display items
 					infos = typeFilter.Filter(infos...)
 
+					// if -R is set, add sub dir, insert into path[i+1]
+					if flagR {
+
+						// set depth
+						dep, ok := depthLimitMap[path[i]]
+						if !ok {
+							depthLimitMap[path[i]] = depth
+							dep = depth
+						}
+						if dep >= 2 || dep <= -1 {
+							newPathLeft := make([]string, 0, len(path)-i)
+							for _, info := range infos {
+								if info.IsDir() {
+									if info.Name() == "." || info.Name() == ".." {
+										continue
+									}
+									newPath := filepath.Join(path[i], info.Name())
+									newPathLeft = append(newPathLeft, newPath)
+									depthLimitMap[newPath] = dep - 1
+								}
+							}
+							path = append(path[:i+1], append(newPathLeft, path[i+1:]...)...)
+						}
+					}
+
 				final:
 					stringSlice := contentFilter.GetStringSlice(infos)
 
@@ -396,7 +451,7 @@ There is NO WARRANTY, to the extent permitted by law.`,
 	initVersionHelpFlags()
 }
 
-func fuzzyUpdate(fuzzy bool, path string) error {
+func fuzzyUpdate(path string) error {
 	err := index.Update(path)
 	if err != nil {
 		return err
@@ -406,7 +461,7 @@ func fuzzyUpdate(fuzzy bool, path string) error {
 
 // fuzzyPath returns the fuzzy path
 // if error, return empty string and error
-func fuzzyPath(fuzzy bool, path string) (newPath string, minorErr error) {
+func fuzzyPath(path string) (newPath string, minorErr error) {
 	fuzzed, err := index.FuzzySearch(path)
 	if err == nil {
 		return fuzzed, nil
@@ -774,16 +829,31 @@ var displayFlag = []cli.Flag{
 	&cli.BoolFlag{
 		Name:               "tree",
 		Aliases:            []string{"t"},
-		Usage:              "list in tree",
+		Usage:              "recursively list in tree",
 		DisableDefaultText: true,
 		Category:           "DISPLAY",
 	},
 	&cli.IntFlag{
 		Name:        "depth",
-		Usage:       "tree limit depth, negative -> infinity",
+		Usage:       "limit recursive depth, negative -> infinity",
 		DefaultText: "infinity",
 		Value:       -1,
 		Category:    "DISPLAY",
+	},
+	&cli.BoolFlag{
+		Name:               "recurse",
+		Aliases:            []string{"R"},
+		Usage:              "recurse into directories",
+		DisableDefaultText: true,
+		Category:           "DISPLAY",
+		Action: func(context *cli.Context, b bool) error {
+			if b {
+				if context.Args().Len() > 1 {
+					return fmt.Errorf("'--recurse' should not be used with more than one directory")
+				}
+			}
+			return nil
+		},
 	},
 	&cli.BoolFlag{
 		Name:               "byline",
@@ -1198,6 +1268,7 @@ var indexFlags = []cli.Flag{
 		Usage:              "fuzzy search",
 		DisableDefaultText: true,
 		Category:           "Index",
+		EnvVars:            []string{"G_FZF"},
 	},
 	&cli.StringSliceFlag{
 		Name:     "remove-index",

@@ -71,6 +71,19 @@ limit depth in tree
 g -t -depth=<level> path
 ```
 
+fuzzy search
+```bash
+g -f path
+# eg: g -f in
+# /mnt/e/Project/gverything/index
+# pathindex.go
+```
+
+show checksum (md5,sha1,sha256,sha512)
+```bash
+g -cs -ca=sha256 path
+```
+
 ## More options
 [g.md](g.md)
 

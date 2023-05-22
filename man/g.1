@@ -36,6 +36,7 @@ g
 [--match-glob|-M]=[value]
 [--numeric]
 [--rebuild-index|--ri]
+[--recurse|-R]
 [--remove-index]=[value]
 [--show-group|--sg]
 [--show-hidden|--sh|-a]
@@ -102,7 +103,7 @@ g [options] [path]
 \fB--checksum-algorithm, --ca\fP="": show checksum of file with algorithm: md5, sha1, sha256, sha512 (default: "sha1")
 
 .PP
-\fB--depth\fP="": tree limit depth, negative -> infinity (default: infinity)
+\fB--depth\fP="": limit recursive depth, negative -> infinity (default: infinity)
 
 .PP
 \fB--dir-first, --df\fP: List directories before other files
@@ -151,6 +152,9 @@ g [options] [path]
 
 .PP
 \fB--rebuild-index, --ri\fP: rebuild index
+
+.PP
+\fB--recurse, -R\fP: recurse into directories
 
 .PP
 \fB--remove-index\fP="": remove paths from index
@@ -210,7 +214,7 @@ g [options] [path]
 \fB--time-type, --tt\fP="": time type, mod, create, access (default: mod)
 
 .PP
-\fB--tree, -t\fP: list in tree
+\fB--tree, -t\fP: recursively list in tree
 
 .PP
 \fB--uid\fP: show uid instead of username [sid in windows]
