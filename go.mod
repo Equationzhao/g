@@ -3,6 +3,7 @@ module github.com/Equationzhao/g
 go 1.20
 
 require (
+	github.com/Equationzhao/pathbeautify v0.0.4
 	github.com/Equationzhao/tsmap v0.0.6
 	github.com/acarl005/stripansi v0.0.0-20180116102854-5a71ef0e047d
 	github.com/gobwas/glob v0.2.3
@@ -17,7 +18,6 @@ require (
 )
 
 require (
-	github.com/Equationzhao/pathbeautify v0.0.2 // indirect
 	github.com/Masterminds/goutils v1.1.1 // indirect
 	github.com/Masterminds/semver/v3 v3.2.1 // indirect
 	github.com/Masterminds/sprig/v3 v3.2.3 // indirect
