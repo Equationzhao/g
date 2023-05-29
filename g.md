@@ -27,6 +27,7 @@ g
 [--lh|--human-readable]
 [--list-index|--li]
 [--match-glob|-M]=[value]
+[--no-path-transform|--np]
 [--numeric]
 [--rebuild-index|--ri]
 [--recurse|-R]
@@ -111,6 +112,8 @@ g [options] [path]
 **--list-index, --li**: list index
 
 **--match-glob, -M**="": match Glob patterns
+
+**--no-path-transform, --np**: By default, .../a/b/c will be transformed to ../../a/b/c, and ~ will be replaced by homedir, using this flag to disable this feature
 
 **--numeric**:  List numeric user and group IDs instead of name [sid in windows]
 
