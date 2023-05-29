@@ -1,22 +1,12 @@
 package cached
 
 import (
-	"os"
-	"sync"
-
+	"github.com/Equationzhao/pathbeautify"
 	"github.com/Equationzhao/tsmap"
 )
 
-var (
-	syncHomedir sync.Once
-	userHomeDir string
-)
-
 func GetUserHomeDir() string {
-	syncHomedir.Do(func() {
-		userHomeDir, _ = os.UserHomeDir()
-	})
-	return userHomeDir
+	return pathbeautify.GetUserHomeDir()
 }
 
 type Map[k comparable, v any] struct {

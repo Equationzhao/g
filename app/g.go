@@ -10,13 +10,13 @@ import (
 
 	"github.com/Equationzhao/g/filter"
 	"github.com/Equationzhao/g/index"
-	"github.com/Equationzhao/g/pathbeautify"
 	"github.com/Equationzhao/g/printer"
 	"github.com/Equationzhao/g/render"
 	"github.com/Equationzhao/g/sorter"
 	"github.com/Equationzhao/g/theme"
 	"github.com/Equationzhao/g/timeparse"
 	"github.com/Equationzhao/g/tree"
+	"github.com/Equationzhao/pathbeautify"
 	"github.com/urfave/cli/v2"
 	versionInfo "go.szostok.io/version"
 	vp "go.szostok.io/version/printer"
@@ -161,7 +161,7 @@ There is NO WARRANTY, to the extent permitted by law.`,
 						fmt.Printf("%s:\n", path[i])
 					}
 
-					pathbeautify.Transform(&path[i])
+					path[i] = pathbeautify.Transform(path[i])
 
 					// fuzzy search
 					if fuzzy {
@@ -234,7 +234,7 @@ There is NO WARRANTY, to the extent permitted by law.`,
 						fmt.Printf("%s:\n", path[i])
 					}
 
-					pathbeautify.Transform(&path[i])
+					path[i] = pathbeautify.Transform(path[i])
 
 					infos := make([]os.FileInfo, 0, 20)
 
