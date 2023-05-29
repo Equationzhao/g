@@ -130,6 +130,7 @@ There is NO WARRANTY, to the extent permitted by law.`,
 					nameToDisplay.GitStyle = filter.GitStyleDefault
 				}
 			}
+			transformEnabled := !context.Bool("np")
 
 			contentFunc = append(contentFunc, nameToDisplay.Enable())
 			typeFilter := filter.NewTypeFilter(typeFunc...)
@@ -161,8 +162,9 @@ There is NO WARRANTY, to the extent permitted by law.`,
 						fmt.Printf("%s:\n", path[i])
 					}
 
-					path[i] = pathbeautify.Transform(path[i])
-
+					if transformEnabled {
+						path[i] = pathbeautify.Transform(path[i])
+					}
 					// fuzzy search
 					if fuzzy {
 						_, err := os.Stat(path[i])
@@ -234,7 +236,9 @@ There is NO WARRANTY, to the extent permitted by law.`,
 						fmt.Printf("%s:\n", path[i])
 					}
 
-					path[i] = pathbeautify.Transform(path[i])
+					if transformEnabled {
+						path[i] = pathbeautify.Transform(path[i])
+					}
 
 					infos := make([]os.FileInfo, 0, 20)
 
@@ -440,6 +444,10 @@ There is NO WARRANTY, to the extent permitted by law.`,
 			return nil
 		},
 		DisableDefaultText: true,
+	}, &cli.BoolFlag{
+		Name:    "no-path-transform",
+		Aliases: []string{"np"},
+		Usage:   "By default, .../a/b/c will be transformed to ../../a/b/c, and ~ will be replaced by homedir, using this flag to disable this feature",
 	})
 
 	G.Flags = append(G.Flags, viewFlag...)
