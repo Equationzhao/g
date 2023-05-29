@@ -9,6 +9,29 @@
 
 ![image](./how-g-works.gif)
 
+## install
+go version required >= 1.20
+```bash
+go install -ldflags="-s -w -v -X"  github.com/Equationzhao/g@latest
+```
+
+Archlinux user can install `g` from AUR
+```bash
+yay -S g-ls
+```
+
+windows Scoop
+```bash
+scoop install https://raw.githubusercontent.com/Equationzhao/g/master/scoop/g.json
+```
+```bash
+# upgrade
+scoop uninstall g # uninstall first
+scoop install https://raw.githubusercontent.com/Equationzhao/g/master/scoop/g.json
+```
+
+or just download from release page
+
 ## usage
 
 ```bash
@@ -87,28 +110,9 @@ g -cs -ca=sha256 path
 ## More options
 [g.md](g.md)
 
-
 ## custom theme
 
 [theme](THEME.md)
-
-## install
-go version required >= 1.20
-```bash
-go install -ldflags="-s -w -v -X main.compiledAt=$(date +%Y%m%d%H%M%S)"  github.com/Equationzhao/g@latest
-```
-
-Archlinux user can install from AUR
-```bash
-yay -S g-ls
-```
-
-windows Scoop
-```bash
-scoop install https://raw.githubusercontent.com/Equationzhao/g/master/scoop/g.json
-```
-
-or just download from release page
 
 ## logo
 created by bing
