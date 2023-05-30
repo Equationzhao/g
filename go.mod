@@ -3,7 +3,7 @@ module github.com/Equationzhao/g
 go 1.20
 
 require (
-	github.com/Equationzhao/pathbeautify v0.0.4
+	github.com/Equationzhao/pathbeautify v0.0.5
 	github.com/Equationzhao/tsmap v0.0.6
 	github.com/acarl005/stripansi v0.0.0-20180116102854-5a71ef0e047d
 	github.com/gobwas/glob v0.2.3
@@ -11,7 +11,7 @@ require (
 	github.com/mattn/go-runewidth v0.0.14
 	github.com/olekukonko/ts v0.0.0-20171002115256-78ecb04241c0
 	github.com/syndtr/goleveldb v1.0.0
-	github.com/urfave/cli/v2 v2.25.4
+	github.com/urfave/cli/v2 v2.25.5
 	github.com/valyala/bytebufferpool v1.0.0
 	go.szostok.io/version v1.2.0
 	gopkg.in/ini.v1 v1.67.0
