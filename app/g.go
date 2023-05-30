@@ -41,7 +41,7 @@ var (
 	depthLimitMap = make(map[string]int)
 )
 
-var Version = "0.5.6"
+var Version = "0.5.7"
 
 var G *cli.App
 
