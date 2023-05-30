@@ -41,7 +41,7 @@ var (
 	depthLimitMap = make(map[string]int)
 )
 
-var Version = "0.5.5"
+var Version = "0.5.6"
 
 var G *cli.App
 
@@ -51,8 +51,9 @@ func init() {
 		info, err := os.Stat(os.Args[0])
 		if err != nil {
 			CompiledAt = time.Now().Format(timeFormat)
+		} else {
+			CompiledAt = info.ModTime().Format(timeFormat)
 		}
-		CompiledAt = info.ModTime().Format(timeFormat)
 	} else {
 		CompiledAtTime, err := time.Parse("2006-01-02-15:04:05", CompiledAt)
 		if err == nil {
