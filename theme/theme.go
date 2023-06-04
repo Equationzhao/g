@@ -173,5 +173,6 @@ func GetTheme(path string) error {
 			}
 		}
 	}
+	SyncColorlessWithTheme()
 	return nil
 }

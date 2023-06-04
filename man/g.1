@@ -19,6 +19,7 @@ g
 [--check-new-version]
 [--checksum-algorithm|--ca]=[value]
 [--checksum|--cs]
+[--colorless]
 [--depth]=[value]
 [--dir-first|--df]
 [--file-type|--ft]
@@ -105,6 +106,9 @@ g [options] [path]
 \fB--checksum-algorithm, --ca\fP="": show checksum of file with algorithm: md5, sha1, sha256, sha512 (default: "sha1")
 
 .PP
+\fB--colorless\fP: without color
+
+.PP
 \fB--depth\fP="": limit recursive depth, negative -> infinity (default: infinity)
 
 .PP
@@ -138,7 +142,7 @@ g [options] [path]
 \fB--ignore-glob, -I\fP="": ignore Glob patterns
 
 .PP
-\fB--inode, -i\fP: show inode[linux only]
+\fB--inode, -i\fP: show inode[linux/darwin only]
 
 .PP
 \fB--lh, --human-readable\fP: show human readable size

@@ -550,6 +550,7 @@ var viewFlag = []cli.Flag{
 			contentFunc = append(contentFunc, i.Enable(r))
 			return nil
 		},
+		Category: "VIEW",
 	},
 	&cli.StringFlag{
 		Name:        "size-unit",
@@ -568,6 +569,7 @@ var viewFlag = []cli.Flag{
 			}
 			return nil
 		},
+		Category: "VIEW",
 	},
 	&cli.BoolFlag{
 		Name:               "uid",
@@ -984,6 +986,18 @@ var displayFlag = []cli.Flag{
 		Category: "DISPLAY",
 	},
 
+	&cli.BoolFlag{
+		Name:               "colorless",
+		Usage:              "without color",
+		DisableDefaultText: true,
+		Action: func(context *cli.Context, b bool) error {
+			if b {
+				*r = *render.NewRenderer(theme.Colorless, theme.ColorlessInfo)
+			}
+			return nil
+		},
+		Category: "DISPLAY",
+	},
 	&cli.StringFlag{
 		Name:    "theme",
 		Aliases: []string{"th"},
