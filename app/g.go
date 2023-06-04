@@ -120,6 +120,8 @@ There is NO WARRANTY, to the extent permitted by law.`,
 				}()
 			}
 
+			disableIndex := context.Bool("di")
+
 			{
 				s := context.String("git-status-style")
 				switch s {
@@ -208,9 +210,11 @@ There is NO WARRANTY, to the extent permitted by law.`,
 					if err != nil {
 						minorErr = true
 					} else {
-						if err = fuzzyUpdate(absPath); err != nil {
-							_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(err.Error()))
-							minorErr = true
+						if !disableIndex {
+							if err = fuzzyUpdate(absPath); err != nil {
+								_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(err.Error()))
+								minorErr = true
+							}
 						}
 					}
 
@@ -312,9 +316,11 @@ There is NO WARRANTY, to the extent permitted by law.`,
 					if err != nil {
 						minorErr = true
 					}
-					if err = fuzzyUpdate(absPath); err != nil {
-						_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(err.Error()))
-						minorErr = true
+					if !disableIndex {
+						if err = fuzzyUpdate(absPath); err != nil {
+							_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(err.Error()))
+							minorErr = true
+						}
 					}
 
 					var d []os.DirEntry
@@ -1281,6 +1287,13 @@ var filteringFlag = []cli.Flag{
 }
 
 var indexFlags = []cli.Flag{
+	&cli.BoolFlag{
+		Name:               "disable-index",
+		Aliases:            []string{"di"},
+		Usage:              "disable updating index",
+		Category:           "Index",
+		DisableDefaultText: true,
+	},
 	&cli.BoolFlag{
 		Name:               "rebuild-index",
 		Aliases:            []string{"ri"},
