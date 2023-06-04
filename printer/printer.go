@@ -47,7 +47,9 @@ type FitTerminal struct {
 }
 
 func NewFitTerminal() Printer {
-	return &FitTerminal{Writer: bufio.NewWriter(Output)}
+	return &FitTerminal{
+		Writer: bufio.NewWriter(Output),
+	}
 }
 
 func (f *FitTerminal) Print(s ...string) {
@@ -57,26 +59,7 @@ func (f *FitTerminal) Print(s ...string) {
 func (f *FitTerminal) printColumns(strs *[]string) {
 	defer f.Flush()
 
-	maxLength := 0
-	// also keep track of each individual length to easily calculate padding
-	lengths := make([]int, 0, len(*strs))
-	for _, str := range *strs {
-		colorless := stripansi.Strip(str)
-		// len() is insufficient here, as it counts emojis as 4 characters each
-		length := runewidth.StringWidth(colorless)
-		if runtime.GOOS == "windows" {
-			if strings.ContainsRune(colorless, dot) {
-				length--
-			}
-		}
-		maxLength = max(maxLength, length)
-		lengths = append(lengths, length)
-	}
-
-	// see how wide the terminal is
-	width := getTermWidth()
-	// calculate the dimensions of the columns
-	numCols, numRows := calculateTableSize(width, 4, maxLength, len(*strs))
+	maxLength, lengths, numCols, numRows := calculateRowCol(strs, 6)
 
 	// if we're forced into a single column, fall back to simple printing (one per line)
 	if numCols == 1 {
@@ -118,6 +101,30 @@ func (f *FitTerminal) printColumns(strs *[]string) {
 	}
 }
 
+// maxLength, maxLength, numCols, numRows
+func calculateRowCol(strs *[]string, margin int) (maxLength int, lengths []int, numCols int, numRows int) {
+	// also keep track of each individual length to easily calculate padding
+	lengths = make([]int, 0, len(*strs))
+	for _, str := range *strs {
+		colorless := stripansi.Strip(str)
+		// len() is insufficient here, as it counts emojis as 4 characters each
+		length := runewidth.StringWidth(colorless)
+		if runtime.GOOS == "windows" {
+			if strings.ContainsRune(colorless, dot) {
+				length--
+			}
+		}
+		maxLength = max(maxLength, length)
+		lengths = append(lengths, length)
+	}
+
+	// see how wide the terminal is
+	width := getTermWidth()
+	// calculate the dimensions of the columns
+	numCols, numRows = calculateTableSize(width, margin, maxLength, len(*strs))
+	return
+}
+
 // getTermWidth returns the width of the terminal in characters
 // this is a modified version
 func getTermWidth() int {
@@ -141,7 +148,7 @@ func getTermWidth() int {
 */
 
 func calculateTableSize(width, margin, maxLength, numCells int) (int, int) {
-	numCols := (width + margin) / (maxLength + margin)
+	numCols := (width + margin) / (maxLength + 1)
 	if numCols == 0 {
 		numCols = 1
 	}
@@ -231,7 +238,7 @@ func (a *Across) printRow(strs *[]string) {
 	defer a.Flush()
 	width := getTermWidth()
 
-	const m = 4
+	const m = 1
 	strLen := make([]int, len(*strs))
 
 	maxLength := 0
@@ -246,7 +253,7 @@ func (a *Across) printRow(strs *[]string) {
 		maxLength = max(maxLength, strLen[i])
 	}
 
-	cols := (width + m) / (maxLength + 2*m)
+	cols := (width + m) / (maxLength + m)
 	if cols == 0 {
 		cols = 1
 	}
