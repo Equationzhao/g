@@ -117,10 +117,15 @@ func Delete(key string) error {
 }
 
 func RebuildIndex() error {
-	err := db.Close()
+	db, err := getDB()
+	if err != nil {
+		goto remove
+	}
+	err = db.Close()
 	if err != nil {
 		return err
 	}
+remove:
 	err = os.RemoveAll(indexPath)
 	if err != nil {
 		return err
