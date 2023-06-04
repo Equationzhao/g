@@ -7,6 +7,7 @@ require (
 	github.com/Equationzhao/tsmap v0.0.6
 	github.com/acarl005/stripansi v0.0.0-20180116102854-5a71ef0e047d
 	github.com/gobwas/glob v0.2.3
+	github.com/hako/durafmt v0.0.0-20210608085754-5c1018a4e16b
 	github.com/junegunn/fzf v0.0.0-20230603000304-3e9efd140140
 	github.com/mattn/go-runewidth v0.0.14
 	github.com/olekukonko/ts v0.0.0-20171002115256-78ecb04241c0
@@ -30,7 +31,6 @@ require (
 	github.com/goccy/go-yaml v1.11.0 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/google/uuid v1.3.0 // indirect
-	github.com/hako/durafmt v0.0.0-20210608085754-5c1018a4e16b // indirect
 	github.com/hashicorp/go-version v1.6.0 // indirect
 	github.com/hokaccha/go-prettyjson v0.0.0-20211117102719-0474bc63780f // indirect
 	github.com/huandu/xstrings v1.4.0 // indirect
