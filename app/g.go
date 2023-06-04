@@ -542,7 +542,7 @@ var viewFlag = []cli.Flag{
 	&cli.BoolFlag{
 		Name:               "inode",
 		Aliases:            []string{"i"},
-		Usage:              "show inode[linux only]",
+		Usage:              "show inode[linux/darwin only]",
 		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
 			i := filter.NewInodeEnabler()
@@ -558,12 +558,6 @@ var viewFlag = []cli.Flag{
 		EnvVars:     []string{"SIZE_UNIT"},
 		DefaultText: "auto",
 		Action: func(context *cli.Context, s string) error {
-			defer func() {
-				if err := recover(); err != nil {
-					ReturnCode = 1
-				}
-			}()
-
 			if strings.EqualFold(s, "auto") {
 				return nil
 			}
