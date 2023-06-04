@@ -31,6 +31,7 @@ g
 [--numeric]
 [--rebuild-index|--ri]
 [--recurse|-R]
+[--relative-time|--rt]
 [--remove-index]=[value]
 [--show-group|--sg]
 [--show-hidden|--sh|-a]
@@ -120,6 +121,8 @@ g [options] [path]
 **--rebuild-index, --ri**: rebuild index
 
 **--recurse, -R**: recurse into directories
+
+**--relative-time, --rt**: show relative time
 
 **--remove-index**="": remove paths from index
 
