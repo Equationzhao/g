@@ -13,11 +13,11 @@ func ModTime(a os.FileInfo) time.Time {
 }
 
 func AccessTime(a os.FileInfo) time.Time {
-	ctim := a.Sys().(*syscall.Stat_t).Ctim
+	ctim := a.Sys().(*syscall.Stat_t).Atim
 	return time.Unix(int64(ctim.Sec), int64(ctim.Nsec))
 }
 
 func CreateTime(a os.FileInfo) time.Time {
-	atim := a.Sys().(*syscall.Stat_t).Atim
+	atim := a.Sys().(*syscall.Stat_t).Ctim
 	return time.Unix(int64(atim.Sec), int64(atim.Nsec))
 }

@@ -575,23 +575,6 @@ var viewFlag = []cli.Flag{
 			return nil
 		},
 	},
-	&cli.StringFlag{
-		Name:        "time-type",
-		Aliases:     []string{"tt"},
-		Usage:       "time type, mod, create, access",
-		EnvVars:     []string{"TIME_TYPE"},
-		DefaultText: "mod",
-		Action: func(context *cli.Context, s string) error {
-			if s == "mod" || s == "create" || s == "access" {
-				timeType = s
-				return nil
-			} else {
-				ReturnCode = 1
-				return errors.New("invalid time type")
-			}
-		},
-		Category: "VIEW",
-	},
 	&cli.BoolFlag{
 		Name:               "uid",
 		Usage:              "show uid instead of username [sid in windows]",
@@ -624,6 +607,39 @@ var viewFlag = []cli.Flag{
 			if b {
 				filter.Gid = true
 				filter.Uid = true
+			}
+			return nil
+		},
+		Category: "VIEW",
+	},
+	&cli.StringFlag{
+		Name:        "time-type",
+		Aliases:     []string{"tt"},
+		Usage:       "time type, mod, create, access",
+		EnvVars:     []string{"TIME_TYPE"},
+		DefaultText: "mod",
+		Action: func(context *cli.Context, s string) error {
+			if s == "mod" || s == "create" || s == "access" {
+				timeType = s
+				return nil
+			} else {
+				ReturnCode = 1
+				return errors.New("invalid time type")
+			}
+		},
+		Category: "VIEW",
+	},
+	&cli.BoolFlag{
+		Name:               "relative-time",
+		Aliases:            []string{"rt"},
+		Usage:              "show relative time",
+		DisableDefaultText: true,
+		Action: func(context *cli.Context, b bool) error {
+			if b {
+				rt := filter.NewRelativeTimeEnabler()
+				rt.Mode = timeType
+				contentFunc = append(contentFunc, rt.Enable(r))
+				wgs = append(wgs, rt)
 			}
 			return nil
 		},

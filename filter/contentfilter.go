@@ -21,6 +21,7 @@ import (
 	"github.com/Equationzhao/g/osbased"
 	"github.com/Equationzhao/g/render"
 	"github.com/Equationzhao/tsmap"
+	"github.com/hako/durafmt"
 	"github.com/valyala/bytebufferpool"
 )
 
@@ -348,6 +349,68 @@ func (s *SizeEnabler) EnableSize(size SizeUnit) ContentOption {
 			s.total.Add(v)
 		}
 		return s.Size2String(v, 7)
+	}
+}
+
+type RelativeTimeEnabler struct {
+	*sync.WaitGroup
+	Mode string
+}
+
+func NewRelativeTimeEnabler() *RelativeTimeEnabler {
+	return &RelativeTimeEnabler{
+		WaitGroup: new(sync.WaitGroup),
+	}
+}
+
+func (r *RelativeTimeEnabler) Enable(renderer *render.Renderer) ContentOption {
+	longestRt := 0
+	m := sync.RWMutex{}
+	done := func(rt string) {
+		defer r.Done()
+		m.RLock()
+		if longestRt >= len(rt) {
+			m.RUnlock()
+			return
+		}
+		m.RUnlock()
+		m.Lock()
+		if longestRt < len(rt) {
+			longestRt = len(rt)
+		}
+		m.Unlock()
+	}
+
+	wait := func(size string) string {
+		r.Wait()
+		return fillBlank(size, longestRt)
+	}
+
+	return func(info os.FileInfo) string {
+		var t time.Time
+		switch r.Mode {
+		case "mod":
+			t = osbased.ModTime(info)
+		case "create":
+			t = osbased.CreateTime(info)
+		case "access":
+			t = osbased.AccessTime(info)
+		default:
+			t = osbased.ModTime(info)
+		}
+		rt := renderer.Time(relativeTime(time.Now(), t))
+		done(rt)
+		return wait(rt)
+	}
+}
+
+func relativeTime(now, modTime time.Time) string {
+	if t := now.Sub(modTime); t > 0 {
+		return fmt.Sprintf("%s ago", durafmt.Parse(t).LimitFirstN(1).String())
+	} else if t == 0 {
+		return "now"
+	} else {
+		return fmt.Sprintf("in %s", durafmt.Parse(-t).LimitFirstN(1).String())
 	}
 }
 

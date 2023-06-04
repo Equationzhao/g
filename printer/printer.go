@@ -6,12 +6,15 @@ import (
 	"io"
 	"math"
 	"os"
+	"runtime"
 	"strings"
 
 	"github.com/acarl005/stripansi"
 	"github.com/mattn/go-runewidth"
 	"github.com/olekukonko/ts"
 )
+
+const dot = '\uF111'
 
 var Output io.Writer = os.Stdout
 
@@ -61,6 +64,11 @@ func (f *FitTerminal) printColumns(strs *[]string) {
 		colorless := stripansi.Strip(str)
 		// len() is insufficient here, as it counts emojis as 4 characters each
 		length := runewidth.StringWidth(colorless)
+		if runtime.GOOS == "windows" {
+			if strings.ContainsRune(colorless, dot) {
+				length--
+			}
+		}
 		maxLength = max(maxLength, length)
 		lengths = append(lengths, length)
 	}
@@ -196,12 +204,24 @@ func (a *Across) printRowWithNoSpace(strs *[]string) {
 
 	maxLength := 0
 	for _, str := range *strs {
+		colorless := stripansi.Strip(str)
 		maxLength += runewidth.StringWidth(stripansi.Strip(str))
+		if runtime.GOOS == "windows" {
+			if strings.ContainsRune(colorless, dot) {
+				maxLength--
+			}
+		}
+
 		if maxLength <= width {
 			_, _ = a.WriteString(str)
 		} else {
 			_, _ = a.WriteString("\n" + str)
-			maxLength = runewidth.StringWidth(stripansi.Strip(str))
+			maxLength = runewidth.StringWidth(colorless)
+			if runtime.GOOS == "windows" {
+				if strings.ContainsRune(colorless, dot) {
+					maxLength--
+				}
+			}
 		}
 	}
 	_ = a.WriteByte('\n')
@@ -218,7 +238,11 @@ func (a *Across) printRow(strs *[]string) {
 	for i, str := range *strs {
 		colorless := stripansi.Strip(str)
 		strLen[i] = runewidth.StringWidth(colorless)
-
+		if runtime.GOOS == "windows" {
+			if strings.ContainsRune(colorless, dot) {
+				strLen[i]--
+			}
+		}
 		maxLength = max(maxLength, strLen[i])
 	}
 
@@ -238,9 +262,9 @@ func (a *Across) printRow(strs *[]string) {
 				padding = 0
 			}
 			if j < cols-1 {
-				fmt.Fprintf(a, "%s%s", str, a.stringOf(' ', padding+m))
+				_, _ = fmt.Fprintf(a, "%s%s", str, a.stringOf(' ', padding+m))
 			} else {
-				fmt.Fprintf(a, "%s%s", str, a.stringOf(' ', padding))
+				_, _ = fmt.Fprintf(a, "%s%s", str, a.stringOf(' ', padding))
 			}
 		}
 		_ = a.WriteByte('\n')
