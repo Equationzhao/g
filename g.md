@@ -12,6 +12,7 @@ g
 [--check-new-version]
 [--checksum-algorithm|--ca]=[value]
 [--checksum|--cs]
+[--colorless]
 [--depth]=[value]
 [--dir-first|--df]
 [--file-type|--ft]
@@ -84,6 +85,8 @@ g [options] [path]
 
 **--checksum-algorithm, --ca**="": show checksum of file with algorithm: md5, sha1, sha256, sha512 (default: "sha1")
 
+**--colorless**: without color
+
 **--depth**="": limit recursive depth, negative -> infinity (default: infinity)
 
 **--dir-first, --df**: List directories before other files
@@ -106,7 +109,7 @@ g [options] [path]
 
 **--ignore-glob, -I**="": ignore Glob patterns
 
-**--inode, -i**: show inode[linux only]
+**--inode, -i**: show inode[linux/darwin only]
 
 **--lh, --human-readable**: show human readable size
 

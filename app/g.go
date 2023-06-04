@@ -120,6 +120,8 @@ There is NO WARRANTY, to the extent permitted by law.`,
 				}()
 			}
 
+			disableIndex := context.Bool("di")
+
 			{
 				s := context.String("git-status-style")
 				switch s {
@@ -208,9 +210,11 @@ There is NO WARRANTY, to the extent permitted by law.`,
 					if err != nil {
 						minorErr = true
 					} else {
-						if err = fuzzyUpdate(absPath); err != nil {
-							_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(err.Error()))
-							minorErr = true
+						if !disableIndex {
+							if err = fuzzyUpdate(absPath); err != nil {
+								_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(err.Error()))
+								minorErr = true
+							}
 						}
 					}
 
@@ -312,9 +316,11 @@ There is NO WARRANTY, to the extent permitted by law.`,
 					if err != nil {
 						minorErr = true
 					}
-					if err = fuzzyUpdate(absPath); err != nil {
-						_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(err.Error()))
-						minorErr = true
+					if !disableIndex {
+						if err = fuzzyUpdate(absPath); err != nil {
+							_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(err.Error()))
+							minorErr = true
+						}
 					}
 
 					var d []os.DirEntry
@@ -550,6 +556,7 @@ var viewFlag = []cli.Flag{
 			contentFunc = append(contentFunc, i.Enable(r))
 			return nil
 		},
+		Category: "VIEW",
 	},
 	&cli.StringFlag{
 		Name:        "size-unit",
@@ -568,6 +575,7 @@ var viewFlag = []cli.Flag{
 			}
 			return nil
 		},
+		Category: "VIEW",
 	},
 	&cli.BoolFlag{
 		Name:               "uid",
@@ -984,6 +992,18 @@ var displayFlag = []cli.Flag{
 		Category: "DISPLAY",
 	},
 
+	&cli.BoolFlag{
+		Name:               "colorless",
+		Usage:              "without color",
+		DisableDefaultText: true,
+		Action: func(context *cli.Context, b bool) error {
+			if b {
+				*r = *render.NewRenderer(theme.Colorless, theme.ColorlessInfo)
+			}
+			return nil
+		},
+		Category: "DISPLAY",
+	},
 	&cli.StringFlag{
 		Name:    "theme",
 		Aliases: []string{"th"},
@@ -1267,6 +1287,13 @@ var filteringFlag = []cli.Flag{
 }
 
 var indexFlags = []cli.Flag{
+	&cli.BoolFlag{
+		Name:               "disable-index",
+		Aliases:            []string{"di"},
+		Usage:              "disable updating index",
+		Category:           "Index",
+		DisableDefaultText: true,
+	},
 	&cli.BoolFlag{
 		Name:               "rebuild-index",
 		Aliases:            []string{"ri"},
