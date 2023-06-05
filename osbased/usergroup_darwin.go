@@ -3,10 +3,11 @@
 package osbased
 
 import (
-	"github.com/Equationzhao/g/cached"
 	"os"
 	"strconv"
 	"syscall"
+
+	"github.com/Equationzhao/g/cached"
 )
 
 func GroupID(a os.FileInfo) string {

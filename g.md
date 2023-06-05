@@ -15,6 +15,7 @@ g
 [--colorless]
 [--depth]=[value]
 [--dir-first|--df]
+[--disable-index|--di]
 [--file-type|--ft]
 [--format]=[value]
 [--full-time]
@@ -90,6 +91,8 @@ g [options] [path]
 **--depth**="": limit recursive depth, negative -> infinity (default: infinity)
 
 **--dir-first, --df**: List directories before other files
+
+**--disable-index, --di**: disable updating index
 
 **--file-type, --ft**: likewise, except do not append '*'
 

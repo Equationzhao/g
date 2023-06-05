@@ -1,7 +1,9 @@
 package theme
 
-var ColorlessInfo = Theme{}
-var Colorless = Theme{}
+var (
+	ColorlessInfo = Theme{}
+	Colorless     = Theme{}
+)
 
 func init() {
 	SyncColorlessWithTheme()
