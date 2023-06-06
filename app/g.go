@@ -768,7 +768,7 @@ var viewFlag = []cli.Flag{
 		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
 			if b {
-				contentFunc = append(contentFunc, filter.EnableTime(timeFormat, r, timeType))
+				contentFunc = append(contentFunc, filter.EnableTime(timeFormat, timeType, r))
 				if _, ok := p.(*printer.Byline); !ok {
 					p = printer.NewByline()
 				}
@@ -980,7 +980,7 @@ var displayFlag = []cli.Flag{
 					p = printer.NewCommaPrint()
 				}
 			case "long", "l", "verbose":
-				contentFunc = append(contentFunc, filter.EnableFileMode(r), sizeEnabler.EnableSize(sizeUint), contentFilter.EnableOwner(r), contentFilter.EnableGroup(r), filter.EnableTime(timeFormat, r, timeType))
+				contentFunc = append(contentFunc, filter.EnableFileMode(r), sizeEnabler.EnableSize(sizeUint), contentFilter.EnableOwner(r), contentFilter.EnableGroup(r), filter.EnableTime(timeFormat, timeType, r))
 				if _, ok := p.(*printer.Byline); !ok {
 					p = printer.NewByline()
 				}
@@ -1086,7 +1086,7 @@ var filteringFlag = []cli.Flag{
 		Usage:              "show human readable size",
 		Action: func(context *cli.Context, b bool) error {
 			if b {
-				contentFunc = append(contentFunc, filter.EnableFileMode(r), sizeEnabler.EnableSize(sizeUint), contentFilter.EnableOwner(r), contentFilter.EnableGroup(r), filter.EnableTime(timeFormat, r, timeType))
+				contentFunc = append(contentFunc, filter.EnableFileMode(r), sizeEnabler.EnableSize(sizeUint), contentFilter.EnableOwner(r), contentFilter.EnableGroup(r), filter.EnableTime(timeFormat, timeType, r))
 				if _, ok := p.(*printer.Byline); !ok {
 					p = printer.NewByline()
 				}
@@ -1214,7 +1214,7 @@ var filteringFlag = []cli.Flag{
 					}
 				}
 				typeFunc = newFF
-				contentFunc = append(contentFunc, filter.EnableFileMode(r), sizeEnabler.EnableSize(sizeUint), contentFilter.EnableGroup(r), filter.EnableTime(timeFormat, r, timeType))
+				contentFunc = append(contentFunc, filter.EnableFileMode(r), sizeEnabler.EnableSize(sizeUint), contentFilter.EnableGroup(r), filter.EnableTime(timeFormat, timeType, r))
 				if _, ok := p.(*printer.Byline); !ok {
 					p = printer.NewByline()
 				}
@@ -1237,7 +1237,7 @@ var filteringFlag = []cli.Flag{
 					}
 				}
 				typeFunc = newFF
-				contentFunc = append(contentFunc, filter.EnableFileMode(r), sizeEnabler.EnableSize(sizeUint), contentFilter.EnableOwner(r), filter.EnableTime(timeFormat, r, timeType))
+				contentFunc = append(contentFunc, filter.EnableFileMode(r), sizeEnabler.EnableSize(sizeUint), contentFilter.EnableOwner(r), filter.EnableTime(timeFormat, timeType, r))
 				if _, ok := p.(*printer.Byline); !ok {
 					p = printer.NewByline()
 				}
@@ -1273,7 +1273,7 @@ var filteringFlag = []cli.Flag{
 				if !context.Bool("G") {
 					contentFunc = append(contentFunc, contentFilter.EnableGroup(r))
 				}
-				contentFunc = append(contentFunc, filter.EnableTime(timeFormat, r, timeType))
+				contentFunc = append(contentFunc, filter.EnableTime(timeFormat, timeType, r))
 
 				if _, ok := p.(*printer.Byline); !ok {
 					p = printer.NewByline()

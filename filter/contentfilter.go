@@ -415,7 +415,7 @@ func relativeTime(now, modTime time.Time) string {
 	}
 }
 
-func EnableTime(format string, renderer *render.Renderer, mod string) ContentOption {
+func EnableTime(format string, mod string, renderer *render.Renderer) ContentOption {
 	return func(info os.FileInfo) string {
 		// get mod time/ create time/ access time
 		var t time.Time
