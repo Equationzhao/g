@@ -1350,7 +1350,7 @@ var indexFlags = []cli.Flag{
 					return err
 				}
 				for i := 0; i < len(keys); i++ {
-					fmt.Println(string(keys[i]), string(values[i]))
+					fmt.Println(keys[i], values[i])
 				}
 			}
 			return Err4Exit{}
