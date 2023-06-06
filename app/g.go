@@ -1399,7 +1399,7 @@ var sortingFlags = []cli.Flag{
 	&cli.StringSliceFlag{
 		Name:    "sort",
 		Aliases: []string{"SORT_FIELD"},
-		Usage:   "sort by field, default: ascending and case insensitive, field beginning with Uppercase is case sensitive, available fields: none,name,size,time,owner,group,extension. following `-descend` to sort descending",
+		Usage:   "sort by field, default: ascending and case insensitive, field beginning with Uppercase is case sensitive, available fields: none(nosort),name,size,time,owner,group,extension. following `-descend` to sort descending",
 		Action: func(context *cli.Context, slice []string) error {
 			sorter.WithSize(len(slice))(sort)
 			for _, s := range slice {
