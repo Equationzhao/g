@@ -7,6 +7,7 @@ import (
 	"crypto/sha512"
 	"fmt"
 	"hash"
+	"hash/crc32"
 	"io"
 	"os"
 	"sort"
@@ -857,8 +858,11 @@ type SumType int
 const (
 	SumTypeMd5 SumType = iota + 1
 	SumTypeSha1
+	SumTypeSha224
 	SumTypeSha256
+	SumTypeSha384
 	SumTypeSha512
+	SumTypeCRC32
 )
 
 func (cf *ContentFilter) EnableSum(sumTypes ...SumType) ContentOption {
@@ -869,10 +873,16 @@ func (cf *ContentFilter) EnableSum(sumTypes ...SumType) ContentOption {
 			length += 32
 		case SumTypeSha1:
 			length += 40
+		case SumTypeSha224:
+			length += 56
 		case SumTypeSha256:
 			length += 64
+		case SumTypeSha384:
+			length += 96
 		case SumTypeSha512:
 			length += 128
+		case SumTypeCRC32:
+			length += 8
 		}
 	}
 	length += len(sumTypes) - 1
@@ -896,10 +906,16 @@ func (cf *ContentFilter) EnableSum(sumTypes ...SumType) ContentOption {
 				hashed = md5.New()
 			case SumTypeSha1:
 				hashed = sha1.New()
+			case SumTypeSha224:
+				hashed = sha256.New224()
 			case SumTypeSha256:
 				hashed = sha256.New()
+			case SumTypeSha384:
+				hashed = sha512.New384()
 			case SumTypeSha512:
 				hashed = sha512.New()
+			case SumTypeCRC32:
+				hashed = crc32.NewIEEE()
 			}
 			writers = append(writers, hashed)
 			hashes = append(hashes, hashed)

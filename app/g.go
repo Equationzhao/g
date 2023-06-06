@@ -799,14 +799,14 @@ var viewFlag = []cli.Flag{
 	},
 	&cli.StringSliceFlag{
 		Name:     "checksum-algorithm",
-		Usage:    "show checksum of file with algorithm: md5, sha1, sha256, sha512",
+		Usage:    "show checksum of file with algorithm: md5, sha1, sha224, sha256, sha384, sha512, crc32",
 		Aliases:  []string{"ca"},
 		Value:    cli.NewStringSlice("sha1"),
 		Category: "VIEW",
 	},
 	&cli.BoolFlag{
 		Name:               "checksum",
-		Usage:              "show checksum of file with algorithm: md5, sha1, sha256, sha512",
+		Usage:              "show checksum of file with algorithm: md5, sha1(default), sha224, sha256, sha384, sha512, crc32",
 		Aliases:            []string{"cs"},
 		DisableDefaultText: true,
 		Category:           "VIEW",
@@ -822,10 +822,16 @@ var viewFlag = []cli.Flag{
 					sums = append(sums, filter.SumTypeMd5)
 				case "sha1":
 					sums = append(sums, filter.SumTypeSha1)
+				case "sha224":
+					sums = append(sums, filter.SumTypeSha224)
 				case "sha256":
 					sums = append(sums, filter.SumTypeSha256)
+				case "sha384":
+					sums = append(sums, filter.SumTypeSha384)
 				case "sha512":
 					sums = append(sums, filter.SumTypeSha512)
+				case "crc32":
+					sums = append(sums, filter.SumTypeCRC32)
 				}
 			}
 
