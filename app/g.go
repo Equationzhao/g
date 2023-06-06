@@ -1296,7 +1296,7 @@ var indexFlags = []cli.Flag{
 	},
 	&cli.BoolFlag{
 		Name:               "rebuild-index",
-		Aliases:            []string{"ri"},
+		Aliases:            []string{"ri", "remove-all"},
 		Usage:              "rebuild index",
 		DisableDefaultText: true,
 		Category:           "Index",
@@ -1320,14 +1320,32 @@ var indexFlags = []cli.Flag{
 	},
 	&cli.StringSliceFlag{
 		Name:     "remove-index",
+		Aliases:  []string{"rm"},
 		Usage:    "remove paths from index",
 		Category: "Index",
 		Action: func(context *cli.Context, i []string) error {
 			var errSum error = nil
+
+			var beautification = true
+			if context.Bool("np") { // --no-path-transform
+				beautification = false
+			}
+
 			for _, s := range i {
-				err := index.Delete(s)
+				if beautification {
+					s = pathbeautify.Transform(s)
+				}
+
+				// get absolute path
+				r, err := filepath.Abs(s)
 				if err != nil {
-					errSum = errors.Join(errSum, err)
+					errSum = errors.Join(errSum, fmt.Errorf("remove-path: %w", err))
+					continue
+				}
+
+				err = index.Delete(r)
+				if err != nil {
+					errSum = errors.Join(errSum, fmt.Errorf("remove-path: %w", err))
 				}
 			}
 			if errSum != nil {
@@ -1345,12 +1363,31 @@ var indexFlags = []cli.Flag{
 		Category:           "Index",
 		Action: func(context *cli.Context, b bool) error {
 			if b {
-				keys, values, err := index.All()
+				keys, _, err := index.All()
 				if err != nil {
 					return err
 				}
 				for i := 0; i < len(keys); i++ {
-					fmt.Println(keys[i], values[i])
+					fmt.Println(keys[i])
+				}
+			}
+			return Err4Exit{}
+		},
+	},
+	&cli.BoolFlag{
+		Name:     "remove-current-path",
+		Aliases:  []string{"rcp", "rc", "rmc"},
+		Usage:    "remove current path from index",
+		Category: "Index",
+		Action: func(context *cli.Context, b bool) error {
+			if b {
+				r, err := os.Getwd()
+				if err != nil {
+					return err
+				}
+				err = index.Delete(r)
+				if err != nil {
+					return err
 				}
 			}
 			return Err4Exit{}
