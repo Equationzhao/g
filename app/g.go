@@ -1367,6 +1367,8 @@ var sortingFlags = []cli.Flag{
 			sorter.WithSize(len(slice))(sort)
 			for _, s := range slice {
 				switch s {
+				case "none", "None", "nosort":
+					sort.AddOption(sorter.ByNone)
 				case "name-descend":
 					sort.AddOption(sorter.ByNameDescend)
 				case "name":
@@ -1417,7 +1419,7 @@ var sortingFlags = []cli.Flag{
 	},
 	&cli.BoolFlag{
 		Name:               "sort-reverse",
-		Aliases:            []string{"sr"},
+		Aliases:            []string{"sr", "reverse"},
 		Usage:              "reverse the order of the sort",
 		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
