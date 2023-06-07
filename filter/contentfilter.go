@@ -10,6 +10,7 @@ import (
 	"hash/crc32"
 	"io"
 	"os"
+	"runtime"
 	"sort"
 	"strconv"
 	"strings"
@@ -18,10 +19,10 @@ import (
 	"time"
 
 	"github.com/Equationzhao/g/cached"
+	"github.com/Equationzhao/g/display"
 	"github.com/Equationzhao/g/git"
 	"github.com/Equationzhao/g/osbased"
 	"github.com/Equationzhao/g/render"
-	"github.com/Equationzhao/tsmap"
 	"github.com/hako/durafmt"
 	"github.com/valyala/bytebufferpool"
 
@@ -62,12 +63,14 @@ func (cf *ContentFilter) SetOptions(options ...ContentOption) {
 	cf.options = options
 }
 
-type ContentOption func(info os.FileInfo) string
+type ContentOption func(info os.FileInfo) (stringContent string, funcName string)
+
+const Permissions = "Permissions"
 
 // EnableFileMode return file mode like -rwxrwxrwx/drwxrwxrwx
 func EnableFileMode(renderer *render.Renderer) ContentOption {
-	return func(info os.FileInfo) string {
-		return renderer.FileMode(fillBlank(info.Mode().String(), 12))
+	return func(info os.FileInfo) (string, string) {
+		return renderer.FileMode(fillBlank(info.Mode().String(), 12)), Permissions
 	}
 }
 
@@ -80,6 +83,8 @@ func NewInodeEnabler() *InodeEnabler {
 		WaitGroup: new(sync.WaitGroup),
 	}
 }
+
+const Inode = "Inode"
 
 func (i *InodeEnabler) Enable(renderer *render.Renderer) ContentOption {
 	m := sync.RWMutex{}
@@ -105,10 +110,10 @@ func (i *InodeEnabler) Enable(renderer *render.Renderer) ContentOption {
 		}
 	}
 
-	return func(info os.FileInfo) string {
+	return func(info os.FileInfo) (string, string) {
 		str := osbased.Inode(info)
 		done(str)
-		return wait(str)
+		return wait(str), Inode
 	}
 }
 
@@ -350,6 +355,8 @@ func (s *SizeEnabler) Size2String(b int64, blank int) string {
 	return s.renderer.Size(fillBlank(res, blank))
 }
 
+const SizeName = "Size"
+
 func (s *SizeEnabler) EnableSize(size SizeUnit) ContentOption {
 	s.sizeUint = size
 
@@ -376,23 +383,23 @@ func (s *SizeEnabler) EnableSize(size SizeUnit) ContentOption {
 			return fillBlank(size, longestSize)
 		}
 
-		return func(info os.FileInfo) string {
+		return func(info os.FileInfo) (string, string) {
 			v := info.Size()
 			if s.enableTotal {
 				s.total.Add(v)
 			}
 			size := s.Size2String(v, 0)
 			done(size)
-			return wait(size)
+			return wait(size), SizeName
 		}
 	}
 
-	return func(info os.FileInfo) string {
+	return func(info os.FileInfo) (string, string) {
 		v := info.Size()
 		if s.enableTotal {
 			s.total.Add(v)
 		}
-		return s.Size2String(v, 7)
+		return s.Size2String(v, 7), SizeName
 	}
 }
 
@@ -406,6 +413,8 @@ func NewRelativeTimeEnabler() *RelativeTimeEnabler {
 		WaitGroup: new(sync.WaitGroup),
 	}
 }
+
+const RelativeTime = "Relative-time"
 
 func (r *RelativeTimeEnabler) Enable(renderer *render.Renderer) ContentOption {
 	longestRt := 0
@@ -430,7 +439,7 @@ func (r *RelativeTimeEnabler) Enable(renderer *render.Renderer) ContentOption {
 		return fillBlank(size, longestRt)
 	}
 
-	return func(info os.FileInfo) string {
+	return func(info os.FileInfo) (string, string) {
 		var t time.Time
 		switch r.Mode {
 		case "mod":
@@ -444,7 +453,7 @@ func (r *RelativeTimeEnabler) Enable(renderer *render.Renderer) ContentOption {
 		}
 		rt := renderer.Time(relativeTime(time.Now(), t))
 		done(rt)
-		return wait(rt)
+		return wait(rt), RelativeTime
 	}
 }
 
@@ -458,19 +467,30 @@ func relativeTime(now, modTime time.Time) string {
 	}
 }
 
+const (
+	timeName     = "Time"
+	timeModified = "Modified"
+	timeCreated  = "Created"
+	timeAccessed = "Accessed"
+)
+
 func EnableTime(format string, mod string, renderer *render.Renderer) ContentOption {
-	return func(info os.FileInfo) string {
+	return func(info os.FileInfo) (string, string) {
 		// get mod time/ create time/ access time
 		var t time.Time
+		timeType := ""
 		switch mod {
 		case "mod":
 			t = osbased.ModTime(info)
+			timeType = timeModified
 		case "create":
 			t = osbased.CreateTime(info)
+			timeType = timeCreated
 		case "access":
 			t = osbased.AccessTime(info)
+			timeType = timeAccessed
 		}
-		return renderer.Time(t.Format(format))
+		return renderer.Time(t.Format(format)), timeName + " " + timeType
 	}
 }
 
@@ -550,6 +570,8 @@ func NewNameEnable() *Name {
 	return &Name{}
 }
 
+const NameName = "name"
+
 func (n *Name) Enable() ContentOption {
 	/*
 		 -F      Display a slash (`/`) immediately after each pathname that is a
@@ -574,7 +596,7 @@ func (n *Name) Enable() ContentOption {
 		return value
 	}
 
-	return func(info os.FileInfo) string {
+	return func(info os.FileInfo) (string, string) {
 		buffer := bytebufferpool.Get()
 		defer bytebufferpool.Put(buffer)
 		name := info.Name()
@@ -640,7 +662,7 @@ func (n *Name) Enable() ContentOption {
 		}
 
 	end:
-		return str
+		return str, NameName
 	}
 }
 
@@ -704,6 +726,12 @@ var (
 	Gid = false
 )
 
+const (
+	OwnerName    = "owner"
+	OwnerUidName = "owner-uid"
+	OwnerSID     = "owner-sid"
+)
+
 func (cf *ContentFilter) EnableOwner(renderer *render.Renderer) ContentOption {
 	m := sync.RWMutex{}
 	longestOwner := 0
@@ -729,17 +757,30 @@ func (cf *ContentFilter) EnableOwner(renderer *render.Renderer) ContentOption {
 			m.RUnlock()
 		}
 	}
-	return func(info os.FileInfo) string {
+	return func(info os.FileInfo) (string, string) {
 		name := ""
+		returnFuncName := ""
 		if Uid {
 			name = osbased.OwnerID(info)
+			if runtime.GOOS == "windows" {
+				returnFuncName = OwnerSID
+			} else {
+				returnFuncName = OwnerUidName
+			}
 		} else {
 			name = osbased.Owner(info)
+			returnFuncName = OwnerName
 		}
 		done(name)
-		return wait(name)
+		return wait(name), returnFuncName
 	}
 }
+
+const (
+	GroupName    = "group"
+	GroupUidName = "group-uid"
+	GroupSID     = "group-sid"
+)
 
 func (cf *ContentFilter) EnableGroup(renderer *render.Renderer) ContentOption {
 	m := sync.RWMutex{}
@@ -767,15 +808,22 @@ func (cf *ContentFilter) EnableGroup(renderer *render.Renderer) ContentOption {
 		}
 	}
 
-	return func(info os.FileInfo) string {
+	return func(info os.FileInfo) (string, string) {
 		name := ""
+		returnFuncName := ""
 		if Gid {
 			name = osbased.GroupID(info)
+			if runtime.GOOS == "windows" {
+				returnFuncName = GroupSID
+			} else {
+				returnFuncName = GroupUidName
+			}
 		} else {
 			name = osbased.Group(info)
+			returnFuncName = GroupName
 		}
 		done(name)
-		return wait(name)
+		return wait(name), returnFuncName
 	}
 }
 
@@ -791,19 +839,7 @@ func NewContentFilter(options ...ContentOption) *ContentFilter {
 
 type ContentFunc func(entry os.FileInfo) bool
 
-func (cf *ContentFilter) GetStringSlice(e []os.FileInfo) []string {
-	resBuffers := make([]*bytebufferpool.ByteBuffer, len(e))
-
-	for i := range resBuffers {
-		resBuffers[i] = bytebufferpool.Get()
-	}
-
-	defer func() {
-		for i := range resBuffers {
-			bytebufferpool.Put(resBuffers[i])
-		}
-	}()
-
+func (cf *ContentFilter) GetDisplayItems(e ...os.FileInfo) []*display.Item {
 	sort.Slice(e, func(i, j int) bool {
 		if cf.sortFunc != nil {
 			return cf.sortFunc(e[i], e[j])
@@ -817,81 +853,23 @@ func (cf *ContentFilter) GetStringSlice(e []os.FileInfo) []string {
 	for i := range cf.wgs {
 		cf.wgs[i].Add(len(e))
 	}
+
+	res := make([]*display.Item, 0, len(e))
+	for i := 0; i < len(e); i++ {
+		res = append(res, display.NewItem(display.WithDelimiter(" ")))
+	}
+
 	for i, entry := range e {
 		go func(entry os.FileInfo, i int) {
-			options := cf.options[:len(cf.options)-1]
-			for _, option := range options {
-				_, _ = resBuffers[i].WriteString(option(entry))
-				_ = resBuffers[i].WriteByte(' ')
+			for j, option := range cf.options {
+				stringContent, funcName := option(entry)
+				content := display.ItemContent{Content: display.StringContent(stringContent), No: j}
+				res[i].Add(funcName, content)
 			}
-			// the last one should not follow by space
-			_, _ = resBuffers[i].WriteString(cf.options[len(cf.options)-1](entry))
 			wg.Done()
 		}(entry, i)
 	}
-	res := make([]string, 0, len(e))
 	wg.Wait()
-	for _, buffer := range resBuffers {
-		res = append(res, buffer.String())
-	}
-
-	return res
-}
-
-// GetExtraAndNameStringSlice returns a slice of string which contains extra information and name of the file
-/*
-	buffers layout:
-		extra extra extra ... |half|  name name name ...
-*/
-func (cf *ContentFilter) GetExtraAndNameStringSlice(e ...os.FileInfo) []tsmap.Pair[string, string] {
-	resBuffers := make([]*bytebufferpool.ByteBuffer, 2*len(e))
-
-	for i := range resBuffers {
-		resBuffers[i] = bytebufferpool.Get()
-	}
-
-	defer func() {
-		for i := range resBuffers {
-			bytebufferpool.Put(resBuffers[i])
-		}
-	}()
-
-	sort.Slice(e, func(i, j int) bool {
-		if cf.sortFunc != nil {
-			return cf.sortFunc(e[i], e[j])
-		} else {
-			return true
-		}
-	})
-
-	wg := sync.WaitGroup{}
-	wg.Add(len(e))
-	for i := range cf.wgs {
-		cf.wgs[i].Add(len(e))
-	}
-	for i, entry := range e {
-		go func(entry os.FileInfo, i int) {
-			options := cf.options[:len(cf.options)-1]
-			for j := range options {
-				_, _ = resBuffers[i].WriteString(options[j](entry))
-				_ = resBuffers[i].WriteByte(' ')
-			}
-			// the last one should not follow by space
-			_, _ = resBuffers[i+len(e)].WriteString(cf.options[len(cf.options)-1](entry))
-			wg.Done()
-		}(entry, i)
-	}
-	res := make([]tsmap.Pair[string, string], 0, len(e))
-	wg.Wait()
-
-	/*
-		buffers layout:
-			extra extra extra ... |half|  name name name ...
-	*/
-	bufLen := len(resBuffers)
-	for i := 0; i < bufLen/2; i++ {
-		res = append(res, tsmap.MakePair(resBuffers[i].String(), resBuffers[i+bufLen/2].String()))
-	}
 
 	return res
 }
@@ -907,6 +885,8 @@ const (
 	SumTypeSha512
 	SumTypeCRC32
 )
+
+const SumName = "sum"
 
 func (cf *ContentFilter) EnableSum(sumTypes ...SumType) ContentOption {
 	length := 0
@@ -930,14 +910,14 @@ func (cf *ContentFilter) EnableSum(sumTypes ...SumType) ContentOption {
 	}
 	length += len(sumTypes) - 1
 
-	return func(info os.FileInfo) string {
+	return func(info os.FileInfo) (string, string) {
 		if info.IsDir() {
-			return fillBlank("", length)
+			return fillBlank("", length), SumName
 		}
 
 		file, err := os.Open(info.Name())
 		if err != nil {
-			return fillBlank("", length)
+			return fillBlank("", length), SumName
 		}
 		defer file.Close()
 		hashes := make([]hash.Hash, 0, len(sumTypes))
@@ -965,28 +945,28 @@ func (cf *ContentFilter) EnableSum(sumTypes ...SumType) ContentOption {
 		}
 		multiWriter := io.MultiWriter(writers...)
 		if _, err := io.Copy(multiWriter, file); err != nil {
-			return fillBlank("", length)
+			return fillBlank("", length), SumName
 		}
 		sums := make([]string, 0, len(hashes))
 		for _, h := range hashes {
 			sums = append(sums, fmt.Sprintf("%x", h.Sum(nil)))
 		}
 		sumsStr := strings.Join(sums, " ")
-		return fillBlank(sumsStr, length)
+		return fillBlank(sumsStr, length), SumName
 	}
 }
 
 type ExactFileTypeEnabler struct {
 	*sync.WaitGroup
-	DetectSize uint32
 }
 
 func NewExactFileTypeEnabler() *ExactFileTypeEnabler {
 	return &ExactFileTypeEnabler{
-		WaitGroup:  &sync.WaitGroup{},
-		DetectSize: 1024 * 1024,
+		WaitGroup: &sync.WaitGroup{},
 	}
 }
+
+const ExactTypeName = "exact_type_name"
 
 func (e *ExactFileTypeEnabler) Enable() ContentOption {
 	longestTypeName := 0
@@ -1011,8 +991,7 @@ func (e *ExactFileTypeEnabler) Enable() ContentOption {
 		return fillBlank(tn, longestTypeName)
 	}
 
-	mt.SetLimit(e.DetectSize)
-	return func(info os.FileInfo) string {
+	return func(info os.FileInfo) (string, string) {
 		tn := ""
 		if info.IsDir() {
 			tn = "directory"
@@ -1021,21 +1000,17 @@ func (e *ExactFileTypeEnabler) Enable() ContentOption {
 			if err != nil {
 				tn = err.Error()
 				done(tn)
-				return wait(tn)
+				return wait(tn), ExactTypeName
 			}
 			mtype, err := mt.DetectReader(file)
 			if err != nil {
 				tn = err.Error()
 				done(tn)
-				return wait(tn)
+				return wait(tn), ExactTypeName
 			}
 			tn = mtype.String()
 		}
 		done(tn)
-		return wait(tn)
+		return wait(tn), ExactTypeName
 	}
-}
-
-func (e *ExactFileTypeEnabler) SetDetectSize(u uint64) {
-	e.DetectSize = uint32(u)
 }

@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/Equationzhao/g/git"
+	"github.com/gabriel-vasile/mimetype"
 	"github.com/gobwas/glob"
 )
 
@@ -60,7 +61,7 @@ var DirOnly = func(e os.FileInfo) bool {
 //		RemoveByExt([]string{"go", "cxx"})
 //	result:
 //		b.c c.rs dir
-var RemoveByExt = func(ext ...string) TypeFunc {
+func RemoveByExt(ext ...string) TypeFunc {
 	return func(e os.FileInfo) bool {
 		for _, extI := range ext {
 			if strings.HasSuffix(e.Name(), "."+extI) {
@@ -71,7 +72,7 @@ var RemoveByExt = func(ext ...string) TypeFunc {
 	}
 }
 
-var ExtOnly = func(ext ...string) TypeFunc {
+func ExtOnly(ext ...string) TypeFunc {
 	return func(e os.FileInfo) bool {
 		for _, extI := range ext {
 			if strings.HasSuffix(e.Name(), "."+extI) {
@@ -86,7 +87,7 @@ var ExtOnly = func(ext ...string) TypeFunc {
 // RemoveGlob if all pattern complied successfully, return a func and nil error,
 // if match any one, the fn will return false, else return false
 // if error occurred, return nil func and error
-var RemoveGlob = func(globPattern ...string) (TypeFunc, error) {
+func RemoveGlob(globPattern ...string) (TypeFunc, error) {
 	compiled := make([]glob.Glob, 0, len(globPattern))
 	for _, v := range globPattern {
 		compile, err := glob.Compile(v)
@@ -109,7 +110,7 @@ var RemoveGlob = func(globPattern ...string) (TypeFunc, error) {
 // GlobOnly if all pattern complied successfully, return a func and nil error,
 // if match any one, the fn will return true, else return false
 // if error occurred, return nil func and error
-var GlobOnly = func(globPattern ...string) (TypeFunc, error) {
+func GlobOnly(globPattern ...string) (TypeFunc, error) {
 	compiled := make([]glob.Glob, 0, len(globPattern))
 	for _, v := range globPattern {
 		compile, err := glob.Compile(v)
@@ -141,7 +142,7 @@ var RemoveBackups = func(e os.FileInfo) bool {
 	return !strings.HasSuffix(e.Name(), "~")
 }
 
-var RemoveGitIgnore = func(repoPath git.GitRepoPath) TypeFunc {
+func RemoveGitIgnore(repoPath git.GitRepoPath) TypeFunc {
 	isOrIsParentOf := func(parent, child string) bool {
 		if parent == child {
 			return true
@@ -163,5 +164,55 @@ var RemoveGitIgnore = func(repoPath git.GitRepoPath) TypeFunc {
 			}
 		}
 		return
+	}
+}
+
+func isOrIsSonOf(a, b string) bool {
+	if a == b {
+		return true
+	}
+	if strings.HasPrefix(a, b+"/") {
+		return true
+	}
+	return false
+}
+
+func ExactFileTypeOnly(fileTypes ...string) TypeFunc {
+	return func(e os.FileInfo) bool {
+		file, err := os.Open(e.Name())
+		if err != nil {
+			return keep
+		}
+		mtype, err := mimetype.DetectReader(file)
+		if err != nil {
+			return keep
+		}
+
+		for i := range fileTypes {
+			if isOrIsSonOf(mtype.String(), fileTypes[i]) {
+				return keep
+			}
+		}
+		return remove
+	}
+}
+
+func RemoveExactFileType(fileTypes ...string) TypeFunc {
+	return func(e os.FileInfo) bool {
+		file, err := os.Open(e.Name())
+		if err != nil {
+			return keep
+		}
+		mtype, err := mimetype.DetectReader(file)
+		if err != nil {
+			return keep
+		}
+
+		for i := range fileTypes {
+			if fileTypes[i] == mtype.String() {
+				return remove
+			}
+		}
+		return keep
 	}
 }

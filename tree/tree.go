@@ -39,9 +39,13 @@ func NewTreeString(entry string, depthLimit int, typeFilter *filter.TypeFilter, 
 	}
 	cm := sync.Mutex{}
 	cm.Lock()
-	ExtraName := contentFilter.GetExtraAndNameStringSlice(stat)
+	ExtraName := contentFilter.GetDisplayItems(stat)[0]
+	extra := ExtraName.ExcludeOrderedContent(filter.NameName)
+	name, _ := ExtraName.Get(filter.NameName)
 	cm.Unlock()
-	n := &Tree{tree: NewWithExtraInfoRoot(ExtraName[0].Key(), "", ExtraName[0].Value())}
+	n := &Tree{
+		tree: NewWithExtraInfoRoot(extra, "", name.Content.String()),
+	}
 
 	var wg sync.WaitGroup
 
@@ -97,10 +101,11 @@ func expand(node tree, depthLimit int, wg *sync.WaitGroup, parent string, s *sta
 			var name, extra string
 			if contentFilter != nil {
 				cm.Lock()
-				en := contentFilter.GetExtraAndNameStringSlice(v)[0]
+				en := contentFilter.GetDisplayItems(v)[0]
 				cm.Unlock()
-				name = en.Value()
-				extra = en.Key()
+				wrappedName, _ := en.Get(filter.NameName)
+				name = wrappedName.Content.String()
+				extra = en.ExcludeOrderedContent(filter.NameName)
 			} else {
 				name = v.Name()
 			}
@@ -113,9 +118,11 @@ func expand(node tree, depthLimit int, wg *sync.WaitGroup, parent string, s *sta
 			s.file.Add(1)
 			if contentFilter != nil {
 				cm.Lock()
-				en := contentFilter.GetExtraAndNameStringSlice(v)[0]
+				en := contentFilter.GetDisplayItems(v)[0]
 				cm.Unlock()
-				node.AddInfoNode(en.Key(), "", en.Value())
+				wrappedName, _ := en.Get(filter.NameName)
+				extra := en.ExcludeOrderedContent(filter.NameName)
+				node.AddInfoNode(extra, "", wrappedName.Content.String())
 			} else {
 				node.AddNode(v.Name())
 			}

@@ -16,8 +16,11 @@ import (
 	"github.com/Equationzhao/g/theme"
 	"github.com/Equationzhao/g/timeparse"
 	"github.com/Equationzhao/g/tree"
+	"github.com/Equationzhao/g/util"
 	"github.com/Equationzhao/pathbeautify"
+	"github.com/gabriel-vasile/mimetype"
 	"github.com/urfave/cli/v2"
+	"github.com/valyala/bytebufferpool"
 	versionInfo "go.szostok.io/version"
 	vp "go.szostok.io/version/printer"
 	"go.szostok.io/version/style"
@@ -39,9 +42,10 @@ var (
 	sizeEnabler   = filter.NewSizeEnabler()
 	wgs           = make([]filter.LengthFixed, 0, 1)
 	depthLimitMap = make(map[string]int)
+	limitOnce     = util.Once{}
 )
 
-var Version = "0.5.8"
+var Version = "0.6.0"
 
 var G *cli.App
 
@@ -157,9 +161,9 @@ There is NO WARRANTY, to the extent permitted by law.`,
 			}
 			contentFilter.SetOptions(contentFunc...)
 			contentFilter.AppendToLengthFixed(wgs...)
-
+			depth := context.Int("depth")
 			if context.Bool("tree") {
-				depth := context.Int("depth")
+
 				for i := 0; i < len(path); i++ {
 					if len(path) > 1 {
 						fmt.Printf("%s:\n", path[i])
@@ -234,7 +238,8 @@ There is NO WARRANTY, to the extent permitted by law.`,
 				// flag: if A is set
 				flagA := context.Bool("A")
 				flagR := context.Bool("R")
-				depth := context.Int("depth")
+
+				header := context.Bool("header")
 
 				for i := 0; i < len(path); i++ {
 					if len(path) > 1 {
@@ -406,13 +411,56 @@ There is NO WARRANTY, to the extent permitted by law.`,
 					}
 
 				final:
-					stringSlice := contentFilter.GetStringSlice(infos)
+					items := contentFilter.GetDisplayItems(infos...)
 
 					// if -l/show-total-size is set, add total size
 					if total, ok := sizeEnabler.Total(); ok {
-						p.Print(fmt.Sprintf("  total %s", sizeEnabler.Size2String(total, 0)))
+						i := display.NewItem()
+						i.Add("total", display.ItemContent{Content: display.StringContent(fmt.Sprintf("  total %s", sizeEnabler.Size2String(total, 0)))})
+						p.Print(*i)
 					}
-					p.Print(stringSlice...)
+
+					itemsCopy := make([]display.Item, 0, len(items))
+					for _, item := range items {
+						itemsCopy = append(itemsCopy, *item)
+					}
+
+					if header {
+						p.AddBeforePrint(func(item ...display.Item) {
+							// add header
+							allPart := item[0].KeysByOrder()
+							longestEachPart := make(map[string]int)
+							for _, it := range item {
+								for _, part := range allPart {
+									content, _ := it.Get(part)
+									l := display.WidthLen(content.Content.String())
+									if l > longestEachPart[part] {
+										longestEachPart[part] = l
+									}
+								}
+							}
+
+							// add longest - len(header) * space
+							// print header
+							contentStrBuf := bytebufferpool.Get()
+							for i, s := range allPart {
+								if len(s) > longestEachPart[s] {
+
+								} else {
+									_, _ = contentStrBuf.WriteString(theme.Underline)
+									_, _ = contentStrBuf.WriteString(s)
+									_, _ = contentStrBuf.WriteString(theme.Reset)
+									if i != len(allPart)-1 {
+										_, _ = contentStrBuf.WriteString(strings.Repeat(" ", longestEachPart[s]-len(s)+1))
+									}
+								}
+							}
+							_, _ = contentStrBuf.WriteString(theme.Reset)
+							_, _ = fmt.Fprintln(display.Output, contentStrBuf.String())
+						})
+					}
+
+					p.Print(itemsCopy...)
 
 					// switch back to start dir
 					if i != len(path)-1 {
@@ -546,6 +594,104 @@ func initVersionHelpFlags() {
 var viewFlag = []cli.Flag{
 	// VIEW
 	&cli.BoolFlag{
+		Name:  "header",
+		Usage: "add a header row",
+		Action: func(context *cli.Context, b bool) error {
+			if b {
+				if _, ok := p.(*display.Byline); !ok {
+					p = display.NewByline()
+				}
+			}
+			return nil
+		},
+	},
+	&cli.StringFlag{
+		Name:        "time-type",
+		Aliases:     []string{"tt"},
+		Usage:       "time type, mod, create, access",
+		EnvVars:     []string{"TIME_TYPE"},
+		DefaultText: "mod",
+		Action: func(context *cli.Context, s string) error {
+			if s == "mod" || s == "create" || s == "access" {
+				timeType = s
+				return nil
+			} else {
+				ReturnCode = 1
+				return errors.New("invalid time type")
+			}
+		},
+		Category: "VIEW",
+	},
+	&cli.StringFlag{
+		Name:        "size-unit",
+		Aliases:     []string{"su"},
+		Usage:       "size unit, b, k, m, g, t, p, e, z, y, auto",
+		EnvVars:     []string{"SIZE_UNIT"},
+		DefaultText: "auto",
+		Action: func(context *cli.Context, s string) error {
+			if strings.EqualFold(s, "auto") {
+				return nil
+			}
+			sizeUint = filter.ConvertFromSizeString(s)
+			if sizeUint == filter.Unknown {
+				ReturnCode = 1
+				return errors.New("invalid size unit")
+			}
+			return nil
+		},
+		Category: "VIEW",
+	},
+	&cli.StringFlag{
+		Name:        "time-style",
+		Usage:       "time/date format with -l, Valid timestamp styles are `default', `iso`, `long iso`, `full-iso`, `locale`, custom `+FORMAT` like date(1).",
+		EnvVars:     []string{"TIME_STYLE"},
+		DefaultText: "+%d.%b'%y %H:%M (like 02.Jan'06 15:04)",
+		Action: func(context *cli.Context, s string) error {
+			/*
+				The TIME_STYLE argument can be full-iso, long-iso, iso, locale, or  +FORMAT.   FORMAT
+				is  interpreted  like in date(1).  If FORMAT is FORMAT1<newline>FORMAT2, then FORMAT1
+				applies to non-recent files and FORMAT2 to recent files.   TIME_STYLE  prefixed  with
+				'posix-' takes effect only outside the POSIX locale.  Also the TIME_STYLE environment
+				variable sets the default style to use.
+			*/
+			if strings.HasPrefix(s, "+") {
+				s := s[1:] // remove +
+				timeFormat = timeparse.Transform(s)
+				return nil
+			}
+
+			switch s {
+			case "full-iso":
+				timeFormat = "2006-01-02 15:04:05.000000000 -0700"
+			case "long-iso":
+				timeFormat = "2006-01-02 15:04"
+			case "locale":
+				timeFormat = "Jan 02 15:04"
+			case "iso":
+				timeFormat = "01-02 15:04"
+			case "default":
+				timeFormat = "02.Jan'06 15:04"
+			default:
+				ReturnCode = 1
+				return errors.New("invalid time-style")
+			}
+			return nil
+		},
+		Category: "VIEW",
+	},
+	&cli.BoolFlag{
+		Name:               "full-time",
+		Usage:              "like -all/l --time-style=full-iso",
+		DisableDefaultText: true,
+		Action: func(context *cli.Context, b bool) error {
+			if b {
+				timeFormat = "2006-01-02 15:04:05.000000000 -0700"
+			}
+			return nil
+		},
+		Category: "VIEW",
+	},
+	&cli.BoolFlag{
 		Name:               "o",
 		DisableDefaultText: true,
 		Usage:              "like -all/l, but do not list group information",
@@ -648,25 +794,6 @@ var viewFlag = []cli.Flag{
 		},
 		Category: "VIEW",
 	},
-	&cli.StringFlag{
-		Name:        "size-unit",
-		Aliases:     []string{"su"},
-		Usage:       "size unit, b, k, m, g, t, p, e, z, y, auto",
-		EnvVars:     []string{"SIZE_UNIT"},
-		DefaultText: "auto",
-		Action: func(context *cli.Context, s string) error {
-			if strings.EqualFold(s, "auto") {
-				return nil
-			}
-			sizeUint = filter.ConvertFromSizeString(s)
-			if sizeUint == filter.Unknown {
-				ReturnCode = 1
-				return errors.New("invalid size unit")
-			}
-			return nil
-		},
-		Category: "VIEW",
-	},
 	&cli.BoolFlag{
 		Name:               "uid",
 		Usage:              "show uid instead of username [sid in windows]",
@@ -704,23 +831,6 @@ var viewFlag = []cli.Flag{
 		},
 		Category: "VIEW",
 	},
-	&cli.StringFlag{
-		Name:        "time-type",
-		Aliases:     []string{"tt"},
-		Usage:       "time type, mod, create, access",
-		EnvVars:     []string{"TIME_TYPE"},
-		DefaultText: "mod",
-		Action: func(context *cli.Context, s string) error {
-			if s == "mod" || s == "create" || s == "access" {
-				timeType = s
-				return nil
-			} else {
-				ReturnCode = 1
-				return errors.New("invalid time type")
-			}
-		},
-		Category: "VIEW",
-	},
 	&cli.BoolFlag{
 		Name:               "relative-time",
 		Aliases:            []string{"rt"},
@@ -737,56 +847,7 @@ var viewFlag = []cli.Flag{
 		},
 		Category: "VIEW",
 	},
-	&cli.StringFlag{
-		Name:        "time-style",
-		Usage:       "time/date format with -l, Valid timestamp styles are `default', `iso`, `long iso`, `full-iso`, `locale`, custom `+FORMAT` like date(1).",
-		EnvVars:     []string{"TIME_STYLE"},
-		DefaultText: "+%d.%b'%y %H:%M (like 02.Jan'06 15:04)",
-		Action: func(context *cli.Context, s string) error {
-			/*
-				The TIME_STYLE argument can be full-iso, long-iso, iso, locale, or  +FORMAT.   FORMAT
-				is  interpreted  like in date(1).  If FORMAT is FORMAT1<newline>FORMAT2, then FORMAT1
-				applies to non-recent files and FORMAT2 to recent files.   TIME_STYLE  prefixed  with
-				'posix-' takes effect only outside the POSIX locale.  Also the TIME_STYLE environment
-				variable sets the default style to use.
-			*/
-			if strings.HasPrefix(s, "+") {
-				s := s[1:] // remove +
-				timeFormat = timeparse.Transform(s)
-				return nil
-			}
 
-			switch s {
-			case "full-iso":
-				timeFormat = "2006-01-02 15:04:05.000000000 -0700"
-			case "long-iso":
-				timeFormat = "2006-01-02 15:04"
-			case "locale":
-				timeFormat = "Jan 02 15:04"
-			case "iso":
-				timeFormat = "01-02 15:04"
-			case "default":
-				timeFormat = "02.Jan'06 15:04"
-			default:
-				ReturnCode = 1
-				return errors.New("invalid time-style")
-			}
-			return nil
-		},
-		Category: "VIEW",
-	},
-	&cli.BoolFlag{
-		Name:               "full-time",
-		Usage:              "like -all/l --time-style=full-iso",
-		DisableDefaultText: true,
-		Action: func(context *cli.Context, b bool) error {
-			if b {
-				timeFormat = "2006-01-02 15:04:05.000000000 -0700"
-			}
-			return nil
-		},
-		Category: "VIEW",
-	},
 	&cli.BoolFlag{
 		Name:               "show-perm",
 		Aliases:            []string{"sp"},
@@ -921,18 +982,24 @@ var viewFlag = []cli.Flag{
 			if b {
 				exact := filter.NewExactFileTypeEnabler()
 
-				size := context.String("exact-detect-size")
-				var bytes uint64 = 1024 * 1024
-				if size == "0" || size == "infinity" {
-					bytes = 0
-				} else if size != "" {
-					sizeUint, err := filter.ParseSize(size)
-					if err != nil {
-						return err
+				err := limitOnce.Do(func() error {
+					size := context.String("exact-detect-size")
+					var bytes uint64 = 1024 * 1024
+					if size == "0" || size == "infinity" {
+						bytes = 0
+					} else if size != "" {
+						sizeUint, err := filter.ParseSize(size)
+						if err != nil {
+							return err
+						}
+						bytes = sizeUint.Bytes
 					}
-					bytes = sizeUint.Bytes
+					mimetype.SetLimit(uint32(bytes))
+					return nil
+				})
+				if err != nil {
+					return err
 				}
-				exact.SetDetectSize(bytes)
 				contentFunc = append(contentFunc, exact.Enable())
 				wgs = append(wgs, exact)
 			}
@@ -1326,6 +1393,37 @@ var filteringFlag = []cli.Flag{
 		},
 		Category: "FILTERING",
 	},
+	&cli.StringSliceFlag{
+		Name:     "show-exact-file-type-only",
+		Usage:    "only show file with given type",
+		Aliases:  []string{"et-only", "eto"},
+		Category: "FILTERING",
+		Action: func(context *cli.Context, i []string) error {
+			if len(i) > 0 {
+				err := limitOnce.Do(func() error {
+					size := context.String("exact-detect-size")
+					var bytes uint64 = 1024 * 1024
+					if size == "0" || size == "infinity" {
+						bytes = 0
+					} else if size != "" {
+						sizeUint, err := filter.ParseSize(size)
+						if err != nil {
+							return err
+						}
+						bytes = sizeUint.Bytes
+					}
+					mimetype.SetLimit(uint32(bytes))
+					return nil
+				})
+				if err != nil {
+					return err
+				}
+				eft := filter.ExactFileTypeOnly(i...)
+				typeFunc = append(typeFunc, &eft)
+			}
+			return nil
+		},
+	},
 }
 
 var indexFlags = []cli.Flag{
@@ -1368,7 +1466,7 @@ var indexFlags = []cli.Flag{
 		Action: func(context *cli.Context, i []string) error {
 			var errSum error = nil
 
-			var beautification = true
+			beautification := true
 			if context.Bool("np") { // --no-path-transform
 				beautification = false
 			}
