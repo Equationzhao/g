@@ -8,9 +8,9 @@ import (
 	"strings"
 	"time"
 
+	"github.com/Equationzhao/g/display"
 	"github.com/Equationzhao/g/filter"
 	"github.com/Equationzhao/g/index"
-	"github.com/Equationzhao/g/printer"
 	"github.com/Equationzhao/g/render"
 	"github.com/Equationzhao/g/sorter"
 	"github.com/Equationzhao/g/theme"
@@ -28,7 +28,7 @@ var (
 	typeFunc      = make([]*filter.TypeFunc, 0)
 	contentFunc   = make([]filter.ContentOption, 0)
 	r             = render.NewRenderer(theme.DefaultTheme, theme.DefaultInfoTheme)
-	p             = printer.NewFitTerminal()
+	p             = display.NewFitTerminal()
 	timeFormat    = "02.Jan'06 15:04"
 	ReturnCode    = 0
 	contentFilter = filter.NewContentFilter()
@@ -560,8 +560,8 @@ var viewFlag = []cli.Flag{
 				}
 				typeFunc = newFF
 				contentFunc = append(contentFunc, filter.EnableFileMode(r), sizeEnabler.EnableSize(sizeUint), contentFilter.EnableGroup(r), filter.EnableTime(timeFormat, timeType, r))
-				if _, ok := p.(*printer.Byline); !ok {
-					p = printer.NewByline()
+				if _, ok := p.(*display.Byline); !ok {
+					p = display.NewByline()
 				}
 			}
 			return nil
@@ -583,8 +583,8 @@ var viewFlag = []cli.Flag{
 				}
 				typeFunc = newFF
 				contentFunc = append(contentFunc, filter.EnableFileMode(r), sizeEnabler.EnableSize(sizeUint), contentFilter.EnableOwner(r), filter.EnableTime(timeFormat, timeType, r))
-				if _, ok := p.(*printer.Byline); !ok {
-					p = printer.NewByline()
+				if _, ok := p.(*display.Byline); !ok {
+					p = display.NewByline()
 				}
 			}
 			return nil
@@ -620,8 +620,8 @@ var viewFlag = []cli.Flag{
 				}
 				contentFunc = append(contentFunc, filter.EnableTime(timeFormat, timeType, r))
 
-				if _, ok := p.(*printer.Byline); !ok {
-					p = printer.NewByline()
+				if _, ok := p.(*display.Byline); !ok {
+					p = display.NewByline()
 				}
 			}
 			return nil
@@ -795,8 +795,8 @@ var viewFlag = []cli.Flag{
 		Action: func(context *cli.Context, b bool) error {
 			if b {
 				contentFunc = append(contentFunc, filter.EnableFileMode(r))
-				if _, ok := p.(*printer.Byline); !ok {
-					p = printer.NewByline()
+				if _, ok := p.(*display.Byline); !ok {
+					p = display.NewByline()
 				}
 			}
 			return nil
@@ -811,8 +811,8 @@ var viewFlag = []cli.Flag{
 		Action: func(context *cli.Context, b bool) error {
 			if b {
 				contentFunc = append(contentFunc, sizeEnabler.EnableSize(sizeUint))
-				if _, ok := p.(*printer.Byline); !ok {
-					p = printer.NewByline()
+				if _, ok := p.(*display.Byline); !ok {
+					p = display.NewByline()
 				}
 			}
 			return nil
@@ -827,8 +827,8 @@ var viewFlag = []cli.Flag{
 		Action: func(context *cli.Context, b bool) error {
 			if b {
 				contentFunc = append(contentFunc, filter.EnableFileMode(r), sizeEnabler.EnableSize(sizeUint), contentFilter.EnableOwner(r), contentFilter.EnableGroup(r), filter.EnableTime(timeFormat, timeType, r))
-				if _, ok := p.(*printer.Byline); !ok {
-					p = printer.NewByline()
+				if _, ok := p.(*display.Byline); !ok {
+					p = display.NewByline()
 				}
 			}
 			return nil
@@ -843,8 +843,8 @@ var viewFlag = []cli.Flag{
 		Action: func(context *cli.Context, b bool) error {
 			if b {
 				contentFunc = append(contentFunc, contentFilter.EnableOwner(r))
-				if _, ok := p.(*printer.Byline); !ok {
-					p = printer.NewByline()
+				if _, ok := p.(*display.Byline); !ok {
+					p = display.NewByline()
 				}
 			}
 			return nil
@@ -859,8 +859,8 @@ var viewFlag = []cli.Flag{
 		Action: func(context *cli.Context, b bool) error {
 			if b {
 				contentFunc = append(contentFunc, contentFilter.EnableGroup(r))
-				if _, ok := p.(*printer.Byline); !ok {
-					p = printer.NewByline()
+				if _, ok := p.(*display.Byline); !ok {
+					p = display.NewByline()
 				}
 			}
 			return nil
@@ -875,8 +875,8 @@ var viewFlag = []cli.Flag{
 		Action: func(context *cli.Context, b bool) error {
 			if b {
 				contentFunc = append(contentFunc, filter.EnableTime(timeFormat, timeType, r))
-				if _, ok := p.(*printer.Byline); !ok {
-					p = printer.NewByline()
+				if _, ok := p.(*display.Byline); !ok {
+					p = display.NewByline()
 				}
 			}
 			return nil
@@ -903,11 +903,11 @@ var viewFlag = []cli.Flag{
 			return nil
 		},
 	},
-	&cli.Uint64Flag{
+	&cli.StringFlag{
 		Name:        "exact-detect-size",
-		Usage:       "set exact detect size",
+		Usage:       "set exact detect size (bytes)",
 		Aliases:     []string{"eds", "detect-size", "ds"},
-		Value:       1024 * 1024,
+		Value:       "1M",
 		DefaultText: "1M",
 		Category:    "VIEW",
 	},
@@ -920,7 +920,19 @@ var viewFlag = []cli.Flag{
 		Action: func(context *cli.Context, b bool) error {
 			if b {
 				exact := filter.NewExactFileTypeEnabler()
-				exact.SetDetectSize(context.Uint64("exact-detect-size"))
+
+				size := context.String("exact-detect-size")
+				var bytes uint64 = 1024 * 1024
+				if size == "0" || size == "infinity" {
+					bytes = 0
+				} else if size != "" {
+					sizeUint, err := filter.ParseSize(size)
+					if err != nil {
+						return err
+					}
+					bytes = sizeUint.Bytes
+				}
+				exact.SetDetectSize(bytes)
 				contentFunc = append(contentFunc, exact.Enable())
 				wgs = append(wgs, exact)
 			}
@@ -967,8 +979,8 @@ var viewFlag = []cli.Flag{
 
 			if b {
 				contentFunc = append(contentFunc, contentFilter.EnableSum(sums...))
-				if _, ok := p.(*printer.Byline); !ok {
-					p = printer.NewByline()
+				if _, ok := p.(*display.Byline); !ok {
+					p = display.NewByline()
 				}
 			}
 			return nil
@@ -1027,8 +1039,8 @@ var displayFlag = []cli.Flag{
 		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
 			if b {
-				if _, ok := p.(*printer.Byline); !ok {
-					p = printer.NewByline()
+				if _, ok := p.(*display.Byline); !ok {
+					p = display.NewByline()
 				}
 			}
 			return nil
@@ -1042,8 +1054,8 @@ var displayFlag = []cli.Flag{
 		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
 			if b {
-				if _, ok := p.(*printer.Zero); !ok {
-					p = printer.NewZero()
+				if _, ok := p.(*display.Zero); !ok {
+					p = display.NewZero()
 				}
 			}
 			return nil
@@ -1057,8 +1069,8 @@ var displayFlag = []cli.Flag{
 		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
 			if b {
-				if _, ok := p.(*printer.CommaPrint); !ok {
-					p = printer.NewCommaPrint()
+				if _, ok := p.(*display.CommaPrint); !ok {
+					p = display.NewCommaPrint()
 				}
 			}
 			return nil
@@ -1072,8 +1084,8 @@ var displayFlag = []cli.Flag{
 		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
 			if b {
-				if _, ok := p.(*printer.Across); !ok {
-					p = printer.NewAcross()
+				if _, ok := p.(*display.Across); !ok {
+					p = display.NewAcross()
 				}
 			}
 			return nil
@@ -1087,8 +1099,8 @@ var displayFlag = []cli.Flag{
 		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
 			if b {
-				if _, ok := p.(*printer.FitTerminal); !ok {
-					p = printer.NewFitTerminal()
+				if _, ok := p.(*display.FitTerminal); !ok {
+					p = display.NewFitTerminal()
 				}
 			}
 			return nil
@@ -1102,25 +1114,25 @@ var displayFlag = []cli.Flag{
 		Action: func(context *cli.Context, s string) error {
 			switch s {
 			case "across", "x", "horizontal":
-				if _, ok := p.(*printer.Across); !ok {
-					p = printer.NewAcross()
+				if _, ok := p.(*display.Across); !ok {
+					p = display.NewAcross()
 				}
 			case "commas", "m":
-				if _, ok := p.(*printer.CommaPrint); !ok {
-					p = printer.NewCommaPrint()
+				if _, ok := p.(*display.CommaPrint); !ok {
+					p = display.NewCommaPrint()
 				}
 			case "long", "l", "verbose":
 				contentFunc = append(contentFunc, filter.EnableFileMode(r), sizeEnabler.EnableSize(sizeUint), contentFilter.EnableOwner(r), contentFilter.EnableGroup(r), filter.EnableTime(timeFormat, timeType, r))
-				if _, ok := p.(*printer.Byline); !ok {
-					p = printer.NewByline()
+				if _, ok := p.(*display.Byline); !ok {
+					p = display.NewByline()
 				}
 			case "single-column", "1":
-				if _, ok := p.(*printer.Byline); !ok {
-					p = printer.NewByline()
+				if _, ok := p.(*display.Byline); !ok {
+					p = display.NewByline()
 				}
 			case "vertical", "C":
-				if _, ok := p.(*printer.FitTerminal); !ok {
-					p = printer.NewFitTerminal()
+				if _, ok := p.(*display.FitTerminal); !ok {
+					p = display.NewFitTerminal()
 				}
 			}
 			return nil

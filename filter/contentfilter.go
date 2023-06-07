@@ -112,6 +112,43 @@ func (i *InodeEnabler) Enable(renderer *render.Renderer) ContentOption {
 	}
 }
 
+type Size struct {
+	Bytes uint64
+}
+
+var allSizeUints = []SizeUnit{
+	Bit,
+	B,
+	KB,
+	MB,
+	GB,
+	TB,
+	PB,
+	EB,
+	ZB,
+	YB,
+	BB,
+	NB,
+}
+
+func ParseSize(size string) (Size, error) {
+	for _, sizeUint := range allSizeUints {
+		for _, sizeString := range sizeStringSets(sizeUint) {
+			if strings.HasSuffix(size, sizeString) {
+				size = strings.TrimSuffix(size, sizeString)
+				sizeFloat, err := strconv.ParseFloat(size, 64)
+				if err != nil {
+					return Size{}, err
+				}
+				return Size{
+					Bytes: uint64(sizeFloat * float64(sizeUint)),
+				}, nil
+			}
+		}
+	}
+	return Size{}, fmt.Errorf("unknown size unit")
+}
+
 type SizeUnit float64
 
 const Unknown SizeUnit = -1
@@ -141,39 +178,43 @@ func fillBlank(s string, length int) string {
 	return strings.Repeat(" ", length-len(s)) + s
 }
 
-func Convert2SizeString(size SizeUnit) string {
+func sizeStringSets(size SizeUnit) []string {
 	switch size {
 	case Unknown:
-		return "?"
+		return []string{"unknown"}
 	case Auto:
-		return ""
+		return []string{""}
 	case Bit:
-		return "bit"
+		return []string{"bit", "Bit"}
 	case B:
-		return "B"
+		return []string{"B", "b", "byte", "Byte"}
 	case KB:
-		return "KB"
+		return []string{"KB", "kb", "K", "k"}
 	case MB:
-		return "MB"
+		return []string{"MB", "mb", "M", "m"}
 	case GB:
-		return "GB"
+		return []string{"GB", "gb", "G", "g"}
 	case TB:
-		return "TB"
+		return []string{"TB", "tb", "T", "t"}
 	case PB:
-		return "PB"
+		return []string{"PB", "pb", "P", "p"}
 	case EB:
-		return "EB"
+		return []string{"EB", "eb", "E", "e"}
 	case ZB:
-		return "ZB"
+		return []string{"ZB", "zb", "Z", "z"}
 	case YB:
-		return "YB"
+		return []string{"YB", "yb", "Y", "y"}
 	case BB:
-		return "BB"
+		return []string{"BB", "bb"}
 	case NB:
-		return "NB"
+		return []string{"NB", "nb", "N", "n"}
 	default:
-		return "unknown"
+		return []string{"unknown"}
 	}
+}
+
+func Convert2SizeString(size SizeUnit) string {
+	return sizeStringSets(size)[0]
 }
 
 func ConvertFromSizeString(size string) SizeUnit {
