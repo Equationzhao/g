@@ -8,6 +8,10 @@ import (
 	"github.com/Equationzhao/g/osbased"
 )
 
+func ByNone(a, b os.FileInfo) bool {
+	return false
+}
+
 func ByNameDescend(a, b os.FileInfo) bool {
 	return strings.ToLower(a.Name()) > strings.ToLower(b.Name())
 }

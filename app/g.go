@@ -1326,7 +1326,7 @@ var indexFlags = []cli.Flag{
 	},
 	&cli.BoolFlag{
 		Name:               "rebuild-index",
-		Aliases:            []string{"ri"},
+		Aliases:            []string{"ri", "remove-all"},
 		Usage:              "rebuild index",
 		DisableDefaultText: true,
 		Category:           "Index",
@@ -1350,14 +1350,32 @@ var indexFlags = []cli.Flag{
 	},
 	&cli.StringSliceFlag{
 		Name:     "remove-index",
+		Aliases:  []string{"rm"},
 		Usage:    "remove paths from index",
 		Category: "Index",
 		Action: func(context *cli.Context, i []string) error {
 			var errSum error = nil
+
+			var beautification = true
+			if context.Bool("np") { // --no-path-transform
+				beautification = false
+			}
+
 			for _, s := range i {
-				err := index.Delete(s)
+				if beautification {
+					s = pathbeautify.Transform(s)
+				}
+
+				// get absolute path
+				r, err := filepath.Abs(s)
 				if err != nil {
-					errSum = errors.Join(errSum, err)
+					errSum = errors.Join(errSum, fmt.Errorf("remove-path: %w", err))
+					continue
+				}
+
+				err = index.Delete(r)
+				if err != nil {
+					errSum = errors.Join(errSum, fmt.Errorf("remove-path: %w", err))
 				}
 			}
 			if errSum != nil {
@@ -1375,12 +1393,31 @@ var indexFlags = []cli.Flag{
 		Category:           "Index",
 		Action: func(context *cli.Context, b bool) error {
 			if b {
-				keys, values, err := index.All()
+				keys, _, err := index.All()
 				if err != nil {
 					return err
 				}
 				for i := 0; i < len(keys); i++ {
-					fmt.Println(string(keys[i]), string(values[i]))
+					fmt.Println(keys[i])
+				}
+			}
+			return Err4Exit{}
+		},
+	},
+	&cli.BoolFlag{
+		Name:     "remove-current-path",
+		Aliases:  []string{"rcp", "rc", "rmc"},
+		Usage:    "remove current path from index",
+		Category: "Index",
+		Action: func(context *cli.Context, b bool) error {
+			if b {
+				r, err := os.Getwd()
+				if err != nil {
+					return err
+				}
+				err = index.Delete(r)
+				if err != nil {
+					return err
 				}
 			}
 			return Err4Exit{}
@@ -1392,11 +1429,13 @@ var sortingFlags = []cli.Flag{
 	&cli.StringSliceFlag{
 		Name:    "sort",
 		Aliases: []string{"SORT_FIELD"},
-		Usage:   "sort by field, default: ascending and case insensitive, field beginning with Uppercase is case sensitive, available fields: name,size,time,owner,group,extension. following `-descend` to sort descending",
+		Usage:   "sort by field, default: ascending and case insensitive, field beginning with Uppercase is case sensitive, available fields: none(nosort),name,size,time,owner,group,extension. following `-descend` to sort descending",
 		Action: func(context *cli.Context, slice []string) error {
 			sorter.WithSize(len(slice))(sort)
 			for _, s := range slice {
 				switch s {
+				case "none", "None", "nosort":
+					sort.AddOption(sorter.ByNone)
 				case "name-descend":
 					sort.AddOption(sorter.ByNameDescend)
 				case "name":
@@ -1447,7 +1486,7 @@ var sortingFlags = []cli.Flag{
 	},
 	&cli.BoolFlag{
 		Name:               "sort-reverse",
-		Aliases:            []string{"sr"},
+		Aliases:            []string{"sr", "reverse"},
 		Usage:              "reverse the order of the sort",
 		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {

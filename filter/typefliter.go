@@ -151,8 +151,8 @@ var RemoveGitIgnore = func(repoPath git.GitRepoPath) TypeFunc {
 		}
 		return false
 	}
+	ignoredCache := git.GetCache()
 	return func(e os.FileInfo) (ok bool) {
-		ignoredCache := git.GetCache()
 		actual, _ := ignoredCache.GetOrInit(repoPath, git.DefaultInit(repoPath))
 		ok = true
 		for _, fileGit := range *actual {
