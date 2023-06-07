@@ -546,6 +546,96 @@ func initVersionHelpFlags() {
 var viewFlag = []cli.Flag{
 	// VIEW
 	&cli.BoolFlag{
+		Name:               "o",
+		DisableDefaultText: true,
+		Usage:              "like -all/l, but do not list group information",
+		Action: func(context *cli.Context, b bool) error {
+			if b {
+				// remove filter.RemoveHidden
+				newFF := make([]*filter.TypeFunc, 0, len(typeFunc))
+				for _, typeFunc := range typeFunc {
+					if typeFunc != &filter.RemoveHidden {
+						newFF = append(newFF, typeFunc)
+					}
+				}
+				typeFunc = newFF
+				contentFunc = append(contentFunc, filter.EnableFileMode(r), sizeEnabler.EnableSize(sizeUint), contentFilter.EnableGroup(r), filter.EnableTime(timeFormat, timeType, r))
+				if _, ok := p.(*printer.Byline); !ok {
+					p = printer.NewByline()
+				}
+			}
+			return nil
+		},
+		Category: "VIEW",
+	},
+	&cli.BoolFlag{
+		Name:               "g",
+		DisableDefaultText: true,
+		Usage:              "like -all/l, but do not list owner",
+		Action: func(context *cli.Context, b bool) error {
+			if b {
+				// remove filter.RemoveHidden
+				newFF := make([]*filter.TypeFunc, 0, len(typeFunc))
+				for _, typeFunc := range typeFunc {
+					if typeFunc != &filter.RemoveHidden {
+						newFF = append(newFF, typeFunc)
+					}
+				}
+				typeFunc = newFF
+				contentFunc = append(contentFunc, filter.EnableFileMode(r), sizeEnabler.EnableSize(sizeUint), contentFilter.EnableOwner(r), filter.EnableTime(timeFormat, timeType, r))
+				if _, ok := p.(*printer.Byline); !ok {
+					p = printer.NewByline()
+				}
+			}
+			return nil
+		},
+		Category: "VIEW",
+	},
+	&cli.BoolFlag{
+		Name:               "G",
+		DisableDefaultText: true,
+		Aliases:            []string{"no-group"},
+		Usage:              "in a long listing, don't print group names",
+		Category:           "VIEW",
+	},
+	&cli.BoolFlag{
+		Name:               "all",
+		Aliases:            []string{"la", "l"},
+		Usage:              "show all info/use a long listing format",
+		DisableDefaultText: true,
+		Action: func(context *cli.Context, b bool) error {
+			if b {
+				// remove filter.RemoveHidden
+				newFF := make([]*filter.TypeFunc, 0, len(typeFunc))
+				for _, typeFunc := range typeFunc {
+					if typeFunc != &filter.RemoveHidden {
+						newFF = append(newFF, typeFunc)
+					}
+				}
+				typeFunc = newFF
+				sizeEnabler.SetEnableTotal()
+				contentFunc = append(contentFunc, filter.EnableFileMode(r), sizeEnabler.EnableSize(sizeUint), contentFilter.EnableOwner(r))
+				if !context.Bool("G") {
+					contentFunc = append(contentFunc, contentFilter.EnableGroup(r))
+				}
+				contentFunc = append(contentFunc, filter.EnableTime(timeFormat, timeType, r))
+
+				if _, ok := p.(*printer.Byline); !ok {
+					p = printer.NewByline()
+				}
+			}
+			return nil
+		},
+		Category: "VIEW",
+	},
+	&cli.BoolFlag{
+		Name:               "hide-git-ignore",
+		Aliases:            []string{"gi", "hgi"},
+		Usage:              "hide git ignored file/dir [if git is installed]",
+		DisableDefaultText: true,
+		Category:           "VIEW",
+	},
+	&cli.BoolFlag{
 		Name:               "inode",
 		Aliases:            []string{"i"},
 		Usage:              "show inode[linux/darwin only]",
@@ -730,6 +820,22 @@ var viewFlag = []cli.Flag{
 		Category: "VIEW",
 	},
 	&cli.BoolFlag{
+		Name:               "lh",
+		Aliases:            []string{"human-readable"},
+		DisableDefaultText: true,
+		Usage:              "show human readable size",
+		Action: func(context *cli.Context, b bool) error {
+			if b {
+				contentFunc = append(contentFunc, filter.EnableFileMode(r), sizeEnabler.EnableSize(sizeUint), contentFilter.EnableOwner(r), contentFilter.EnableGroup(r), filter.EnableTime(timeFormat, timeType, r))
+				if _, ok := p.(*printer.Byline); !ok {
+					p = printer.NewByline()
+				}
+			}
+			return nil
+		},
+		Category: "VIEW",
+	},
+	&cli.BoolFlag{
 		Name:               "show-owner",
 		Aliases:            []string{"so", "author"},
 		Usage:              "show owner",
@@ -793,6 +899,30 @@ var viewFlag = []cli.Flag{
 		Action: func(context *cli.Context, b bool) error {
 			if b {
 				sizeEnabler.SetEnableTotal()
+			}
+			return nil
+		},
+	},
+	&cli.Uint64Flag{
+		Name:        "exact-detect-size",
+		Usage:       "set exact detect size",
+		Aliases:     []string{"eds", "detect-size", "ds"},
+		Value:       1024 * 1024,
+		DefaultText: "1M",
+		Category:    "VIEW",
+	},
+	&cli.BoolFlag{
+		Name:               "exact-file-type",
+		Usage:              "show exact file type",
+		Aliases:            []string{"et"},
+		DisableDefaultText: true,
+		Category:           "VIEW",
+		Action: func(context *cli.Context, b bool) error {
+			if b {
+				exact := filter.NewExactFileTypeEnabler()
+				exact.SetDetectSize(context.Uint64("exact-detect-size"))
+				contentFunc = append(contentFunc, exact.Enable())
+				wgs = append(wgs, exact)
 			}
 			return nil
 		},
@@ -1080,22 +1210,6 @@ var filteringFlag = []cli.Flag{
 		Category: "FILTERING",
 	},
 	&cli.BoolFlag{
-		Name:               "lh",
-		Aliases:            []string{"human-readable"},
-		DisableDefaultText: true,
-		Usage:              "show human readable size",
-		Action: func(context *cli.Context, b bool) error {
-			if b {
-				contentFunc = append(contentFunc, filter.EnableFileMode(r), sizeEnabler.EnableSize(sizeUint), contentFilter.EnableOwner(r), contentFilter.EnableGroup(r), filter.EnableTime(timeFormat, timeType, r))
-				if _, ok := p.(*printer.Byline); !ok {
-					p = printer.NewByline()
-				}
-			}
-			return nil
-		},
-		Category: "FILTERING",
-	},
-	&cli.BoolFlag{
 		Name:               "show-hidden",
 		Aliases:            []string{"sh", "a"},
 		DisableDefaultText: true,
@@ -1199,96 +1313,6 @@ var filteringFlag = []cli.Flag{
 			return nil
 		},
 		Category: "FILTERING",
-	},
-	&cli.BoolFlag{
-		Name:               "o",
-		DisableDefaultText: true,
-		Usage:              "like -all/l, but do not list group information",
-		Action: func(context *cli.Context, b bool) error {
-			if b {
-				// remove filter.RemoveHidden
-				newFF := make([]*filter.TypeFunc, 0, len(typeFunc))
-				for _, typeFunc := range typeFunc {
-					if typeFunc != &filter.RemoveHidden {
-						newFF = append(newFF, typeFunc)
-					}
-				}
-				typeFunc = newFF
-				contentFunc = append(contentFunc, filter.EnableFileMode(r), sizeEnabler.EnableSize(sizeUint), contentFilter.EnableGroup(r), filter.EnableTime(timeFormat, timeType, r))
-				if _, ok := p.(*printer.Byline); !ok {
-					p = printer.NewByline()
-				}
-			}
-			return nil
-		},
-		Category: "FILTERING",
-	},
-	&cli.BoolFlag{
-		Name:               "g",
-		DisableDefaultText: true,
-		Usage:              "like -all/l, but do not list owner",
-		Action: func(context *cli.Context, b bool) error {
-			if b {
-				// remove filter.RemoveHidden
-				newFF := make([]*filter.TypeFunc, 0, len(typeFunc))
-				for _, typeFunc := range typeFunc {
-					if typeFunc != &filter.RemoveHidden {
-						newFF = append(newFF, typeFunc)
-					}
-				}
-				typeFunc = newFF
-				contentFunc = append(contentFunc, filter.EnableFileMode(r), sizeEnabler.EnableSize(sizeUint), contentFilter.EnableOwner(r), filter.EnableTime(timeFormat, timeType, r))
-				if _, ok := p.(*printer.Byline); !ok {
-					p = printer.NewByline()
-				}
-			}
-			return nil
-		},
-		Category: "FILTERING",
-	},
-	&cli.BoolFlag{
-		Name:               "G",
-		DisableDefaultText: true,
-		Aliases:            []string{"no-group"},
-		Usage:              "in a long listing, don't print group names",
-		Category:           "FILTERING",
-	},
-	&cli.BoolFlag{
-		Name:               "all",
-		Aliases:            []string{"la", "l"},
-		Usage:              "show all info/use a long listing format",
-		DisableDefaultText: true,
-		Action: func(context *cli.Context, b bool) error {
-			if b {
-				// remove filter.RemoveHidden
-				newFF := make([]*filter.TypeFunc, 0, len(typeFunc))
-				for _, typeFunc := range typeFunc {
-					if typeFunc != &filter.RemoveHidden {
-						newFF = append(newFF, typeFunc)
-					}
-				}
-				typeFunc = newFF
-				sizeEnabler.SetEnableTotal()
-				contentFunc = append(contentFunc, filter.EnableFileMode(r), sizeEnabler.EnableSize(sizeUint), contentFilter.EnableOwner(r))
-				if !context.Bool("G") {
-					contentFunc = append(contentFunc, contentFilter.EnableGroup(r))
-				}
-				contentFunc = append(contentFunc, filter.EnableTime(timeFormat, timeType, r))
-
-				if _, ok := p.(*printer.Byline); !ok {
-					p = printer.NewByline()
-				}
-			}
-			return nil
-		},
-		Category: "FILTERING",
-	},
-	&cli.BoolFlag{
-		Name:               "hide-git-ignore",
-		Aliases:            []string{"gi", "hgi"},
-		Usage:              "hide git ignored file/dir [if git is installed]",
-		DisableDefaultText: true,
-		Category:           "FILTERING",
 	},
 }
 

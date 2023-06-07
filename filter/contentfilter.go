@@ -24,6 +24,8 @@ import (
 	"github.com/Equationzhao/tsmap"
 	"github.com/hako/durafmt"
 	"github.com/valyala/bytebufferpool"
+
+	mt "github.com/gabriel-vasile/mimetype"
 )
 
 type LengthFixed interface {
@@ -931,4 +933,68 @@ func (cf *ContentFilter) EnableSum(sumTypes ...SumType) ContentOption {
 		sumsStr := strings.Join(sums, " ")
 		return fillBlank(sumsStr, length)
 	}
+}
+
+type ExactFileTypeEnabler struct {
+	*sync.WaitGroup
+	DetectSize uint32
+}
+
+func NewExactFileTypeEnabler() *ExactFileTypeEnabler {
+	return &ExactFileTypeEnabler{
+		WaitGroup:  &sync.WaitGroup{},
+		DetectSize: 1024 * 1024,
+	}
+}
+
+func (e *ExactFileTypeEnabler) Enable() ContentOption {
+	longestTypeName := 0
+	m := sync.RWMutex{}
+	done := func(tn string) {
+		defer e.Done()
+		m.RLock()
+		if longestTypeName >= len(tn) {
+			m.RUnlock()
+			return
+		}
+		m.RUnlock()
+		m.Lock()
+		if longestTypeName < len(tn) {
+			longestTypeName = len(tn)
+		}
+		m.Unlock()
+	}
+
+	wait := func(tn string) string {
+		e.Wait()
+		return fillBlank(tn, longestTypeName)
+	}
+
+	mt.SetLimit(e.DetectSize)
+	return func(info os.FileInfo) string {
+		tn := ""
+		if info.IsDir() {
+			tn = "directory"
+		} else {
+			file, err := os.Open(info.Name())
+			if err != nil {
+				tn = err.Error()
+				done(tn)
+				return wait(tn)
+			}
+			mtype, err := mt.DetectReader(file)
+			if err != nil {
+				tn = err.Error()
+				done(tn)
+				return wait(tn)
+			}
+			tn = mtype.String()
+		}
+		done(tn)
+		return wait(tn)
+	}
+}
+
+func (e *ExactFileTypeEnabler) SetDetectSize(u uint64) {
+	e.DetectSize = uint32(u)
 }
