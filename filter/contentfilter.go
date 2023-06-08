@@ -192,7 +192,7 @@ func sizeStringSets(size SizeUnit) []string {
 	case Bit:
 		return []string{"bit", "Bit"}
 	case B:
-		return []string{"B", "b", "byte", "Byte"}
+		return []string{"B", "b", "byte", "Byte", "BYTE"}
 	case KB:
 		return []string{"KB", "kb", "K", "k"}
 	case MB:
@@ -226,7 +226,7 @@ func ConvertFromSizeString(size string) SizeUnit {
 	switch size {
 	case "bit", "Bit", "BIT":
 		return Bit
-	case "B", "b":
+	case "B", "b", "byte", "Byte", "BYTE":
 		return B
 	case "KB", "kb", "Kb", "k":
 		return KB
@@ -995,10 +995,17 @@ func (e *ExactFileTypeEnabler) Enable() ContentOption {
 		tn := ""
 		if info.IsDir() {
 			tn = "directory"
+		} else if info.Mode()&os.ModeSymlink != 0 {
+			tn = "symlink"
+		} else if info.Mode()&os.ModeNamedPipe != 0 {
+			tn = "named_pipe"
+		} else if info.Mode()&os.ModeSocket != 0 {
+			tn = "socket"
 		} else {
 			file, err := os.Open(info.Name())
 			if err != nil {
-				tn = err.Error()
+				// tn = err.Error()
+				tn = "failed_to_read"
 				done(tn)
 				return wait(tn), ExactTypeName
 			}

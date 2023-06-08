@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/Equationzhao/g/display"
@@ -125,6 +126,7 @@ There is NO WARRANTY, to the extent permitted by law.`,
 			}
 
 			disableIndex := context.Bool("di")
+			wgUpdateIndex := sync.WaitGroup{}
 
 			{
 				s := context.String("git-status-style")
@@ -162,10 +164,15 @@ There is NO WARRANTY, to the extent permitted by law.`,
 			contentFilter.SetOptions(contentFunc...)
 			contentFilter.AppendToLengthFixed(wgs...)
 			depth := context.Int("depth")
-			if context.Bool("tree") {
 
+			printPath := false
+			if len(path) > 1 {
+				printPath = true
+			}
+
+			if context.Bool("tree") {
 				for i := 0; i < len(path); i++ {
-					if len(path) > 1 {
+					if printPath {
 						fmt.Printf("%s:\n", path[i])
 					}
 
@@ -215,10 +222,13 @@ There is NO WARRANTY, to the extent permitted by law.`,
 						minorErr = true
 					} else {
 						if !disableIndex {
-							if err = fuzzyUpdate(absPath); err != nil {
-								_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(err.Error()))
-								minorErr = true
-							}
+							wgUpdateIndex.Add(1)
+							go func() {
+								if err = fuzzyUpdate(absPath); err != nil {
+									minorErr = true
+								}
+								wgUpdateIndex.Done()
+							}()
 						}
 					}
 
@@ -242,7 +252,7 @@ There is NO WARRANTY, to the extent permitted by law.`,
 				header := context.Bool("header")
 
 				for i := 0; i < len(path); i++ {
-					if len(path) > 1 {
+					if printPath {
 						fmt.Printf("%s:\n", path[i])
 					}
 
@@ -253,13 +263,22 @@ There is NO WARRANTY, to the extent permitted by law.`,
 					infos := make([]os.FileInfo, 0, 20)
 
 					isFile := false
-					// switch to target dir
-					// or get target file info
+
+					// get abs path
+					absPath, err := filepath.Abs(path[i])
+					if err != nil {
+						_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(fmt.Sprintf("Not a valid path: %s", absPath)))
+					} else {
+						path[i] = absPath
+					}
+
 					if path[i] != "." {
 						stat, err := os.Stat(path[i])
 						if err != nil {
+							// no match
 							if fuzzy {
-								if newPath, err := fuzzyPath(path[i]); err != nil {
+								// start fuzzy search
+								if newPath, err := fuzzyPath(filepath.Base(path[i])); err != nil {
 									_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(err.Error()))
 									minorErr = true
 								} else {
@@ -279,6 +298,7 @@ There is NO WARRANTY, to the extent permitted by law.`,
 									fmt.Println(path[i])
 								}
 							} else {
+								// output error
 								if pathErr := new(os.PathError); errors.As(err, &pathErr) {
 									_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(fmt.Sprintf("No such file or directory: %s", pathErr.Path)))
 									seriousErr = true
@@ -295,37 +315,21 @@ There is NO WARRANTY, to the extent permitted by law.`,
 								// when -d is set, treat dir as file
 								infos = append(infos, stat)
 								isFile = true
-							} else {
-								err = os.Chdir(path[i])
-								if err != nil {
-									if pathErr := new(os.PathError); errors.As(err, &pathErr) {
-										_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(fmt.Sprintf("No such file or directory: %s", pathErr.Path)))
-										seriousErr = true
-										continue
-									} else {
-										_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(err.Error()))
-										seriousErr = true
-										continue
-									}
-								}
 							}
 						} else {
-							parent := filepath.Dir(path[i])
-							_ = os.Chdir(parent)
 							infos = append(infos, stat)
 							isFile = true
 						}
 					}
 
-					absPath, err := filepath.Abs(".")
-					if err != nil {
-						minorErr = true
-					}
 					if !disableIndex {
-						if err = fuzzyUpdate(absPath); err != nil {
-							_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(err.Error()))
-							minorErr = true
-						}
+						wgUpdateIndex.Add(1)
+						go func() {
+							if err = fuzzyUpdate(path[i]); err != nil {
+								minorErr = true
+							}
+							wgUpdateIndex.Done()
+						}()
 					}
 
 					var d []os.DirEntry
@@ -333,37 +337,42 @@ There is NO WARRANTY, to the extent permitted by law.`,
 						goto final
 					}
 
-					d, err = os.ReadDir(".")
+					d, err = os.ReadDir(path[i])
 					if err != nil {
 						goto final
 					}
 
 					// if -A(almost-all) is not set, add the "."/".." info
 					if !flagA {
-						statCurrent, err := os.Stat(".")
+						err := os.Chdir(path[i])
 						if err != nil {
-							if pathErr := new(os.PathError); errors.As(err, &pathErr) {
-								_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(fmt.Sprintf("No such file or directory: %s", pathErr.Path)))
-								seriousErr = true
-							} else {
-								_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(err.Error()))
-								seriousErr = true
-							}
+							_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(err.Error()))
 						} else {
-							infos = append(infos, statCurrent)
-						}
+							statCurrent, err := os.Stat(".")
+							if err != nil {
+								if pathErr := new(os.PathError); errors.As(err, &pathErr) {
+									_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(fmt.Sprintf("No such file or directory: %s", pathErr.Path)))
+									seriousErr = true
+								} else {
+									_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(err.Error()))
+									seriousErr = true
+								}
+							} else {
+								infos = append(infos, statCurrent)
+							}
 
-						statParent, err := os.Stat("..")
-						if err != nil {
-							if pathErr := new(os.PathError); errors.As(err, &pathErr) {
-								_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(fmt.Sprintf("No such file or directory: %s", pathErr.Path)))
-								minorErr = true
+							statParent, err := os.Stat("..")
+							if err != nil {
+								if pathErr := new(os.PathError); errors.As(err, &pathErr) {
+									_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(fmt.Sprintf("No such file or directory: %s", pathErr.Path)))
+									minorErr = true
+								} else {
+									_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(err.Error()))
+									minorErr = true
+								}
 							} else {
-								_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(err.Error()))
-								minorErr = true
+								infos = append(infos, statParent)
 							}
-						} else {
-							infos = append(infos, statParent)
 						}
 					}
 
@@ -385,6 +394,7 @@ There is NO WARRANTY, to the extent permitted by law.`,
 					if gitignore {
 						*removeGitIgnore = filter.RemoveGitIgnore(path[i])
 					}
+
 					nameToDisplay.SetParent(path[i])
 					// remove non-display items
 					infos = typeFilter.Filter(infos...)
@@ -490,6 +500,7 @@ There is NO WARRANTY, to the extent permitted by law.`,
 					}
 				}
 			}
+			wgUpdateIndex.Wait()
 
 			if seriousErr {
 				ReturnCode = 2
