@@ -349,7 +349,10 @@ There is NO WARRANTY, to the extent permitted by law.`,
 								_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(err.Error()))
 								seriousErr = true
 							}
+						} else {
+							infos = append(infos, statCurrent)
 						}
+
 						statParent, err := os.Stat("..")
 						if err != nil {
 							if pathErr := new(os.PathError); errors.As(err, &pathErr) {
@@ -359,8 +362,9 @@ There is NO WARRANTY, to the extent permitted by law.`,
 								_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(err.Error()))
 								minorErr = true
 							}
+						} else {
+							infos = append(infos, statParent)
 						}
-						infos = append(infos, statCurrent, statParent)
 					}
 
 					for _, v := range d {
@@ -416,13 +420,8 @@ There is NO WARRANTY, to the extent permitted by law.`,
 					// if -l/show-total-size is set, add total size
 					if total, ok := sizeEnabler.Total(); ok {
 						i := display.NewItem()
-						i.Add("total", display.ItemContent{Content: display.StringContent(fmt.Sprintf("  total %s", sizeEnabler.Size2String(total, 0)))})
+						i.Set("total", display.ItemContent{Content: display.StringContent(fmt.Sprintf("  total %s", sizeEnabler.Size2String(total, 0)))})
 						p.Print(*i)
-					}
-
-					itemsCopy := make([]display.Item, 0, len(items))
-					for _, item := range items {
-						itemsCopy = append(itemsCopy, *item)
 					}
 
 					if header {
@@ -445,7 +444,18 @@ There is NO WARRANTY, to the extent permitted by law.`,
 							contentStrBuf := bytebufferpool.Get()
 							for i, s := range allPart {
 								if len(s) > longestEachPart[s] {
-
+									// expand the every items' content of this part
+									for _, it := range items {
+										content, _ := it.Get(s)
+										content.Content = display.StringContent(fmt.Sprintf("%s%s", strings.Repeat(" ", len(s)-longestEachPart[s]), content.Content.String()))
+										it.Set(s, content)
+									}
+									_, _ = contentStrBuf.WriteString(theme.Underline)
+									_, _ = contentStrBuf.WriteString(s)
+									_, _ = contentStrBuf.WriteString(theme.Reset)
+									if i != len(allPart)-1 {
+										_, _ = contentStrBuf.WriteString(" ")
+									}
 								} else {
 									_, _ = contentStrBuf.WriteString(theme.Underline)
 									_, _ = contentStrBuf.WriteString(s)
@@ -457,7 +467,13 @@ There is NO WARRANTY, to the extent permitted by law.`,
 							}
 							_, _ = contentStrBuf.WriteString(theme.Reset)
 							_, _ = fmt.Fprintln(display.Output, contentStrBuf.String())
+							bytebufferpool.Put(contentStrBuf)
 						})
+					}
+
+					itemsCopy := make([]display.Item, 0, len(items))
+					for _, item := range items {
+						itemsCopy = append(itemsCopy, *item)
 					}
 
 					p.Print(itemsCopy...)
@@ -866,7 +882,7 @@ var viewFlag = []cli.Flag{
 	},
 	&cli.BoolFlag{
 		Name:               "show-size",
-		Aliases:            []string{"ss"},
+		Aliases:            []string{"ss", "size"},
 		Usage:              "show file/dir size",
 		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
@@ -882,7 +898,7 @@ var viewFlag = []cli.Flag{
 	},
 	&cli.BoolFlag{
 		Name:               "lh",
-		Aliases:            []string{"human-readable"},
+		Aliases:            []string{"human-readable", "hr"},
 		DisableDefaultText: true,
 		Usage:              "show human readable size",
 		Action: func(context *cli.Context, b bool) error {
@@ -898,7 +914,7 @@ var viewFlag = []cli.Flag{
 	},
 	&cli.BoolFlag{
 		Name:               "show-owner",
-		Aliases:            []string{"so", "author"},
+		Aliases:            []string{"so", "author", "owner"},
 		Usage:              "show owner",
 		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
@@ -914,7 +930,7 @@ var viewFlag = []cli.Flag{
 	},
 	&cli.BoolFlag{
 		Name:               "show-group",
-		Aliases:            []string{"sg"},
+		Aliases:            []string{"sg", "group"},
 		Usage:              "show group",
 		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
@@ -930,7 +946,7 @@ var viewFlag = []cli.Flag{
 	},
 	&cli.BoolFlag{
 		Name:               "show-time",
-		Aliases:            []string{"st"},
+		Aliases:            []string{"st", "time"},
 		Usage:              "show time",
 		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
@@ -947,7 +963,7 @@ var viewFlag = []cli.Flag{
 	&cli.BoolFlag{
 		Name:               "show-icon",
 		Usage:              "show icon",
-		Aliases:            []string{"si", "icons"},
+		Aliases:            []string{"si", "icons", "icon"},
 		DisableDefaultText: true,
 		Category:           "VIEW",
 	},
@@ -985,7 +1001,7 @@ var viewFlag = []cli.Flag{
 				err := limitOnce.Do(func() error {
 					size := context.String("exact-detect-size")
 					var bytes uint64 = 1024 * 1024
-					if size == "0" || size == "infinity" {
+					if size == "0" || strings.EqualFold(size, "infinity") || strings.EqualFold(size, "nolimit") {
 						bytes = 0
 					} else if size != "" {
 						sizeUint, err := filter.ParseSize(size)
@@ -1056,14 +1072,14 @@ var viewFlag = []cli.Flag{
 	&cli.BoolFlag{
 		Name:               "git-status",
 		Usage:              "show git status: ? untracked, + added, ! deleted, ~ modified, | renamed, = copied, $ ignored [if git is installed]",
-		Aliases:            []string{"gs"},
+		Aliases:            []string{"gs", "git"},
 		DisableDefaultText: true,
 		Category:           "VIEW",
 	},
 	&cli.StringFlag{
 		Name:     "git-status-style",
 		Usage:    "git status style: colored-symbol: {? untracked, + added, - deleted, ~ modified, | renamed, = copied, ! ignored} colored-dot",
-		Aliases:  []string{"gss"},
+		Aliases:  []string{"gss", "git-style"},
 		Category: "VIEW",
 	},
 }
@@ -1209,6 +1225,7 @@ var displayFlag = []cli.Flag{
 
 	&cli.BoolFlag{
 		Name:               "colorless",
+		Aliases:            []string{"nc", "no-color"},
 		Usage:              "without color",
 		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
@@ -1429,7 +1446,7 @@ var filteringFlag = []cli.Flag{
 var indexFlags = []cli.Flag{
 	&cli.BoolFlag{
 		Name:               "disable-index",
-		Aliases:            []string{"di"},
+		Aliases:            []string{"di", "no-update"},
 		Usage:              "disable updating index",
 		Category:           "Index",
 		DisableDefaultText: true,

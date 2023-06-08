@@ -864,7 +864,7 @@ func (cf *ContentFilter) GetDisplayItems(e ...os.FileInfo) []*display.Item {
 			for j, option := range cf.options {
 				stringContent, funcName := option(entry)
 				content := display.ItemContent{Content: display.StringContent(stringContent), No: j}
-				res[i].Add(funcName, content)
+				res[i].Set(funcName, content)
 			}
 			wg.Done()
 		}(entry, i)
