@@ -1,11 +1,10 @@
 {
-  "hash": "",
   "homepage": "",
   "bin": "bin/g.exe",
   "architecture": {
     "64bit": {
-      "url": "https://github.com/Equationzhao/g/releases/download/v0.5.8/g-amd64.exe",
-      "hash": "fda631077718e5ec81517d66f81bc9af0886af1b01e2319308d6d1f28cfe1116",
+      "url": "https://github.com/Equationzhao/g/releases/download/v0.6.0/g-amd64.exe",
+      "hash": "0cec148e3675510b2c884b1734a43d86a5bbdbc2050eb989080ca5d78fe59db5",
       "bin": "g-amd64.exe",
       "post_install":[
         "cd $scoopdir/shims",
@@ -20,8 +19,8 @@
       ]
     },
     "32bit": {
-      "url": "https://github.com/Equationzhao/g/releases/download/v0.5.8/g-386.exe",
-      "hash": "45b19fd0860d9c81a5c2674c9dbc43a49c2d31476d9ee4f03a1ad8dc92d2d5e9",
+      "url": "https://github.com/Equationzhao/g/releases/download/v0.6.0/g-386.exe",
+      "hash": "31b80ca7d0f7dbbe62c648da015afd7a1a575df2d8f778705be7f4f8253773b1",
       "bin": "g-386.exe",
       "post_install":[
         "cd $scoopdir/shims",
@@ -36,8 +35,8 @@
       ]
     },
     "arm64": {
-      "url": "https://github.com/Equationzhao/g/releases/download/v0.5.8/g-arm64.exe",
-      "hash": "35725ec899a5af0a89ac9f3cbe1d68112d3e6d4a90b35c74d93d9301f877f73c",
+      "url": "https://github.com/Equationzhao/g/releases/download/v0.6.0/g-arm64.exe",
+      "hash": "4452d7ad6f1f3964fd68532fd67c302b491436f361e703256995eb56ef98d21e",
       "bin": "g-arm64.exe",
       "post_install":[
         "cd $scoopdir/shims",
@@ -52,8 +51,8 @@
       ]
     },
     "arm": {
-      "url": "https://github.com/Equationzhao/g/releases/download/v0.5.8/g-arm.exe",
-      "hash": "077f9109245755b0838366363e5f73b38a4adbc16b7c545bdd7cf5ee35e72c86",
+      "url": "https://github.com/Equationzhao/g/releases/download/v0.6.0/g-arm.exe",
+      "hash": "d30db90d1e3f3aecc341d4dfb47a9d7a8c4daa444677bc14d987e2d201b0c730",
       "bin": "g-arm.exe",
       "post_install":[
         "cd $scoopdir/shims",
@@ -70,5 +69,5 @@
   },
 
   "license": "MIT",
-  "version": "v0.5.8"
+  "version": "v0.6.0"
 }
