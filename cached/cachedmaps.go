@@ -33,6 +33,9 @@ func (m *usernameMap) Get(u Uid) Username {
 	v, _ := m.m.GetOrInit(u, func() Groupname {
 		targetUser, err := user.LookupId(u)
 		if err != nil {
+			if targetUser == nil {
+				targetUser = new(user.User)
+			}
 			targetUser.Username = "uid:" + u
 		}
 		return targetUser.Username
@@ -58,11 +61,14 @@ func NewGroupnameMap() *groupnameMap {
 
 func (m *groupnameMap) Get(g Gid) Groupname {
 	v, _ := m.m.GetOrInit(g, func() Groupname {
-		targetUser, err := user.LookupGroupId(g)
+		targetGroup, err := user.LookupGroupId(g)
 		if err != nil {
-			targetUser.Name = "gid:" + g
+			if targetGroup == nil {
+				targetGroup = new(user.Group)
+			}
+			targetGroup.Name = "gid:" + g
 		}
-		return targetUser.Name
+		return targetGroup.Name
 	})
 	return v
 }
