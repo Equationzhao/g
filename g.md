@@ -12,43 +12,48 @@ g
 [--check-new-version]
 [--checksum-algorithm|--ca]=[value]
 [--checksum|--cs]
-[--colorless]
+[--colorless|--nc|--no-color]
 [--depth]=[value]
 [--dir-first|--df]
-[--disable-index|--di]
+[--disable-index|--di|--no-update]
+[--exact-detect-size|--eds|--detect-size|--ds]=[value]
+[--exact-file-type|--et]
 [--file-type|--ft]
 [--format]=[value]
 [--full-time]
 [--fuzzy|--fz|-f]
 [--gid]
-[--git-status-style|--gss]=[value]
-[--git-status|--gs]
+[--git-status-style|--gss|--git-style]=[value]
+[--git-status|--gs|--git]
+[--header]
 [--hide-git-ignore|--gi|--hgi]
 [--ignore-glob|-I]=[value]
 [--inode|-i]
-[--lh|--human-readable]
+[--lh|--human-readable|--hr]
 [--list-index|--li]
 [--match-glob|-M]=[value]
 [--no-path-transform|--np]
 [--numeric]
-[--rebuild-index|--ri]
+[--rebuild-index|--ri|--remove-all]
 [--recurse|-R]
 [--relative-time|--rt]
-[--remove-index]=[value]
-[--show-group|--sg]
+[--remove-current-path|--rcp|--rc|--rmc]
+[--remove-index|--rm]=[value]
+[--show-exact-file-type-only|--et-only|--eto]=[value]
+[--show-group|--sg|--group]
 [--show-hidden|--sh|-a]
-[--show-icon|--si|--icons]
+[--show-icon|--si|--icons|--icon]
 [--show-no-dir|--nd|--nodir|--no-dir]
 [--show-no-ext|--sne|--noext]=[value]
 [--show-only-dir|--sd|--dir|--only-dir]
 [--show-only-ext|--se|--ext]=[value]
-[--show-owner|--so|--author]
+[--show-owner|--so|--author|--owner]
 [--show-perm|--sp]
-[--show-size|--ss]
-[--show-time|--st]
+[--show-size|--ss|--size]
+[--show-time|--st|--time]
 [--show-total-size|--ts]
-[--size-unit|--su]=[value]
-[--sort-reverse|--sr]
+[--size-unit|--su|--block-size]=[value]
+[--sort-reverse|--sr|--reverse]
 [--sort|--SORT_FIELD]=[value]
 [--theme|--th]=[value]
 [--time-style]=[value]
@@ -82,17 +87,21 @@ g [options] [path]
 
 **--check-new-version**: check if there's new release
 
-**--checksum, --cs**: show checksum of file with algorithm: md5, sha1, sha256, sha512
+**--checksum, --cs**: show checksum of file with algorithm: md5, sha1(default), sha224, sha256, sha384, sha512, crc32
 
-**--checksum-algorithm, --ca**="": show checksum of file with algorithm: md5, sha1, sha256, sha512 (default: "sha1")
+**--checksum-algorithm, --ca**="": show checksum of file with algorithm: md5, sha1, sha224, sha256, sha384, sha512, crc32 (default: "sha1")
 
-**--colorless**: without color
+**--colorless, --nc, --no-color**: without color
 
 **--depth**="": limit recursive depth, negative -> infinity (default: infinity)
 
 **--dir-first, --df**: List directories before other files
 
-**--disable-index, --di**: disable updating index
+**--disable-index, --di, --no-update**: disable updating index
+
+**--exact-detect-size, --eds, --detect-size, --ds**="": set exact detect size (bytes) (default: 1M)
+
+**--exact-file-type, --et**: show exact file type
 
 **--file-type, --ft**: likewise, except do not append '*'
 
@@ -104,9 +113,11 @@ g [options] [path]
 
 **--gid**: show gid instead of groupname [sid in windows]
 
-**--git-status, --gs**: show git status: ? untracked, + added, ! deleted, ~ modified, | renamed, = copied, $ ignored [if git is installed]
+**--git-status, --gs, --git**: show git status: ? untracked, + added, ! deleted, ~ modified, | renamed, = copied, $ ignored [if git is installed]
 
-**--git-status-style, --gss**="": git status style: colored-symbol: {? untracked, + added, - deleted, ~ modified, | renamed, = copied, ! ignored} colored-dot
+**--git-status-style, --gss, --git-style**="": git status style: colored-symbol: {? untracked, + added, - deleted, ~ modified, | renamed, = copied, ! ignored} colored-dot
+
+**--header**: add a header row
 
 **--hide-git-ignore, --gi, --hgi**: hide git ignored file/dir [if git is installed]
 
@@ -114,7 +125,7 @@ g [options] [path]
 
 **--inode, -i**: show inode[linux/darwin only]
 
-**--lh, --human-readable**: show human readable size
+**--lh, --human-readable, --hr**: show human readable size
 
 **--list-index, --li**: list index
 
@@ -124,19 +135,23 @@ g [options] [path]
 
 **--numeric**:  List numeric user and group IDs instead of name [sid in windows]
 
-**--rebuild-index, --ri**: rebuild index
+**--rebuild-index, --ri, --remove-all**: rebuild index
 
 **--recurse, -R**: recurse into directories
 
 **--relative-time, --rt**: show relative time
 
-**--remove-index**="": remove paths from index
+**--remove-current-path, --rcp, --rc, --rmc**: remove current path from index
 
-**--show-group, --sg**: show group
+**--remove-index, --rm**="": remove paths from index
+
+**--show-exact-file-type-only, --et-only, --eto**="": only show file with given type
+
+**--show-group, --sg, --group**: show group
 
 **--show-hidden, --sh, -a**: show hidden files
 
-**--show-icon, --si, --icons**: show icon
+**--show-icon, --si, --icons, --icon**: show icon
 
 **--show-no-dir, --nd, --nodir, --no-dir**: do not show directory
 
@@ -146,21 +161,21 @@ g [options] [path]
 
 **--show-only-ext, --se, --ext**="": show file which has target ext, eg: --show-only-ext=go,java
 
-**--show-owner, --so, --author**: show owner
+**--show-owner, --so, --author, --owner**: show owner
 
 **--show-perm, --sp**: show permission
 
-**--show-size, --ss**: show file/dir size
+**--show-size, --ss, --size**: show file/dir size
 
-**--show-time, --st**: show time
+**--show-time, --st, --time**: show time
 
 **--show-total-size, --ts**: show total size
 
-**--size-unit, --su**="": size unit, b, k, m, g, t, p, e, z, y, auto (default: auto)
+**--size-unit, --su, --block-size**="": size unit, b, k, m, g, t, p, e, z, y, bb, nb, auto (default: auto)
 
-**--sort, --SORT_FIELD**="": sort by field, default: ascending and case insensitive, field beginning with Uppercase is case sensitive, available fields: name,size,time,owner,group,extension. following `-descend` to sort descending
+**--sort, --SORT_FIELD**="": sort by field, default: ascending and case insensitive, field beginning with Uppercase is case sensitive, available fields: none(nosort),name,size,time,owner,group,extension. following `-descend` to sort descending
 
-**--sort-reverse, --sr**: reverse the order of the sort
+**--sort-reverse, --sr, --reverse**: reverse the order of the sort
 
 **--theme, --th**="": apply theme `path/to/theme`
 

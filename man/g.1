@@ -19,43 +19,48 @@ g
 [--check-new-version]
 [--checksum-algorithm|--ca]=[value]
 [--checksum|--cs]
-[--colorless]
+[--colorless|--nc|--no-color]
 [--depth]=[value]
 [--dir-first|--df]
-[--disable-index|--di]
+[--disable-index|--di|--no-update]
+[--exact-detect-size|--eds|--detect-size|--ds]=[value]
+[--exact-file-type|--et]
 [--file-type|--ft]
 [--format]=[value]
 [--full-time]
 [--fuzzy|--fz|-f]
 [--gid]
-[--git-status-style|--gss]=[value]
-[--git-status|--gs]
+[--git-status-style|--gss|--git-style]=[value]
+[--git-status|--gs|--git]
+[--header]
 [--hide-git-ignore|--gi|--hgi]
 [--ignore-glob|-I]=[value]
 [--inode|-i]
-[--lh|--human-readable]
+[--lh|--human-readable|--hr]
 [--list-index|--li]
 [--match-glob|-M]=[value]
 [--no-path-transform|--np]
 [--numeric]
-[--rebuild-index|--ri]
+[--rebuild-index|--ri|--remove-all]
 [--recurse|-R]
 [--relative-time|--rt]
-[--remove-index]=[value]
-[--show-group|--sg]
+[--remove-current-path|--rcp|--rc|--rmc]
+[--remove-index|--rm]=[value]
+[--show-exact-file-type-only|--et-only|--eto]=[value]
+[--show-group|--sg|--group]
 [--show-hidden|--sh|-a]
-[--show-icon|--si|--icons]
+[--show-icon|--si|--icons|--icon]
 [--show-no-dir|--nd|--nodir|--no-dir]
 [--show-no-ext|--sne|--noext]=[value]
 [--show-only-dir|--sd|--dir|--only-dir]
 [--show-only-ext|--se|--ext]=[value]
-[--show-owner|--so|--author]
+[--show-owner|--so|--author|--owner]
 [--show-perm|--sp]
-[--show-size|--ss]
-[--show-time|--st]
+[--show-size|--ss|--size]
+[--show-time|--st|--time]
 [--show-total-size|--ts]
-[--size-unit|--su]=[value]
-[--sort-reverse|--sr]
+[--size-unit|--su|--block-size]=[value]
+[--sort-reverse|--sr|--reverse]
 [--sort|--SORT_FIELD]=[value]
 [--theme|--th]=[value]
 [--time-style]=[value]
@@ -101,13 +106,13 @@ g [options] [path]
 \fB--check-new-version\fP: check if there's new release
 
 .PP
-\fB--checksum, --cs\fP: show checksum of file with algorithm: md5, sha1, sha256, sha512
+\fB--checksum, --cs\fP: show checksum of file with algorithm: md5, sha1(default), sha224, sha256, sha384, sha512, crc32
 
 .PP
-\fB--checksum-algorithm, --ca\fP="": show checksum of file with algorithm: md5, sha1, sha256, sha512 (default: "sha1")
+\fB--checksum-algorithm, --ca\fP="": show checksum of file with algorithm: md5, sha1, sha224, sha256, sha384, sha512, crc32 (default: "sha1")
 
 .PP
-\fB--colorless\fP: without color
+\fB--colorless, --nc, --no-color\fP: without color
 
 .PP
 \fB--depth\fP="": limit recursive depth, negative -> infinity (default: infinity)
@@ -116,7 +121,13 @@ g [options] [path]
 \fB--dir-first, --df\fP: List directories before other files
 
 .PP
-\fB--disable-index, --di\fP: disable updating index
+\fB--disable-index, --di, --no-update\fP: disable updating index
+
+.PP
+\fB--exact-detect-size, --eds, --detect-size, --ds\fP="": set exact detect size (bytes) (default: 1M)
+
+.PP
+\fB--exact-file-type, --et\fP: show exact file type
 
 .PP
 \fB--file-type, --ft\fP: likewise, except do not append '*'
@@ -134,10 +145,13 @@ g [options] [path]
 \fB--gid\fP: show gid instead of groupname [sid in windows]
 
 .PP
-\fB--git-status, --gs\fP: show git status: ? untracked, + added, ! deleted, ~ modified, | renamed, = copied, $ ignored [if git is installed]
+\fB--git-status, --gs, --git\fP: show git status: ? untracked, + added, ! deleted, ~ modified, | renamed, = copied, $ ignored [if git is installed]
 
 .PP
-\fB--git-status-style, --gss\fP="": git status style: colored-symbol: {? untracked, + added, - deleted, ~ modified, | renamed, = copied, ! ignored} colored-dot
+\fB--git-status-style, --gss, --git-style\fP="": git status style: colored-symbol: {? untracked, + added, - deleted, ~ modified, | renamed, = copied, ! ignored} colored-dot
+
+.PP
+\fB--header\fP: add a header row
 
 .PP
 \fB--hide-git-ignore, --gi, --hgi\fP: hide git ignored file/dir [if git is installed]
@@ -149,7 +163,7 @@ g [options] [path]
 \fB--inode, -i\fP: show inode[linux/darwin only]
 
 .PP
-\fB--lh, --human-readable\fP: show human readable size
+\fB--lh, --human-readable, --hr\fP: show human readable size
 
 .PP
 \fB--list-index, --li\fP: list index
@@ -164,7 +178,7 @@ g [options] [path]
 \fB--numeric\fP:  List numeric user and group IDs instead of name [sid in windows]
 
 .PP
-\fB--rebuild-index, --ri\fP: rebuild index
+\fB--rebuild-index, --ri, --remove-all\fP: rebuild index
 
 .PP
 \fB--recurse, -R\fP: recurse into directories
@@ -173,16 +187,22 @@ g [options] [path]
 \fB--relative-time, --rt\fP: show relative time
 
 .PP
-\fB--remove-index\fP="": remove paths from index
+\fB--remove-current-path, --rcp, --rc, --rmc\fP: remove current path from index
 
 .PP
-\fB--show-group, --sg\fP: show group
+\fB--remove-index, --rm\fP="": remove paths from index
+
+.PP
+\fB--show-exact-file-type-only, --et-only, --eto\fP="": only show file with given type
+
+.PP
+\fB--show-group, --sg, --group\fP: show group
 
 .PP
 \fB--show-hidden, --sh, -a\fP: show hidden files
 
 .PP
-\fB--show-icon, --si, --icons\fP: show icon
+\fB--show-icon, --si, --icons, --icon\fP: show icon
 
 .PP
 \fB--show-no-dir, --nd, --nodir, --no-dir\fP: do not show directory
@@ -197,28 +217,28 @@ g [options] [path]
 \fB--show-only-ext, --se, --ext\fP="": show file which has target ext, eg: --show-only-ext=go,java
 
 .PP
-\fB--show-owner, --so, --author\fP: show owner
+\fB--show-owner, --so, --author, --owner\fP: show owner
 
 .PP
 \fB--show-perm, --sp\fP: show permission
 
 .PP
-\fB--show-size, --ss\fP: show file/dir size
+\fB--show-size, --ss, --size\fP: show file/dir size
 
 .PP
-\fB--show-time, --st\fP: show time
+\fB--show-time, --st, --time\fP: show time
 
 .PP
 \fB--show-total-size, --ts\fP: show total size
 
 .PP
-\fB--size-unit, --su\fP="": size unit, b, k, m, g, t, p, e, z, y, auto (default: auto)
+\fB--size-unit, --su, --block-size\fP="": size unit, b, k, m, g, t, p, e, z, y, bb, nb, auto (default: auto)
 
 .PP
-\fB--sort, --SORT_FIELD\fP="": sort by field, default: ascending and case insensitive, field beginning with Uppercase is case sensitive, available fields: name,size,time,owner,group,extension. following \fB\fC-descend\fR to sort descending
+\fB--sort, --SORT_FIELD\fP="": sort by field, default: ascending and case insensitive, field beginning with Uppercase is case sensitive, available fields: none(nosort),name,size,time,owner,group,extension. following \fB\fC-descend\fR to sort descending
 
 .PP
-\fB--sort-reverse, --sr\fP: reverse the order of the sort
+\fB--sort-reverse, --sr, --reverse\fP: reverse the order of the sort
 
 .PP
 \fB--theme, --th\fP="": apply theme \fB\fCpath/to/theme\fR
