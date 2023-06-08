@@ -6,6 +6,7 @@ require (
 	github.com/Equationzhao/pathbeautify v0.0.6
 	github.com/Equationzhao/tsmap v0.0.6
 	github.com/acarl005/stripansi v0.0.0-20180116102854-5a71ef0e047d
+	github.com/gabriel-vasile/mimetype v1.4.2
 	github.com/gobwas/glob v0.2.3
 	github.com/hako/durafmt v0.0.0-20210608085754-5c1018a4e16b
 	github.com/junegunn/fzf v0.0.0-20230603000304-3e9efd140140
@@ -28,7 +29,6 @@ require (
 	github.com/dolthub/maphash v0.1.0 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/fatih/color v1.15.0 // indirect
-	github.com/gabriel-vasile/mimetype v1.4.2 // indirect
 	github.com/goccy/go-yaml v1.11.0 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/google/uuid v1.3.0 // indirect

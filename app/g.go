@@ -192,7 +192,7 @@ There is NO WARRANTY, to the extent permitted by law.`,
 								_, err = os.Stat(path[i])
 								if err != nil {
 									if pathErr := new(os.PathError); errors.As(err, &pathErr) {
-										_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(fmt.Sprintf("No such file or directory: %s", pathErr.Path)))
+										_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(fmt.Sprintf("No such file or directory/Can't access: %s", pathErr.Path)))
 										seriousErr = true
 										continue
 									} else {
@@ -206,15 +206,23 @@ There is NO WARRANTY, to the extent permitted by law.`,
 						}
 					}
 
-					s, err := tree.NewTreeString(path[i], depth, typeFilter, contentFilter)
+					s, err, minorErrInTree := tree.NewTreeString(path[i], depth, typeFilter, contentFilter)
 					if pathErr := new(os.PathError); errors.As(err, &pathErr) {
-						_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(fmt.Sprintf("No such file or directory: %s", pathErr.Path)))
+						_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(fmt.Sprintf("No such file or directory/Can't access: %s", pathErr.Path)))
 						seriousErr = true
 						continue
 					} else if err != nil {
 						_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(err.Error()))
 						seriousErr = true
 						continue
+					}
+
+					if pathErr := new(os.PathError); errors.As(minorErrInTree, &pathErr) {
+						_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(fmt.Sprintf("No such file or directory/Can't access: %s", pathErr.Path)))
+						minorErr = true
+					} else if minorErrInTree != nil {
+						_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(err.Error()))
+						minorErr = true
 					}
 
 					absPath, err := filepath.Abs(path[i])
@@ -286,7 +294,7 @@ There is NO WARRANTY, to the extent permitted by law.`,
 									stat, err = os.Stat(path[i])
 									if err != nil {
 										if pathErr := new(os.PathError); errors.As(err, &pathErr) {
-											_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(fmt.Sprintf("No such file or directory: %s", pathErr.Path)))
+											_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(fmt.Sprintf("No such file or directory/Can't access: %s", pathErr.Path)))
 											seriousErr = true
 											continue
 										} else {
@@ -300,7 +308,7 @@ There is NO WARRANTY, to the extent permitted by law.`,
 							} else {
 								// output error
 								if pathErr := new(os.PathError); errors.As(err, &pathErr) {
-									_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(fmt.Sprintf("No such file or directory: %s", pathErr.Path)))
+									_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(fmt.Sprintf("No such file or directory/Can't access: %s", pathErr.Path)))
 									seriousErr = true
 									continue
 								} else {
@@ -351,7 +359,7 @@ There is NO WARRANTY, to the extent permitted by law.`,
 							statCurrent, err := os.Stat(".")
 							if err != nil {
 								if pathErr := new(os.PathError); errors.As(err, &pathErr) {
-									_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(fmt.Sprintf("No such file or directory: %s", pathErr.Path)))
+									_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(fmt.Sprintf("No such file or directory/Can't access: %s", pathErr.Path)))
 									seriousErr = true
 								} else {
 									_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(err.Error()))
@@ -364,7 +372,7 @@ There is NO WARRANTY, to the extent permitted by law.`,
 							statParent, err := os.Stat("..")
 							if err != nil {
 								if pathErr := new(os.PathError); errors.As(err, &pathErr) {
-									_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(fmt.Sprintf("No such file or directory: %s", pathErr.Path)))
+									_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(fmt.Sprintf("No such file or directory/Can't access: %s", pathErr.Path)))
 									minorErr = true
 								} else {
 									_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(err.Error()))
@@ -380,7 +388,7 @@ There is NO WARRANTY, to the extent permitted by law.`,
 						info, err := v.Info()
 						if err != nil {
 							if pathErr := new(os.PathError); errors.As(err, &pathErr) {
-								_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(fmt.Sprintf("No such file or directory: %s", pathErr.Path)))
+								_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(fmt.Sprintf("No such file or directory/Can't access: %s", pathErr.Path)))
 								minorErr = true
 							} else {
 								minorErr = true

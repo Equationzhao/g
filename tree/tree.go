@@ -1,6 +1,7 @@
 package tree
 
 import (
+	"errors"
 	"os"
 	"path/filepath"
 	"sort"
@@ -32,10 +33,10 @@ func (n *Tree) MakeTreeStr() string {
 	return n.tree.String()
 }
 
-func NewTreeString(entry string, depthLimit int, typeFilter *filter.TypeFilter, contentFilter *filter.ContentFilter) (*Tree, error) {
+func NewTreeString(entry string, depthLimit int, typeFilter *filter.TypeFilter, contentFilter *filter.ContentFilter) (t *Tree, serious error, minor error) {
 	stat, err := os.Stat(entry)
 	if err != nil {
-		return nil, err
+		return nil, err, nil
 	}
 	cm := sync.Mutex{}
 	cm.Lock()
@@ -54,27 +55,40 @@ func NewTreeString(entry string, depthLimit int, typeFilter *filter.TypeFilter, 
 	} else {
 		n.stat.file.Add(1)
 	}
-
-	expand(n.tree, depthLimit, &wg, entry, &n.stat, typeFilter, contentFilter, &cm)
+	errChan := make(chan error, 10)
+	var errSum error
+	expand(n.tree, depthLimit, &wg, entry, &n.stat, typeFilter, contentFilter, &cm, errChan)
+	errWg := sync.WaitGroup{}
+	errWg.Add(1)
+	go func() {
+		for err := range errChan {
+			if err != nil {
+				errSum = errors.Join(errSum, err)
+			}
+		}
+		errWg.Done()
+	}()
 	wg.Wait()
-	return n, nil
+	close(errChan)
+	errWg.Wait()
+	return n, nil, errSum
 }
 
-func expand(node tree, depthLimit int, wg *sync.WaitGroup, parent string, s *statistic, typeFilter *filter.TypeFilter, contentFilter *filter.ContentFilter, cm *sync.Mutex) {
+func expand(node tree, depthLimit int, wg *sync.WaitGroup, parent string, s *statistic, typeFilter *filter.TypeFilter, contentFilter *filter.ContentFilter, cm *sync.Mutex, errSender chan<- error) {
 	if depthLimit == 0 {
 		return
 	}
 
 	d, err := os.ReadDir(parent)
 	if err != nil {
-		node.AddNode(err.Error())
+		errSender <- err
 	}
 
 	infos := make([]os.FileInfo, 0, len(d))
 	for _, entry := range d {
 		info, err := entry.Info()
 		if err != nil {
-			node.AddNode(err.Error())
+			errSender <- err
 			continue
 		}
 		infos = append(infos, info)
@@ -111,7 +125,7 @@ func expand(node tree, depthLimit int, wg *sync.WaitGroup, parent string, s *sta
 			}
 			newBranch := node.AddInfoBranch(extra, "", name)
 			go func() {
-				expand(newBranch, depthLimit-1, wg, filepath.Join(parent, v.Name()), s, typeFilter, contentFilter, cm)
+				expand(newBranch, depthLimit-1, wg, filepath.Join(parent, v.Name()), s, typeFilter, contentFilter, cm, errSender)
 				wg.Done()
 			}()
 		} else {
