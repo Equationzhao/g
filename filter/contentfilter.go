@@ -228,25 +228,25 @@ func ConvertFromSizeString(size string) SizeUnit {
 		return Bit
 	case "B", "b":
 		return B
-	case "KB", "kb", "Kb":
+	case "KB", "kb", "Kb", "k":
 		return KB
-	case "MB", "mb", "Mb":
+	case "MB", "mb", "Mb", "M", "m":
 		return MB
-	case "GB", "gb", "Gb":
+	case "GB", "gb", "Gb", "G", "g":
 		return GB
-	case "TB", "tb", "Tb":
+	case "TB", "tb", "Tb", "T", "t":
 		return TB
-	case "PB", "pb", "Pb":
+	case "PB", "pb", "Pb", "P", "p":
 		return PB
-	case "EB", "eb", "Eb":
+	case "EB", "eb", "Eb", "E", "e":
 		return EB
-	case "ZB", "zb", "Zb":
+	case "ZB", "zb", "Zb", "Z", "z":
 		return ZB
-	case "YB", "yb", "Yb":
+	case "YB", "yb", "Yb", "Y", "y":
 		return YB
 	case "BB", "bb", "Bb":
 		return BB
-	case "NB", "nb", "Nb":
+	case "NB", "nb", "Nb", "N", "n":
 		return NB
 	default:
 		return Unknown

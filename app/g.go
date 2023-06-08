@@ -640,8 +640,8 @@ var viewFlag = []cli.Flag{
 	},
 	&cli.StringFlag{
 		Name:        "size-unit",
-		Aliases:     []string{"su"},
-		Usage:       "size unit, b, k, m, g, t, p, e, z, y, auto",
+		Aliases:     []string{"su", "block-size"},
+		Usage:       "size unit, b, k, m, g, t, p, e, z, y, bb, nb, auto",
 		EnvVars:     []string{"SIZE_UNIT"},
 		DefaultText: "auto",
 		Action: func(context *cli.Context, s string) error {
@@ -651,7 +651,7 @@ var viewFlag = []cli.Flag{
 			sizeUint = filter.ConvertFromSizeString(s)
 			if sizeUint == filter.Unknown {
 				ReturnCode = 1
-				return errors.New("invalid size unit")
+				return fmt.Errorf("invalid size unit: %s", s)
 			}
 			return nil
 		},
