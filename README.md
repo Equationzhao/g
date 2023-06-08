@@ -35,77 +35,125 @@ or just download from release page
 ## usage
 
 ```bash
-g path
+g path(s)
 ```
 
 with icon
 ```bash
-g -si path
+g -si    path
+g -icons path
 ```
 
-with mod time
+with mod(default) time
 ```bash
-g -st path
+g -st        path
+g -show-time path
+g -time      path
+```
+
+with access/create/mod time
+```bash
+g -st -time-type="access" path
 ```
 
 with fileperm
 ```bash
-g -sp path
+g -sp         path
+g -permission path
 ```
 
 with owner/group
 ```bash
-g -so path
-g -sg path
+g -so    path
+g -owner path
+g -sg    path
+g -group path
 ```
 
 with size
 ```bash
-g -ss path
+g -ss   path
+g -size path
 ```
 
 show all files, including hidden files
 ```bash
 g -sh path
+g -a  path
 ```
 
 show dir only
 ```bash
-g -sd path
+g -sd  path
+g -dir path
 ```
 list by line
 ```bash
-g -1 path
-g -bl path
+g -1             path
+g -bl            path
+g -oneline       path
+g -single-column path
 ```
 
 show file only with target ext
 ```bash
-g -ext=<target ext> path
+g -ext=<target ext(s)> path
 ```
 
 list in tree
 ```bash
-g -t path
+g -t    path
+g -tree path
 ```
 
-limit depth in tree
+recurse into directories
+```bash
+g -R       path
+g -recurse path
+```
+
+limit depth in tree/recurse (default: no limit)
 ```bash
 g -t -depth=<level> path
+g -R -depth=<level> path
 ```
 
 fuzzy search
 ```bash
-g -f path
+g -f     path
+g -fuzzy path
 # eg: g -f in
 # /mnt/e/Project/gverything/index
 # pathindex.go
 ```
 
-show checksum (md5,sha1,sha256,sha512)
+disable index update
+```bash
+g -di            path  
+g -no-update     path
+g -disable-index path
+```
+
+disable color
+```bash
+g -nc        path
+g -no-color  path
+g -colorless path
+```
+
+show checksum (md5,sha1,sha224,sha256,sha384,sha512,crc32)
 ```bash
 g -cs -ca=sha256 path
 ```
+
+show git status with icon
+```bash
+g -gs         path
+g -git        path
+g -git-status path
+```
+
+
 
 ## More options
 [g.md](g.md)

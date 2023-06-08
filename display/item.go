@@ -70,7 +70,7 @@ func (i *Item) Get(name string) (ItemContent, bool) {
 	return c, ok
 }
 
-func (i *Item) Add(name string, ic ItemContent) {
+func (i *Item) Set(name string, ic ItemContent) {
 	i.internal[name] = ic
 }
 
