@@ -27,6 +27,7 @@ type Item struct {
 	internal  map[string]ItemContent
 }
 
+// Keys return all keys in random order
 func (i *Item) Keys() []string {
 	res := make([]string, 0, len(i.internal))
 	for k := range i.internal {
@@ -35,6 +36,7 @@ func (i *Item) Keys() []string {
 	return res
 }
 
+// KeysByOrder return Keys(ordered by itemContent.No, ascending)
 func (i *Item) KeysByOrder() []string {
 	res := make([]string, 0, len(i.internal))
 	kNo := make([]struct {
@@ -61,24 +63,27 @@ func (i *Item) KeysByOrder() []string {
 	return res
 }
 
-func (i *Item) Del(name string) {
-	delete(i.internal, name)
+func (i *Item) Del(key string) {
+	delete(i.internal, key)
 }
 
-func (i *Item) Get(name string) (ItemContent, bool) {
-	c, ok := i.internal[name]
+// Get content by key
+func (i *Item) Get(key string) (ItemContent, bool) {
+	c, ok := i.internal[key]
 	return c, ok
 }
 
-func (i *Item) Set(name string, ic ItemContent) {
-	i.internal[name] = ic
+// Set content by key
+func (i *Item) Set(key string, ic ItemContent) {
+	i.internal[key] = ic
 }
 
-func (i *Item) ExcludeOrderedContent(names ...string) string {
+// ExcludeOrderedContent get content in order, exclude those match given parameter(ordered by itemContent.No, ascending)
+func (i *Item) ExcludeOrderedContent(key ...string) string {
 	res := bytebufferpool.Get()
 	ics := make([]ItemContent, 0, len(i.internal))
 	for name, v := range i.internal {
-		if util.SliceContains(names, name) {
+		if util.SliceContains(key, name) {
 			continue
 		}
 		ics = append(ics, v)
@@ -96,6 +101,7 @@ func (i *Item) ExcludeOrderedContent(names ...string) string {
 	return res.String()
 }
 
+// IncludeOrderedContent return those content inorder(ordered by itemContent.No, ascending)
 func (i *Item) IncludeOrderedContent(names ...string) string {
 	res := bytebufferpool.Get()
 	ics := make([]ItemContent, 0, len(i.internal))
@@ -118,6 +124,7 @@ func (i *Item) IncludeOrderedContent(names ...string) string {
 	return res.String()
 }
 
+// OrderedContent return all content in order(ordered by itemContent.No, ascending)
 func (i *Item) OrderedContent() string {
 	res := bytebufferpool.Get()
 	ics := make([]ItemContent, 0, len(i.internal))
