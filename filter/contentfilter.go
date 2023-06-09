@@ -890,34 +890,42 @@ const SumName = "sum"
 
 func (cf *ContentFilter) EnableSum(sumTypes ...SumType) ContentOption {
 	length := 0
+	types := make([]string, 0, len(sumTypes))
 	for _, t := range sumTypes {
 		switch t {
 		case SumTypeMd5:
 			length += 32
+			types = append(types, "md5")
 		case SumTypeSha1:
 			length += 40
+			types = append(types, "sha1")
 		case SumTypeSha224:
 			length += 56
+			types = append(types, "sha224")
 		case SumTypeSha256:
 			length += 64
+			types = append(types, "sha256")
 		case SumTypeSha384:
 			length += 96
+			types = append(types, "sha384")
 		case SumTypeSha512:
 			length += 128
+			types = append(types, "sha512")
 		case SumTypeCRC32:
 			length += 8
+			types = append(types, "crc32")
 		}
 	}
 	length += len(sumTypes) - 1
-
+	sumName := fmt.Sprintf("%s(%s)", SumName, strings.Join(types, ","))
 	return func(info os.FileInfo) (string, string) {
 		if info.IsDir() {
-			return fillBlank("", length), SumName
+			return fillBlank("", length), sumName
 		}
 
 		file, err := os.Open(info.Name())
 		if err != nil {
-			return fillBlank("", length), SumName
+			return fillBlank("", length), sumName
 		}
 		defer file.Close()
 		hashes := make([]hash.Hash, 0, len(sumTypes))
@@ -945,14 +953,14 @@ func (cf *ContentFilter) EnableSum(sumTypes ...SumType) ContentOption {
 		}
 		multiWriter := io.MultiWriter(writers...)
 		if _, err := io.Copy(multiWriter, file); err != nil {
-			return fillBlank("", length), SumName
+			return fillBlank("", length), sumName
 		}
 		sums := make([]string, 0, len(hashes))
 		for _, h := range hashes {
 			sums = append(sums, fmt.Sprintf("%x", h.Sum(nil)))
 		}
 		sumsStr := strings.Join(sums, " ")
-		return fillBlank(sumsStr, length), SumName
+		return fillBlank(sumsStr, length), sumName
 	}
 }
 

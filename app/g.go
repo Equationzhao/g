@@ -44,6 +44,7 @@ var (
 	wgs           = make([]filter.LengthFixed, 0, 1)
 	depthLimitMap = make(map[string]int)
 	limitOnce     = util.Once{}
+	hookOnce      = util.Once{}
 )
 
 var Version = "0.6.0"
@@ -443,49 +444,52 @@ There is NO WARRANTY, to the extent permitted by law.`,
 					}
 
 					if header {
-						p.AddBeforePrint(func(item ...display.Item) {
-							// add header
-							allPart := item[0].KeysByOrder()
-							longestEachPart := make(map[string]int)
-							for _, it := range item {
-								for _, part := range allPart {
-									content, _ := it.Get(part)
-									l := display.WidthLen(content.Content.String())
-									if l > longestEachPart[part] {
-										longestEachPart[part] = l
+						_ = hookOnce.Do(func() error {
+							p.AddBeforePrint(func(item ...display.Item) {
+								// add header
+								allPart := item[0].KeysByOrder()
+								longestEachPart := make(map[string]int)
+								for _, it := range item {
+									for _, part := range allPart {
+										content, _ := it.Get(part)
+										l := display.WidthLen(content.Content.String())
+										if l > longestEachPart[part] {
+											longestEachPart[part] = l
+										}
 									}
 								}
-							}
 
-							// add longest - len(header) * space
-							// print header
-							contentStrBuf := bytebufferpool.Get()
-							for i, s := range allPart {
-								if len(s) > longestEachPart[s] {
-									// expand the every items' content of this part
-									for _, it := range items {
-										content, _ := it.Get(s)
-										content.Content = display.StringContent(fmt.Sprintf("%s%s", strings.Repeat(" ", len(s)-longestEachPart[s]), content.Content.String()))
-										it.Set(s, content)
-									}
-									_, _ = contentStrBuf.WriteString(theme.Underline)
-									_, _ = contentStrBuf.WriteString(s)
-									_, _ = contentStrBuf.WriteString(theme.Reset)
-									if i != len(allPart)-1 {
-										_, _ = contentStrBuf.WriteString(" ")
-									}
-								} else {
-									_, _ = contentStrBuf.WriteString(theme.Underline)
-									_, _ = contentStrBuf.WriteString(s)
-									_, _ = contentStrBuf.WriteString(theme.Reset)
-									if i != len(allPart)-1 {
-										_, _ = contentStrBuf.WriteString(strings.Repeat(" ", longestEachPart[s]-len(s)+1))
+								// add longest - len(header) * space
+								// print header
+								contentStrBuf := bytebufferpool.Get()
+								for i, s := range allPart {
+									if len(s) > longestEachPart[s] {
+										// expand the every item's content of this part
+										for _, it := range items {
+											content, _ := it.Get(s)
+											content.Content = display.StringContent(fmt.Sprintf("%s%s", strings.Repeat(" ", len(s)-longestEachPart[s]), content.Content.String()))
+											it.Set(s, content)
+										}
+										_, _ = contentStrBuf.WriteString(theme.Underline)
+										_, _ = contentStrBuf.WriteString(s)
+										_, _ = contentStrBuf.WriteString(theme.Reset)
+										if i != len(allPart)-1 {
+											_, _ = contentStrBuf.WriteString(" ")
+										}
+									} else {
+										_, _ = contentStrBuf.WriteString(theme.Underline)
+										_, _ = contentStrBuf.WriteString(s)
+										_, _ = contentStrBuf.WriteString(theme.Reset)
+										if i != len(allPart)-1 {
+											_, _ = contentStrBuf.WriteString(strings.Repeat(" ", longestEachPart[s]-len(s)+1))
+										}
 									}
 								}
-							}
-							_, _ = contentStrBuf.WriteString(theme.Reset)
-							_, _ = fmt.Fprintln(display.Output, contentStrBuf.String())
-							bytebufferpool.Put(contentStrBuf)
+								_, _ = contentStrBuf.WriteString(theme.Reset)
+								_, _ = fmt.Fprintln(display.Output, contentStrBuf.String())
+								bytebufferpool.Put(contentStrBuf)
+							})
+							return nil
 						})
 					}
 
