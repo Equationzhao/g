@@ -464,7 +464,7 @@ There is NO WARRANTY, to the extent permitted by law.`,
 								contentStrBuf := bytebufferpool.Get()
 								for i, s := range allPart {
 									if len(s) > longestEachPart[s] {
-										// expand the every items' content of this part
+										// expand the every item's content of this part
 										for _, it := range items {
 											content, _ := it.Get(s)
 											content.Content = display.StringContent(fmt.Sprintf("%s%s", strings.Repeat(" ", len(s)-longestEachPart[s]), content.Content.String()))
