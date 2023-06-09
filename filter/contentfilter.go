@@ -474,12 +474,12 @@ const (
 	timeAccessed = "Accessed"
 )
 
-func EnableTime(format string, mod string, renderer *render.Renderer) ContentOption {
+func EnableTime(format string, mode string, renderer *render.Renderer) ContentOption {
 	return func(info os.FileInfo) (string, string) {
 		// get mod time/ create time/ access time
 		var t time.Time
 		timeType := ""
-		switch mod {
+		switch mode {
 		case "mod":
 			t = osbased.ModTime(info)
 			timeType = timeModified
@@ -501,6 +501,7 @@ type (
 		parent                        string
 		GitCache                      *cached.Map[git.GitRepoPath, *git.FileGits]
 		GitStyle                      gitStyle
+		Quote                         string
 	}
 )
 
@@ -511,6 +512,16 @@ const (
 	GitStyleSym
 	GitStyleDefault = GitStyleDot
 )
+
+func (n *Name) SetQuote(quote string) *Name {
+	n.Quote = quote
+	return n
+}
+
+func (n *Name) UnsetQuote() *Name {
+	n.Quote = ""
+	return n
+}
 
 func (n *Name) UnsetGit() *Name {
 	n.git = false
@@ -662,6 +673,10 @@ func (n *Name) Enable() ContentOption {
 		}
 
 	end:
+		if n.Quote != "" {
+			str = strings.Replace(str, name, n.Quote+name+n.Quote, 1)
+		}
+
 		return str, NameName
 	}
 }
@@ -1028,4 +1043,46 @@ func (e *ExactFileTypeEnabler) Enable() ContentOption {
 		done(tn)
 		return wait(tn), ExactTypeName
 	}
+}
+
+type LinkEnabler struct {
+	// List each file's number of hard links.
+	*sync.WaitGroup
+}
+
+func NewLinkEnabler() *LinkEnabler {
+	return &LinkEnabler{
+		WaitGroup: &sync.WaitGroup{},
+	}
+}
+
+func (l *LinkEnabler) Enable() ContentOption {
+	var longestLinkNum string
+	m := sync.RWMutex{}
+	done := func(linkNumStr string) {
+		defer l.Done()
+		m.RLock()
+		if len(longestLinkNum) >= len(linkNumStr) {
+			m.RUnlock()
+			return
+		}
+		m.RUnlock()
+		m.Lock()
+		if len(longestLinkNum) < len(linkNumStr) {
+			longestLinkNum = linkNumStr
+		}
+		m.Unlock()
+	}
+
+	wait := func(linkNumStr string) string {
+		l.Wait()
+		return fillBlank(linkNumStr, len(longestLinkNum))
+	}
+
+	return func(info os.FileInfo) (string, string) {
+		n := strconv.FormatUint(osbased.LinkCount(info), 10)
+		done(n)
+		return wait(n), "links"
+	}
+
 }

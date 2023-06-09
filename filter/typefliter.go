@@ -28,10 +28,10 @@ func NewTypeFilter(tfs ...*TypeFunc) *TypeFilter {
 
 func (tf *TypeFilter) Filter(e ...os.FileInfo) (res []os.FileInfo) {
 	for _, entry := range e {
-		ok := true
+		ok := keep
 		for _, funcPtr := range tf.tfs {
 			if !(*funcPtr)(entry) {
-				ok = false
+				ok = remove
 				break
 			}
 		}

@@ -36,12 +36,42 @@ func BySizeAscend(a, b os.FileInfo) bool {
 	return a.Size() < b.Size()
 }
 
-func ByTimeDescend(a, b os.FileInfo) bool {
-	return a.ModTime().After(b.ModTime())
+func ByTimeDescend(timeType string) FileSortFunc {
+	switch timeType {
+	case "mod":
+		return func(a, b os.FileInfo) bool {
+			return osbased.ModTime(a).After(osbased.ModTime(b))
+		}
+	case "access":
+		return func(a, b os.FileInfo) bool {
+			return osbased.AccessTime(a).After(osbased.AccessTime(b))
+		}
+	case "create":
+		return func(a, b os.FileInfo) bool {
+			return osbased.CreateTime(a).After(osbased.CreateTime(b))
+		}
+	default:
+		panic("invalid time type")
+	}
 }
 
-func ByTimeAscend(a, b os.FileInfo) bool {
-	return a.ModTime().Before(b.ModTime())
+func ByTimeAscend(timeType string) FileSortFunc {
+	switch timeType {
+	case "mod":
+		return func(a, b os.FileInfo) bool {
+			return osbased.ModTime(a).Before(osbased.ModTime(b))
+		}
+	case "access":
+		return func(a, b os.FileInfo) bool {
+			return osbased.AccessTime(a).Before(osbased.AccessTime(b))
+		}
+	case "create":
+		return func(a, b os.FileInfo) bool {
+			return osbased.CreateTime(a).Before(osbased.CreateTime(b))
+		}
+	default:
+		panic("invalid time type")
+	}
 }
 
 func ByExtensionDescend(a, b os.FileInfo) bool {
@@ -92,6 +122,14 @@ func ByOwnerCaseSensitiveAscend(a, b os.FileInfo) bool {
 	return byUserCaseSensitiveName(a, b, true)
 }
 
+func ByNameWidthDescend(a, b os.FileInfo) bool {
+	return byNameWidth(a, b, false)
+}
+
+func ByNameWidthAscend(a, b os.FileInfo) bool {
+	return byNameWidth(a, b, true)
+}
+
 func dirFirst(a, b os.FileInfo) bool {
 	hdA := isHiddenDir(a)
 	hdB := isHiddenDir(b)
@@ -119,6 +157,12 @@ type Sorter struct {
 	reverse  bool
 	dirFirst bool
 	option   []FileSortFunc
+}
+
+func (s *Sorter) Reset() {
+	s.reverse = false
+	s.dirFirst = false
+	s.option = make([]FileSortFunc, 0, 10)
 }
 
 func (s *Sorter) DirFirst() {
@@ -270,4 +314,12 @@ func byUserCaseSensitiveName(a, b os.FileInfo, Ascend bool) bool {
 		return osbased.Owner(a) < osbased.Owner(b)
 	}
 	return osbased.Owner(a) > osbased.Owner(b)
+}
+
+func byNameWidth(a, b os.FileInfo, Ascend bool) bool {
+	if Ascend {
+		return len(a.Name()) < len(b.Name())
+	} else {
+		return len(a.Name()) > len(b.Name())
+	}
 }
