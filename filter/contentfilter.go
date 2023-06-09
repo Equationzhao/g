@@ -10,6 +10,7 @@ import (
 	"hash/crc32"
 	"io"
 	"os"
+	"path/filepath"
 	"runtime"
 	"sort"
 	"strconv"
@@ -257,12 +258,29 @@ type SizeEnabler struct {
 	total       atomic.Int64
 	enableTotal bool
 	sizeUint    SizeUnit
+	recursive   *SizeRecursive
 	renderer    *render.Renderer
 	*sync.WaitGroup
 }
 
+func (s *SizeEnabler) Recursive() *SizeRecursive {
+	return s.recursive
+}
+
+func (s *SizeEnabler) SetRecursive(sr *SizeRecursive) {
+	s.recursive = sr
+}
+
 func (s *SizeEnabler) SetRenderer(renderer *render.Renderer) {
 	s.renderer = renderer
+}
+
+type SizeRecursive struct {
+	depth int
+}
+
+func NewSizeRecursive(depth int) *SizeRecursive {
+	return &SizeRecursive{depth: depth}
 }
 
 func NewSizeEnabler() *SizeEnabler {
@@ -271,6 +289,7 @@ func NewSizeEnabler() *SizeEnabler {
 		enableTotal: false,
 		sizeUint:    Auto,
 		renderer:    nil,
+		recursive:   nil,
 		WaitGroup:   new(sync.WaitGroup),
 	}
 }
@@ -357,6 +376,52 @@ func (s *SizeEnabler) Size2String(b int64, blank int) string {
 
 const SizeName = "Size"
 
+func recursivelySizeOf(info os.FileInfo, depth int) int64 {
+	currentDepth := 0
+	if info.IsDir() {
+		totalSize := info.Size()
+		if depth < 0 {
+			// -1 means no limit
+			_ = filepath.Walk(info.Name(), func(path string, info os.FileInfo, err error) error {
+				if err != nil {
+					return err
+				}
+
+				if !info.IsDir() {
+					totalSize += info.Size()
+				}
+
+				return nil
+			})
+		} else {
+			_ = filepath.Walk(info.Name(), func(path string, info os.FileInfo, err error) error {
+				if err != nil {
+					return err
+				}
+				if currentDepth > depth {
+					if info.IsDir() {
+						return filepath.SkipDir
+					}
+					return nil
+				}
+
+				if !info.IsDir() {
+					totalSize += info.Size()
+				}
+
+				if info.IsDir() {
+					currentDepth++
+				}
+
+				return nil
+			})
+		}
+
+		return totalSize
+	}
+	return info.Size()
+}
+
 func (s *SizeEnabler) EnableSize(size SizeUnit) ContentOption {
 	s.sizeUint = size
 
@@ -384,7 +449,12 @@ func (s *SizeEnabler) EnableSize(size SizeUnit) ContentOption {
 		}
 
 		return func(info os.FileInfo) (string, string) {
-			v := info.Size()
+			var v int64
+			if s.recursive != nil {
+				v = recursivelySizeOf(info, s.recursive.depth)
+			} else {
+				v = info.Size()
+			}
 			if s.enableTotal {
 				s.total.Add(v)
 			}
@@ -395,7 +465,12 @@ func (s *SizeEnabler) EnableSize(size SizeUnit) ContentOption {
 	}
 
 	return func(info os.FileInfo) (string, string) {
-		v := info.Size()
+		var v int64
+		if s.recursive != nil {
+			v = recursivelySizeOf(info, s.recursive.depth)
+		} else {
+			v = info.Size()
+		}
 		if s.enableTotal {
 			s.total.Add(v)
 		}

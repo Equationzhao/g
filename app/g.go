@@ -941,6 +941,19 @@ var viewFlag = []cli.Flag{
 		Category: "VIEW",
 	},
 	&cli.BoolFlag{
+		Name:               "show-recursive-size",
+		Aliases:            []string{"srs", "recursive-size"},
+		Usage:              "show recursive size of dir, only work with --show-size",
+		DisableDefaultText: true,
+		Action: func(context *cli.Context, b bool) error {
+			if b {
+				n := context.Int("depth")
+				sizeEnabler.SetRecursive(filter.NewSizeRecursive(n))
+			}
+			return nil
+		},
+	},
+	&cli.BoolFlag{
 		Name:               "lh",
 		Aliases:            []string{"human-readable", "hr"},
 		DisableDefaultText: true,

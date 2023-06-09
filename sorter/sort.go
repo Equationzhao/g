@@ -28,6 +28,8 @@ func ByNameCaseSensitiveAscend(a, b os.FileInfo) bool {
 	return a.Name() < b.Name()
 }
 
+// todo size for folder
+
 func BySizeDescend(a, b os.FileInfo) bool {
 	return a.Size() > b.Size()
 }
