@@ -3,8 +3,15 @@
 
 >   a powerful ls
 
+[![CodeFactor](https://www.codefactor.io/repository/github/equationzhao/g/badge/master)](https://www.codefactor.io/repository/github/equationzhao/g/overview/master)
 [![Go Report Card](https://goreportcard.com/badge/github.com/Equationzhao/g)](https://goreportcard.com/report/github.com/Equationzhao/g)
 [![wakatime](https://wakatime.com/badge/github/Equationzhao/g.svg)](https://wakatime.com/badge/github/Equationzhao/g)
+[![Go](https://github.com/Equationzhao/g/actions/workflows/go.yml/badge.svg)](https://github.com/Equationzhao/g/actions/workflows/go.yml)
+
+
+![linux](https://img.shields.io/badge/Linux-FCC624?style=for-the-badge&logo=linux&logoColor=black)
+![macos](https://img.shields.io/badge/mac%20os-000000?style=for-the-badge&logo=apple&logoColor=white)
+![windows](https://img.shields.io/badge/Windows-0078D6?style=for-the-badge&logo=windows&logoColor=white)
 ## Screenshots
 
 ![image](./how-g-works.gif)
@@ -15,7 +22,10 @@ go version required >= 1.20
 go install -ldflags="-s -w -v"  github.com/Equationzhao/g@latest
 ```
 
-Archlinux user can install `g` from AUR
+
+![archlinux](https://img.shields.io/badge/Arch_Linux-1793D1?style=for-the-badge&logo=arch-linux&logoColor=white)
+
+Archlinux user can install `g` from AUR 
 ```bash
 yay -S g-ls
 ```
