@@ -38,7 +38,7 @@ var (
 	contentFilter = filter.NewContentFilter()
 	CompiledAt    = ""
 	sort          = sorter.NewSorter()
-	timeType      = "mod"
+	timeType      = []string{"mod"}
 	sizeUint      = filter.Auto
 	sizeEnabler   = filter.NewSizeEnabler()
 	wgs           = make([]filter.LengthFixed, 0, 1)
@@ -47,7 +47,7 @@ var (
 	hookOnce      = util.Once{}
 )
 
-var Version = "0.6.0"
+var Version = "0.7.0"
 
 var G *cli.App
 
@@ -140,6 +140,14 @@ There is NO WARRANTY, to the extent permitted by law.`,
 					nameToDisplay.GitStyle = filter.GitStyleDefault
 				}
 			}
+
+			if context.Bool("Q") {
+				nameToDisplay.SetQuote(`"`)
+			}
+			if context.Bool("N") {
+				nameToDisplay.UnsetQuote()
+			}
+
 			transformEnabled := !context.Bool("np")
 
 			contentFunc = append(contentFunc, nameToDisplay.Enable())
@@ -273,7 +281,7 @@ There is NO WARRANTY, to the extent permitted by law.`,
 
 					isFile := false
 
-					// get abs path
+					// get the abs path
 					absPath, err := filepath.Abs(path[i])
 					if err != nil {
 						_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(fmt.Sprintf("Not a valid path: %s", absPath)))
@@ -644,20 +652,25 @@ var viewFlag = []cli.Flag{
 			return nil
 		},
 	},
-	&cli.StringFlag{
+	&cli.StringSliceFlag{
 		Name:        "time-type",
 		Aliases:     []string{"tt"},
-		Usage:       "time type, mod, create, access",
+		Usage:       "time type, mod(default), create, access, all",
 		EnvVars:     []string{"TIME_TYPE"},
 		DefaultText: "mod",
-		Action: func(context *cli.Context, s string) error {
-			if s == "mod" || s == "create" || s == "access" {
-				timeType = s
-				return nil
-			} else {
-				ReturnCode = 1
-				return errors.New("invalid time type")
+		Action: func(context *cli.Context, ss []string) error {
+			timeType = make([]string, 0, len(ss))
+			for _, s := range ss {
+				if s == "mod" || s == "create" || s == "access" {
+					timeType = append(timeType, s)
+				} else if s == "all" {
+					timeType = []string{"mod", "create", "access"}
+				} else {
+					ReturnCode = 1
+					return errors.New("invalid time type")
+				}
 			}
+			return nil
 		},
 		Category: "VIEW",
 	},
@@ -744,7 +757,10 @@ var viewFlag = []cli.Flag{
 					}
 				}
 				typeFunc = newFF
-				contentFunc = append(contentFunc, filter.EnableFileMode(r), sizeEnabler.EnableSize(sizeUint), contentFilter.EnableGroup(r), filter.EnableTime(timeFormat, timeType, r))
+				contentFunc = append(contentFunc, filter.EnableFileMode(r), sizeEnabler.EnableSize(sizeUint), contentFilter.EnableGroup(r))
+				for _, s := range timeType {
+					contentFunc = append(contentFunc, filter.EnableTime(timeFormat, s, r))
+				}
 				if _, ok := p.(*display.Byline); !ok {
 					p = display.NewByline()
 				}
@@ -767,7 +783,10 @@ var viewFlag = []cli.Flag{
 					}
 				}
 				typeFunc = newFF
-				contentFunc = append(contentFunc, filter.EnableFileMode(r), sizeEnabler.EnableSize(sizeUint), contentFilter.EnableOwner(r), filter.EnableTime(timeFormat, timeType, r))
+				contentFunc = append(contentFunc, filter.EnableFileMode(r), sizeEnabler.EnableSize(sizeUint), contentFilter.EnableOwner(r))
+				for _, s := range timeType {
+					contentFunc = append(contentFunc, filter.EnableTime(timeFormat, s, r))
+				}
 				if _, ok := p.(*display.Byline); !ok {
 					p = display.NewByline()
 				}
@@ -785,7 +804,7 @@ var viewFlag = []cli.Flag{
 	},
 	&cli.BoolFlag{
 		Name:               "all",
-		Aliases:            []string{"la", "l"},
+		Aliases:            []string{"la", "l", "long"},
 		Usage:              "show all info/use a long listing format",
 		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
@@ -803,8 +822,9 @@ var viewFlag = []cli.Flag{
 				if !context.Bool("G") {
 					contentFunc = append(contentFunc, contentFilter.EnableGroup(r))
 				}
-				contentFunc = append(contentFunc, filter.EnableTime(timeFormat, timeType, r))
-
+				for _, s := range timeType {
+					contentFunc = append(contentFunc, filter.EnableTime(timeFormat, s, r))
+				}
 				if _, ok := p.(*display.Byline); !ok {
 					p = display.NewByline()
 				}
@@ -859,6 +879,7 @@ var viewFlag = []cli.Flag{
 	},
 	&cli.BoolFlag{
 		Name:               "numeric",
+		Aliases:            []string{"numeric-uid-gid"},
 		Usage:              " List numeric user and group IDs instead of name [sid in windows]",
 		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
@@ -878,7 +899,7 @@ var viewFlag = []cli.Flag{
 		Action: func(context *cli.Context, b bool) error {
 			if b {
 				rt := filter.NewRelativeTimeEnabler()
-				rt.Mode = timeType
+				rt.Mode = timeType[0]
 				contentFunc = append(contentFunc, rt.Enable(r))
 				wgs = append(wgs, rt)
 			}
@@ -889,7 +910,7 @@ var viewFlag = []cli.Flag{
 
 	&cli.BoolFlag{
 		Name:               "show-perm",
-		Aliases:            []string{"sp"},
+		Aliases:            []string{"sp", "permission", "perm"},
 		Usage:              "show permission",
 		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
@@ -920,13 +941,29 @@ var viewFlag = []cli.Flag{
 		Category: "VIEW",
 	},
 	&cli.BoolFlag{
+		Name:               "show-recursive-size",
+		Aliases:            []string{"srs", "recursive-size"},
+		Usage:              "show recursive size of dir, only work with --show-size",
+		DisableDefaultText: true,
+		Action: func(context *cli.Context, b bool) error {
+			if b {
+				n := context.Int("depth")
+				sizeEnabler.SetRecursive(filter.NewSizeRecursive(n))
+			}
+			return nil
+		},
+	},
+	&cli.BoolFlag{
 		Name:               "lh",
 		Aliases:            []string{"human-readable", "hr"},
 		DisableDefaultText: true,
 		Usage:              "show human readable size",
 		Action: func(context *cli.Context, b bool) error {
 			if b {
-				contentFunc = append(contentFunc, filter.EnableFileMode(r), sizeEnabler.EnableSize(sizeUint), contentFilter.EnableOwner(r), contentFilter.EnableGroup(r), filter.EnableTime(timeFormat, timeType, r))
+				contentFunc = append(contentFunc, filter.EnableFileMode(r), sizeEnabler.EnableSize(sizeUint), contentFilter.EnableOwner(r), contentFilter.EnableGroup(r))
+				for _, s := range timeType {
+					contentFunc = append(contentFunc, filter.EnableTime(timeFormat, s, r))
+				}
 				if _, ok := p.(*display.Byline); !ok {
 					p = display.NewByline()
 				}
@@ -974,7 +1011,9 @@ var viewFlag = []cli.Flag{
 		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
 			if b {
-				contentFunc = append(contentFunc, filter.EnableTime(timeFormat, timeType, r))
+				for _, s := range timeType {
+					contentFunc = append(contentFunc, filter.EnableTime(timeFormat, s, r))
+				}
 				if _, ok := p.(*display.Byline); !ok {
 					p = display.NewByline()
 				}
@@ -993,7 +1032,7 @@ var viewFlag = []cli.Flag{
 	&cli.BoolFlag{
 		Name:               "show-total-size",
 		Usage:              "show total size",
-		Aliases:            []string{"ts"},
+		Aliases:            []string{"ts", "total-size"},
 		DisableDefaultText: true,
 		Category:           "VIEW",
 		Action: func(context *cli.Context, b bool) error {
@@ -1104,6 +1143,35 @@ var viewFlag = []cli.Flag{
 		Usage:    "git status style: colored-symbol: {? untracked, + added, - deleted, ~ modified, | renamed, = copied, ! ignored} colored-dot",
 		Aliases:  []string{"gss", "git-style"},
 		Category: "VIEW",
+	},
+
+	&cli.BoolFlag{
+		Name:    "quote-name",
+		Aliases: []string{"Q"},
+		Usage:   "enclose entry names in double quotes(overridden by --literal)",
+	},
+	// &cli.StringFlag{
+	// 	Name:    "quoting-style",
+	// 	Aliases: []string{"Qs"},
+	// 	Usage:   "use quoting style: literal, shell, shell-always, c, escape, locale, clocale",
+	// },
+	&cli.BoolFlag{
+		Name:    "literal",
+		Aliases: []string{"N"},
+		Usage:   "print entry names without quoting",
+	},
+	&cli.BoolFlag{
+		Name:    "link",
+		Aliases: []string{"H"},
+		Usage:   "list each file's number of hard links",
+		Action: func(context *cli.Context, b bool) error {
+			if b {
+				link := filter.NewLinkEnabler()
+				contentFunc = append(contentFunc, link.Enable())
+				wgs = append(wgs, link)
+			}
+			return nil
+		},
 	},
 }
 
@@ -1228,7 +1296,10 @@ var displayFlag = []cli.Flag{
 					p = display.NewCommaPrint()
 				}
 			case "long", "l", "verbose":
-				contentFunc = append(contentFunc, filter.EnableFileMode(r), sizeEnabler.EnableSize(sizeUint), contentFilter.EnableOwner(r), contentFilter.EnableGroup(r), filter.EnableTime(timeFormat, timeType, r))
+				contentFunc = append(contentFunc, filter.EnableFileMode(r), sizeEnabler.EnableSize(sizeUint), contentFilter.EnableOwner(r), contentFilter.EnableGroup(r))
+				for _, s := range timeType {
+					contentFunc = append(contentFunc, filter.EnableTime(timeFormat, s, r))
+				}
 				if _, ok := p.(*display.Byline); !ok {
 					p = display.NewByline()
 				}
@@ -1271,6 +1342,20 @@ var displayFlag = []cli.Flag{
 			return nil
 		},
 		Category: "DISPLAY",
+	},
+	&cli.BoolFlag{
+		Name:  "classic",
+		Usage: "Enable classic mode (no colours or icons)",
+		Action: func(context *cli.Context, b bool) error {
+			if b {
+				*r = *render.NewRenderer(theme.Colorless, theme.ColorlessInfo)
+			}
+			err := context.Set("si", "0")
+			if err != nil {
+				return err
+			}
+			return nil
+		},
 	},
 	&cli.BoolFlag{
 		Name:               "d",
@@ -1327,6 +1412,24 @@ var filteringFlag = []cli.Flag{
 			return nil
 		},
 		Category: "FILTERING",
+	},
+	&cli.BoolFlag{
+		Name:               "show-only-hidden",
+		Aliases:            []string{"soh", "hidden"},
+		DisableDefaultText: true,
+		Usage:              "show only hidden files(overridden by --show-hidden/-sh/-a/-A)",
+		Action: func(context *cli.Context, b bool) error {
+			if b {
+				newFF := make([]*filter.TypeFunc, 0, len(typeFunc))
+				for _, typeFunc := range typeFunc {
+					if typeFunc != &filter.RemoveHidden {
+						newFF = append(newFF, typeFunc)
+					}
+				}
+				typeFunc = append(newFF, &filter.HiddenOnly)
+			}
+			return nil
+		},
 	},
 	&cli.BoolFlag{
 		Name:               "show-hidden",
@@ -1389,7 +1492,7 @@ var filteringFlag = []cli.Flag{
 	},
 	&cli.BoolFlag{
 		Name:               "show-only-dir",
-		Aliases:            []string{"sd", "dir", "only-dir"},
+		Aliases:            []string{"sd", "dir", "only-dir", "D"},
 		DisableDefaultText: true,
 		Usage:              "show directory only",
 		Action: func(context *cli.Context, b bool) error {
@@ -1579,12 +1682,13 @@ var sortingFlags = []cli.Flag{
 	&cli.StringSliceFlag{
 		Name:    "sort",
 		Aliases: []string{"SORT_FIELD"},
-		Usage:   "sort by field, default: ascending and case insensitive, field beginning with Uppercase is case sensitive, available fields: none(nosort),name,size,time,owner,group,extension. following `-descend` to sort descending",
+		Usage:   "sort by field, default: ascending and case insensitive, field beginning with Uppercase is case sensitive, available fields: nature(default),none(nosort),name,size,time,owner,group,extension. following `-descend` to sort descending",
 		Action: func(context *cli.Context, slice []string) error {
 			sorter.WithSize(len(slice))(sort)
 			for _, s := range slice {
 				switch s {
-				case "none", "None", "nosort":
+				case "nature":
+				case "none", "None", "nosort", "U":
 					sort.AddOption(sorter.ByNone)
 				case "name-descend":
 					sort.AddOption(sorter.ByNameDescend)
@@ -1594,21 +1698,21 @@ var sortingFlags = []cli.Flag{
 					sort.AddOption(sorter.ByNameCaseSensitiveAscend)
 				case "Name-descend":
 					sort.AddOption(sorter.ByNameCaseSensitiveDescend)
-				case "size-descend":
+				case "size-descend", "S", "sizesort":
 					sort.AddOption(sorter.BySizeDescend)
 				case "size":
 					sort.AddOption(sorter.BySizeAscend)
 				case "time-descend":
-					sort.AddOption(sorter.ByTimeDescend)
+					sort.AddOption(sorter.ByTimeDescend(timeType[0]))
 				case "time":
-					sort.AddOption(sorter.ByTimeAscend)
+					sort.AddOption(sorter.ByTimeAscend(timeType[0]))
 				case "extension-descend", "ext-descend":
 					sort.AddOption(sorter.ByExtensionDescend)
-				case "extension", "ext":
+				case "extension", "ext", "x", "extentionsort":
 					sort.AddOption(sorter.ByExtensionAscend)
 				case "Extension-descend", "Ext-descend":
 					sort.AddOption(sorter.ByExtensionCaseSensitiveDescend)
-				case "Extension", "Ext":
+				case "Extension", "Ext", "X", "Extentionsort":
 					sort.AddOption(sorter.ByExtensionCaseSensitiveAscend)
 				case "group-descend":
 					sort.AddOption(sorter.ByGroupDescend)
@@ -1626,6 +1730,12 @@ var sortingFlags = []cli.Flag{
 					sort.AddOption(sorter.ByOwnerCaseSensitiveDescend)
 				case "Owner":
 					sort.AddOption(sorter.ByOwnerCaseSensitiveAscend)
+				case "width-descend", "Width-descend":
+					sort.AddOption(sorter.ByNameWidthDescend)
+				case "width", "Width":
+					sort.AddOption(sorter.ByNameWidthAscend)
+				//	todo
+				//	case "v", "version":
 				default:
 					return fmt.Errorf("unknown sort field: %s", s)
 				}
@@ -1662,6 +1772,56 @@ var sortingFlags = []cli.Flag{
 		},
 		Category: "SORTING",
 	},
+	&cli.BoolFlag{
+		Name:               "S",
+		Aliases:            []string{"sort-size", "sort-by-size", "sizesort"},
+		Usage:              "sort by file size, largest first(descending)",
+		DisableDefaultText: true,
+		Action: func(context *cli.Context, b bool) error {
+			sort.Reset()
+			return nil
+		},
+		Category: "SORTING",
+	},
+	&cli.BoolFlag{
+		Name:    "U",
+		Aliases: []string{"nosort", "no-sort"},
+		Usage:   "do not sort; list entries in directory order. ",
+		Action: func(context *cli.Context, b bool) error {
+			sort.AddOption(sorter.ByNone)
+			return nil
+		},
+		Category: "SORTING",
+	},
+	&cli.BoolFlag{
+		Name:    "X",
+		Aliases: []string{"extensionsort", "Extentionsort"},
+		Usage:   "sort alphabetically by entry extension",
+		Action: func(context *cli.Context, b bool) error {
+			sort.AddOption(sorter.ByExtensionAscend)
+			return nil
+		},
+		Category: "SORTING",
+	},
+	&cli.BoolFlag{
+		Name:  "width",
+		Usage: "sort by entry name width",
+		Action: func(context *cli.Context, b bool) error {
+			sort.AddOption(sorter.ByNameWidthAscend)
+			return nil
+		},
+		Category: "SORTING",
+	},
+	// todo sort by version
+	// &cli.BoolFlag{
+	// 	Name:  "v",
+	// 	Usage: "sort by version",
+	// 	Action: func(context *cli.Context, b bool) error {
+	// 		sort.AddOption(sorter.ByVersionAscend)
+	// 		return nil
+	// 	},
+	// 	Category: "SORTING",
+	// },
 }
 
 func MakeErrorStr(msg string) string {
