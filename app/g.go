@@ -452,16 +452,27 @@ There is NO WARRANTY, to the extent permitted by law.`,
 				final:
 					items := contentFilter.GetDisplayItems(infos...)
 
-					// if -l/show-total-size is set, add total size
-					if total, ok := sizeEnabler.Total(); ok {
-						i := display.NewItem()
-						i.Set("total", display.ItemContent{No: 0, Content: display.StringContent(fmt.Sprintf("  total %s", sizeEnabler.Size2String(total, 0)))})
+					{
+						var i *display.Item
+						// if -l/show-total-size is set, add total size
+						if total, ok := sizeEnabler.Total(); ok {
+							i = display.NewItem()
+							i.Set("total", display.ItemContent{No: 0, Content: display.StringContent(fmt.Sprintf("  total %s", sizeEnabler.Size2String(total, 0)))})
+
+						}
 						if s := nameToDisplay.Statistics(); s != nil {
-							i.Set("time", display.ItemContent{No: 1, Content: display.StringContent(fmt.Sprintf("\n  underwent %s", r.Time(durafmt.Parse(time.Since(start)).LimitToUnit("ms").String())))})
-							i.Set("statistic", display.ItemContent{No: 2, Content: display.StringContent(fmt.Sprintf("\n  statistic %s", s))})
+							tFormat := "\n  underwent %s"
+							if i == nil {
+								i = display.NewItem()
+								tFormat = "  underwent %s"
+							}
+							i.Set("time", display.ItemContent{No: 1, Content: display.StringContent(fmt.Sprintf(tFormat, r.Time(durafmt.Parse(time.Since(start)).LimitToUnit("ms").String())))})
+							i.Set("statistic", display.ItemContent{No: 2, Content: display.StringContent(fmt.Sprintf("\n  statistic: %s", s))})
 							s.Reset()
 						}
-						p.Print(*i)
+						if i != nil {
+							p.Print(*i)
+						}
 					}
 
 					if header {
