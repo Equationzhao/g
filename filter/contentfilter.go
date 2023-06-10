@@ -575,12 +575,27 @@ func EnableTime(format string, mode string, renderer *render.Renderer) ContentOp
 	}
 }
 
+type Statistics struct {
+	file, dir, link uint64
+}
+
+func (s *Statistics) Reset() {
+	s.file = 0
+	s.dir = 0
+	s.link = 0
+}
+
+func (s *Statistics) String() string {
+	return fmt.Sprintf("file: %d, dir: %d, link: %d", s.file, s.dir, s.link)
+}
+
 type (
 	Name struct {
 		Icon, Classify, FileType, git bool
 		Renderer                      *render.Renderer
-		parent                        string
 		GitCache                      *cached.Map[git.GitRepoPath, *git.FileGits]
+		statistics                    *Statistics
+		parent                        string
 		GitStyle                      gitStyle
 		Quote                         string
 	}
@@ -593,6 +608,14 @@ const (
 	GitStyleSym
 	GitStyleDefault = GitStyleDot
 )
+
+func (n *Name) Statistics() *Statistics {
+	return n.statistics
+}
+
+func (n *Name) SetStatistics(Statistics *Statistics) {
+	n.statistics = Statistics
+}
 
 func (n *Name) SetQuote(quote string) *Name {
 	n.Quote = quote
@@ -695,37 +718,67 @@ func (n *Name) Enable() ContentOption {
 		str := name
 		mode := info.Mode()
 
+		char := ""
+
 		if n.Icon {
 			if info.IsDir() {
+				if n.statistics != nil {
+					n.statistics.dir++
+				}
 				str = n.Renderer.DirIcon(str)
+				char = "/"
 			} else if mode&os.ModeSymlink != 0 {
+				if n.statistics != nil {
+					n.statistics.link++
+				}
 				if n.Classify {
 					str = n.Renderer.SymlinkIconPlus(str, n.parent, "@")
 				} else {
 					str = n.Renderer.SymlinkIcon(str, n.parent)
 				}
-			} else if mode&os.ModeNamedPipe != 0 {
-				str = n.Renderer.PipeIcon(str)
-			} else if mode&os.ModeSocket != 0 {
-				str = n.Renderer.SocketIcon(str)
 			} else {
-				str = n.Renderer.ByExtIcon(str)
+				if n.statistics != nil {
+					n.statistics.file++
+				}
+				if mode&os.ModeNamedPipe != 0 {
+					str = n.Renderer.PipeIcon(str)
+					char = "|"
+				} else if mode&os.ModeSocket != 0 {
+					str = n.Renderer.SocketIcon(str)
+					char = "="
+				} else {
+					str = n.Renderer.ByExtIcon(str)
+				}
 			}
 		} else {
 			if info.IsDir() {
+				if n.statistics != nil {
+					n.statistics.dir++
+				}
 				str = n.Renderer.Dir(str)
+				char = "/"
 			} else if mode&os.ModeSymlink != 0 {
+				if n.statistics != nil {
+					n.statistics.link++
+				}
 				if n.Classify {
 					str = n.Renderer.SymlinkPlus(str, n.parent, "@")
 				} else {
 					str = n.Renderer.Symlink(str, n.parent)
 				}
-			} else if mode&os.ModeNamedPipe != 0 {
-				str = n.Renderer.Pipe(str)
-			} else if mode&os.ModeSocket != 0 {
-				str = n.Renderer.Socket(str)
 			} else {
-				str = n.Renderer.ByExt(str)
+				if n.statistics != nil {
+					n.statistics.file++
+				}
+				if mode&os.ModeNamedPipe != 0 {
+					str = n.Renderer.Pipe(str)
+					char = "|"
+				} else if mode&os.ModeSocket != 0 {
+					str = n.Renderer.Socket(str)
+					char = "="
+				} else {
+					str = n.Renderer.ByExt(str)
+				}
 			}
 		}
 
@@ -740,20 +793,13 @@ func (n *Name) Enable() ContentOption {
 		}
 
 		if n.Classify {
-			if info.IsDir() {
-				str += "/"
-			} else if mode&os.ModeSymlink != 0 {
-				goto end
-			} else if mode&os.ModeNamedPipe != 0 {
-				str += "|"
-			} else if mode&os.ModeSocket != 0 {
-				str += "="
-			} else if (!n.FileType) && (mode&0o111 != 0) {
+			if (!n.FileType) && (mode&0o111 != 0) {
 				str += "*"
+			} else {
+				str += char
 			}
 		}
 
-	end:
 		if n.Quote != "" {
 			str = strings.Replace(str, name, n.Quote+name+n.Quote, 1)
 		}

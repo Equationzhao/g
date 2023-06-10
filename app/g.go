@@ -20,6 +20,7 @@ import (
 	"github.com/Equationzhao/g/util"
 	"github.com/Equationzhao/pathbeautify"
 	"github.com/gabriel-vasile/mimetype"
+	"github.com/hako/durafmt"
 	"github.com/urfave/cli/v2"
 	"github.com/valyala/bytebufferpool"
 	versionInfo "go.szostok.io/version"
@@ -181,6 +182,8 @@ There is NO WARRANTY, to the extent permitted by law.`,
 
 			if context.Bool("tree") {
 				for i := 0; i < len(path); i++ {
+					start := time.Now()
+
 					if printPath {
 						fmt.Printf("%s:\n", path[i])
 					}
@@ -250,7 +253,7 @@ There is NO WARRANTY, to the extent permitted by law.`,
 					}
 
 					fmt.Println(s.MakeTreeStr())
-					fmt.Printf("\n%d directories, %d files\n", s.Directory(), s.File())
+					fmt.Printf("\n%d directories, %d files\n", s.Directory(), s.File(), time.Since(start).String())
 
 					if i != len(path)-1 {
 						//goland:noinspection GoPrintFunctions
@@ -267,8 +270,13 @@ There is NO WARRANTY, to the extent permitted by law.`,
 				flagR := context.Bool("R")
 
 				header := context.Bool("header")
+				if context.Bool("statistic") {
+					nameToDisplay.SetStatistics(&filter.Statistics{})
+				}
 
 				for i := 0; i < len(path); i++ {
+					start := time.Now()
+
 					if printPath {
 						fmt.Printf("%s:\n", path[i])
 					}
@@ -447,7 +455,12 @@ There is NO WARRANTY, to the extent permitted by law.`,
 					// if -l/show-total-size is set, add total size
 					if total, ok := sizeEnabler.Total(); ok {
 						i := display.NewItem()
-						i.Set("total", display.ItemContent{Content: display.StringContent(fmt.Sprintf("  total %s", sizeEnabler.Size2String(total, 0)))})
+						i.Set("total", display.ItemContent{No: 0, Content: display.StringContent(fmt.Sprintf("  total %s", sizeEnabler.Size2String(total, 0)))})
+						if s := nameToDisplay.Statistics(); s != nil {
+							i.Set("time", display.ItemContent{No: 1, Content: display.StringContent(fmt.Sprintf("\n  underwent %s", r.Time(durafmt.Parse(time.Since(start)).LimitToUnit("ms").String())))})
+							i.Set("statistic", display.ItemContent{No: 2, Content: display.StringContent(fmt.Sprintf("\n  statistic %s", s))})
+							s.Reset()
+						}
 						p.Print(*i)
 					}
 
@@ -651,6 +664,12 @@ var viewFlag = []cli.Flag{
 			}
 			return nil
 		},
+		Category: "VIEW",
+	},
+	&cli.BoolFlag{
+		Name:     "statistic",
+		Usage:    "show statistic info",
+		Category: "VIEW",
 	},
 	&cli.StringSliceFlag{
 		Name:        "time-type",
