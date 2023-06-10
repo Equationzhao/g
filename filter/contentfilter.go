@@ -382,34 +382,40 @@ func recursivelySizeOf(info os.FileInfo, depth int) int64 {
 		totalSize := info.Size()
 		if depth < 0 {
 			// -1 means no limit
-			_ = filepath.Walk(info.Name(), func(path string, info os.FileInfo, err error) error {
+			_ = filepath.WalkDir(info.Name(), func(path string, dir os.DirEntry, err error) error {
 				if err != nil {
 					return err
 				}
 
-				if !info.IsDir() {
-					totalSize += info.Size()
+				if !dir.IsDir() {
+					info, err := dir.Info()
+					if err == nil {
+						totalSize += info.Size()
+					}
 				}
 
 				return nil
 			})
 		} else {
-			_ = filepath.Walk(info.Name(), func(path string, info os.FileInfo, err error) error {
+			_ = filepath.WalkDir(info.Name(), func(path string, dir os.DirEntry, err error) error {
 				if err != nil {
 					return err
 				}
 				if currentDepth > depth {
-					if info.IsDir() {
+					if dir.IsDir() {
 						return filepath.SkipDir
 					}
 					return nil
 				}
 
-				if !info.IsDir() {
-					totalSize += info.Size()
+				if !dir.IsDir() {
+					info, err := dir.Info()
+					if err == nil {
+						totalSize += info.Size()
+					}
 				}
 
-				if info.IsDir() {
+				if dir.IsDir() {
 					currentDepth++
 				}
 
