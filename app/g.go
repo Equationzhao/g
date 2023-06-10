@@ -1031,21 +1031,21 @@ var viewFlag = []cli.Flag{
 	},
 	&cli.StringFlag{
 		Name:        "exact-detect-size",
-		Usage:       "set exact detect size (bytes)",
+		Usage:       "set exact size for mimetype detection eg:1M/nolimit/infinity",
 		Aliases:     []string{"eds", "detect-size", "ds"},
 		Value:       "1M",
 		DefaultText: "1M",
 		Category:    "VIEW",
 	},
 	&cli.BoolFlag{
-		Name:               "exact-file-type",
-		Usage:              "show exact file type",
-		Aliases:            []string{"et"},
+		Name:               "mime-type",
+		Usage:              "show mime file type",
+		Aliases:            []string{"mime", "mimetype"},
 		DisableDefaultText: true,
 		Category:           "VIEW",
 		Action: func(context *cli.Context, b bool) error {
 			if b {
-				exact := filter.NewExactFileTypeEnabler()
+				exact := filter.NewMimeFileTypeEnabler()
 
 				err := limitOnce.Do(func() error {
 					size := context.String("exact-detect-size")
@@ -1721,6 +1721,46 @@ var sortingFlags = []cli.Flag{
 					sort.AddOption(sorter.ByNameWidthDescend)
 				case "width", "Width":
 					sort.AddOption(sorter.ByNameWidthAscend)
+				case "mime", "mimetype", "Mime", "Mimetype":
+					err := limitOnce.Do(func() error {
+						size := context.String("exact-detect-size")
+						var bytes uint64 = 1024 * 1024
+						if size == "0" || strings.EqualFold(size, "infinity") || strings.EqualFold(size, "nolimit") {
+							bytes = 0
+						} else if size != "" {
+							sizeUint, err := filter.ParseSize(size)
+							if err != nil {
+								return err
+							}
+							bytes = sizeUint.Bytes
+						}
+						mimetype.SetLimit(uint32(bytes))
+						return nil
+					})
+					if err != nil {
+						return err
+					}
+					sort.AddOption(sorter.ByMimeTypeAscend)
+				case "mime-descend", "mimetype-descend", "Mime-descend", "Mimetype-descend":
+					err := limitOnce.Do(func() error {
+						size := context.String("exact-detect-size")
+						var bytes uint64 = 1024 * 1024
+						if size == "0" || strings.EqualFold(size, "infinity") || strings.EqualFold(size, "nolimit") {
+							bytes = 0
+						} else if size != "" {
+							sizeUint, err := filter.ParseSize(size)
+							if err != nil {
+								return err
+							}
+							bytes = sizeUint.Bytes
+						}
+						mimetype.SetLimit(uint32(bytes))
+						return nil
+					})
+					if err != nil {
+						return err
+					}
+					sort.AddOption(sorter.ByMimeTypeDescend)
 				//	todo
 				//	case "v", "version":
 				default:
@@ -1809,6 +1849,127 @@ var sortingFlags = []cli.Flag{
 	// 	},
 	// 	Category: "SORTING",
 	// },
+	&cli.BoolFlag{
+		Name:    "sort-by-mimetype",
+		Aliases: []string{"mimetypesort", "Mimetypesort", "sort-by-mime"},
+		Usage:   "sort by mimetype",
+		Action: func(context *cli.Context, b bool) error {
+
+			err := limitOnce.Do(func() error {
+				size := context.String("exact-detect-size")
+				var bytes uint64 = 1024 * 1024
+				if size == "0" || strings.EqualFold(size, "infinity") || strings.EqualFold(size, "nolimit") {
+					bytes = 0
+				} else if size != "" {
+					sizeUint, err := filter.ParseSize(size)
+					if err != nil {
+						return err
+					}
+					bytes = sizeUint.Bytes
+				}
+				mimetype.SetLimit(uint32(bytes))
+				return nil
+			})
+			if err != nil {
+				return err
+			}
+
+			sort.AddOption(sorter.ByMimeTypeAscend)
+			return nil
+		},
+		Category: "SORTING",
+	},
+	&cli.BoolFlag{
+		Name:    "sort-by-mimetype-descend",
+		Aliases: []string{"mimetypesort-descend", "Mimetypesort-descend"},
+		Usage:   "sort by mimetype, descending",
+		Action: func(context *cli.Context, b bool) error {
+			if b {
+				err := limitOnce.Do(func() error {
+					size := context.String("exact-detect-size")
+					var bytes uint64 = 1024 * 1024
+					if size == "0" || strings.EqualFold(size, "infinity") || strings.EqualFold(size, "nolimit") {
+						bytes = 0
+					} else if size != "" {
+						sizeUint, err := filter.ParseSize(size)
+						if err != nil {
+							return err
+						}
+						bytes = sizeUint.Bytes
+					}
+					mimetype.SetLimit(uint32(bytes))
+					return nil
+				})
+				if err != nil {
+					return err
+				}
+
+				sort.AddOption(sorter.ByMimeTypeDescend)
+			}
+			return nil
+		},
+		Category: "SORTING",
+	},
+	&cli.BoolFlag{
+		Name:    "sort-by-mimetype-parent",
+		Aliases: []string{"mimetypesort-parent", "Mimetypesort-parent", "sort-by-mime-parent"},
+		Usage:   "sort by mimetype parent",
+		Action: func(context *cli.Context, b bool) error {
+			if b {
+				err := limitOnce.Do(func() error {
+					size := context.String("exact-detect-size")
+					var bytes uint64 = 1024 * 1024
+					if size == "0" || strings.EqualFold(size, "infinity") || strings.EqualFold(size, "nolimit") {
+						bytes = 0
+					} else if size != "" {
+						sizeUint, err := filter.ParseSize(size)
+						if err != nil {
+							return err
+						}
+						bytes = sizeUint.Bytes
+					}
+					mimetype.SetLimit(uint32(bytes))
+					return nil
+				})
+				if err != nil {
+					return err
+				}
+
+				sort.AddOption(sorter.ByMimeTypeParentAscend)
+			}
+			return nil
+		},
+	},
+	&cli.BoolFlag{
+		Name:    "sort-by-mimetype-parent-descend",
+		Aliases: []string{"mimetypesort-parent-descend", "Mimetypesort-parent-descend", "sort-by-mime-parent-descend"},
+		Usage:   "sort by mimetype parent",
+		Action: func(context *cli.Context, b bool) error {
+			if b {
+				err := limitOnce.Do(func() error {
+					size := context.String("exact-detect-size")
+					var bytes uint64 = 1024 * 1024
+					if size == "0" || strings.EqualFold(size, "infinity") || strings.EqualFold(size, "nolimit") {
+						bytes = 0
+					} else if size != "" {
+						sizeUint, err := filter.ParseSize(size)
+						if err != nil {
+							return err
+						}
+						bytes = sizeUint.Bytes
+					}
+					mimetype.SetLimit(uint32(bytes))
+					return nil
+				})
+				if err != nil {
+					return err
+				}
+
+				sort.AddOption(sorter.ByMimeTypeParentDescend)
+			}
+			return nil
+		},
+	},
 }
 
 func MakeErrorStr(msg string) string {
