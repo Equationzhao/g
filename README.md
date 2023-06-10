@@ -18,9 +18,9 @@
 g is a ls alternative with features:
 
 1. display items with type-specific icons and colors that are easy to be customized
-2. display in verious layouts ( grid/across/byline/tree/zero/comma )
+2. display in various layouts ( grid/across/byline/tree/zero/comma )
 3. user-friendly options with many alias
-4. distinguish file git-status with with icons or symbol chars
+4. distinguish file git-status with icons or char symbols
 5. highly customizable sort option
 6. cross-platform ( Linux/Windows/MacOS )
 7. option to fuzzy match path like [`zoxide`](https://github.com/ajeetdsouza/zoxide) with [`fzf`](https://github.com/junegunn/fzf) algorithm
