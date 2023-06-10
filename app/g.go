@@ -341,12 +341,12 @@ There is NO WARRANTY, to the extent permitted by law.`,
 
 					if !disableIndex {
 						wgUpdateIndex.Add(1)
-						go func() {
+						go func(i int) {
 							if err = fuzzyUpdate(path[i]); err != nil {
 								minorErr = true
 							}
 							wgUpdateIndex.Done()
-						}()
+						}(i)
 					}
 
 					var d []os.DirEntry
