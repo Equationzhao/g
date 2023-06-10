@@ -176,7 +176,7 @@ func WidthLen(str string) int {
 	colorless := stripansi.Strip(str)
 	// len() is insufficient here, as it counts emojis as 4 characters each
 	length := runewidth.StringWidth(colorless)
-	if runtime.GOOS == "windows" {
+	if runtime.GOOS == "windows" || runtime.GOOS == "darwin" {
 		if strings.ContainsRune(colorless, dot) {
 			length--
 		}
@@ -289,7 +289,7 @@ func (a *Across) printRowWithNoSpace(strs *[]string) {
 	for _, str := range *strs {
 		colorless := stripansi.Strip(str)
 		maxLength += runewidth.StringWidth(stripansi.Strip(str))
-		if runtime.GOOS == "windows" {
+		if runtime.GOOS == "windows" || runtime.GOOS == "darwin" {
 			if strings.ContainsRune(colorless, dot) {
 				maxLength--
 			}
@@ -300,7 +300,7 @@ func (a *Across) printRowWithNoSpace(strs *[]string) {
 		} else {
 			_, _ = a.WriteString("\n" + str)
 			maxLength = runewidth.StringWidth(colorless)
-			if runtime.GOOS == "windows" {
+			if runtime.GOOS == "windows" || runtime.GOOS == "darwin" {
 				if strings.ContainsRune(colorless, dot) {
 					maxLength--
 				}
