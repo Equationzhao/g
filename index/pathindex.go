@@ -5,43 +5,17 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"sync"
-	"sync/atomic"
 
+	gutil "github.com/Equationzhao/g/util"
 	"github.com/junegunn/fzf/src/algo"
 	"github.com/junegunn/fzf/src/util"
 	"github.com/syndtr/goleveldb/leveldb"
 )
 
-type once struct {
-	m    sync.Mutex
-	done uint32
-}
-
-func (o *once) Do(fn func() error) error {
-	if atomic.LoadUint32(&o.done) == 1 {
-		return nil
-	}
-	return o.doSlow(fn)
-}
-
-func (o *once) doSlow(fn func() error) error {
-	o.m.Lock()
-	defer o.m.Unlock()
-	var err error
-	if o.done == 0 {
-		err = fn()
-		if err == nil {
-			atomic.StoreUint32(&o.done, 1)
-		}
-	}
-	return err
-}
-
 var (
 	db        *leveldb.DB
-	initOnce  once
-	closeOnce once
+	initOnce  gutil.Once
+	closeOnce gutil.Once
 	indexPath string
 )
 
