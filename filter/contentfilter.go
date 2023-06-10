@@ -534,7 +534,7 @@ func (r *RelativeTimeEnabler) Enable(renderer *render.Renderer) ContentOption {
 		}
 		rt := renderer.Time(relativeTime(time.Now(), t))
 		done(rt)
-		return wait(rt), RelativeTime
+		return wait(rt), RelativeTime + " " + r.Mode
 	}
 }
 
