@@ -44,7 +44,7 @@ or Clone this repo
 ```bash
 git clone github.com/Equationzhao/g
 cd g
-go build -ldflags="-s -w" # use -s -w shrink size
+go build -ldflags="-s -w" # use -s -w to shrink size
 # then add the executable file to your `PATH`
 ```
 
@@ -79,7 +79,6 @@ scoop install https://raw.githubusercontent.com/Equationzhao/g/master/scoop/g.js
 ```
 
 homebrew: ***todo***
-
 
 ### Pre-built executable
 
