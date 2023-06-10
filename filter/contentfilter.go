@@ -586,7 +586,7 @@ func (s *Statistics) Reset() {
 }
 
 func (s *Statistics) String() string {
-	return fmt.Sprintf("file: %d, dir: %d, link: %d", s.file, s.dir, s.link)
+	return fmt.Sprintf("%d file(s), %d dir(s), %d link(s)", s.file, s.dir, s.link)
 }
 
 type (
