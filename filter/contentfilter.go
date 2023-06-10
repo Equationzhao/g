@@ -979,19 +979,21 @@ func (cf *ContentFilter) EnableSum(sumTypes ...SumType) ContentOption {
 	}
 }
 
-type ExactFileTypeEnabler struct {
+type MimeFileTypeEnabler struct {
 	*sync.WaitGroup
+	ParentOnly bool
 }
 
-func NewExactFileTypeEnabler() *ExactFileTypeEnabler {
-	return &ExactFileTypeEnabler{
-		WaitGroup: &sync.WaitGroup{},
+func NewMimeFileTypeEnabler() *MimeFileTypeEnabler {
+	return &MimeFileTypeEnabler{
+		WaitGroup:  &sync.WaitGroup{},
+		ParentOnly: false,
 	}
 }
 
-const ExactTypeName = "exact_type_name"
+const MimeTypeName = "mine type"
 
-func (e *ExactFileTypeEnabler) Enable() ContentOption {
+func (e *MimeFileTypeEnabler) Enable() ContentOption {
 	longestTypeName := 0
 	m := sync.RWMutex{}
 	done := func(tn string) {
@@ -1030,18 +1032,27 @@ func (e *ExactFileTypeEnabler) Enable() ContentOption {
 				// tn = err.Error()
 				tn = "failed_to_read"
 				done(tn)
-				return wait(tn), ExactTypeName
+				return wait(tn), MimeTypeName
 			}
 			mtype, err := mt.DetectReader(file)
 			if err != nil {
 				tn = err.Error()
 				done(tn)
-				return wait(tn), ExactTypeName
+				return wait(tn), MimeTypeName
 			}
 			tn = mtype.String()
+			if e.ParentOnly {
+				tn = strings.SplitN(tn, "/", 2)[0]
+			}
+
+			if strings.Contains(tn, ";") {
+				// remove charset
+				tn = strings.SplitN(tn, ";", 2)[0]
+			}
+
 		}
 		done(tn)
-		return wait(tn), ExactTypeName
+		return wait(tn), MimeTypeName
 	}
 }
 

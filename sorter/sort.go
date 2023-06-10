@@ -5,6 +5,8 @@ import (
 	"path/filepath"
 	"strings"
 
+	mt "github.com/gabriel-vasile/mimetype"
+
 	"github.com/Equationzhao/g/osbased"
 )
 
@@ -128,6 +130,46 @@ func ByNameWidthDescend(a, b os.FileInfo) bool {
 
 func ByNameWidthAscend(a, b os.FileInfo) bool {
 	return byNameWidth(a, b, true)
+}
+
+func ByMimeTypeAscend(a, b os.FileInfo) bool {
+	return byMimeType(a, b, true)
+}
+
+func ByMimeTypeDescend(a, b os.FileInfo) bool {
+	return byMimeType(a, b, false)
+}
+
+func byMimeType(a, b os.FileInfo, true bool) bool {
+	mimeA, err := mt.DetectFile(a.Name())
+	if err != nil {
+		return false
+	}
+	mimeB, err := mt.DetectFile(b.Name())
+	if err != nil {
+		return true
+	}
+	return mimeA.String() < mimeB.String()
+}
+
+func ByMimeTypeParentAscend(a, b os.FileInfo) bool {
+	return byMimeTypeParent(a, b, true)
+}
+
+func ByMimeTypeParentDescend(a, b os.FileInfo) bool {
+	return byMimeTypeParent(a, b, false)
+}
+
+func byMimeTypeParent(a, b os.FileInfo, true bool) bool {
+	mimeA, err := mt.DetectFile(a.Name())
+	if err != nil {
+		return false
+	}
+	mimeB, err := mt.DetectFile(b.Name())
+	if err != nil {
+		return true
+	}
+	return strings.SplitN(mimeA.String(), "/", 2)[0] < strings.SplitN(mimeB.String(), "/", 2)[0]
 }
 
 func dirFirst(a, b os.FileInfo) bool {
