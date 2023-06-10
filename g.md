@@ -7,17 +7,17 @@ g - a powerful ls
 g
 
 ```
-[--all|--la|-l]
+[--all|--la|-l|--long]
 [--byline|--bl|-1|--oneline|--single-column]
 [--check-new-version]
 [--checksum-algorithm|--ca]=[value]
 [--checksum|--cs]
+[--classic]
 [--colorless|--nc|--no-color]
 [--depth]=[value]
 [--dir-first|--df]
 [--disable-index|--di|--no-update]
 [--exact-detect-size|--eds|--detect-size|--ds]=[value]
-[--exact-file-type|--et]
 [--file-type|--ft]
 [--format]=[value]
 [--full-time]
@@ -30,10 +30,14 @@ g
 [--ignore-glob|-I]=[value]
 [--inode|-i]
 [--lh|--human-readable|--hr]
+[--link|-H]
 [--list-index|--li]
+[--literal|-N]
 [--match-glob|-M]=[value]
+[--mime-type|--mime|--mimetype]
 [--no-path-transform|--np]
-[--numeric]
+[--numeric|--numeric-uid-gid]
+[--quote-name|-Q]
 [--rebuild-index|--ri|--remove-all]
 [--recurse|-R]
 [--relative-time|--rt]
@@ -45,27 +49,38 @@ g
 [--show-icon|--si|--icons|--icon]
 [--show-no-dir|--nd|--nodir|--no-dir]
 [--show-no-ext|--sne|--noext]=[value]
-[--show-only-dir|--sd|--dir|--only-dir]
+[--show-only-dir|--sd|--dir|--only-dir|-D]
 [--show-only-ext|--se|--ext]=[value]
+[--show-only-hidden|--soh|--hidden]
 [--show-owner|--so|--author|--owner]
-[--show-perm|--sp]
+[--show-perm|--sp|--permission|--perm]
+[--show-recursive-size|--srs|--recursive-size]
 [--show-size|--ss|--size]
 [--show-time|--st|--time]
-[--show-total-size|--ts]
+[--show-total-size|--ts|--total-size]
 [--size-unit|--su|--block-size]=[value]
+[--sort-by-mimetype-descend|--mimetypesort-descend|--Mimetypesort-descend]
+[--sort-by-mimetype-parent-descend|--mimetypesort-parent-descend|--Mimetypesort-parent-descend|--sort-by-mime-parent-descend]
+[--sort-by-mimetype-parent|--mimetypesort-parent|--Mimetypesort-parent|--sort-by-mime-parent]
+[--sort-by-mimetype|--mimetypesort|--Mimetypesort|--sort-by-mime]
 [--sort-reverse|--sr|--reverse]
 [--sort|--SORT_FIELD]=[value]
+[--statistic]
 [--theme|--th]=[value]
 [--time-style]=[value]
 [--time-type|--tt]=[value]
 [--tree|-t]
 [--uid]
+[--width]
 [--zero|-0]
 [-A|--almost-all]
 [-B|--ignore-backups]
 [-C|--vertical]
 [-F|--classify]
 [-G|--no-group]
+[-S|--sort-size|--sort-by-size|--sizesort]
+[-U|--nosort|--no-sort]
+[-X|--extensionsort|--Extentionsort]
 [-d|--directory|--list-dirs]
 [-g]
 [-m|--comma]
@@ -81,7 +96,7 @@ g [options] [path]
 
 # GLOBAL OPTIONS
 
-**--all, --la, -l**: show all info/use a long listing format
+**--all, --la, -l, --long**: show all info/use a long listing format
 
 **--byline, --bl, -1, --oneline, --single-column**: print by line
 
@@ -91,6 +106,8 @@ g [options] [path]
 
 **--checksum-algorithm, --ca**="": show checksum of file with algorithm: md5, sha1, sha224, sha256, sha384, sha512, crc32 (default: "sha1")
 
+**--classic**: Enable classic mode (no colours or icons)
+
 **--colorless, --nc, --no-color**: without color
 
 **--depth**="": limit recursive depth, negative -> infinity (default: infinity)
@@ -99,9 +116,7 @@ g [options] [path]
 
 **--disable-index, --di, --no-update**: disable updating index
 
-**--exact-detect-size, --eds, --detect-size, --ds**="": set exact detect size (bytes) (default: 1M)
-
-**--exact-file-type, --et**: show exact file type
+**--exact-detect-size, --eds, --detect-size, --ds**="": set exact size for mimetype detection eg:1M/nolimit/infinity (default: 1M)
 
 **--file-type, --ft**: likewise, except do not append '*'
 
@@ -127,13 +142,21 @@ g [options] [path]
 
 **--lh, --human-readable, --hr**: show human readable size
 
+**--link, -H**: list each file's number of hard links
+
 **--list-index, --li**: list index
+
+**--literal, -N**: print entry names without quoting
 
 **--match-glob, -M**="": match Glob patterns
 
+**--mime-type, --mime, --mimetype**: show mime file type
+
 **--no-path-transform, --np**: By default, .../a/b/c will be transformed to ../../a/b/c, and ~ will be replaced by homedir, using this flag to disable this feature
 
-**--numeric**:  List numeric user and group IDs instead of name [sid in windows]
+**--numeric, --numeric-uid-gid**:  List numeric user and group IDs instead of name [sid in windows]
+
+**--quote-name, -Q**: enclose entry names in double quotes(overridden by --literal)
 
 **--rebuild-index, --ri, --remove-all**: rebuild index
 
@@ -157,35 +180,51 @@ g [options] [path]
 
 **--show-no-ext, --sne, --noext**="": show file which doesn't have target ext
 
-**--show-only-dir, --sd, --dir, --only-dir**: show directory only
+**--show-only-dir, --sd, --dir, --only-dir, -D**: show directory only
 
 **--show-only-ext, --se, --ext**="": show file which has target ext, eg: --show-only-ext=go,java
 
+**--show-only-hidden, --soh, --hidden**: show only hidden files(overridden by --show-hidden/-sh/-a/-A)
+
 **--show-owner, --so, --author, --owner**: show owner
 
-**--show-perm, --sp**: show permission
+**--show-perm, --sp, --permission, --perm**: show permission
+
+**--show-recursive-size, --srs, --recursive-size**: show recursive size of dir, only work with --show-size
 
 **--show-size, --ss, --size**: show file/dir size
 
 **--show-time, --st, --time**: show time
 
-**--show-total-size, --ts**: show total size
+**--show-total-size, --ts, --total-size**: show total size
 
 **--size-unit, --su, --block-size**="": size unit, b, k, m, g, t, p, e, z, y, bb, nb, auto (default: auto)
 
-**--sort, --SORT_FIELD**="": sort by field, default: ascending and case insensitive, field beginning with Uppercase is case sensitive, available fields: none(nosort),name,size,time,owner,group,extension. following `-descend` to sort descending
+**--sort, --SORT_FIELD**="": sort by field, default: ascending and case insensitive, field beginning with Uppercase is case sensitive, available fields: nature(default),none(nosort),name,size,time,owner,group,extension. following `-descend` to sort descending
+
+**--sort-by-mimetype, --mimetypesort, --Mimetypesort, --sort-by-mime**: sort by mimetype
+
+**--sort-by-mimetype-descend, --mimetypesort-descend, --Mimetypesort-descend**: sort by mimetype, descending
+
+**--sort-by-mimetype-parent, --mimetypesort-parent, --Mimetypesort-parent, --sort-by-mime-parent**: sort by mimetype parent
+
+**--sort-by-mimetype-parent-descend, --mimetypesort-parent-descend, --Mimetypesort-parent-descend, --sort-by-mime-parent-descend**: sort by mimetype parent
 
 **--sort-reverse, --sr, --reverse**: reverse the order of the sort
+
+**--statistic**: show statistic info
 
 **--theme, --th**="": apply theme `path/to/theme`
 
 **--time-style**="": time/date format with -l, Valid timestamp styles are `default', `iso`, `long iso`, `full-iso`, `locale`, custom `+FORMAT` like date(1). (default: +%d.%b'%y %H:%M (like 02.Jan'06 15:04))
 
-**--time-type, --tt**="": time type, mod, create, access (default: mod)
+**--time-type, --tt**="": time type, mod(default), create, access, all (default: mod)
 
 **--tree, -t**: recursively list in tree
 
 **--uid**: show uid instead of username [sid in windows]
+
+**--width**: sort by entry name width
 
 **--zero, -0**: end each output line with NUL, not newline
 
@@ -198,6 +237,12 @@ g [options] [path]
 **-F, --classify**: append indicator (one of */=>@|) to entries
 
 **-G, --no-group**: in a long listing, don't print group names
+
+**-S, --sort-size, --sort-by-size, --sizesort**: sort by file size, largest first(descending)
+
+**-U, --nosort, --no-sort**: do not sort; list entries in directory order. 
+
+**-X, --extensionsort, --Extentionsort**: sort alphabetically by entry extension
 
 **-d, --directory, --list-dirs**: list directories themselves, not their contents
 

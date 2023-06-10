@@ -1222,5 +1222,4 @@ func (l *LinkEnabler) Enable() ContentOption {
 		done(n)
 		return wait(n), "links"
 	}
-
 }

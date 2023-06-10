@@ -1886,7 +1886,6 @@ var sortingFlags = []cli.Flag{
 		Aliases: []string{"mimetypesort", "Mimetypesort", "sort-by-mime"},
 		Usage:   "sort by mimetype",
 		Action: func(context *cli.Context, b bool) error {
-
 			err := limitOnce.Do(func() error {
 				size := context.String("exact-detect-size")
 				var bytes uint64 = 1024 * 1024
