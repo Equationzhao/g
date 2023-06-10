@@ -10,6 +10,7 @@ import (
 	"hash/crc32"
 	"io"
 	"os"
+	"path/filepath"
 	"runtime"
 	"sort"
 	"strconv"
@@ -257,12 +258,29 @@ type SizeEnabler struct {
 	total       atomic.Int64
 	enableTotal bool
 	sizeUint    SizeUnit
+	recursive   *SizeRecursive
 	renderer    *render.Renderer
 	*sync.WaitGroup
 }
 
+func (s *SizeEnabler) Recursive() *SizeRecursive {
+	return s.recursive
+}
+
+func (s *SizeEnabler) SetRecursive(sr *SizeRecursive) {
+	s.recursive = sr
+}
+
 func (s *SizeEnabler) SetRenderer(renderer *render.Renderer) {
 	s.renderer = renderer
+}
+
+type SizeRecursive struct {
+	depth int
+}
+
+func NewSizeRecursive(depth int) *SizeRecursive {
+	return &SizeRecursive{depth: depth}
 }
 
 func NewSizeEnabler() *SizeEnabler {
@@ -271,6 +289,7 @@ func NewSizeEnabler() *SizeEnabler {
 		enableTotal: false,
 		sizeUint:    Auto,
 		renderer:    nil,
+		recursive:   nil,
 		WaitGroup:   new(sync.WaitGroup),
 	}
 }
@@ -357,6 +376,58 @@ func (s *SizeEnabler) Size2String(b int64, blank int) string {
 
 const SizeName = "Size"
 
+func recursivelySizeOf(info os.FileInfo, depth int) int64 {
+	currentDepth := 0
+	if info.IsDir() {
+		totalSize := info.Size()
+		if depth < 0 {
+			// -1 means no limit
+			_ = filepath.WalkDir(info.Name(), func(path string, dir os.DirEntry, err error) error {
+				if err != nil {
+					return err
+				}
+
+				if !dir.IsDir() {
+					info, err := dir.Info()
+					if err == nil {
+						totalSize += info.Size()
+					}
+				}
+
+				return nil
+			})
+		} else {
+			_ = filepath.WalkDir(info.Name(), func(path string, dir os.DirEntry, err error) error {
+				if err != nil {
+					return err
+				}
+				if currentDepth > depth {
+					if dir.IsDir() {
+						return filepath.SkipDir
+					}
+					return nil
+				}
+
+				if !dir.IsDir() {
+					info, err := dir.Info()
+					if err == nil {
+						totalSize += info.Size()
+					}
+				}
+
+				if dir.IsDir() {
+					currentDepth++
+				}
+
+				return nil
+			})
+		}
+
+		return totalSize
+	}
+	return info.Size()
+}
+
 func (s *SizeEnabler) EnableSize(size SizeUnit) ContentOption {
 	s.sizeUint = size
 
@@ -384,7 +455,12 @@ func (s *SizeEnabler) EnableSize(size SizeUnit) ContentOption {
 		}
 
 		return func(info os.FileInfo) (string, string) {
-			v := info.Size()
+			var v int64
+			if s.recursive != nil {
+				v = recursivelySizeOf(info, s.recursive.depth)
+			} else {
+				v = info.Size()
+			}
 			if s.enableTotal {
 				s.total.Add(v)
 			}
@@ -395,7 +471,12 @@ func (s *SizeEnabler) EnableSize(size SizeUnit) ContentOption {
 	}
 
 	return func(info os.FileInfo) (string, string) {
-		v := info.Size()
+		var v int64
+		if s.recursive != nil {
+			v = recursivelySizeOf(info, s.recursive.depth)
+		} else {
+			v = info.Size()
+		}
 		if s.enableTotal {
 			s.total.Add(v)
 		}
@@ -453,7 +534,7 @@ func (r *RelativeTimeEnabler) Enable(renderer *render.Renderer) ContentOption {
 		}
 		rt := renderer.Time(relativeTime(time.Now(), t))
 		done(rt)
-		return wait(rt), RelativeTime
+		return wait(rt), RelativeTime + " " + r.Mode
 	}
 }
 
@@ -494,12 +575,27 @@ func EnableTime(format string, mode string, renderer *render.Renderer) ContentOp
 	}
 }
 
+type Statistics struct {
+	file, dir, link uint64
+}
+
+func (s *Statistics) Reset() {
+	s.file = 0
+	s.dir = 0
+	s.link = 0
+}
+
+func (s *Statistics) String() string {
+	return fmt.Sprintf("file: %d, dir: %d, link: %d", s.file, s.dir, s.link)
+}
+
 type (
 	Name struct {
 		Icon, Classify, FileType, git bool
 		Renderer                      *render.Renderer
-		parent                        string
 		GitCache                      *cached.Map[git.GitRepoPath, *git.FileGits]
+		statistics                    *Statistics
+		parent                        string
 		GitStyle                      gitStyle
 		Quote                         string
 	}
@@ -512,6 +608,14 @@ const (
 	GitStyleSym
 	GitStyleDefault = GitStyleDot
 )
+
+func (n *Name) Statistics() *Statistics {
+	return n.statistics
+}
+
+func (n *Name) SetStatistics(Statistics *Statistics) {
+	n.statistics = Statistics
+}
 
 func (n *Name) SetQuote(quote string) *Name {
 	n.Quote = quote
@@ -614,37 +718,67 @@ func (n *Name) Enable() ContentOption {
 		str := name
 		mode := info.Mode()
 
+		char := ""
+
 		if n.Icon {
 			if info.IsDir() {
+				if n.statistics != nil {
+					n.statistics.dir++
+				}
 				str = n.Renderer.DirIcon(str)
+				char = "/"
 			} else if mode&os.ModeSymlink != 0 {
+				if n.statistics != nil {
+					n.statistics.link++
+				}
 				if n.Classify {
 					str = n.Renderer.SymlinkIconPlus(str, n.parent, "@")
 				} else {
 					str = n.Renderer.SymlinkIcon(str, n.parent)
 				}
-			} else if mode&os.ModeNamedPipe != 0 {
-				str = n.Renderer.PipeIcon(str)
-			} else if mode&os.ModeSocket != 0 {
-				str = n.Renderer.SocketIcon(str)
 			} else {
-				str = n.Renderer.ByExtIcon(str)
+				if n.statistics != nil {
+					n.statistics.file++
+				}
+				if mode&os.ModeNamedPipe != 0 {
+					str = n.Renderer.PipeIcon(str)
+					char = "|"
+				} else if mode&os.ModeSocket != 0 {
+					str = n.Renderer.SocketIcon(str)
+					char = "="
+				} else {
+					str = n.Renderer.ByExtIcon(str)
+				}
 			}
 		} else {
 			if info.IsDir() {
+				if n.statistics != nil {
+					n.statistics.dir++
+				}
 				str = n.Renderer.Dir(str)
+				char = "/"
 			} else if mode&os.ModeSymlink != 0 {
+				if n.statistics != nil {
+					n.statistics.link++
+				}
 				if n.Classify {
 					str = n.Renderer.SymlinkPlus(str, n.parent, "@")
 				} else {
 					str = n.Renderer.Symlink(str, n.parent)
 				}
-			} else if mode&os.ModeNamedPipe != 0 {
-				str = n.Renderer.Pipe(str)
-			} else if mode&os.ModeSocket != 0 {
-				str = n.Renderer.Socket(str)
 			} else {
-				str = n.Renderer.ByExt(str)
+				if n.statistics != nil {
+					n.statistics.file++
+				}
+				if mode&os.ModeNamedPipe != 0 {
+					str = n.Renderer.Pipe(str)
+					char = "|"
+				} else if mode&os.ModeSocket != 0 {
+					str = n.Renderer.Socket(str)
+					char = "="
+				} else {
+					str = n.Renderer.ByExt(str)
+				}
 			}
 		}
 
@@ -659,20 +793,13 @@ func (n *Name) Enable() ContentOption {
 		}
 
 		if n.Classify {
-			if info.IsDir() {
-				str += "/"
-			} else if mode&os.ModeSymlink != 0 {
-				goto end
-			} else if mode&os.ModeNamedPipe != 0 {
-				str += "|"
-			} else if mode&os.ModeSocket != 0 {
-				str += "="
-			} else if (!n.FileType) && (mode&0o111 != 0) {
+			if (!n.FileType) && (mode&0o111 != 0) {
 				str += "*"
+			} else {
+				str += char
 			}
 		}
 
-	end:
 		if n.Quote != "" {
 			str = strings.Replace(str, name, n.Quote+name+n.Quote, 1)
 		}
