@@ -253,7 +253,7 @@ There is NO WARRANTY, to the extent permitted by law.`,
 					}
 
 					fmt.Println(s.MakeTreeStr())
-					fmt.Printf("\n%d directories, %d files\nunderwent %s", s.Directory(), s.File(), time.Since(start).String())
+					fmt.Printf("\n%d directories, %d files\nunderwent %s\n", s.Directory(), s.File(), time.Since(start).String())
 
 					if i != len(path)-1 {
 						//goland:noinspection GoPrintFunctions
