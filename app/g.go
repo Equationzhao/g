@@ -1523,7 +1523,7 @@ var filteringFlag = []cli.Flag{
 	},
 	&cli.BoolFlag{
 		Name:               "show-no-dir",
-		Aliases:            []string{"nd", "nodir", "no-dir"},
+		Aliases:            []string{"nd", "nodir", "no-dir", "file"},
 		DisableDefaultText: true,
 		Usage:              "do not show directory",
 		Action: func(context *cli.Context, b bool) error {

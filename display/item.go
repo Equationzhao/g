@@ -139,9 +139,11 @@ func (i *Item) OrderedContent() string {
 		return ics[i].No < ics[j].No
 	})
 
-	for _, v := range ics {
+	for j, v := range ics {
 		_, _ = res.WriteString(v.Content.String())
-		_, _ = res.WriteString(i.Delimiter)
+		if j != len(ics)-1 {
+			_, _ = res.WriteString(i.Delimiter)
+		}
 	}
 
 	defer bytebufferpool.Put(res)

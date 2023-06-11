@@ -9,6 +9,7 @@ import (
 	"math"
 	"os"
 	"runtime"
+	"sort"
 	"strings"
 
 	"github.com/acarl005/stripansi"
@@ -253,6 +254,7 @@ func (c *CommaPrint) Print(items ...Item) {
 	s := make([]string, 0, len(items))
 	for i, v := range items {
 		if i != len(items)-1 {
+
 			s = append(s, v.OrderedContent()+",")
 		} else {
 			s = append(s, v.OrderedContent())
@@ -416,19 +418,35 @@ func (j *JsonPrinter) Print(items ...Item) {
 		all := v.GetAll()
 		s := orderedmap.New[string, string]()
 
+		type oerderIten struct {
+			name    string
+			content string
+			no      int
+		}
+
+		order := make([]oerderIten, 0, len(all))
+
 		// sort by v.Content.No
 		for name, v := range all {
 			c := stripansi.Strip(v.Content.String())
 			if name == "name" {
-				s.Set(name, c)
+				order = append(order, oerderIten{name: name, content: c, no: v.No})
 			} else if name == "underwent" || name == "statistic" {
-				s.Set(name, strings.TrimLeft(c, "\n "))
+				order = append(order, oerderIten{name: name, content: strings.TrimLeft(c, "\n "), no: v.No})
 			} else if name == "total" {
-				s.Set(name, strings.TrimPrefix(c, "  total "))
+				order = append(order, oerderIten{name: name, content: strings.TrimPrefix(c, "  total "), no: v.No})
 			} else {
 				// remove all leading spaces
-				s.Set(name, strings.TrimLeft(c, " "))
+				order = append(order, oerderIten{name: name, content: strings.TrimLeft(c, " "), no: v.No})
 			}
+		}
+
+		sort.Slice(order, func(i, j int) bool {
+			return order[i].no < order[j].no
+		})
+
+		for _, v := range order {
+			s.Set(v.name, v.content)
 		}
 
 		prettyBytes, err := s.MarshalJSON()
