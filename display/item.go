@@ -27,6 +27,10 @@ type Item struct {
 	internal  map[string]ItemContent
 }
 
+func (i *Item) GetAll() map[string]ItemContent {
+	return i.internal
+}
+
 // Keys return all keys in random order
 func (i *Item) Keys() []string {
 	res := make([]string, 0, len(i.internal))

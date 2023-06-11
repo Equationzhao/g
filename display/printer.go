@@ -2,6 +2,8 @@ package display
 
 import (
 	"bufio"
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"io"
 	"math"
@@ -12,6 +14,7 @@ import (
 	"github.com/acarl005/stripansi"
 	"github.com/mattn/go-runewidth"
 	"github.com/olekukonko/ts"
+	orderedmap "github.com/wk8/go-ordered-map/v2"
 )
 
 const dot = '\uF111'
@@ -382,4 +385,64 @@ func (z *Zero) Print(items ...Item) {
 		_, _ = z.WriteString(v.OrderedContent())
 	}
 	fire(z.AfterPrint, items...)
+}
+
+type JsonPrinter struct {
+	bufio.Writer
+	*hook
+}
+
+func (j *JsonPrinter) pretty(data []byte) (string, error) {
+	b := &bytes.Buffer{}
+	err := json.Indent(b, data, "", "	")
+	if err != nil {
+		return "", err
+	}
+	return b.String(), nil
+}
+
+func NewJsonPrinter() Printer {
+	return &JsonPrinter{
+		Writer: *bufio.NewWriter(Output),
+		hook:   newHook(),
+	}
+}
+
+func (j *JsonPrinter) Print(items ...Item) {
+	fire(j.BeforePrint, items...)
+	defer j.Flush()
+
+	for _, v := range items {
+		all := v.GetAll()
+		s := orderedmap.New[string, string]()
+
+		// sort by v.Content.No
+		for name, v := range all {
+			c := stripansi.Strip(v.Content.String())
+			if name == "name" {
+				s.Set(name, c)
+			} else if name == "underwent" || name == "statistic" {
+				s.Set(name, strings.TrimLeft(c, "\n "))
+			} else if name == "total" {
+				s.Set(name, strings.TrimPrefix(c, "  total "))
+			} else {
+				// remove all leading spaces
+				s.Set(name, strings.TrimLeft(c, " "))
+			}
+		}
+
+		prettyBytes, err := s.MarshalJSON()
+		if err != nil {
+			_, _ = j.WriteString(err.Error() + "\n")
+			return
+		}
+		pretty, err := j.pretty(prettyBytes)
+		if err != nil {
+			_, _ = j.WriteString(err.Error() + "\n")
+			return
+		}
+		_, _ = j.WriteString(pretty)
+		_, _ = j.WriteString("\n")
+	}
+	fire(j.AfterPrint, items...)
 }

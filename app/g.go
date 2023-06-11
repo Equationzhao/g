@@ -466,7 +466,7 @@ There is NO WARRANTY, to the extent permitted by law.`,
 								i = display.NewItem()
 								tFormat = "  underwent %s"
 							}
-							i.Set("time", display.ItemContent{No: 1, Content: display.StringContent(fmt.Sprintf(tFormat, r.Time(durafmt.Parse(time.Since(start)).LimitToUnit("ms").String())))})
+							i.Set("underwent", display.ItemContent{No: 1, Content: display.StringContent(fmt.Sprintf(tFormat, r.Time(durafmt.Parse(time.Since(start)).LimitToUnit("ms").String())))})
 							i.Set("statistic", display.ItemContent{No: 2, Content: display.StringContent(fmt.Sprintf("\n  statistic: %s", s))})
 							s.Reset()
 						}
@@ -1310,6 +1310,20 @@ var displayFlag = []cli.Flag{
 			return nil
 		},
 		Category: "DISPLAY",
+	},
+	&cli.BoolFlag{
+		Name:               "json",
+		Aliases:            []string{"j"},
+		Usage:              "output in json format",
+		DisableDefaultText: true,
+		Action: func(context *cli.Context, b bool) error {
+			if b {
+				if _, ok := p.(*display.JsonPrinter); !ok {
+					p = display.NewJsonPrinter()
+				}
+			}
+			return nil
+		},
 	},
 	&cli.StringFlag{
 		Name:        "format",
