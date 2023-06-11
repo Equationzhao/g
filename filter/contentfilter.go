@@ -1142,9 +1142,9 @@ func (e *MimeFileTypeEnabler) Enable() ContentOption {
 		e.Wait()
 		return fillBlank(tn, longestTypeName)
 	}
-
 	return func(info os.FileInfo) (string, string) {
 		tn := ""
+		returnName := MimeTypeName
 		if info.IsDir() {
 			tn = "directory"
 		} else if info.Mode()&os.ModeSymlink != 0 {
@@ -1168,8 +1168,10 @@ func (e *MimeFileTypeEnabler) Enable() ContentOption {
 				return wait(tn), MimeTypeName
 			}
 			tn = mtype.String()
+
 			if e.ParentOnly {
 				tn = strings.SplitN(tn, "/", 2)[0]
+				returnName = "parent_" + returnName
 			}
 
 			if strings.Contains(tn, ";") {
@@ -1179,7 +1181,7 @@ func (e *MimeFileTypeEnabler) Enable() ContentOption {
 
 		}
 		done(tn)
-		return wait(tn), MimeTypeName
+		return wait(tn), returnName
 	}
 }
 

@@ -1114,6 +1114,40 @@ var viewFlag = []cli.Flag{
 			return nil
 		},
 	},
+	&cli.BoolFlag{
+		Name:     "mime-parent",
+		Usage:    "show mime parent type",
+		Aliases:  []string{"mime-p", "mime-parent-type", "mime-type-parent"},
+		Category: "VIEW",
+		Action: func(context *cli.Context, b bool) error {
+			if b {
+				exact := filter.NewMimeFileTypeEnabler()
+				exact.ParentOnly = true
+
+				err := limitOnce.Do(func() error {
+					size := context.String("exact-detect-size")
+					var bytes uint64 = 1024 * 1024
+					if size == "0" || strings.EqualFold(size, "infinity") || strings.EqualFold(size, "nolimit") {
+						bytes = 0
+					} else if size != "" {
+						sizeUint, err := filter.ParseSize(size)
+						if err != nil {
+							return err
+						}
+						bytes = sizeUint.Bytes
+					}
+					mimetype.SetLimit(uint32(bytes))
+					return nil
+				})
+				if err != nil {
+					return err
+				}
+				contentFunc = append(contentFunc, exact.Enable())
+				wgs = append(wgs, exact)
+			}
+			return nil
+		},
+	},
 	&cli.StringSliceFlag{
 		Name:     "checksum-algorithm",
 		Usage:    "show checksum of file with algorithm: md5, sha1, sha224, sha256, sha384, sha512, crc32",
