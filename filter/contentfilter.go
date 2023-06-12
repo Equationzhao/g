@@ -10,13 +10,11 @@ import (
 	"hash/crc32"
 	"io"
 	"os"
-	"path/filepath"
 	"runtime"
 	"sort"
 	"strconv"
 	"strings"
 	"sync"
-	"sync/atomic"
 	"time"
 
 	"github.com/Equationzhao/g/cached"
@@ -66,422 +64,14 @@ func (cf *ContentFilter) SetOptions(options ...ContentOption) {
 
 type ContentOption func(info os.FileInfo) (stringContent string, funcName string)
 
-const Permissions = "Permissions"
-
-// EnableFileMode return file mode like -rwxrwxrwx/drwxrwxrwx
-func EnableFileMode(renderer *render.Renderer) ContentOption {
-	return func(info os.FileInfo) (string, string) {
-		return renderer.FileMode(fillBlank(info.Mode().String(), 12)), Permissions
-	}
-}
-
-type InodeEnabler struct {
-	*sync.WaitGroup
-}
-
-func NewInodeEnabler() *InodeEnabler {
-	return &InodeEnabler{
-		WaitGroup: new(sync.WaitGroup),
-	}
-}
-
-const Inode = "Inode"
-
-func (i *InodeEnabler) Enable(renderer *render.Renderer) ContentOption {
-	m := sync.RWMutex{}
-	longestInode := 0
-
-	wait := func(res string) string {
-		i.Wait()
-		return renderer.Inode(fillBlank(res, longestInode))
-	}
-
-	done := func(name string) {
-		defer i.Done()
-		m.RLock()
-		if len(name) > longestInode {
-			m.RUnlock()
-			m.Lock()
-			if len(name) > longestInode {
-				longestInode = len(name)
-			}
-			m.Unlock()
-		} else {
-			m.RUnlock()
-		}
-	}
-
-	return func(info os.FileInfo) (string, string) {
-		str := osbased.Inode(info)
-		done(str)
-		return wait(str), Inode
-	}
-}
-
-type Size struct {
-	Bytes uint64
-}
-
-var allSizeUints = []SizeUnit{
-	Bit,
-	B,
-	KB,
-	MB,
-	GB,
-	TB,
-	PB,
-	EB,
-	ZB,
-	YB,
-	BB,
-	NB,
-}
-
-func ParseSize(size string) (Size, error) {
-	for _, sizeUint := range allSizeUints {
-		for _, sizeString := range sizeStringSets(sizeUint) {
-			if strings.HasSuffix(size, sizeString) {
-				size = strings.TrimSuffix(size, sizeString)
-				sizeFloat, err := strconv.ParseFloat(size, 64)
-				if err != nil {
-					return Size{}, err
-				}
-				return Size{
-					Bytes: uint64(sizeFloat * float64(sizeUint)),
-				}, nil
-			}
-		}
-	}
-	return Size{}, fmt.Errorf("unknown size unit")
-}
-
-type SizeUnit float64
-
-const Unknown SizeUnit = -1
-const (
-	Auto SizeUnit = iota
-	Bit  SizeUnit = 1.0 << (10 * iota)
-	B
-	KB
-	MB
-	GB
-	TB
-	PB
-	EB
-	ZB
-	YB
-	BB
-	NB
-)
-
-// fill blank
+// FillBlank
 // if s is shorter than length, fill blank from left
 // if s is longer than length, panic
-func fillBlank(s string, length int) string {
+func FillBlank(s string, length int) string {
 	if len(s) > length {
 		return s
 	}
 	return strings.Repeat(" ", length-len(s)) + s
-}
-
-func sizeStringSets(size SizeUnit) []string {
-	switch size {
-	case Unknown:
-		return []string{"unknown"}
-	case Auto:
-		return []string{""}
-	case Bit:
-		return []string{"bit", "Bit"}
-	case B:
-		return []string{"B", "b", "byte", "Byte", "BYTE"}
-	case KB:
-		return []string{"KB", "kb", "K", "k"}
-	case MB:
-		return []string{"MB", "mb", "M", "m"}
-	case GB:
-		return []string{"GB", "gb", "G", "g"}
-	case TB:
-		return []string{"TB", "tb", "T", "t"}
-	case PB:
-		return []string{"PB", "pb", "P", "p"}
-	case EB:
-		return []string{"EB", "eb", "E", "e"}
-	case ZB:
-		return []string{"ZB", "zb", "Z", "z"}
-	case YB:
-		return []string{"YB", "yb", "Y", "y"}
-	case BB:
-		return []string{"BB", "bb"}
-	case NB:
-		return []string{"NB", "nb", "N", "n"}
-	default:
-		return []string{"unknown"}
-	}
-}
-
-func Convert2SizeString(size SizeUnit) string {
-	return sizeStringSets(size)[0]
-}
-
-func ConvertFromSizeString(size string) SizeUnit {
-	switch size {
-	case "bit", "Bit", "BIT":
-		return Bit
-	case "B", "b", "byte", "Byte", "BYTE":
-		return B
-	case "KB", "kb", "Kb", "k":
-		return KB
-	case "MB", "mb", "Mb", "M", "m":
-		return MB
-	case "GB", "gb", "Gb", "G", "g":
-		return GB
-	case "TB", "tb", "Tb", "T", "t":
-		return TB
-	case "PB", "pb", "Pb", "P", "p":
-		return PB
-	case "EB", "eb", "Eb", "E", "e":
-		return EB
-	case "ZB", "zb", "Zb", "Z", "z":
-		return ZB
-	case "YB", "yb", "Yb", "Y", "y":
-		return YB
-	case "BB", "bb", "Bb":
-		return BB
-	case "NB", "nb", "Nb", "N", "n":
-		return NB
-	default:
-		return Unknown
-	}
-}
-
-type SizeEnabler struct {
-	total       atomic.Int64
-	enableTotal bool
-	sizeUint    SizeUnit
-	recursive   *SizeRecursive
-	renderer    *render.Renderer
-	*sync.WaitGroup
-}
-
-func (s *SizeEnabler) Recursive() *SizeRecursive {
-	return s.recursive
-}
-
-func (s *SizeEnabler) SetRecursive(sr *SizeRecursive) {
-	s.recursive = sr
-}
-
-func (s *SizeEnabler) SetRenderer(renderer *render.Renderer) {
-	s.renderer = renderer
-}
-
-type SizeRecursive struct {
-	depth int
-}
-
-func NewSizeRecursive(depth int) *SizeRecursive {
-	return &SizeRecursive{depth: depth}
-}
-
-func NewSizeEnabler() *SizeEnabler {
-	return &SizeEnabler{
-		total:       atomic.Int64{},
-		enableTotal: false,
-		sizeUint:    Auto,
-		renderer:    nil,
-		recursive:   nil,
-		WaitGroup:   new(sync.WaitGroup),
-	}
-}
-
-func (s *SizeEnabler) SizeUint() SizeUnit {
-	return s.sizeUint
-}
-
-func (s *SizeEnabler) SetEnableTotal() {
-	s.enableTotal = true
-}
-
-func (s *SizeEnabler) DisableTotal() {
-	s.enableTotal = false
-}
-
-func (s *SizeEnabler) Total() (size int64, ok bool) {
-	if s.enableTotal {
-		return s.total.Load(), s.enableTotal
-	}
-	return 0, false
-}
-
-func (s *SizeEnabler) Reset() {
-	if s.enableTotal {
-		s.total.Store(0)
-	}
-}
-
-func (s *SizeEnabler) Size2String(b int64, blank int) string {
-	var res string
-	v := float64(b)
-	switch s.sizeUint {
-	case Bit:
-		res = strconv.FormatInt(int64(v*8), 10)
-	case B:
-		res = strconv.FormatInt(int64(v), 10)
-	case KB:
-		fallthrough
-	case MB:
-		fallthrough
-	case GB:
-		fallthrough
-	case TB:
-		fallthrough
-	case PB:
-		fallthrough
-	case EB:
-		fallthrough
-	case ZB:
-		fallthrough
-	case YB:
-		fallthrough
-	case BB:
-		fallthrough
-	case NB:
-		res = fmt.Sprintf("%g", v*float64(B)/float64(s.sizeUint))
-
-	case Auto:
-		for i := B; i <= ZB; i *= 1024 {
-			if v < 1024 {
-				res = strconv.FormatFloat(v, 'f', 1, 64)
-				if res == "0.0" {
-					res = "-"
-				} else {
-					res += Convert2SizeString(i)
-				}
-				return s.renderer.Size(fillBlank(res, blank))
-			}
-			v /= 1024
-		}
-		panic("too large")
-	default:
-		panic("invalid size uint" + strconv.Itoa(int(s.sizeUint)))
-	}
-
-	if res == "0" {
-		res = "-"
-	} else {
-		res += Convert2SizeString(s.sizeUint)
-	}
-	return s.renderer.Size(fillBlank(res, blank))
-}
-
-const SizeName = "Size"
-
-func recursivelySizeOf(info os.FileInfo, depth int) int64 {
-	currentDepth := 0
-	if info.IsDir() {
-		totalSize := info.Size()
-		if depth < 0 {
-			// -1 means no limit
-			_ = filepath.WalkDir(info.Name(), func(path string, dir os.DirEntry, err error) error {
-				if err != nil {
-					return err
-				}
-
-				if !dir.IsDir() {
-					info, err := dir.Info()
-					if err == nil {
-						totalSize += info.Size()
-					}
-				}
-
-				return nil
-			})
-		} else {
-			_ = filepath.WalkDir(info.Name(), func(path string, dir os.DirEntry, err error) error {
-				if err != nil {
-					return err
-				}
-				if currentDepth > depth {
-					if dir.IsDir() {
-						return filepath.SkipDir
-					}
-					return nil
-				}
-
-				if !dir.IsDir() {
-					info, err := dir.Info()
-					if err == nil {
-						totalSize += info.Size()
-					}
-				}
-
-				if dir.IsDir() {
-					currentDepth++
-				}
-
-				return nil
-			})
-		}
-
-		return totalSize
-	}
-	return info.Size()
-}
-
-func (s *SizeEnabler) EnableSize(size SizeUnit) ContentOption {
-	s.sizeUint = size
-
-	if size != Auto {
-		longestSize := 0
-		m := sync.RWMutex{}
-		done := func(size string) {
-			defer s.Done()
-			m.RLock()
-			if longestSize >= len(size) {
-				m.RUnlock()
-				return
-			}
-			m.RUnlock()
-			m.Lock()
-			if longestSize < len(size) {
-				longestSize = len(size)
-			}
-			m.Unlock()
-		}
-
-		wait := func(size string) string {
-			s.Wait()
-			return fillBlank(size, longestSize)
-		}
-
-		return func(info os.FileInfo) (string, string) {
-			var v int64
-			if s.recursive != nil {
-				v = recursivelySizeOf(info, s.recursive.depth)
-			} else {
-				v = info.Size()
-			}
-			if s.enableTotal {
-				s.total.Add(v)
-			}
-			size := s.Size2String(v, 0)
-			done(size)
-			return wait(size), SizeName
-		}
-	}
-
-	return func(info os.FileInfo) (string, string) {
-		var v int64
-		if s.recursive != nil {
-			v = recursivelySizeOf(info, s.recursive.depth)
-		} else {
-			v = info.Size()
-		}
-		if s.enableTotal {
-			s.total.Add(v)
-		}
-		return s.Size2String(v, 7), SizeName
-	}
 }
 
 type RelativeTimeEnabler struct {
@@ -517,7 +107,7 @@ func (r *RelativeTimeEnabler) Enable(renderer *render.Renderer) ContentOption {
 
 	wait := func(size string) string {
 		r.Wait()
-		return fillBlank(size, longestRt)
+		return FillBlank(size, longestRt)
 	}
 
 	return func(info os.FileInfo) (string, string) {
@@ -882,7 +472,7 @@ func (cf *ContentFilter) EnableOwner(renderer *render.Renderer) ContentOption {
 	cf.wgs = append(cf.wgs, wg)
 	wait := func(res string) string {
 		wg.Wait()
-		return renderer.Owner(fillBlank(res, longestOwner))
+		return renderer.Owner(FillBlank(res, longestOwner))
 	}
 
 	done := func(name string) {
@@ -932,7 +522,7 @@ func (cf *ContentFilter) EnableGroup(renderer *render.Renderer) ContentOption {
 	cf.wgs = append(cf.wgs, wg)
 	wait := func(name string) string {
 		wg.Wait()
-		return renderer.Group(fillBlank(name, longestGroup))
+		return renderer.Group(FillBlank(name, longestGroup))
 	}
 
 	done := func(name string) {
@@ -1062,12 +652,12 @@ func (cf *ContentFilter) EnableSum(sumTypes ...SumType) ContentOption {
 	sumName := fmt.Sprintf("%s(%s)", SumName, strings.Join(types, ","))
 	return func(info os.FileInfo) (string, string) {
 		if info.IsDir() {
-			return fillBlank("", length), sumName
+			return FillBlank("", length), sumName
 		}
 
 		file, err := os.Open(info.Name())
 		if err != nil {
-			return fillBlank("", length), sumName
+			return FillBlank("", length), sumName
 		}
 		defer file.Close()
 		hashes := make([]hash.Hash, 0, len(sumTypes))
@@ -1095,14 +685,14 @@ func (cf *ContentFilter) EnableSum(sumTypes ...SumType) ContentOption {
 		}
 		multiWriter := io.MultiWriter(writers...)
 		if _, err := io.Copy(multiWriter, file); err != nil {
-			return fillBlank("", length), sumName
+			return FillBlank("", length), sumName
 		}
 		sums := make([]string, 0, len(hashes))
 		for _, h := range hashes {
 			sums = append(sums, fmt.Sprintf("%x", h.Sum(nil)))
 		}
 		sumsStr := strings.Join(sums, " ")
-		return fillBlank(sumsStr, length), sumName
+		return FillBlank(sumsStr, length), sumName
 	}
 }
 
@@ -1140,11 +730,11 @@ func (e *MimeFileTypeEnabler) Enable() ContentOption {
 
 	wait := func(tn string) string {
 		e.Wait()
-		return fillBlank(tn, longestTypeName)
+		return FillBlank(tn, longestTypeName)
 	}
-
 	return func(info os.FileInfo) (string, string) {
 		tn := ""
+		returnName := MimeTypeName
 		if info.IsDir() {
 			tn = "directory"
 		} else if info.Mode()&os.ModeSymlink != 0 {
@@ -1168,8 +758,10 @@ func (e *MimeFileTypeEnabler) Enable() ContentOption {
 				return wait(tn), MimeTypeName
 			}
 			tn = mtype.String()
+
 			if e.ParentOnly {
 				tn = strings.SplitN(tn, "/", 2)[0]
+				returnName = "parent_" + returnName
 			}
 
 			if strings.Contains(tn, ";") {
@@ -1179,7 +771,7 @@ func (e *MimeFileTypeEnabler) Enable() ContentOption {
 
 		}
 		done(tn)
-		return wait(tn), MimeTypeName
+		return wait(tn), returnName
 	}
 }
 
@@ -1214,12 +806,24 @@ func (l *LinkEnabler) Enable() ContentOption {
 
 	wait := func(linkNumStr string) string {
 		l.Wait()
-		return fillBlank(linkNumStr, len(longestLinkNum))
+		return FillBlank(linkNumStr, len(longestLinkNum))
 	}
 
 	return func(info os.FileInfo) (string, string) {
 		n := strconv.FormatUint(osbased.LinkCount(info), 10)
 		done(n)
 		return wait(n), "links"
+	}
+}
+
+type IndexEnabler struct{}
+
+func NewIndexEnabler() *IndexEnabler {
+	return &IndexEnabler{}
+}
+
+func (i *IndexEnabler) Enable() ContentOption {
+	return func(info os.FileInfo) (string, string) {
+		return "", "#"
 	}
 }

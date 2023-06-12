@@ -5,12 +5,14 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
 
 	"github.com/Equationzhao/g/display"
 	"github.com/Equationzhao/g/filter"
+	filtercontent "github.com/Equationzhao/g/filter/content"
 	"github.com/Equationzhao/g/index"
 	"github.com/Equationzhao/g/render"
 	"github.com/Equationzhao/g/sorter"
@@ -40,8 +42,8 @@ var (
 	CompiledAt    = ""
 	sort          = sorter.NewSorter()
 	timeType      = []string{"mod"}
-	sizeUint      = filter.Auto
-	sizeEnabler   = filter.NewSizeEnabler()
+	sizeUint      = filtercontent.Auto
+	sizeEnabler   = filtercontent.NewSizeEnabler()
 	wgs           = make([]filter.LengthFixed, 0, 1)
 	depthLimitMap = make(map[string]int)
 	limitOnce     = util.Once{}
@@ -274,6 +276,8 @@ There is NO WARRANTY, to the extent permitted by law.`,
 					nameToDisplay.SetStatistics(&filter.Statistics{})
 				}
 
+				flagSharp := context.Bool("#")
+
 				for i := 0; i < len(path); i++ {
 					start := time.Now()
 
@@ -458,7 +462,6 @@ There is NO WARRANTY, to the extent permitted by law.`,
 						if total, ok := sizeEnabler.Total(); ok {
 							i = display.NewItem()
 							i.Set("total", display.ItemContent{No: 0, Content: display.StringContent(fmt.Sprintf("  total %s", sizeEnabler.Size2String(total, 0)))})
-
 						}
 						if s := nameToDisplay.Statistics(); s != nil {
 							tFormat := "\n  underwent %s"
@@ -471,7 +474,9 @@ There is NO WARRANTY, to the extent permitted by law.`,
 							s.Reset()
 						}
 						if i != nil {
+							p.DisableHookBefore()
 							p.Print(*i)
+							p.EnableHookBefore()
 						}
 					}
 
@@ -526,8 +531,18 @@ There is NO WARRANTY, to the extent permitted by law.`,
 					}
 
 					itemsCopy := make([]display.Item, 0, len(items))
-					for _, item := range items {
-						itemsCopy = append(itemsCopy, *item)
+					{
+						l := len(strconv.Itoa(len(items)))
+						for i, item := range items {
+							// if there is #, add No
+							if flagSharp {
+								item.Set("#", display.ItemContent{
+									No:      -1,
+									Content: display.StringContent(fmt.Sprintf("%d%s", i, strings.Repeat(" ", l-len(strconv.Itoa(i))))),
+								})
+							}
+							itemsCopy = append(itemsCopy, *item)
+						}
 					}
 
 					p.Print(itemsCopy...)
@@ -555,26 +570,29 @@ There is NO WARRANTY, to the extent permitted by law.`,
 			return nil
 		},
 	}
-	G.Flags = append(G.Flags, &cli.BoolFlag{
-		Name:     "check-new-version",
-		Usage:    "check if there's new release",
-		Category: "software info",
-		Action: func(context *cli.Context, b bool) error {
-			if b {
-				fmt.Println(context.App.Name + " - " + context.App.Usage)
-				upgrade.WithUpdateCheckTimeout(1 * time.Second)
-				notice := upgrade.NewGitHubDetector("Equationzhao", "g")
-				_ = notice.PrintIfFoundGreater(os.Stderr, Version)
-				return Err4Exit{}
-			}
-			return nil
+	G.Flags = append(G.Flags,
+		&cli.BoolFlag{
+			Name:     "check-new-version",
+			Usage:    "check if there's new release",
+			Category: "software info",
+			Action: func(context *cli.Context, b bool) error {
+				if b {
+					fmt.Println(context.App.Name + " - " + context.App.Usage)
+					upgrade.WithUpdateCheckTimeout(1 * time.Second)
+					notice := upgrade.NewGitHubDetector("Equationzhao", "g")
+					_ = notice.PrintIfFoundGreater(os.Stderr, Version)
+					return Err4Exit{}
+				}
+				return nil
+			},
+			DisableDefaultText: true,
 		},
-		DisableDefaultText: true,
-	}, &cli.BoolFlag{
-		Name:    "no-path-transform",
-		Aliases: []string{"np"},
-		Usage:   "By default, .../a/b/c will be transformed to ../../a/b/c, and ~ will be replaced by homedir, using this flag to disable this feature",
-	})
+		&cli.BoolFlag{
+			Name:               "no-path-transform",
+			Aliases:            []string{"np"},
+			DisableDefaultText: true,
+			Usage:              "By default, .../a/b/c will be transformed to ../../a/b/c, and ~ will be replaced by homedir, using this flag to disable this feature",
+		})
 
 	G.Flags = append(G.Flags, viewFlag...)
 	G.Flags = append(G.Flags, displayFlag...)
@@ -655,7 +673,7 @@ func initVersionHelpFlags() {
 
 	cli.HelpFlag = &cli.BoolFlag{
 		Name:               "help",
-		Aliases:            []string{"h"},
+		Aliases:            []string{"h", "?"},
 		Usage:              "show help",
 		DisableDefaultText: true,
 		Category:           "software info",
@@ -665,8 +683,9 @@ func initVersionHelpFlags() {
 var viewFlag = []cli.Flag{
 	// VIEW
 	&cli.BoolFlag{
-		Name:  "header",
-		Usage: "add a header row",
+		Name:    "header",
+		Aliases: []string{"title"},
+		Usage:   "add a header row",
 		Action: func(context *cli.Context, b bool) error {
 			if b {
 				if _, ok := p.(*display.Byline); !ok {
@@ -714,8 +733,8 @@ var viewFlag = []cli.Flag{
 			if strings.EqualFold(s, "auto") {
 				return nil
 			}
-			sizeUint = filter.ConvertFromSizeString(s)
-			if sizeUint == filter.Unknown {
+			sizeUint = filtercontent.ConvertFromSizeString(s)
+			if sizeUint == filtercontent.Unknown {
 				ReturnCode = 1
 				return fmt.Errorf("invalid size unit: %s", s)
 			}
@@ -774,6 +793,18 @@ var viewFlag = []cli.Flag{
 		Category: "VIEW",
 	},
 	&cli.BoolFlag{
+		Name:               "#",
+		DisableDefaultText: true,
+		Usage:              "print entry No. for each entry",
+		Category:           "DISPLAY",
+		Action: func(context *cli.Context, b bool) error {
+			if b {
+				contentFunc = append(contentFunc, filter.NewIndexEnabler().Enable())
+			}
+			return nil
+		},
+	},
+	&cli.BoolFlag{
 		Name:               "o",
 		DisableDefaultText: true,
 		Usage:              "like -all/l, but do not list group information",
@@ -787,7 +818,7 @@ var viewFlag = []cli.Flag{
 					}
 				}
 				typeFunc = newFF
-				contentFunc = append(contentFunc, filter.EnableFileMode(r), sizeEnabler.EnableSize(sizeUint), contentFilter.EnableGroup(r))
+				contentFunc = append(contentFunc, filtercontent.EnableFileMode(r), sizeEnabler.EnableSize(sizeUint), contentFilter.EnableGroup(r))
 				for _, s := range timeType {
 					contentFunc = append(contentFunc, filter.EnableTime(timeFormat, s, r))
 				}
@@ -813,7 +844,7 @@ var viewFlag = []cli.Flag{
 					}
 				}
 				typeFunc = newFF
-				contentFunc = append(contentFunc, filter.EnableFileMode(r), sizeEnabler.EnableSize(sizeUint), contentFilter.EnableOwner(r))
+				contentFunc = append(contentFunc, filtercontent.EnableFileMode(r), sizeEnabler.EnableSize(sizeUint), contentFilter.EnableOwner(r))
 				for _, s := range timeType {
 					contentFunc = append(contentFunc, filter.EnableTime(timeFormat, s, r))
 				}
@@ -848,7 +879,7 @@ var viewFlag = []cli.Flag{
 				}
 				typeFunc = newFF
 				sizeEnabler.SetEnableTotal()
-				contentFunc = append(contentFunc, filter.EnableFileMode(r), sizeEnabler.EnableSize(sizeUint), contentFilter.EnableOwner(r))
+				contentFunc = append(contentFunc, filtercontent.EnableFileMode(r), sizeEnabler.EnableSize(sizeUint), contentFilter.EnableOwner(r))
 				if !context.Bool("G") {
 					contentFunc = append(contentFunc, contentFilter.EnableGroup(r))
 				}
@@ -876,7 +907,7 @@ var viewFlag = []cli.Flag{
 		Usage:              "show inode[linux/darwin only]",
 		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
-			i := filter.NewInodeEnabler()
+			i := filtercontent.NewInodeEnabler()
 			wgs = append(wgs, i)
 			contentFunc = append(contentFunc, i.Enable(r))
 			return nil
@@ -945,7 +976,7 @@ var viewFlag = []cli.Flag{
 		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
 			if b {
-				contentFunc = append(contentFunc, filter.EnableFileMode(r))
+				contentFunc = append(contentFunc, filtercontent.EnableFileMode(r))
 				if _, ok := p.(*display.Byline); !ok {
 					p = display.NewByline()
 				}
@@ -978,10 +1009,11 @@ var viewFlag = []cli.Flag{
 		Action: func(context *cli.Context, b bool) error {
 			if b {
 				n := context.Int("depth")
-				sizeEnabler.SetRecursive(filter.NewSizeRecursive(n))
+				sizeEnabler.SetRecursive(filtercontent.NewSizeRecursive(n))
 			}
 			return nil
 		},
+		Category: "VIEW",
 	},
 	&cli.BoolFlag{
 		Name:               "lh",
@@ -990,7 +1022,7 @@ var viewFlag = []cli.Flag{
 		Usage:              "show human readable size",
 		Action: func(context *cli.Context, b bool) error {
 			if b {
-				contentFunc = append(contentFunc, filter.EnableFileMode(r), sizeEnabler.EnableSize(sizeUint), contentFilter.EnableOwner(r), contentFilter.EnableGroup(r))
+				contentFunc = append(contentFunc, filtercontent.EnableFileMode(r), sizeEnabler.EnableSize(sizeUint), contentFilter.EnableOwner(r), contentFilter.EnableGroup(r))
 				for _, s := range timeType {
 					contentFunc = append(contentFunc, filter.EnableTime(timeFormat, s, r))
 				}
@@ -1096,7 +1128,41 @@ var viewFlag = []cli.Flag{
 					if size == "0" || strings.EqualFold(size, "infinity") || strings.EqualFold(size, "nolimit") {
 						bytes = 0
 					} else if size != "" {
-						sizeUint, err := filter.ParseSize(size)
+						sizeUint, err := filtercontent.ParseSize(size)
+						if err != nil {
+							return err
+						}
+						bytes = sizeUint.Bytes
+					}
+					mimetype.SetLimit(uint32(bytes))
+					return nil
+				})
+				if err != nil {
+					return err
+				}
+				contentFunc = append(contentFunc, exact.Enable())
+				wgs = append(wgs, exact)
+			}
+			return nil
+		},
+	},
+	&cli.BoolFlag{
+		Name:     "mime-parent",
+		Usage:    "show mime parent type",
+		Aliases:  []string{"mime-p", "mime-parent-type", "mime-type-parent"},
+		Category: "VIEW",
+		Action: func(context *cli.Context, b bool) error {
+			if b {
+				exact := filter.NewMimeFileTypeEnabler()
+				exact.ParentOnly = true
+
+				err := limitOnce.Do(func() error {
+					size := context.String("exact-detect-size")
+					var bytes uint64 = 1024 * 1024
+					if size == "0" || strings.EqualFold(size, "infinity") || strings.EqualFold(size, "nolimit") {
+						bytes = 0
+					} else if size != "" {
+						sizeUint, err := filtercontent.ParseSize(size)
 						if err != nil {
 							return err
 						}
@@ -1176,9 +1242,10 @@ var viewFlag = []cli.Flag{
 	},
 
 	&cli.BoolFlag{
-		Name:    "quote-name",
-		Aliases: []string{"Q"},
-		Usage:   "enclose entry names in double quotes(overridden by --literal)",
+		Name:     "quote-name",
+		Aliases:  []string{"Q"},
+		Usage:    "enclose entry names in double quotes(overridden by --literal)",
+		Category: "VIEW",
 	},
 	// &cli.StringFlag{
 	// 	Name:    "quoting-style",
@@ -1186,9 +1253,10 @@ var viewFlag = []cli.Flag{
 	// 	Usage:   "use quoting style: literal, shell, shell-always, c, escape, locale, clocale",
 	// },
 	&cli.BoolFlag{
-		Name:    "literal",
-		Aliases: []string{"N"},
-		Usage:   "print entry names without quoting",
+		Name:     "literal",
+		Aliases:  []string{"N"},
+		Usage:    "print entry names without quoting",
+		Category: "VIEW",
 	},
 	&cli.BoolFlag{
 		Name:    "link",
@@ -1202,6 +1270,7 @@ var viewFlag = []cli.Flag{
 			}
 			return nil
 		},
+		Category: "VIEW",
 	},
 }
 
@@ -1324,6 +1393,7 @@ var displayFlag = []cli.Flag{
 			}
 			return nil
 		},
+		Category: "DISPLAY",
 	},
 	&cli.StringFlag{
 		Name:        "format",
@@ -1340,7 +1410,7 @@ var displayFlag = []cli.Flag{
 					p = display.NewCommaPrint()
 				}
 			case "long", "l", "verbose":
-				contentFunc = append(contentFunc, filter.EnableFileMode(r), sizeEnabler.EnableSize(sizeUint), contentFilter.EnableOwner(r), contentFilter.EnableGroup(r))
+				contentFunc = append(contentFunc, filtercontent.EnableFileMode(r), sizeEnabler.EnableSize(sizeUint), contentFilter.EnableOwner(r), contentFilter.EnableGroup(r))
 				for _, s := range timeType {
 					contentFunc = append(contentFunc, filter.EnableTime(timeFormat, s, r))
 				}
@@ -1400,6 +1470,7 @@ var displayFlag = []cli.Flag{
 			}
 			return nil
 		},
+		Category: "DISPLAY",
 	},
 	&cli.BoolFlag{
 		Name:               "d",
@@ -1443,7 +1514,7 @@ var filteringFlag = []cli.Flag{
 	},
 	&cli.StringSliceFlag{
 		Name:    "match-glob",
-		Aliases: []string{"M"},
+		Aliases: []string{"M", "glob", "match"},
 		Usage:   "match Glob patterns",
 		Action: func(context *cli.Context, s []string) error {
 			if len(s) > 0 {
@@ -1474,6 +1545,7 @@ var filteringFlag = []cli.Flag{
 			}
 			return nil
 		},
+		Category: "FILTERING",
 	},
 	&cli.BoolFlag{
 		Name:               "show-hidden",
@@ -1523,7 +1595,7 @@ var filteringFlag = []cli.Flag{
 	},
 	&cli.BoolFlag{
 		Name:               "show-no-dir",
-		Aliases:            []string{"nd", "nodir", "no-dir"},
+		Aliases:            []string{"nd", "nodir", "no-dir", "file"},
 		DisableDefaultText: true,
 		Usage:              "do not show directory",
 		Action: func(context *cli.Context, b bool) error {
@@ -1593,7 +1665,7 @@ var filteringFlag = []cli.Flag{
 					if size == "0" || size == "infinity" {
 						bytes = 0
 					} else if size != "" {
-						sizeUint, err := filter.ParseSize(size)
+						sizeUint, err := filtercontent.ParseSize(size)
 						if err != nil {
 							return err
 						}
@@ -1785,7 +1857,7 @@ var sortingFlags = []cli.Flag{
 						if size == "0" || strings.EqualFold(size, "infinity") || strings.EqualFold(size, "nolimit") {
 							bytes = 0
 						} else if size != "" {
-							sizeUint, err := filter.ParseSize(size)
+							sizeUint, err := filtercontent.ParseSize(size)
 							if err != nil {
 								return err
 							}
@@ -1805,7 +1877,7 @@ var sortingFlags = []cli.Flag{
 						if size == "0" || strings.EqualFold(size, "infinity") || strings.EqualFold(size, "nolimit") {
 							bytes = 0
 						} else if size != "" {
-							sizeUint, err := filter.ParseSize(size)
+							sizeUint, err := filtercontent.ParseSize(size)
 							if err != nil {
 								return err
 							}
@@ -1843,7 +1915,7 @@ var sortingFlags = []cli.Flag{
 	},
 	&cli.BoolFlag{
 		Name:               "dir-first",
-		Aliases:            []string{"df"},
+		Aliases:            []string{"df", "group-directories-first"},
 		Usage:              "List directories before other files",
 		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
@@ -1917,7 +1989,7 @@ var sortingFlags = []cli.Flag{
 				if size == "0" || strings.EqualFold(size, "infinity") || strings.EqualFold(size, "nolimit") {
 					bytes = 0
 				} else if size != "" {
-					sizeUint, err := filter.ParseSize(size)
+					sizeUint, err := filtercontent.ParseSize(size)
 					if err != nil {
 						return err
 					}
@@ -1947,7 +2019,7 @@ var sortingFlags = []cli.Flag{
 					if size == "0" || strings.EqualFold(size, "infinity") || strings.EqualFold(size, "nolimit") {
 						bytes = 0
 					} else if size != "" {
-						sizeUint, err := filter.ParseSize(size)
+						sizeUint, err := filtercontent.ParseSize(size)
 						if err != nil {
 							return err
 						}
@@ -1978,7 +2050,7 @@ var sortingFlags = []cli.Flag{
 					if size == "0" || strings.EqualFold(size, "infinity") || strings.EqualFold(size, "nolimit") {
 						bytes = 0
 					} else if size != "" {
-						sizeUint, err := filter.ParseSize(size)
+						sizeUint, err := filtercontent.ParseSize(size)
 						if err != nil {
 							return err
 						}
@@ -1995,6 +2067,7 @@ var sortingFlags = []cli.Flag{
 			}
 			return nil
 		},
+		Category: "SORTING",
 	},
 	&cli.BoolFlag{
 		Name:    "sort-by-mimetype-parent-descend",
@@ -2008,7 +2081,7 @@ var sortingFlags = []cli.Flag{
 					if size == "0" || strings.EqualFold(size, "infinity") || strings.EqualFold(size, "nolimit") {
 						bytes = 0
 					} else if size != "" {
-						sizeUint, err := filter.ParseSize(size)
+						sizeUint, err := filtercontent.ParseSize(size)
 						if err != nil {
 							return err
 						}
@@ -2025,6 +2098,7 @@ var sortingFlags = []cli.Flag{
 			}
 			return nil
 		},
+		Category: "SORTING",
 	},
 }
 
