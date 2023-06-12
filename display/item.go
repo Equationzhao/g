@@ -150,6 +150,18 @@ func (i *Item) OrderedContent() string {
 	return res.String()
 }
 
+func (i *Item) GetAllOrdered() []ItemContent {
+	ics := make([]ItemContent, 0, len(i.internal))
+	for _, v := range i.internal {
+		ics = append(ics, v)
+	}
+	sort.Slice(ics, func(i, j int) bool {
+		return ics[i].No < ics[j].No
+	})
+
+	return ics
+}
+
 type ItemOptions func(*Item)
 
 func NewItem(Ops ...ItemOptions) *Item {

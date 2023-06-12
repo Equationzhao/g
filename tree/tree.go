@@ -9,6 +9,7 @@ import (
 	"sync/atomic"
 
 	"github.com/Equationzhao/g/filter"
+	"github.com/Equationzhao/g/filter/content"
 )
 
 type statistic struct {
@@ -41,8 +42,8 @@ func NewTreeString(entry string, depthLimit int, typeFilter *filter.TypeFilter, 
 	cm := sync.Mutex{}
 	cm.Lock()
 	ExtraName := contentFilter.GetDisplayItems(stat)[0]
-	extra := ExtraName.ExcludeOrderedContent(filter.NameName)
-	name, _ := ExtraName.Get(filter.NameName)
+	extra := ExtraName.ExcludeOrderedContent(content.NameName)
+	name, _ := ExtraName.Get(content.NameName)
 	cm.Unlock()
 	n := &Tree{
 		tree: NewWithExtraInfoRoot(extra, "", name.Content.String()),
@@ -117,9 +118,9 @@ func expand(node tree, depthLimit int, wg *sync.WaitGroup, parent string, s *sta
 				cm.Lock()
 				en := contentFilter.GetDisplayItems(v)[0]
 				cm.Unlock()
-				wrappedName, _ := en.Get(filter.NameName)
+				wrappedName, _ := en.Get(content.NameName)
 				name = wrappedName.Content.String()
-				extra = en.ExcludeOrderedContent(filter.NameName)
+				extra = en.ExcludeOrderedContent(content.NameName)
 			} else {
 				name = v.Name()
 			}
@@ -134,8 +135,8 @@ func expand(node tree, depthLimit int, wg *sync.WaitGroup, parent string, s *sta
 				cm.Lock()
 				en := contentFilter.GetDisplayItems(v)[0]
 				cm.Unlock()
-				wrappedName, _ := en.Get(filter.NameName)
-				extra := en.ExcludeOrderedContent(filter.NameName)
+				wrappedName, _ := en.Get(content.NameName)
+				extra := en.ExcludeOrderedContent(content.NameName)
 				node.AddInfoNode(extra, "", wrappedName.Content.String())
 			} else {
 				node.AddNode(v.Name())

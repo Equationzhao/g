@@ -1,11 +1,12 @@
 package content
 
 import (
+	"os"
+	"sync"
+
 	"github.com/Equationzhao/g/filter"
 	"github.com/Equationzhao/g/osbased"
 	"github.com/Equationzhao/g/render"
-	"os"
-	"sync"
 )
 
 type InodeEnabler struct {

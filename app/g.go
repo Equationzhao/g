@@ -101,8 +101,8 @@ There is NO WARRANTY, to the extent permitted by law.`,
 
 			path := context.Args().Slice()
 
-			nameToDisplay := filter.NewNameEnable().SetRenderer(r)
-			if context.Bool("show-icon") || context.Bool("all") {
+			nameToDisplay := filtercontent.NewNameEnable().SetRenderer(r)
+			if !context.Bool("classic") && (context.Bool("show-icon") || context.Bool("all")) {
 				nameToDisplay.SetIcon()
 			}
 			if context.Bool("F") {
@@ -136,11 +136,11 @@ There is NO WARRANTY, to the extent permitted by law.`,
 				s := context.String("git-status-style")
 				switch s {
 				case "symbol", "sym":
-					nameToDisplay.GitStyle = filter.GitStyleSym
+					nameToDisplay.GitStyle = filtercontent.GitStyleSym
 				case "dot", ".":
-					nameToDisplay.GitStyle = filter.GitStyleDot
+					nameToDisplay.GitStyle = filtercontent.GitStyleDot
 				default:
-					nameToDisplay.GitStyle = filter.GitStyleDefault
+					nameToDisplay.GitStyle = filtercontent.GitStyleDefault
 				}
 			}
 
@@ -273,7 +273,7 @@ There is NO WARRANTY, to the extent permitted by law.`,
 
 				header := context.Bool("header")
 				if context.Bool("statistic") {
-					nameToDisplay.SetStatistics(&filter.Statistics{})
+					nameToDisplay.SetStatistics(&filtercontent.Statistics{})
 				}
 
 				flagSharp := context.Bool("#")
@@ -459,18 +459,29 @@ There is NO WARRANTY, to the extent permitted by law.`,
 					{
 						var i *display.Item
 						// if -l/show-total-size is set, add total size
+						_, isTablePrinter := p.(*display.TablePrinter)
+
 						if total, ok := sizeEnabler.Total(); ok {
-							i = display.NewItem()
-							i.Set("total", display.ItemContent{No: 0, Content: display.StringContent(fmt.Sprintf("  total %s", sizeEnabler.Size2String(total, 0)))})
+							if !isTablePrinter {
+								i = display.NewItem()
+								i.Set("total", display.ItemContent{No: 0, Content: display.StringContent(fmt.Sprintf("  total %s", sizeEnabler.Size2String(total, 0)))})
+							} else {
+								_, _ = display.RawPrint(fmt.Sprintf("  total %s\n", sizeEnabler.Size2String(total, 0)))
+							}
 						}
 						if s := nameToDisplay.Statistics(); s != nil {
-							tFormat := "\n  underwent %s"
-							if i == nil {
-								i = display.NewItem()
-								tFormat = "  underwent %s"
+							if !isTablePrinter {
+								tFormat := "\n  underwent %s"
+								if i == nil {
+									i = display.NewItem()
+									tFormat = "  underwent %s"
+								}
+								i.Set("underwent", display.ItemContent{No: 1, Content: display.StringContent(fmt.Sprintf(tFormat, r.Time(durafmt.Parse(time.Since(start)).LimitToUnit("ms").String())))})
+								i.Set("statistic", display.ItemContent{No: 2, Content: display.StringContent(fmt.Sprintf("\n  statistic: %s", s))})
+							} else {
+								_, _ = display.RawPrint(fmt.Sprintf("  underwent %s", r.Time(durafmt.Parse(time.Since(start)).LimitToUnit("ms").String())))
+								_, _ = display.RawPrint(fmt.Sprintf("\n  statistic: %s\n", s))
 							}
-							i.Set("underwent", display.ItemContent{No: 1, Content: display.StringContent(fmt.Sprintf(tFormat, r.Time(durafmt.Parse(time.Since(start)).LimitToUnit("ms").String())))})
-							i.Set("statistic", display.ItemContent{No: 2, Content: display.StringContent(fmt.Sprintf("\n  statistic: %s", s))})
 							s.Reset()
 						}
 						if i != nil {
@@ -478,6 +489,7 @@ There is NO WARRANTY, to the extent permitted by law.`,
 							p.Print(*i)
 							p.EnableHookBefore()
 						}
+
 					}
 
 					if header {
@@ -499,26 +511,37 @@ There is NO WARRANTY, to the extent permitted by law.`,
 								// add longest - len(header) * space
 								// print header
 								contentStrBuf := bytebufferpool.Get()
+								tbprinter, isTablePrinter := p.(*display.TablePrinter)
+								tbprinter.ResetHeader()
 								for i, s := range allPart {
 									if len(s) > longestEachPart[s] {
 										// expand the every item's content of this part
 										for _, it := range items {
 											content, _ := it.Get(s)
 											content.Content = display.StringContent(fmt.Sprintf("%s%s", strings.Repeat(" ", len(s)-longestEachPart[s]), content.Content.String()))
+
 											it.Set(s, content)
 										}
-										_, _ = contentStrBuf.WriteString(theme.Underline)
-										_, _ = contentStrBuf.WriteString(s)
-										_, _ = contentStrBuf.WriteString(theme.Reset)
-										if i != len(allPart)-1 {
-											_, _ = contentStrBuf.WriteString(" ")
+										if !isTablePrinter {
+											_, _ = contentStrBuf.WriteString(theme.Underline)
+											_, _ = contentStrBuf.WriteString(s)
+											_, _ = contentStrBuf.WriteString(theme.Reset)
+											if i != len(allPart)-1 {
+												_, _ = contentStrBuf.WriteString(" ")
+											}
+										} else {
+											tbprinter.AddHeader(s)
 										}
 									} else {
-										_, _ = contentStrBuf.WriteString(theme.Underline)
-										_, _ = contentStrBuf.WriteString(s)
-										_, _ = contentStrBuf.WriteString(theme.Reset)
-										if i != len(allPart)-1 {
-											_, _ = contentStrBuf.WriteString(strings.Repeat(" ", longestEachPart[s]-len(s)+1))
+										if !isTablePrinter {
+											_, _ = contentStrBuf.WriteString(theme.Underline)
+											_, _ = contentStrBuf.WriteString(s)
+											_, _ = contentStrBuf.WriteString(theme.Reset)
+											if i != len(allPart)-1 {
+												_, _ = contentStrBuf.WriteString(strings.Repeat(" ", longestEachPart[s]-len(s)+1))
+											}
+										} else {
+											tbprinter.AddHeader(s)
 										}
 									}
 								}
@@ -799,7 +822,7 @@ var viewFlag = []cli.Flag{
 		Category:           "DISPLAY",
 		Action: func(context *cli.Context, b bool) error {
 			if b {
-				contentFunc = append(contentFunc, filter.NewIndexEnabler().Enable())
+				contentFunc = append(contentFunc, filtercontent.NewIndexEnabler().Enable())
 			}
 			return nil
 		},
@@ -820,7 +843,7 @@ var viewFlag = []cli.Flag{
 				typeFunc = newFF
 				contentFunc = append(contentFunc, filtercontent.EnableFileMode(r), sizeEnabler.EnableSize(sizeUint), contentFilter.EnableGroup(r))
 				for _, s := range timeType {
-					contentFunc = append(contentFunc, filter.EnableTime(timeFormat, s, r))
+					contentFunc = append(contentFunc, filtercontent.EnableTime(timeFormat, s, r))
 				}
 				if _, ok := p.(*display.Byline); !ok {
 					p = display.NewByline()
@@ -846,7 +869,7 @@ var viewFlag = []cli.Flag{
 				typeFunc = newFF
 				contentFunc = append(contentFunc, filtercontent.EnableFileMode(r), sizeEnabler.EnableSize(sizeUint), contentFilter.EnableOwner(r))
 				for _, s := range timeType {
-					contentFunc = append(contentFunc, filter.EnableTime(timeFormat, s, r))
+					contentFunc = append(contentFunc, filtercontent.EnableTime(timeFormat, s, r))
 				}
 				if _, ok := p.(*display.Byline); !ok {
 					p = display.NewByline()
@@ -884,7 +907,7 @@ var viewFlag = []cli.Flag{
 					contentFunc = append(contentFunc, contentFilter.EnableGroup(r))
 				}
 				for _, s := range timeType {
-					contentFunc = append(contentFunc, filter.EnableTime(timeFormat, s, r))
+					contentFunc = append(contentFunc, filtercontent.EnableTime(timeFormat, s, r))
 				}
 				if _, ok := p.(*display.Byline); !ok {
 					p = display.NewByline()
@@ -959,7 +982,7 @@ var viewFlag = []cli.Flag{
 		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
 			if b {
-				rt := filter.NewRelativeTimeEnabler()
+				rt := filtercontent.NewRelativeTimeEnabler()
 				rt.Mode = timeType[0]
 				contentFunc = append(contentFunc, rt.Enable(r))
 				wgs = append(wgs, rt)
@@ -1024,7 +1047,7 @@ var viewFlag = []cli.Flag{
 			if b {
 				contentFunc = append(contentFunc, filtercontent.EnableFileMode(r), sizeEnabler.EnableSize(sizeUint), contentFilter.EnableOwner(r), contentFilter.EnableGroup(r))
 				for _, s := range timeType {
-					contentFunc = append(contentFunc, filter.EnableTime(timeFormat, s, r))
+					contentFunc = append(contentFunc, filtercontent.EnableTime(timeFormat, s, r))
 				}
 				if _, ok := p.(*display.Byline); !ok {
 					p = display.NewByline()
@@ -1074,7 +1097,7 @@ var viewFlag = []cli.Flag{
 		Action: func(context *cli.Context, b bool) error {
 			if b {
 				for _, s := range timeType {
-					contentFunc = append(contentFunc, filter.EnableTime(timeFormat, s, r))
+					contentFunc = append(contentFunc, filtercontent.EnableTime(timeFormat, s, r))
 				}
 				if _, ok := p.(*display.Byline); !ok {
 					p = display.NewByline()
@@ -1120,7 +1143,7 @@ var viewFlag = []cli.Flag{
 		Category:           "VIEW",
 		Action: func(context *cli.Context, b bool) error {
 			if b {
-				exact := filter.NewMimeFileTypeEnabler()
+				exact := filtercontent.NewMimeFileTypeEnabler()
 
 				err := limitOnce.Do(func() error {
 					size := context.String("exact-detect-size")
@@ -1153,7 +1176,7 @@ var viewFlag = []cli.Flag{
 		Category: "VIEW",
 		Action: func(context *cli.Context, b bool) error {
 			if b {
-				exact := filter.NewMimeFileTypeEnabler()
+				exact := filtercontent.NewMimeFileTypeEnabler()
 				exact.ParentOnly = true
 
 				err := limitOnce.Do(func() error {
@@ -1264,7 +1287,7 @@ var viewFlag = []cli.Flag{
 		Usage:   "list each file's number of hard links",
 		Action: func(context *cli.Context, b bool) error {
 			if b {
-				link := filter.NewLinkEnabler()
+				link := filtercontent.NewLinkEnabler()
 				contentFunc = append(contentFunc, link.Enable())
 				wgs = append(wgs, link)
 			}
@@ -1391,9 +1414,28 @@ var displayFlag = []cli.Flag{
 					p = display.NewJsonPrinter()
 				}
 			}
+
+			context.Set("header", "0")
+			context.Set("classic", "1")
+			sizeEnabler.DisableTotal()
+
 			return nil
 		},
 		Category: "DISPLAY",
+	},
+	&cli.BoolFlag{
+		Name:               "table",
+		Aliases:            []string{"tb"},
+		Usage:              "output in table format",
+		DisableDefaultText: true,
+		Action: func(context *cli.Context, b bool) error {
+			if b {
+				if _, ok := p.(*display.TablePrinter); !ok {
+					p = display.NewTablePrinter()
+				}
+			}
+			return nil
+		},
 	},
 	&cli.StringFlag{
 		Name:        "format",
@@ -1412,7 +1454,7 @@ var displayFlag = []cli.Flag{
 			case "long", "l", "verbose":
 				contentFunc = append(contentFunc, filtercontent.EnableFileMode(r), sizeEnabler.EnableSize(sizeUint), contentFilter.EnableOwner(r), contentFilter.EnableGroup(r))
 				for _, s := range timeType {
-					contentFunc = append(contentFunc, filter.EnableTime(timeFormat, s, r))
+					contentFunc = append(contentFunc, filtercontent.EnableTime(timeFormat, s, r))
 				}
 				if _, ok := p.(*display.Byline); !ok {
 					p = display.NewByline()
@@ -1498,7 +1540,7 @@ var displayFlag = []cli.Flag{
 var filteringFlag = []cli.Flag{
 	&cli.StringSliceFlag{
 		Name:    "ignore-glob",
-		Aliases: []string{"I"},
+		Aliases: []string{"I", "ignore", "ig"},
 		Usage:   "ignore Glob patterns",
 		Action: func(context *cli.Context, s []string) error {
 			if len(s) > 0 {

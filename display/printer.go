@@ -13,6 +13,7 @@ import (
 	"strings"
 
 	"github.com/acarl005/stripansi"
+	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/mattn/go-runewidth"
 	"github.com/olekukonko/ts"
 	orderedmap "github.com/wk8/go-ordered-map/v2"
@@ -46,8 +47,8 @@ func fire(h []func(...Item), i ...Item) {
 
 func newHook() *hook {
 	return &hook{
-		BeforePrint: make([]func(...Item), 5),
-		AfterPrint:  make([]func(...Item), 5),
+		BeforePrint: make([]func(...Item), 0, 5),
+		AfterPrint:  make([]func(...Item), 0, 5),
 	}
 }
 
@@ -287,7 +288,6 @@ func (c *CommaPrint) Print(items ...Item) {
 	s := make([]string, 0, len(items))
 	for i, v := range items {
 		if i != len(items)-1 {
-
 			s = append(s, v.OrderedContent()+",")
 		} else {
 			s = append(s, v.OrderedContent())
@@ -407,13 +407,13 @@ func (a *Across) stringOf(ch rune, count int) string {
 }
 
 type Zero struct {
-	bufio.Writer
+	*bufio.Writer
 	*hook
 }
 
 func NewZero() Printer {
 	return &Zero{
-		Writer: *bufio.NewWriter(Output),
+		Writer: bufio.NewWriter(Output),
 		hook:   newHook(),
 	}
 }
@@ -433,7 +433,7 @@ func (z *Zero) Print(items ...Item) {
 }
 
 type JsonPrinter struct {
-	bufio.Writer
+	*bufio.Writer
 	*hook
 }
 
@@ -448,7 +448,7 @@ func (j *JsonPrinter) pretty(data []byte) (string, error) {
 
 func NewJsonPrinter() Printer {
 	return &JsonPrinter{
-		Writer: *bufio.NewWriter(Output),
+		Writer: bufio.NewWriter(Output),
 		hook:   newHook(),
 	}
 }
@@ -459,9 +459,9 @@ func (j *JsonPrinter) Print(items ...Item) {
 	}
 	defer j.Flush()
 
+	list := make([]*orderedmap.OrderedMap[string, string], 0, len(items))
 	for _, v := range items {
 		all := v.GetAll()
-		s := orderedmap.New[string, string]()
 
 		type orderItem struct {
 			name    string
@@ -490,24 +490,81 @@ func (j *JsonPrinter) Print(items ...Item) {
 			return order[i].no < order[j].no
 		})
 
+		s := orderedmap.New[string, string](
+			orderedmap.WithCapacity[string, string](len(order)),
+		)
+
+		list = append(list, s)
+
 		for _, v := range order {
 			s.Set(v.name, v.content)
 		}
-
-		prettyBytes, err := s.MarshalJSON()
-		if err != nil {
-			_, _ = j.WriteString(err.Error() + "\n")
-			return
-		}
-		pretty, err := j.pretty(prettyBytes)
-		if err != nil {
-			_, _ = j.WriteString(err.Error() + "\n")
-			return
-		}
-		_, _ = j.WriteString(pretty)
-		_, _ = j.WriteString("\n")
 	}
+	pretty, err := json.MarshalIndent(list, "", "	")
+	if err != nil {
+		_, _ = j.WriteString(err.Error() + "\n")
+		return
+	}
+	_, _ = j.Write(pretty)
+	_, _ = j.WriteString("\n")
 	if !j.disableAfter {
 		fire(j.AfterPrint, items...)
 	}
+}
+
+type TablePrinter struct {
+	*bufio.Writer
+	*hook
+	header table.Row
+}
+
+func (t *TablePrinter) SetHeader(header ...any) {
+	t.header = header
+}
+
+func (t *TablePrinter) ResetHeader() {
+	t.header = make([]any, 0)
+}
+
+func (t *TablePrinter) AddHeader(title string) {
+	t.header = append(t.header, title)
+}
+
+func NewTablePrinter() Printer {
+	return &TablePrinter{
+		Writer: bufio.NewWriter(Output),
+		hook:   newHook(),
+	}
+}
+
+func (t *TablePrinter) Print(s ...Item) {
+	if !t.disableBefore {
+		fire(t.BeforePrint, s...)
+	}
+	defer t.Flush()
+	writer := t.getPrinter(s...)
+	writer.Render()
+	if !t.disableAfter {
+		fire(t.AfterPrint, s...)
+	}
+}
+
+func (t *TablePrinter) getPrinter(s ...Item) table.Writer {
+	w := table.NewWriter()
+	w.SetOutputMirror(t.Writer)
+	for _, v := range s {
+		all := v.GetAllOrdered()
+		row := make(table.Row, 0, len(all))
+		for _, v := range all {
+			row = append(row, v.Content.String())
+		}
+		w.AppendRow(row)
+	}
+
+	w.AppendHeader(t.header)
+	if runtime.GOOS != "windows" {
+		w.SetStyle(table.StyleRounded)
+	}
+	w.Style().Options.SeparateColumns = true
+	return w
 }

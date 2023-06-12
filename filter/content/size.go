@@ -2,14 +2,15 @@ package content
 
 import (
 	"fmt"
-	"github.com/Equationzhao/g/filter"
-	"github.com/Equationzhao/g/render"
 	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
 	"sync"
 	"sync/atomic"
+
+	"github.com/Equationzhao/g/filter"
+	"github.com/Equationzhao/g/render"
 )
 
 const Unknown SizeUnit = -1

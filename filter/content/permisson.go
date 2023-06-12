@@ -1,9 +1,10 @@
 package content
 
 import (
+	"os"
+
 	"github.com/Equationzhao/g/filter"
 	"github.com/Equationzhao/g/render"
-	"os"
 )
 
 const Permissions = "Permissions"
