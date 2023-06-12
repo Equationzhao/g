@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -274,6 +275,8 @@ There is NO WARRANTY, to the extent permitted by law.`,
 					nameToDisplay.SetStatistics(&filter.Statistics{})
 				}
 
+				flagSharp := context.Bool("#")
+
 				for i := 0; i < len(path); i++ {
 					start := time.Now()
 
@@ -458,7 +461,6 @@ There is NO WARRANTY, to the extent permitted by law.`,
 						if total, ok := sizeEnabler.Total(); ok {
 							i = display.NewItem()
 							i.Set("total", display.ItemContent{No: 0, Content: display.StringContent(fmt.Sprintf("  total %s", sizeEnabler.Size2String(total, 0)))})
-
 						}
 						if s := nameToDisplay.Statistics(); s != nil {
 							tFormat := "\n  underwent %s"
@@ -471,7 +473,9 @@ There is NO WARRANTY, to the extent permitted by law.`,
 							s.Reset()
 						}
 						if i != nil {
+							p.DisableHookBefore()
 							p.Print(*i)
+							p.EnableHookBefore()
 						}
 					}
 
@@ -526,8 +530,18 @@ There is NO WARRANTY, to the extent permitted by law.`,
 					}
 
 					itemsCopy := make([]display.Item, 0, len(items))
-					for _, item := range items {
-						itemsCopy = append(itemsCopy, *item)
+					{
+						l := len(strconv.Itoa(len(items)))
+						for i, item := range items {
+							// if there is #, add No
+							if flagSharp {
+								item.Set("#", display.ItemContent{
+									No:      -1,
+									Content: display.StringContent(fmt.Sprintf("%s%d", strings.Repeat(" ", l-len(strconv.Itoa(i))), i)),
+								})
+							}
+							itemsCopy = append(itemsCopy, *item)
+						}
 					}
 
 					p.Print(itemsCopy...)
@@ -555,26 +569,29 @@ There is NO WARRANTY, to the extent permitted by law.`,
 			return nil
 		},
 	}
-	G.Flags = append(G.Flags, &cli.BoolFlag{
-		Name:     "check-new-version",
-		Usage:    "check if there's new release",
-		Category: "software info",
-		Action: func(context *cli.Context, b bool) error {
-			if b {
-				fmt.Println(context.App.Name + " - " + context.App.Usage)
-				upgrade.WithUpdateCheckTimeout(1 * time.Second)
-				notice := upgrade.NewGitHubDetector("Equationzhao", "g")
-				_ = notice.PrintIfFoundGreater(os.Stderr, Version)
-				return Err4Exit{}
-			}
-			return nil
+	G.Flags = append(G.Flags,
+		&cli.BoolFlag{
+			Name:     "check-new-version",
+			Usage:    "check if there's new release",
+			Category: "software info",
+			Action: func(context *cli.Context, b bool) error {
+				if b {
+					fmt.Println(context.App.Name + " - " + context.App.Usage)
+					upgrade.WithUpdateCheckTimeout(1 * time.Second)
+					notice := upgrade.NewGitHubDetector("Equationzhao", "g")
+					_ = notice.PrintIfFoundGreater(os.Stderr, Version)
+					return Err4Exit{}
+				}
+				return nil
+			},
+			DisableDefaultText: true,
 		},
-		DisableDefaultText: true,
-	}, &cli.BoolFlag{
-		Name:    "no-path-transform",
-		Aliases: []string{"np"},
-		Usage:   "By default, .../a/b/c will be transformed to ../../a/b/c, and ~ will be replaced by homedir, using this flag to disable this feature",
-	})
+		&cli.BoolFlag{
+			Name:               "no-path-transform",
+			Aliases:            []string{"np"},
+			DisableDefaultText: true,
+			Usage:              "By default, .../a/b/c will be transformed to ../../a/b/c, and ~ will be replaced by homedir, using this flag to disable this feature",
+		})
 
 	G.Flags = append(G.Flags, viewFlag...)
 	G.Flags = append(G.Flags, displayFlag...)
@@ -655,7 +672,7 @@ func initVersionHelpFlags() {
 
 	cli.HelpFlag = &cli.BoolFlag{
 		Name:               "help",
-		Aliases:            []string{"h"},
+		Aliases:            []string{"h", "?"},
 		Usage:              "show help",
 		DisableDefaultText: true,
 		Category:           "software info",
@@ -665,8 +682,9 @@ func initVersionHelpFlags() {
 var viewFlag = []cli.Flag{
 	// VIEW
 	&cli.BoolFlag{
-		Name:  "header",
-		Usage: "add a header row",
+		Name:    "header",
+		Aliases: []string{"title"},
+		Usage:   "add a header row",
 		Action: func(context *cli.Context, b bool) error {
 			if b {
 				if _, ok := p.(*display.Byline); !ok {
@@ -772,6 +790,18 @@ var viewFlag = []cli.Flag{
 			return nil
 		},
 		Category: "VIEW",
+	},
+	&cli.BoolFlag{
+		Name:               "#",
+		DisableDefaultText: true,
+		Usage:              "print entry No. for each entry",
+		Category:           "DISPLAY",
+		Action: func(context *cli.Context, b bool) error {
+			if b {
+				contentFunc = append(contentFunc, filter.NewIndexEnabler().Enable())
+			}
+			return nil
+		},
 	},
 	&cli.BoolFlag{
 		Name:               "o",
@@ -982,6 +1012,7 @@ var viewFlag = []cli.Flag{
 			}
 			return nil
 		},
+		Category: "VIEW",
 	},
 	&cli.BoolFlag{
 		Name:               "lh",
@@ -1210,9 +1241,10 @@ var viewFlag = []cli.Flag{
 	},
 
 	&cli.BoolFlag{
-		Name:    "quote-name",
-		Aliases: []string{"Q"},
-		Usage:   "enclose entry names in double quotes(overridden by --literal)",
+		Name:     "quote-name",
+		Aliases:  []string{"Q"},
+		Usage:    "enclose entry names in double quotes(overridden by --literal)",
+		Category: "VIEW",
 	},
 	// &cli.StringFlag{
 	// 	Name:    "quoting-style",
@@ -1220,9 +1252,10 @@ var viewFlag = []cli.Flag{
 	// 	Usage:   "use quoting style: literal, shell, shell-always, c, escape, locale, clocale",
 	// },
 	&cli.BoolFlag{
-		Name:    "literal",
-		Aliases: []string{"N"},
-		Usage:   "print entry names without quoting",
+		Name:     "literal",
+		Aliases:  []string{"N"},
+		Usage:    "print entry names without quoting",
+		Category: "VIEW",
 	},
 	&cli.BoolFlag{
 		Name:    "link",
@@ -1236,6 +1269,7 @@ var viewFlag = []cli.Flag{
 			}
 			return nil
 		},
+		Category: "VIEW",
 	},
 }
 
@@ -1358,6 +1392,7 @@ var displayFlag = []cli.Flag{
 			}
 			return nil
 		},
+		Category: "DISPLAY",
 	},
 	&cli.StringFlag{
 		Name:        "format",
@@ -1434,6 +1469,7 @@ var displayFlag = []cli.Flag{
 			}
 			return nil
 		},
+		Category: "DISPLAY",
 	},
 	&cli.BoolFlag{
 		Name:               "d",
@@ -1477,7 +1513,7 @@ var filteringFlag = []cli.Flag{
 	},
 	&cli.StringSliceFlag{
 		Name:    "match-glob",
-		Aliases: []string{"M"},
+		Aliases: []string{"M", "glob", "match"},
 		Usage:   "match Glob patterns",
 		Action: func(context *cli.Context, s []string) error {
 			if len(s) > 0 {
@@ -1508,6 +1544,7 @@ var filteringFlag = []cli.Flag{
 			}
 			return nil
 		},
+		Category: "FILTERING",
 	},
 	&cli.BoolFlag{
 		Name:               "show-hidden",
@@ -1877,7 +1914,7 @@ var sortingFlags = []cli.Flag{
 	},
 	&cli.BoolFlag{
 		Name:               "dir-first",
-		Aliases:            []string{"df"},
+		Aliases:            []string{"df", "group-directories-first"},
 		Usage:              "List directories before other files",
 		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
@@ -2029,6 +2066,7 @@ var sortingFlags = []cli.Flag{
 			}
 			return nil
 		},
+		Category: "SORTING",
 	},
 	&cli.BoolFlag{
 		Name:    "sort-by-mimetype-parent-descend",
@@ -2059,6 +2097,7 @@ var sortingFlags = []cli.Flag{
 			}
 			return nil
 		},
+		Category: "SORTING",
 	},
 }
 
