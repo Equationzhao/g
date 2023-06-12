@@ -1225,3 +1225,15 @@ func (l *LinkEnabler) Enable() ContentOption {
 		return wait(n), "links"
 	}
 }
+
+type IndexEnabler struct{}
+
+func NewIndexEnabler() *IndexEnabler {
+	return &IndexEnabler{}
+}
+
+func (i *IndexEnabler) Enable() ContentOption {
+	return func(info os.FileInfo) (string, string) {
+		return "", "#"
+	}
+}

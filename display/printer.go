@@ -22,11 +22,17 @@ const dot = '\uF111'
 
 var Output io.Writer = os.Stdout
 
+func RawPrint(toPrint ...any) (n int, err error) {
+	return fmt.Fprint(Output, toPrint...)
+}
+
 // print style control
 
 type hook struct {
-	BeforePrint []func(...Item)
-	AfterPrint  []func(...Item)
+	BeforePrint   []func(...Item)
+	AfterPrint    []func(...Item)
+	disableBefore bool
+	disableAfter  bool
 }
 
 func fire(h []func(...Item), i ...Item) {
@@ -53,9 +59,29 @@ func (h *hook) AddAfterPrint(f ...func(...Item)) {
 	h.AfterPrint = append(h.AfterPrint, f...)
 }
 
+func (h *hook) DisableHookBefore() {
+	h.disableBefore = true
+}
+
+func (h *hook) EnableHookBefore() {
+	h.disableBefore = false
+}
+
+func (h *hook) DisableHookAfter() {
+	h.disableAfter = true
+}
+
+func (h *hook) EnableHookAfter() {
+	h.disableAfter = false
+}
+
 type Hook interface {
 	AddBeforePrint(...func(...Item))
 	AddAfterPrint(...func(...Item))
+	DisableHookBefore()
+	EnableHookBefore()
+	DisableHookAfter()
+	EnableHookAfter()
 }
 
 type Printer interface {
@@ -76,16 +102,17 @@ func NewByline() Printer {
 }
 
 func (b *Byline) Print(i ...Item) {
-	fire(b.BeforePrint, i...)
-
+	if !b.disableBefore {
+		fire(b.BeforePrint, i...)
+	}
+	defer b.Flush()
 	for _, v := range i {
 		_, _ = b.WriteString(v.OrderedContent())
 		_ = b.WriteByte('\n')
 	}
-
-	fire(b.AfterPrint, i...)
-
-	_ = b.Flush()
+	if !b.disableAfter {
+		fire(b.AfterPrint, i...)
+	}
 }
 
 // Modified from github.com/acarl005/textcol
@@ -103,7 +130,9 @@ func NewFitTerminal() Printer {
 }
 
 func (f *FitTerminal) Print(i ...Item) {
-	fire(f.BeforePrint, i...)
+	if !f.disableBefore {
+		fire(f.BeforePrint, i...)
+	}
 
 	s := make([]string, 0, len(i))
 	for _, v := range i {
@@ -111,7 +140,9 @@ func (f *FitTerminal) Print(i ...Item) {
 	}
 	f.printColumns(&s)
 
-	fire(f.AfterPrint, i...)
+	if !f.disableAfter {
+		fire(f.AfterPrint, i...)
+	}
 }
 
 func (f *FitTerminal) printColumns(strs *[]string) {
@@ -250,7 +281,9 @@ func NewCommaPrint() Printer {
 }
 
 func (c *CommaPrint) Print(items ...Item) {
-	fire(c.BeforePrint, items...)
+	if !c.disableBefore {
+		fire(c.BeforePrint, items...)
+	}
 	s := make([]string, 0, len(items))
 	for i, v := range items {
 		if i != len(items)-1 {
@@ -261,7 +294,9 @@ func (c *CommaPrint) Print(items ...Item) {
 		}
 	}
 	c.printRowWithNoSpace(&s)
-	fire(c.AfterPrint, items...)
+	if !c.disableAfter {
+		fire(c.AfterPrint, items...)
+	}
 }
 
 type Across struct {
@@ -277,13 +312,17 @@ func NewAcross() Printer {
 }
 
 func (a *Across) Print(items ...Item) {
-	fire(a.BeforePrint, items...)
+	if !a.disableBefore {
+		fire(a.BeforePrint, items...)
+	}
 	s := make([]string, 0, len(items))
 	for _, v := range items {
 		s = append(s, v.OrderedContent())
 	}
 	a.printRow(&s)
-	fire(a.AfterPrint, items...)
+	if !a.disableAfter {
+		fire(a.AfterPrint, items...)
+	}
 }
 
 func (a *Across) printRowWithNoSpace(strs *[]string) {
@@ -380,13 +419,17 @@ func NewZero() Printer {
 }
 
 func (z *Zero) Print(items ...Item) {
-	fire(z.BeforePrint, items...)
+	if !z.disableBefore {
+		fire(z.BeforePrint, items...)
+	}
 	defer z.Flush()
 	for _, v := range items {
 		v.Delimiter = ""
 		_, _ = z.WriteString(v.OrderedContent())
 	}
-	fire(z.AfterPrint, items...)
+	if !z.disableAfter {
+		fire(z.AfterPrint, items...)
+	}
 }
 
 type JsonPrinter struct {
@@ -411,7 +454,9 @@ func NewJsonPrinter() Printer {
 }
 
 func (j *JsonPrinter) Print(items ...Item) {
-	fire(j.BeforePrint, items...)
+	if !j.disableBefore {
+		fire(j.BeforePrint, items...)
+	}
 	defer j.Flush()
 
 	for _, v := range items {
@@ -462,5 +507,7 @@ func (j *JsonPrinter) Print(items ...Item) {
 		_, _ = j.WriteString(pretty)
 		_, _ = j.WriteString("\n")
 	}
-	fire(j.AfterPrint, items...)
+	if !j.disableAfter {
+		fire(j.AfterPrint, items...)
+	}
 }
