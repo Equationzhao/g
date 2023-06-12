@@ -12,6 +12,7 @@ import (
 
 	"github.com/Equationzhao/g/display"
 	"github.com/Equationzhao/g/filter"
+	filtercontent "github.com/Equationzhao/g/filter/content"
 	"github.com/Equationzhao/g/index"
 	"github.com/Equationzhao/g/render"
 	"github.com/Equationzhao/g/sorter"
@@ -41,8 +42,8 @@ var (
 	CompiledAt    = ""
 	sort          = sorter.NewSorter()
 	timeType      = []string{"mod"}
-	sizeUint      = filter.Auto
-	sizeEnabler   = filter.NewSizeEnabler()
+	sizeUint      = filtercontent.Auto
+	sizeEnabler   = filtercontent.NewSizeEnabler()
 	wgs           = make([]filter.LengthFixed, 0, 1)
 	depthLimitMap = make(map[string]int)
 	limitOnce     = util.Once{}
@@ -537,7 +538,7 @@ There is NO WARRANTY, to the extent permitted by law.`,
 							if flagSharp {
 								item.Set("#", display.ItemContent{
 									No:      -1,
-									Content: display.StringContent(fmt.Sprintf("%s%d", strings.Repeat(" ", l-len(strconv.Itoa(i))), i)),
+									Content: display.StringContent(fmt.Sprintf("%d%s", i, strings.Repeat(" ", l-len(strconv.Itoa(i))))),
 								})
 							}
 							itemsCopy = append(itemsCopy, *item)
@@ -732,8 +733,8 @@ var viewFlag = []cli.Flag{
 			if strings.EqualFold(s, "auto") {
 				return nil
 			}
-			sizeUint = filter.ConvertFromSizeString(s)
-			if sizeUint == filter.Unknown {
+			sizeUint = filtercontent.ConvertFromSizeString(s)
+			if sizeUint == filtercontent.Unknown {
 				ReturnCode = 1
 				return fmt.Errorf("invalid size unit: %s", s)
 			}
@@ -817,7 +818,7 @@ var viewFlag = []cli.Flag{
 					}
 				}
 				typeFunc = newFF
-				contentFunc = append(contentFunc, filter.EnableFileMode(r), sizeEnabler.EnableSize(sizeUint), contentFilter.EnableGroup(r))
+				contentFunc = append(contentFunc, filtercontent.EnableFileMode(r), sizeEnabler.EnableSize(sizeUint), contentFilter.EnableGroup(r))
 				for _, s := range timeType {
 					contentFunc = append(contentFunc, filter.EnableTime(timeFormat, s, r))
 				}
@@ -843,7 +844,7 @@ var viewFlag = []cli.Flag{
 					}
 				}
 				typeFunc = newFF
-				contentFunc = append(contentFunc, filter.EnableFileMode(r), sizeEnabler.EnableSize(sizeUint), contentFilter.EnableOwner(r))
+				contentFunc = append(contentFunc, filtercontent.EnableFileMode(r), sizeEnabler.EnableSize(sizeUint), contentFilter.EnableOwner(r))
 				for _, s := range timeType {
 					contentFunc = append(contentFunc, filter.EnableTime(timeFormat, s, r))
 				}
@@ -878,7 +879,7 @@ var viewFlag = []cli.Flag{
 				}
 				typeFunc = newFF
 				sizeEnabler.SetEnableTotal()
-				contentFunc = append(contentFunc, filter.EnableFileMode(r), sizeEnabler.EnableSize(sizeUint), contentFilter.EnableOwner(r))
+				contentFunc = append(contentFunc, filtercontent.EnableFileMode(r), sizeEnabler.EnableSize(sizeUint), contentFilter.EnableOwner(r))
 				if !context.Bool("G") {
 					contentFunc = append(contentFunc, contentFilter.EnableGroup(r))
 				}
@@ -906,7 +907,7 @@ var viewFlag = []cli.Flag{
 		Usage:              "show inode[linux/darwin only]",
 		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
-			i := filter.NewInodeEnabler()
+			i := filtercontent.NewInodeEnabler()
 			wgs = append(wgs, i)
 			contentFunc = append(contentFunc, i.Enable(r))
 			return nil
@@ -975,7 +976,7 @@ var viewFlag = []cli.Flag{
 		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
 			if b {
-				contentFunc = append(contentFunc, filter.EnableFileMode(r))
+				contentFunc = append(contentFunc, filtercontent.EnableFileMode(r))
 				if _, ok := p.(*display.Byline); !ok {
 					p = display.NewByline()
 				}
@@ -1008,7 +1009,7 @@ var viewFlag = []cli.Flag{
 		Action: func(context *cli.Context, b bool) error {
 			if b {
 				n := context.Int("depth")
-				sizeEnabler.SetRecursive(filter.NewSizeRecursive(n))
+				sizeEnabler.SetRecursive(filtercontent.NewSizeRecursive(n))
 			}
 			return nil
 		},
@@ -1021,7 +1022,7 @@ var viewFlag = []cli.Flag{
 		Usage:              "show human readable size",
 		Action: func(context *cli.Context, b bool) error {
 			if b {
-				contentFunc = append(contentFunc, filter.EnableFileMode(r), sizeEnabler.EnableSize(sizeUint), contentFilter.EnableOwner(r), contentFilter.EnableGroup(r))
+				contentFunc = append(contentFunc, filtercontent.EnableFileMode(r), sizeEnabler.EnableSize(sizeUint), contentFilter.EnableOwner(r), contentFilter.EnableGroup(r))
 				for _, s := range timeType {
 					contentFunc = append(contentFunc, filter.EnableTime(timeFormat, s, r))
 				}
@@ -1127,7 +1128,7 @@ var viewFlag = []cli.Flag{
 					if size == "0" || strings.EqualFold(size, "infinity") || strings.EqualFold(size, "nolimit") {
 						bytes = 0
 					} else if size != "" {
-						sizeUint, err := filter.ParseSize(size)
+						sizeUint, err := filtercontent.ParseSize(size)
 						if err != nil {
 							return err
 						}
@@ -1161,7 +1162,7 @@ var viewFlag = []cli.Flag{
 					if size == "0" || strings.EqualFold(size, "infinity") || strings.EqualFold(size, "nolimit") {
 						bytes = 0
 					} else if size != "" {
-						sizeUint, err := filter.ParseSize(size)
+						sizeUint, err := filtercontent.ParseSize(size)
 						if err != nil {
 							return err
 						}
@@ -1409,7 +1410,7 @@ var displayFlag = []cli.Flag{
 					p = display.NewCommaPrint()
 				}
 			case "long", "l", "verbose":
-				contentFunc = append(contentFunc, filter.EnableFileMode(r), sizeEnabler.EnableSize(sizeUint), contentFilter.EnableOwner(r), contentFilter.EnableGroup(r))
+				contentFunc = append(contentFunc, filtercontent.EnableFileMode(r), sizeEnabler.EnableSize(sizeUint), contentFilter.EnableOwner(r), contentFilter.EnableGroup(r))
 				for _, s := range timeType {
 					contentFunc = append(contentFunc, filter.EnableTime(timeFormat, s, r))
 				}
@@ -1664,7 +1665,7 @@ var filteringFlag = []cli.Flag{
 					if size == "0" || size == "infinity" {
 						bytes = 0
 					} else if size != "" {
-						sizeUint, err := filter.ParseSize(size)
+						sizeUint, err := filtercontent.ParseSize(size)
 						if err != nil {
 							return err
 						}
@@ -1856,7 +1857,7 @@ var sortingFlags = []cli.Flag{
 						if size == "0" || strings.EqualFold(size, "infinity") || strings.EqualFold(size, "nolimit") {
 							bytes = 0
 						} else if size != "" {
-							sizeUint, err := filter.ParseSize(size)
+							sizeUint, err := filtercontent.ParseSize(size)
 							if err != nil {
 								return err
 							}
@@ -1876,7 +1877,7 @@ var sortingFlags = []cli.Flag{
 						if size == "0" || strings.EqualFold(size, "infinity") || strings.EqualFold(size, "nolimit") {
 							bytes = 0
 						} else if size != "" {
-							sizeUint, err := filter.ParseSize(size)
+							sizeUint, err := filtercontent.ParseSize(size)
 							if err != nil {
 								return err
 							}
@@ -1988,7 +1989,7 @@ var sortingFlags = []cli.Flag{
 				if size == "0" || strings.EqualFold(size, "infinity") || strings.EqualFold(size, "nolimit") {
 					bytes = 0
 				} else if size != "" {
-					sizeUint, err := filter.ParseSize(size)
+					sizeUint, err := filtercontent.ParseSize(size)
 					if err != nil {
 						return err
 					}
@@ -2018,7 +2019,7 @@ var sortingFlags = []cli.Flag{
 					if size == "0" || strings.EqualFold(size, "infinity") || strings.EqualFold(size, "nolimit") {
 						bytes = 0
 					} else if size != "" {
-						sizeUint, err := filter.ParseSize(size)
+						sizeUint, err := filtercontent.ParseSize(size)
 						if err != nil {
 							return err
 						}
@@ -2049,7 +2050,7 @@ var sortingFlags = []cli.Flag{
 					if size == "0" || strings.EqualFold(size, "infinity") || strings.EqualFold(size, "nolimit") {
 						bytes = 0
 					} else if size != "" {
-						sizeUint, err := filter.ParseSize(size)
+						sizeUint, err := filtercontent.ParseSize(size)
 						if err != nil {
 							return err
 						}
@@ -2080,7 +2081,7 @@ var sortingFlags = []cli.Flag{
 					if size == "0" || strings.EqualFold(size, "infinity") || strings.EqualFold(size, "nolimit") {
 						bytes = 0
 					} else if size != "" {
-						sizeUint, err := filter.ParseSize(size)
+						sizeUint, err := filtercontent.ParseSize(size)
 						if err != nil {
 							return err
 						}
