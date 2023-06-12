@@ -102,7 +102,7 @@ There is NO WARRANTY, to the extent permitted by law.`,
 			path := context.Args().Slice()
 
 			nameToDisplay := filtercontent.NewNameEnable().SetRenderer(r)
-			if !context.Bool("classic") && (context.Bool("show-icon") || context.Bool("all")) {
+			if !context.Bool("no-icon") && (context.Bool("show-icon") || context.Bool("all")) {
 				nameToDisplay.SetIcon()
 			}
 			if context.Bool("F") {
@@ -459,10 +459,10 @@ There is NO WARRANTY, to the extent permitted by law.`,
 					{
 						var i *display.Item
 						// if -l/show-total-size is set, add total size
-						_, isTablePrinter := p.(*display.TablePrinter)
+						_, isPrettyPrinter := p.(display.PrettyPrinter)
 
 						if total, ok := sizeEnabler.Total(); ok {
-							if !isTablePrinter {
+							if !isPrettyPrinter {
 								i = display.NewItem()
 								i.Set("total", display.ItemContent{No: 0, Content: display.StringContent(fmt.Sprintf("  total %s", sizeEnabler.Size2String(total, 0)))})
 							} else {
@@ -470,7 +470,7 @@ There is NO WARRANTY, to the extent permitted by law.`,
 							}
 						}
 						if s := nameToDisplay.Statistics(); s != nil {
-							if !isTablePrinter {
+							if !isPrettyPrinter {
 								tFormat := "\n  underwent %s"
 								if i == nil {
 									i = display.NewItem()
@@ -511,7 +511,7 @@ There is NO WARRANTY, to the extent permitted by law.`,
 								// add longest - len(header) * space
 								// print header
 								contentStrBuf := bytebufferpool.Get()
-								tbprinter, isTablePrinter := p.(*display.TablePrinter)
+								prettyPrinter, isPrettyPrinter := p.(display.PrettyPrinter)
 								for i, s := range allPart {
 									if len(s) > longestEachPart[s] {
 										// expand the every item's content of this part
@@ -521,7 +521,7 @@ There is NO WARRANTY, to the extent permitted by law.`,
 
 											it.Set(s, content)
 										}
-										if !isTablePrinter {
+										if !isPrettyPrinter {
 											_, _ = contentStrBuf.WriteString(theme.Underline)
 											_, _ = contentStrBuf.WriteString(s)
 											_, _ = contentStrBuf.WriteString(theme.Reset)
@@ -529,10 +529,10 @@ There is NO WARRANTY, to the extent permitted by law.`,
 												_, _ = contentStrBuf.WriteString(" ")
 											}
 										} else {
-											tbprinter.AddHeader(s)
+											prettyPrinter.AddHeader(s)
 										}
 									} else {
-										if !isTablePrinter {
+										if !isPrettyPrinter {
 											_, _ = contentStrBuf.WriteString(theme.Underline)
 											_, _ = contentStrBuf.WriteString(s)
 											_, _ = contentStrBuf.WriteString(theme.Reset)
@@ -540,7 +540,7 @@ There is NO WARRANTY, to the extent permitted by law.`,
 												_, _ = contentStrBuf.WriteString(strings.Repeat(" ", longestEachPart[s]-len(s)+1))
 											}
 										} else {
-											tbprinter.AddHeader(s)
+											prettyPrinter.AddHeader(s)
 										}
 									}
 								}
@@ -554,9 +554,10 @@ There is NO WARRANTY, to the extent permitted by law.`,
 
 					itemsCopy := make([]display.Item, 0, len(items))
 					{
-						tbprinter, isTablePrinter := p.(*display.TablePrinter)
+						// if is table printer, set title
+						prettyPrinter, isTablePrinter := p.(display.PrettyPrinter)
 						if isTablePrinter {
-							tbprinter.SetTitle(path[i])
+							prettyPrinter.SetTitle(path[i])
 						}
 						l := len(strconv.Itoa(len(items)))
 						for i, item := range items {
@@ -1111,6 +1112,13 @@ var viewFlag = []cli.Flag{
 		Category: "VIEW",
 	},
 	&cli.BoolFlag{
+		Name:               "no-icon",
+		Usage:              "disable icon(always override show-icon)",
+		Aliases:            []string{"noicon", "ni"},
+		DisableDefaultText: true,
+		Category:           "VIEW",
+	},
+	&cli.BoolFlag{
 		Name:               "show-icon",
 		Usage:              "show icon",
 		Aliases:            []string{"si", "icons", "icon"},
@@ -1440,6 +1448,60 @@ var displayFlag = []cli.Flag{
 			return nil
 		},
 	},
+	&cli.BoolFlag{
+		Name:               "HTML",
+		Aliases:            []string{"html"},
+		Usage:              "output in HTML-table format",
+		DisableDefaultText: true,
+		Action: func(context *cli.Context, b bool) error {
+			if b {
+				if _, ok := p.(*display.HTMLPrinter); !ok {
+					p = display.NewHTMLPrinter()
+					r.SetTheme(theme.Colorless)
+					r.SetInfoTheme(theme.Colorless)
+					theme.Reset = ""
+					context.Set("no-icon", "1")
+				}
+			}
+			return nil
+		},
+	},
+	&cli.BoolFlag{
+		Name:               "Markdown",
+		Aliases:            []string{"md", "MD", "markdown"},
+		Usage:              "output in markdown-table format",
+		DisableDefaultText: true,
+		Action: func(context *cli.Context, b bool) error {
+			if b {
+				if _, ok := p.(*display.MDPrinter); !ok {
+					p = display.NewMDPrinter()
+					r.SetTheme(theme.Colorless)
+					r.SetInfoTheme(theme.Colorless)
+					theme.Reset = ""
+					context.Set("no-icon", "1")
+				}
+			}
+			return nil
+		},
+	},
+	&cli.BoolFlag{
+		Name:               "CSV",
+		Aliases:            []string{"csv"},
+		Usage:              "output in csv format",
+		DisableDefaultText: true,
+		Action: func(context *cli.Context, b bool) error {
+			if b {
+				if _, ok := p.(*display.CSVPrinter); !ok {
+					p = display.NewCSVPrinter()
+					r.SetTheme(theme.Colorless)
+					r.SetInfoTheme(theme.Colorless)
+					theme.Reset = ""
+					context.Set("no-icon", "1")
+				}
+			}
+			return nil
+		},
+	},
 	&cli.StringFlag{
 		Name:        "format",
 		DefaultText: "C",
@@ -1483,7 +1545,9 @@ var displayFlag = []cli.Flag{
 		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
 			if b {
-				*r = *render.NewRenderer(theme.Colorless, theme.ColorlessInfo)
+				r.SetTheme(theme.Colorless)
+				r.SetInfoTheme(theme.Colorless)
+				theme.Reset = ""
 			}
 			return nil
 		},
@@ -1507,11 +1571,13 @@ var displayFlag = []cli.Flag{
 		Usage: "Enable classic mode (no colours or icons)",
 		Action: func(context *cli.Context, b bool) error {
 			if b {
-				*r = *render.NewRenderer(theme.Colorless, theme.ColorlessInfo)
-			}
-			err := context.Set("si", "0")
-			if err != nil {
-				return err
+				r.SetTheme(theme.Colorless)
+				r.SetInfoTheme(theme.Colorless)
+				theme.Reset = ""
+				err := context.Set("no-icon", "1")
+				if err != nil {
+					return err
+				}
 			}
 			return nil
 		},

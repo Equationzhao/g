@@ -15,7 +15,6 @@ const (
 	Purple    = "\033[1;35m"
 	Cyan      = "\033[1;36m"
 	White     = "\033[1;37m"
-	Reset     = "\033[0m"
 	Success   = "\033[1;32m"
 	Error     = "\033[1;31m"
 	Warn      = "\033[1;33m"
@@ -23,6 +22,8 @@ const (
 	Bold      = "\033[1m"
 	Reverse   = "\033[7m"
 )
+
+var Reset = "\033[0m"
 
 type Style struct {
 	// Color of the text.

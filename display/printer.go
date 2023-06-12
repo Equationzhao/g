@@ -527,6 +527,12 @@ func (j *JsonPrinter) Print(items ...Item) {
 	}
 }
 
+type PrettyPrinter interface {
+	SetTitle(title string)
+	AddHeader(headers string)
+	Printer
+}
+
 type TablePrinter struct {
 	*bufio.Writer
 	*hook
@@ -556,15 +562,15 @@ func NewTablePrinter(opts ...func(writer table.Writer)) Printer {
 	return t
 }
 
-func (t *TablePrinter) Print(s ...Item) {
+func (t *TablePrinter) PrintBase(fn func() string, s ...Item) {
 	if !t.disableBefore {
 		fire(t.BeforePrint, s...)
 	}
-	defer t.Flush()
+	defer t.Writer.Flush()
 	t.w.ResetRows()
 	t.setTB(s...)
 	t.w.AppendHeader(t.header)
-	t.w.Render()
+	fn()
 	t.w.ResetHeaders()
 
 	// empty header
@@ -573,6 +579,10 @@ func (t *TablePrinter) Print(s ...Item) {
 	if !t.disableAfter {
 		fire(t.AfterPrint, s...)
 	}
+}
+
+func (t *TablePrinter) Print(s ...Item) {
+	t.PrintBase(t.w.Render, s...)
 }
 
 func (t *TablePrinter) setTB(s ...Item) {
@@ -594,4 +604,46 @@ func DefaultTB(w table.Writer) {
 	w.Style().Options.SeparateColumns = true
 	w.Style().Options.SeparateFooter = true
 	w.SetPageSize(1000)
+}
+
+type MDPrinter struct {
+	*TablePrinter
+}
+
+func NewMDPrinter() Printer {
+	m := &MDPrinter{}
+	m.TablePrinter = NewTablePrinter(DefaultTB).(*TablePrinter)
+	return m
+}
+
+func (m *MDPrinter) Print(s ...Item) {
+	m.PrintBase(m.w.RenderMarkdown, s...)
+}
+
+type HTMLPrinter struct {
+	*TablePrinter
+}
+
+func NewHTMLPrinter() Printer {
+	h := &HTMLPrinter{}
+	h.TablePrinter = NewTablePrinter(DefaultTB).(*TablePrinter)
+	return h
+}
+
+func (p *HTMLPrinter) Print(s ...Item) {
+	p.PrintBase(p.w.RenderHTML, s...)
+}
+
+type CSVPrinter struct {
+	*TablePrinter
+}
+
+func NewCSVPrinter() Printer {
+	c := &CSVPrinter{}
+	c.TablePrinter = NewTablePrinter(DefaultTB).(*TablePrinter)
+	return c
+}
+
+func (c *CSVPrinter) Print(s ...Item) {
+	c.PrintBase(c.w.RenderCSV, s...)
 }
