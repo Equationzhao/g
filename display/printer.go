@@ -12,6 +12,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/Equationzhao/g/util"
 	"github.com/acarl005/stripansi"
 	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/mattn/go-runewidth"
@@ -220,10 +221,24 @@ func WidthLen(str string) int {
 	return length
 }
 
+var (
+	getTermWidthOnce util.Once
+	size             ts.Size
+)
+
 // getTermWidth returns the width of the terminal in characters
 // this is a modified version
 func getTermWidth() int {
-	size, _ := ts.GetSize()
+	if err := getTermWidthOnce.Do(func() error {
+		var err error
+		size, err = ts.GetSize()
+		if err != nil {
+			return err
+		}
+		return nil
+	}); err != nil {
+		return 0
+	}
 	return size.Col()
 }
 
@@ -516,25 +531,29 @@ type TablePrinter struct {
 	*bufio.Writer
 	*hook
 	header table.Row
+	w      table.Writer
 }
 
-func (t *TablePrinter) SetHeader(header ...any) {
-	t.header = header
+func (t *TablePrinter) SetTitle(title string) {
+	t.w.SetTitle("path: %s", title)
 }
 
-func (t *TablePrinter) ResetHeader() {
-	t.header = make([]any, 0)
+func (t *TablePrinter) AddHeader(headers string) {
+	t.header = append(t.header, headers)
 }
 
-func (t *TablePrinter) AddHeader(title string) {
-	t.header = append(t.header, title)
-}
-
-func NewTablePrinter() Printer {
-	return &TablePrinter{
+func NewTablePrinter(opts ...func(writer table.Writer)) Printer {
+	t := &TablePrinter{
 		Writer: bufio.NewWriter(Output),
 		hook:   newHook(),
 	}
+	w := table.NewWriter()
+	for _, opt := range opts {
+		opt(w)
+	}
+	w.SetOutputMirror(t.Writer)
+	t.w = w
+	return t
 }
 
 func (t *TablePrinter) Print(s ...Item) {
@@ -542,29 +561,37 @@ func (t *TablePrinter) Print(s ...Item) {
 		fire(t.BeforePrint, s...)
 	}
 	defer t.Flush()
-	writer := t.getPrinter(s...)
-	writer.Render()
+	t.w.ResetRows()
+	t.setTB(s...)
+	t.w.AppendHeader(t.header)
+	t.w.Render()
+	t.w.ResetHeaders()
+
+	// empty header
+	t.header = t.header[:0]
+
 	if !t.disableAfter {
 		fire(t.AfterPrint, s...)
 	}
 }
 
-func (t *TablePrinter) getPrinter(s ...Item) table.Writer {
-	w := table.NewWriter()
-	w.SetOutputMirror(t.Writer)
+func (t *TablePrinter) setTB(s ...Item) {
 	for _, v := range s {
 		all := v.GetAllOrdered()
 		row := make(table.Row, 0, len(all))
 		for _, v := range all {
-			row = append(row, v.Content.String())
+			row = append(row, strings.TrimLeft(v.Content.String(), " "))
 		}
-		w.AppendRow(row)
+		t.w.AppendRow(row)
 	}
+}
 
-	w.AppendHeader(t.header)
+func DefaultTB(w table.Writer) {
+	w.SetAllowedRowLength(getTermWidth())
 	if runtime.GOOS != "windows" {
 		w.SetStyle(table.StyleRounded)
 	}
 	w.Style().Options.SeparateColumns = true
-	return w
+	w.Style().Options.SeparateFooter = true
+	w.SetPageSize(1000)
 }

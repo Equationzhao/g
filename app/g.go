@@ -512,7 +512,6 @@ There is NO WARRANTY, to the extent permitted by law.`,
 								// print header
 								contentStrBuf := bytebufferpool.Get()
 								tbprinter, isTablePrinter := p.(*display.TablePrinter)
-								tbprinter.ResetHeader()
 								for i, s := range allPart {
 									if len(s) > longestEachPart[s] {
 										// expand the every item's content of this part
@@ -555,6 +554,10 @@ There is NO WARRANTY, to the extent permitted by law.`,
 
 					itemsCopy := make([]display.Item, 0, len(items))
 					{
+						tbprinter, isTablePrinter := p.(*display.TablePrinter)
+						if isTablePrinter {
+							tbprinter.SetTitle(path[i])
+						}
 						l := len(strconv.Itoa(len(items)))
 						for i, item := range items {
 							// if there is #, add No
@@ -1431,7 +1434,7 @@ var displayFlag = []cli.Flag{
 		Action: func(context *cli.Context, b bool) error {
 			if b {
 				if _, ok := p.(*display.TablePrinter); !ok {
-					p = display.NewTablePrinter()
+					p = display.NewTablePrinter(display.DefaultTB)
 				}
 			}
 			return nil
