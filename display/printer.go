@@ -463,26 +463,26 @@ func (j *JsonPrinter) Print(items ...Item) {
 		all := v.GetAll()
 		s := orderedmap.New[string, string]()
 
-		type oerderIten struct {
+		type orderItem struct {
 			name    string
 			content string
 			no      int
 		}
 
-		order := make([]oerderIten, 0, len(all))
+		order := make([]orderItem, 0, len(all))
 
 		// sort by v.Content.No
 		for name, v := range all {
 			c := stripansi.Strip(v.Content.String())
 			if name == "name" {
-				order = append(order, oerderIten{name: name, content: c, no: v.No})
+				order = append(order, orderItem{name: name, content: c, no: v.No})
 			} else if name == "underwent" || name == "statistic" {
-				order = append(order, oerderIten{name: name, content: strings.TrimLeft(c, "\n "), no: v.No})
+				order = append(order, orderItem{name: name, content: strings.TrimLeft(c, "\n "), no: v.No})
 			} else if name == "total" {
-				order = append(order, oerderIten{name: name, content: strings.TrimPrefix(c, "  total "), no: v.No})
+				order = append(order, orderItem{name: name, content: strings.TrimPrefix(c, "  total "), no: v.No})
 			} else {
 				// remove all leading spaces
-				order = append(order, oerderIten{name: name, content: strings.TrimLeft(c, " "), no: v.No})
+				order = append(order, orderItem{name: name, content: strings.TrimLeft(c, " "), no: v.No})
 			}
 		}
 
