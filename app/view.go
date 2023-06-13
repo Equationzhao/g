@@ -71,6 +71,42 @@ var viewFlag = []cli.Flag{
 		},
 		Category: "VIEW",
 	},
+	&cli.BoolFlag{
+		Name:               "access",
+		Aliases:            []string{"ac", "accessed"},
+		Usage:              "accessed time",
+		DisableDefaultText: true,
+		Action: func(context *cli.Context, b bool) error {
+			if b {
+				timeType = append(timeType, "access")
+			}
+			return nil
+		},
+	},
+	&cli.BoolFlag{
+		Name:               "modify",
+		Aliases:            []string{"mod", "modified"},
+		Usage:              "modified time",
+		DisableDefaultText: true,
+		Action: func(context *cli.Context, b bool) error {
+			if b {
+				timeType = append(timeType, "mod")
+			}
+			return nil
+		},
+	},
+	&cli.BoolFlag{
+		Name:               "create",
+		Aliases:            []string{"cr", "created"},
+		Usage:              "created time",
+		DisableDefaultText: true,
+		Action: func(context *cli.Context, b bool) error {
+			if b {
+				timeType = append(timeType, "create")
+			}
+			return nil
+		},
+	},
 	&cli.StringFlag{
 		Name:        "size-unit",
 		Aliases:     []string{"su", "block-size"},

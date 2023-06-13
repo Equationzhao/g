@@ -14,7 +14,7 @@ var sortingFlags = []cli.Flag{
 	&cli.StringSliceFlag{
 		Name:    "sort",
 		Aliases: []string{"SORT_FIELD"},
-		Usage:   "sort by field, default: ascending and case insensitive, field beginning with Uppercase is case sensitive, available fields: nature(default),none(nosort),name,size,time,owner,group,extension. following `-descend` to sort descending",
+		Usage:   "sort by field, default: ascending and case insensitive, field beginning with Uppercase is case sensitive, available fields: nature(default),none(nosort),name,.name(sorts by name without a leading dot),size,time,owner,group,extension,inode. following `-descend` to sort descending",
 		Action: func(context *cli.Context, slice []string) error {
 			sorter.WithSize(len(slice))(sort)
 			for _, s := range slice {
@@ -30,6 +30,14 @@ var sortingFlags = []cli.Flag{
 					sort.AddOption(sorter.ByNameCaseSensitiveAscend)
 				case "Name-descend":
 					sort.AddOption(sorter.ByNameCaseSensitiveDescend)
+				case ".name-descend":
+					sort.AddOption(sorter.ByNameWithoutALeadingDotDescend)
+				case ".name":
+					sort.AddOption(sorter.ByNameWithoutALeadingDotAscend)
+				case ".Name":
+					sort.AddOption(sorter.ByNameWithoutALeadingDotCaseSensitiveAscend)
+				case ".Name-descend":
+					sort.AddOption(sorter.ByNameWithoutALeadingDotCaseSensitiveDescend)
 				case "size-descend", "S", "sizesort":
 					sort.AddOption(sorter.BySizeDescend)
 				case "size":
@@ -106,6 +114,10 @@ var sortingFlags = []cli.Flag{
 						return err
 					}
 					sort.AddOption(sorter.ByMimeTypeDescend)
+				case "inode-descend":
+					sort.AddOption(sorter.ByInodeDescend)
+				case "inode":
+					sort.AddOption(sorter.ByInodeAscend)
 				//	todo
 				//	case "v", "version":
 				default:
@@ -118,7 +130,7 @@ var sortingFlags = []cli.Flag{
 	},
 	&cli.BoolFlag{
 		Name:               "sort-reverse",
-		Aliases:            []string{"sr", "reverse"},
+		Aliases:            []string{"sr", "reverse", "r"},
 		Usage:              "reverse the order of the sort",
 		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {

@@ -3,12 +3,14 @@ package sorter
 import (
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 
 	"github.com/Equationzhao/g/osbased"
 	mt "github.com/gabriel-vasile/mimetype"
 )
 
+//goland:noinspection GoUnusedParameter
 func ByNone(a, b os.FileInfo) bool {
 	return false
 }
@@ -29,7 +31,35 @@ func ByNameCaseSensitiveAscend(a, b os.FileInfo) bool {
 	return a.Name() < b.Name()
 }
 
-// todo size for folder
+func ByNameWithoutALeadingDotDescend(a, b os.FileInfo) bool {
+	return strings.ToLower(strings.TrimPrefix(a.Name(), ".")) > strings.ToLower(strings.TrimPrefix(b.Name(), "."))
+}
+
+func ByNameWithoutALeadingDotAscend(a, b os.FileInfo) bool {
+	return strings.ToLower(strings.TrimPrefix(a.Name(), ".")) < strings.ToLower(strings.TrimPrefix(b.Name(), "."))
+}
+
+func ByNameWithoutALeadingDotCaseSensitiveDescend(a, b os.FileInfo) bool {
+	return strings.TrimPrefix(a.Name(), ".") > strings.TrimPrefix(b.Name(), ".")
+}
+
+func ByNameWithoutALeadingDotCaseSensitiveAscend(a, b os.FileInfo) bool {
+	return strings.TrimPrefix(a.Name(), ".") < strings.TrimPrefix(b.Name(), ".")
+}
+
+func ByInodeDescend(a, b os.FileInfo) bool {
+	inodeA, _ := strconv.Atoi(osbased.Inode(a))
+	inodeB, _ := strconv.Atoi(osbased.Inode(b))
+
+	return inodeA > inodeB
+}
+
+func ByInodeAscend(a, b os.FileInfo) bool {
+	inodeA, _ := strconv.Atoi(osbased.Inode(a))
+	inodeB, _ := strconv.Atoi(osbased.Inode(b))
+
+	return inodeA < inodeB
+}
 
 func BySizeDescend(a, b os.FileInfo) bool {
 	return a.Size() > b.Size()

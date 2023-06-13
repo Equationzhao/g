@@ -13,13 +13,14 @@ var displayFlag = []cli.Flag{
 	// DISPLAY
 	&cli.BoolFlag{
 		Name:               "tree",
-		Aliases:            []string{"t"},
+		Aliases:            []string{"t", "T"},
 		Usage:              "recursively list in tree",
 		DisableDefaultText: true,
 		Category:           "DISPLAY",
 	},
 	&cli.IntFlag{
 		Name:        "depth",
+		Aliases:     []string{"level", "L"},
 		Usage:       "limit recursive depth, negative -> infinity",
 		DefaultText: "infinity",
 		Value:       -1,
@@ -179,7 +180,7 @@ var displayFlag = []cli.Flag{
 					r.SetTheme(theme.Colorless)
 					r.SetInfoTheme(theme.Colorless)
 					theme.Reset = ""
-					context.Set("no-icon", "1")
+					_ = context.Set("no-icon", "1")
 				}
 			}
 			return nil
@@ -197,7 +198,7 @@ var displayFlag = []cli.Flag{
 					r.SetTheme(theme.Colorless)
 					r.SetInfoTheme(theme.Colorless)
 					theme.Reset = ""
-					context.Set("no-icon", "1")
+					_ = context.Set("no-icon", "1")
 				}
 			}
 			return nil

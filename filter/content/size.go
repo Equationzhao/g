@@ -413,8 +413,13 @@ func (b *BlockSizeEnabler) Enable() filter.ContentOption {
 	}
 
 	return func(info os.FileInfo) (string, string) {
+		res := ""
 		bs := osbased.BlockSize(info)
-		res := b.renderer.Size(strconv.FormatInt(bs, 10))
+		if bs == 0 {
+			res = "-"
+		} else {
+			res = b.renderer.Size(strconv.FormatInt(bs, 10))
+		}
 		done(res)
 		return wait(res), BlockSizeName
 	}
