@@ -10,6 +10,7 @@ import (
 	"sync/atomic"
 
 	"github.com/Equationzhao/g/filter"
+	"github.com/Equationzhao/g/osbased"
 	"github.com/Equationzhao/g/render"
 )
 
@@ -367,5 +368,55 @@ func (s *SizeEnabler) EnableSize(size SizeUnit) filter.ContentOption {
 			s.total.Add(v)
 		}
 		return s.Size2String(v, 7), SizeName
+	}
+}
+
+type BlockSizeEnabler struct {
+	renderer *render.Renderer
+	*sync.WaitGroup
+}
+
+func NewBlockSizeEnabler() *BlockSizeEnabler {
+	return &BlockSizeEnabler{
+		renderer:  nil,
+		WaitGroup: new(sync.WaitGroup),
+	}
+}
+
+func (b *BlockSizeEnabler) SetRenderer(r *render.Renderer) {
+	b.renderer = r
+}
+
+const BlockSizeName = "Blocks"
+
+func (b *BlockSizeEnabler) Enable() filter.ContentOption {
+
+	longestSize := 0
+	m := sync.RWMutex{}
+	done := func(size string) {
+		defer b.Done()
+		m.RLock()
+		if longestSize >= len(size) {
+			m.RUnlock()
+			return
+		}
+		m.RUnlock()
+		m.Lock()
+		if longestSize < len(size) {
+			longestSize = len(size)
+		}
+		m.Unlock()
+	}
+
+	wait := func(size string) string {
+		b.Wait()
+		return filter.FillBlank(size, longestSize)
+	}
+
+	return func(info os.FileInfo) (string, string) {
+		bs := osbased.BlockSize(info)
+		res := b.renderer.Size(strconv.FormatInt(bs, 10))
+		done(res)
+		return wait(res), BlockSizeName
 	}
 }

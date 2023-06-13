@@ -364,6 +364,20 @@ var viewFlag = []cli.Flag{
 		Category: "VIEW",
 	},
 	&cli.BoolFlag{
+		Name:               "block",
+		Usage:              "show block size",
+		DisableDefaultText: true,
+		Action: func(context *cli.Context, b bool) error {
+			if b {
+				contentFunc = append(contentFunc, blockEnabler.Enable())
+				if _, ok := p.(*display.Byline); !ok {
+					p = display.NewByline()
+				}
+			}
+			return nil
+		},
+	},
+	&cli.BoolFlag{
 		Name:               "lh",
 		Aliases:            []string{"human-readable", "hr"},
 		DisableDefaultText: true,

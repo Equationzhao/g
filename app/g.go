@@ -43,6 +43,7 @@ var (
 	timeType        = []string{"mod"}
 	sizeUint        = filtercontent.Auto
 	sizeEnabler     = filtercontent.NewSizeEnabler()
+	blockEnabler    = filtercontent.NewBlockSizeEnabler()
 	wgs             = make([]filter.LengthFixed, 0, 1)
 	depthLimitMap   = make(map[string]int)
 	limitOnce       = util.Once{}
@@ -71,7 +72,9 @@ func init() {
 		}
 	}
 	sizeEnabler.SetRenderer(r)
+	blockEnabler.SetRenderer(r)
 	wgs = append(wgs, sizeEnabler)
+	wgs = append(wgs, blockEnabler)
 
 	G = &cli.App{
 		Name:      "g",

@@ -16,7 +16,7 @@ var (
 	getFileInformationByHandle = kernel32.NewProc("GetFileInformationByHandle")
 )
 
-type BY_HANDLE_FILE_INFORMATION struct {
+type byHandleFileInformation struct {
 	FileAttributes     uint32
 	CreationTime       syscall.Filetime
 	LastAccessTime     syscall.Filetime
@@ -29,7 +29,7 @@ type BY_HANDLE_FILE_INFORMATION struct {
 	FileIndexLow       uint32
 }
 
-func GetNumberOfHardLinks(info os.FileInfo) (uint64, error) {
+func getNumberOfHardLinks(info os.FileInfo) (uint64, error) {
 	path := info.Name()
 	utf16PtrFromString, err := syscall.UTF16PtrFromString(path)
 	if err != nil {
@@ -51,7 +51,7 @@ func GetNumberOfHardLinks(info os.FileInfo) (uint64, error) {
 		_ = syscall.CloseHandle(handle)
 	}()
 
-	var fileInfo BY_HANDLE_FILE_INFORMATION
+	var fileInfo byHandleFileInformation
 	ret, _, err := getFileInformationByHandle.Call(
 		uintptr(handle),
 		uintptr(unsafe.Pointer(&fileInfo)),
@@ -64,9 +64,13 @@ func GetNumberOfHardLinks(info os.FileInfo) (uint64, error) {
 }
 
 func LinkCount(info os.FileInfo) uint64 {
-	n, err := GetNumberOfHardLinks(info)
+	n, err := getNumberOfHardLinks(info)
 	if err != nil {
 		return 0
 	}
 	return n
+}
+
+func BlockSize(info os.FileInfo) int64 {
+	return 0
 }

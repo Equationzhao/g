@@ -23,3 +23,12 @@ func LinkCount(info os.FileInfo) uint64 {
 	}
 	return 0
 }
+
+func BlockSize(info os.FileInfo) int64 {
+	stat, ok := info.Sys().(*syscall.Stat_t)
+	if !ok {
+		return 0
+	}
+
+	return stat.Blocks
+}
