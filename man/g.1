@@ -19,6 +19,7 @@ g
 [--HTML|--html]
 [--Markdown|--md|--MD|--markdown]
 [--all|--la|-l|--long]
+[--block]
 [--byline|--bl|-1|--oneline|--single-column]
 [--check-new-version]
 [--checksum-algorithm|--ca]=[value]
@@ -32,6 +33,7 @@ g
 [--exact-detect-size|--eds|--detect-size|--ds]=[value]
 [--file-type|--ft]
 [--format]=[value]
+[--full-path|--fp|--fullpath]
 [--full-time]
 [--fuzzy|--fz|-f]
 [--gid]
@@ -136,6 +138,9 @@ g [options] [path]
 \fB--all, --la, -l, --long\fP: show all info/use a long listing format
 
 .PP
+\fB--block\fP: show block size
+
+.PP
 \fB--byline, --bl, -1, --oneline, --single-column\fP: print by line
 
 .PP
@@ -173,6 +178,9 @@ g [options] [path]
 
 .PP
 \fB--format\fP="": across  -x,  commas  -m, horizontal -x, long -l, single-column -1, verbose -l, vertical -C (default: C)
+
+.PP
+\fB--full-path, --fp, --fullpath\fP: show full path
 
 .PP
 \fB--full-time\fP: like -all/l --time-style=full-iso

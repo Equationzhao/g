@@ -12,6 +12,7 @@ g
 [--HTML|--html]
 [--Markdown|--md|--MD|--markdown]
 [--all|--la|-l|--long]
+[--block]
 [--byline|--bl|-1|--oneline|--single-column]
 [--check-new-version]
 [--checksum-algorithm|--ca]=[value]
@@ -25,6 +26,7 @@ g
 [--exact-detect-size|--eds|--detect-size|--ds]=[value]
 [--file-type|--ft]
 [--format]=[value]
+[--full-path|--fp|--fullpath]
 [--full-time]
 [--fuzzy|--fz|-f]
 [--gid]
@@ -115,6 +117,8 @@ g [options] [path]
 
 **--all, --la, -l, --long**: show all info/use a long listing format
 
+**--block**: show block size
+
 **--byline, --bl, -1, --oneline, --single-column**: print by line
 
 **--check-new-version**: check if there's new release
@@ -140,6 +144,8 @@ g [options] [path]
 **--file-type, --ft**: likewise, except do not append '*'
 
 **--format**="": across  -x,  commas  -m, horizontal -x, long -l, single-column -1, verbose -l, vertical -C (default: C)
+
+**--full-path, --fp, --fullpath**: show full path
 
 **--full-time**: like -all/l --time-style=full-iso
 

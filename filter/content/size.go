@@ -390,7 +390,6 @@ func (b *BlockSizeEnabler) SetRenderer(r *render.Renderer) {
 const BlockSizeName = "Blocks"
 
 func (b *BlockSizeEnabler) Enable() filter.ContentOption {
-
 	longestSize := 0
 	m := sync.RWMutex{}
 	done := func(size string) {
