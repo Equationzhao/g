@@ -7,6 +7,10 @@ g - a powerful ls
 g
 
 ```
+[-#]
+[--CSV|--csv]
+[--HTML|--html]
+[--Markdown|--md|--MD|--markdown]
 [--all|--la|-l|--long]
 [--byline|--bl|-1|--oneline|--single-column]
 [--check-new-version]
@@ -15,8 +19,9 @@ g
 [--classic]
 [--colorless|--nc|--no-color]
 [--depth]=[value]
-[--dir-first|--df]
+[--dir-first|--df|--group-directories-first]
 [--disable-index|--di|--no-update]
+[--duplicate|--dup]
 [--exact-detect-size|--eds|--detect-size|--ds]=[value]
 [--file-type|--ft]
 [--format]=[value]
@@ -25,16 +30,19 @@ g
 [--gid]
 [--git-status-style|--gss|--git-style]=[value]
 [--git-status|--gs|--git]
-[--header]
+[--header|--title]
 [--hide-git-ignore|--gi|--hgi]
-[--ignore-glob|-I]=[value]
+[--ignore-glob|-I|--ignore|--ig]=[value]
 [--inode|-i]
+[--json|-j]
 [--lh|--human-readable|--hr]
 [--link|-H]
 [--list-index|--li]
 [--literal|-N]
-[--match-glob|-M]=[value]
+[--match-glob|-M|--glob|--match]=[value]
+[--mime-parent|--mime-p|--mime-parent-type|--mime-type-parent]
 [--mime-type|--mime|--mimetype]
+[--no-icon|--noicon|--ni]
 [--no-path-transform|--np]
 [--numeric|--numeric-uid-gid]
 [--quote-name|-Q]
@@ -47,7 +55,7 @@ g
 [--show-group|--sg|--group]
 [--show-hidden|--sh|-a]
 [--show-icon|--si|--icons|--icon]
-[--show-no-dir|--nd|--nodir|--no-dir]
+[--show-no-dir|--nd|--nodir|--no-dir|--file]
 [--show-no-ext|--sne|--noext]=[value]
 [--show-only-dir|--sd|--dir|--only-dir|-D]
 [--show-only-ext|--se|--ext]=[value]
@@ -66,6 +74,7 @@ g
 [--sort-reverse|--sr|--reverse]
 [--sort|--SORT_FIELD]=[value]
 [--statistic]
+[--table|--tb]
 [--theme|--th]=[value]
 [--time-style]=[value]
 [--time-type|--tt]=[value]
@@ -96,6 +105,14 @@ g [options] [path]
 
 # GLOBAL OPTIONS
 
+**-#**: print entry No. for each entry
+
+**--CSV, --csv**: output in csv format
+
+**--HTML, --html**: output in HTML-table format
+
+**--Markdown, --md, --MD, --markdown**: output in markdown-table format
+
 **--all, --la, -l, --long**: show all info/use a long listing format
 
 **--byline, --bl, -1, --oneline, --single-column**: print by line
@@ -112,9 +129,11 @@ g [options] [path]
 
 **--depth**="": limit recursive depth, negative -> infinity (default: infinity)
 
-**--dir-first, --df**: List directories before other files
+**--dir-first, --df, --group-directories-first**: List directories before other files
 
 **--disable-index, --di, --no-update**: disable updating index
+
+**--duplicate, --dup**: show duplicate files table
 
 **--exact-detect-size, --eds, --detect-size, --ds**="": set exact size for mimetype detection eg:1M/nolimit/infinity (default: 1M)
 
@@ -132,13 +151,15 @@ g [options] [path]
 
 **--git-status-style, --gss, --git-style**="": git status style: colored-symbol: {? untracked, + added, - deleted, ~ modified, | renamed, = copied, ! ignored} colored-dot
 
-**--header**: add a header row
+**--header, --title**: add a header row
 
 **--hide-git-ignore, --gi, --hgi**: hide git ignored file/dir [if git is installed]
 
-**--ignore-glob, -I**="": ignore Glob patterns
+**--ignore-glob, -I, --ignore, --ig**="": ignore Glob patterns
 
 **--inode, -i**: show inode[linux/darwin only]
+
+**--json, -j**: output in json format
 
 **--lh, --human-readable, --hr**: show human readable size
 
@@ -148,9 +169,13 @@ g [options] [path]
 
 **--literal, -N**: print entry names without quoting
 
-**--match-glob, -M**="": match Glob patterns
+**--match-glob, -M, --glob, --match**="": match Glob patterns
+
+**--mime-parent, --mime-p, --mime-parent-type, --mime-type-parent**: show mime parent type
 
 **--mime-type, --mime, --mimetype**: show mime file type
+
+**--no-icon, --noicon, --ni**: disable icon(always override show-icon)
 
 **--no-path-transform, --np**: By default, .../a/b/c will be transformed to ../../a/b/c, and ~ will be replaced by homedir, using this flag to disable this feature
 
@@ -176,7 +201,7 @@ g [options] [path]
 
 **--show-icon, --si, --icons, --icon**: show icon
 
-**--show-no-dir, --nd, --nodir, --no-dir**: do not show directory
+**--show-no-dir, --nd, --nodir, --no-dir, --file**: do not show directory
 
 **--show-no-ext, --sne, --noext**="": show file which doesn't have target ext
 
@@ -213,6 +238,8 @@ g [options] [path]
 **--sort-reverse, --sr, --reverse**: reverse the order of the sort
 
 **--statistic**: show statistic info
+
+**--table, --tb**: output in table format
 
 **--theme, --th**="": apply theme `path/to/theme`
 

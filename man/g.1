@@ -14,6 +14,10 @@ g
 .RS
 
 .nf
+[-#]
+[--CSV|--csv]
+[--HTML|--html]
+[--Markdown|--md|--MD|--markdown]
 [--all|--la|-l|--long]
 [--byline|--bl|-1|--oneline|--single-column]
 [--check-new-version]
@@ -22,8 +26,9 @@ g
 [--classic]
 [--colorless|--nc|--no-color]
 [--depth]=[value]
-[--dir-first|--df]
+[--dir-first|--df|--group-directories-first]
 [--disable-index|--di|--no-update]
+[--duplicate|--dup]
 [--exact-detect-size|--eds|--detect-size|--ds]=[value]
 [--file-type|--ft]
 [--format]=[value]
@@ -32,16 +37,19 @@ g
 [--gid]
 [--git-status-style|--gss|--git-style]=[value]
 [--git-status|--gs|--git]
-[--header]
+[--header|--title]
 [--hide-git-ignore|--gi|--hgi]
-[--ignore-glob|-I]=[value]
+[--ignore-glob|-I|--ignore|--ig]=[value]
 [--inode|-i]
+[--json|-j]
 [--lh|--human-readable|--hr]
 [--link|-H]
 [--list-index|--li]
 [--literal|-N]
-[--match-glob|-M]=[value]
+[--match-glob|-M|--glob|--match]=[value]
+[--mime-parent|--mime-p|--mime-parent-type|--mime-type-parent]
 [--mime-type|--mime|--mimetype]
+[--no-icon|--noicon|--ni]
 [--no-path-transform|--np]
 [--numeric|--numeric-uid-gid]
 [--quote-name|-Q]
@@ -54,7 +62,7 @@ g
 [--show-group|--sg|--group]
 [--show-hidden|--sh|-a]
 [--show-icon|--si|--icons|--icon]
-[--show-no-dir|--nd|--nodir|--no-dir]
+[--show-no-dir|--nd|--nodir|--no-dir|--file]
 [--show-no-ext|--sne|--noext]=[value]
 [--show-only-dir|--sd|--dir|--only-dir|-D]
 [--show-only-ext|--se|--ext]=[value]
@@ -73,6 +81,7 @@ g
 [--sort-reverse|--sr|--reverse]
 [--sort|--SORT_FIELD]=[value]
 [--statistic]
+[--table|--tb]
 [--theme|--th]=[value]
 [--time-style]=[value]
 [--time-type|--tt]=[value]
@@ -112,6 +121,18 @@ g [options] [path]
 
 .SH GLOBAL OPTIONS
 .PP
+\fB-#\fP: print entry No. for each entry
+
+.PP
+\fB--CSV, --csv\fP: output in csv format
+
+.PP
+\fB--HTML, --html\fP: output in HTML-table format
+
+.PP
+\fB--Markdown, --md, --MD, --markdown\fP: output in markdown-table format
+
+.PP
 \fB--all, --la, -l, --long\fP: show all info/use a long listing format
 
 .PP
@@ -136,10 +157,13 @@ g [options] [path]
 \fB--depth\fP="": limit recursive depth, negative -> infinity (default: infinity)
 
 .PP
-\fB--dir-first, --df\fP: List directories before other files
+\fB--dir-first, --df, --group-directories-first\fP: List directories before other files
 
 .PP
 \fB--disable-index, --di, --no-update\fP: disable updating index
+
+.PP
+\fB--duplicate, --dup\fP: show duplicate files table
 
 .PP
 \fB--exact-detect-size, --eds, --detect-size, --ds\fP="": set exact size for mimetype detection eg:1M/nolimit/infinity (default: 1M)
@@ -166,16 +190,19 @@ g [options] [path]
 \fB--git-status-style, --gss, --git-style\fP="": git status style: colored-symbol: {? untracked, + added, - deleted, ~ modified, | renamed, = copied, ! ignored} colored-dot
 
 .PP
-\fB--header\fP: add a header row
+\fB--header, --title\fP: add a header row
 
 .PP
 \fB--hide-git-ignore, --gi, --hgi\fP: hide git ignored file/dir [if git is installed]
 
 .PP
-\fB--ignore-glob, -I\fP="": ignore Glob patterns
+\fB--ignore-glob, -I, --ignore, --ig\fP="": ignore Glob patterns
 
 .PP
 \fB--inode, -i\fP: show inode[linux/darwin only]
+
+.PP
+\fB--json, -j\fP: output in json format
 
 .PP
 \fB--lh, --human-readable, --hr\fP: show human readable size
@@ -190,10 +217,16 @@ g [options] [path]
 \fB--literal, -N\fP: print entry names without quoting
 
 .PP
-\fB--match-glob, -M\fP="": match Glob patterns
+\fB--match-glob, -M, --glob, --match\fP="": match Glob patterns
+
+.PP
+\fB--mime-parent, --mime-p, --mime-parent-type, --mime-type-parent\fP: show mime parent type
 
 .PP
 \fB--mime-type, --mime, --mimetype\fP: show mime file type
+
+.PP
+\fB--no-icon, --noicon, --ni\fP: disable icon(always override show-icon)
 
 .PP
 \fB--no-path-transform, --np\fP: By default, .../a/b/c will be transformed to ../../a/b/c, and ~ will be replaced by homedir, using this flag to disable this feature
@@ -232,7 +265,7 @@ g [options] [path]
 \fB--show-icon, --si, --icons, --icon\fP: show icon
 
 .PP
-\fB--show-no-dir, --nd, --nodir, --no-dir\fP: do not show directory
+\fB--show-no-dir, --nd, --nodir, --no-dir, --file\fP: do not show directory
 
 .PP
 \fB--show-no-ext, --sne, --noext\fP="": show file which doesn't have target ext
@@ -287,6 +320,9 @@ g [options] [path]
 
 .PP
 \fB--statistic\fP: show statistic info
+
+.PP
+\fB--table, --tb\fP: output in table format
 
 .PP
 \fB--theme, --th\fP="": apply theme \fB\fCpath/to/theme\fR
