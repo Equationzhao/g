@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync/atomic"
 
 	"github.com/Equationzhao/g/cached"
 	"github.com/Equationzhao/g/filter"
@@ -26,17 +27,17 @@ type (
 )
 
 type Statistics struct {
-	file, dir, link uint64
+	file, dir, link atomic.Uint64
 }
 
 func (s *Statistics) Reset() {
-	s.file = 0
-	s.dir = 0
-	s.link = 0
+	s.file.Store(0)
+	s.dir.Store(0)
+	s.link.Store(0)
 }
 
 func (s *Statistics) String() string {
-	return fmt.Sprintf("%d file(s), %d dir(s), %d link(s)", s.file, s.dir, s.link)
+	return fmt.Sprintf("%d file(s), %d dir(s), %d link(s)", s.file.Load(), s.dir.Load(), s.link.Load())
 }
 
 type gitStyle int
@@ -173,13 +174,13 @@ func (n *Name) Enable() filter.ContentOption {
 		if n.Icon {
 			if info.IsDir() {
 				if n.statistics != nil {
-					n.statistics.dir++
+					n.statistics.dir.Add(1)
 				}
 				str = n.Renderer.DirIcon(str)
 				char = "/"
 			} else if mode&os.ModeSymlink != 0 {
 				if n.statistics != nil {
-					n.statistics.link++
+					n.statistics.link.Add(1)
 				}
 				if n.Classify {
 					str = n.Renderer.SymlinkIconPlus(str, n.parent, "@")
@@ -188,7 +189,7 @@ func (n *Name) Enable() filter.ContentOption {
 				}
 			} else {
 				if n.statistics != nil {
-					n.statistics.file++
+					n.statistics.file.Add(1)
 				}
 				if mode&os.ModeNamedPipe != 0 {
 					str = n.Renderer.PipeIcon(str)
@@ -203,13 +204,13 @@ func (n *Name) Enable() filter.ContentOption {
 		} else {
 			if info.IsDir() {
 				if n.statistics != nil {
-					n.statistics.dir++
+					n.statistics.dir.Add(1)
 				}
 				str = n.Renderer.Dir(str)
 				char = "/"
 			} else if mode&os.ModeSymlink != 0 {
 				if n.statistics != nil {
-					n.statistics.link++
+					n.statistics.link.Add(1)
 				}
 				if n.Classify {
 					str = n.Renderer.SymlinkPlus(str, n.parent, "@")
@@ -218,7 +219,7 @@ func (n *Name) Enable() filter.ContentOption {
 				}
 			} else {
 				if n.statistics != nil {
-					n.statistics.file++
+					n.statistics.file.Add(1)
 				}
 				if mode&os.ModeNamedPipe != 0 {
 					str = n.Renderer.Pipe(str)
