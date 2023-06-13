@@ -127,8 +127,8 @@ var displayFlag = []cli.Flag{
 				}
 			}
 
-			context.Set("header", "0")
-			context.Set("classic", "1")
+			_ = context.Set("header", "0")
+			_ = context.Set("classic", "1")
 			sizeEnabler.DisableTotal()
 
 			return nil
@@ -161,7 +161,7 @@ var displayFlag = []cli.Flag{
 					r.SetTheme(theme.Colorless)
 					r.SetInfoTheme(theme.Colorless)
 					theme.Reset = ""
-					context.Set("no-icon", "1")
+					_ = context.Set("no-icon", "1")
 				}
 			}
 			return nil

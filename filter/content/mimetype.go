@@ -21,7 +21,7 @@ func NewMimeFileTypeEnabler() *MimeFileTypeEnabler {
 	}
 }
 
-const MimeTypeName = "mine type"
+const MimeTypeName = "Mime-type"
 
 func (e *MimeFileTypeEnabler) Enable() filter.ContentOption {
 	longestTypeName := 0
@@ -48,6 +48,9 @@ func (e *MimeFileTypeEnabler) Enable() filter.ContentOption {
 	return func(info os.FileInfo) (string, string) {
 		tn := ""
 		returnName := MimeTypeName
+		if e.ParentOnly {
+			returnName = "parent-" + returnName
+		}
 		if info.IsDir() {
 			tn = "directory"
 		} else if info.Mode()&os.ModeSymlink != 0 {
@@ -58,23 +61,23 @@ func (e *MimeFileTypeEnabler) Enable() filter.ContentOption {
 			tn = "socket"
 		} else {
 			file, err := os.Open(info.Name())
+			defer file.Close()
 			if err != nil {
 				// tn = err.Error()
 				tn = "failed_to_read"
 				done(tn)
-				return wait(tn), MimeTypeName
+				return wait(tn), returnName
 			}
 			mtype, err := mimetype.DetectReader(file)
 			if err != nil {
 				tn = err.Error()
 				done(tn)
-				return wait(tn), MimeTypeName
+				return wait(tn), returnName
 			}
 			tn = mtype.String()
 
 			if e.ParentOnly {
 				tn = strings.SplitN(tn, "/", 2)[0]
-				returnName = "parent_" + returnName
 			}
 
 			if strings.Contains(tn, ";") {

@@ -5,9 +5,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	mt "github.com/gabriel-vasile/mimetype"
-
 	"github.com/Equationzhao/g/osbased"
+	mt "github.com/gabriel-vasile/mimetype"
 )
 
 func ByNone(a, b os.FileInfo) bool {

@@ -122,7 +122,7 @@ func fileHash(fileInfo os.FileInfo, isThorough bool) (string, error) {
 		bytes, fileReadErr = readCrucialBytes(fileInfo.Name(), fileInfo.Size())
 	}
 	if fileReadErr != nil {
-		return "", fmt.Errorf("couldn't calculate hash: %+v", fileReadErr)
+		return "", fmt.Errorf("couldn't calculate hash: %w", fileReadErr)
 	}
 	var h hash.Hash
 	if isThorough {
@@ -132,7 +132,7 @@ func fileHash(fileInfo os.FileInfo, isThorough bool) (string, error) {
 	}
 	_, hashErr := h.Write(bytes)
 	if hashErr != nil {
-		return "", fmt.Errorf("error while computing hash: %+v", hashErr)
+		return "", fmt.Errorf("error while computing hash: %w", hashErr)
 	}
 	hashBytes := h.Sum(nil)
 	return prefix + hex.EncodeToString(hashBytes), nil
@@ -149,17 +149,17 @@ func readCrucialBytes(filePath string, fileSize int64) ([]byte, error) {
 	firstBytes := make([]byte, thresholdFileSize/2)
 	_, fErr := file.ReadAt(firstBytes, 0)
 	if fErr != nil {
-		return nil, fmt.Errorf("couldn't read first few bytes (maybe file is corrupted?): %+v", fErr)
+		return nil, fmt.Errorf("couldn't read first few bytes (maybe file is corrupted?): %w", fErr)
 	}
 	middleBytes := make([]byte, thresholdFileSize/4)
 	_, mErr := file.ReadAt(middleBytes, fileSize/2)
 	if mErr != nil {
-		return nil, fmt.Errorf("couldn't read middle bytes (maybe file is corrupted?): %+v", mErr)
+		return nil, fmt.Errorf("couldn't read middle bytes (maybe file is corrupted?): %w", mErr)
 	}
 	lastBytes := make([]byte, thresholdFileSize/4)
 	_, lErr := file.ReadAt(lastBytes, fileSize-thresholdFileSize/4)
 	if lErr != nil {
-		return nil, fmt.Errorf("couldn't read end bytes (maybe file is corrupted?): %+v", lErr)
+		return nil, fmt.Errorf("couldn't read end bytes (maybe file is corrupted?): %w", lErr)
 	}
 	bytes := append(append(firstBytes, middleBytes...), lastBytes...)
 	return bytes, nil
