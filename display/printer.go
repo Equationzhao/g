@@ -31,33 +31,33 @@ func RawPrint(toPrint ...any) (n int, err error) {
 // print style control
 
 type hook struct {
-	BeforePrint   []func(...Item)
-	AfterPrint    []func(...Item)
+	BeforePrint   []func(Printer, ...Item)
+	AfterPrint    []func(Printer, ...Item)
 	disableBefore bool
 	disableAfter  bool
 }
 
-func fire(h []func(...Item), i ...Item) {
+func fire(h []func(Printer, ...Item), p Printer, i ...Item) {
 	for _, fn := range h {
 		if fn == nil {
 			continue
 		}
-		fn(i...)
+		fn(p, i...)
 	}
 }
 
 func newHook() *hook {
 	return &hook{
-		BeforePrint: make([]func(...Item), 0, 5),
-		AfterPrint:  make([]func(...Item), 0, 5),
+		BeforePrint: make([]func(Printer, ...Item), 0, 5),
+		AfterPrint:  make([]func(Printer, ...Item), 0, 5),
 	}
 }
 
-func (h *hook) AddBeforePrint(f ...func(...Item)) {
+func (h *hook) AddBeforePrint(f ...func(Printer, ...Item)) {
 	h.BeforePrint = append(h.BeforePrint, f...)
 }
 
-func (h *hook) AddAfterPrint(f ...func(...Item)) {
+func (h *hook) AddAfterPrint(f ...func(Printer, ...Item)) {
 	h.AfterPrint = append(h.AfterPrint, f...)
 }
 
@@ -78,8 +78,8 @@ func (h *hook) EnableHookAfter() {
 }
 
 type Hook interface {
-	AddBeforePrint(...func(...Item))
-	AddAfterPrint(...func(...Item))
+	AddBeforePrint(...func(Printer, ...Item))
+	AddAfterPrint(...func(Printer, ...Item))
 	DisableHookBefore()
 	EnableHookBefore()
 	DisableHookAfter()
@@ -89,6 +89,7 @@ type Hook interface {
 type Printer interface {
 	Print(s ...Item)
 	Hook
+	io.Writer
 }
 
 type Byline struct {
@@ -105,7 +106,7 @@ func NewByline() Printer {
 
 func (b *Byline) Print(i ...Item) {
 	if !b.disableBefore {
-		fire(b.BeforePrint, i...)
+		fire(b.BeforePrint, b, i...)
 	}
 	defer b.Flush()
 	for _, v := range i {
@@ -113,7 +114,7 @@ func (b *Byline) Print(i ...Item) {
 		_ = b.WriteByte('\n')
 	}
 	if !b.disableAfter {
-		fire(b.AfterPrint, i...)
+		fire(b.AfterPrint, b, i...)
 	}
 }
 
@@ -133,9 +134,9 @@ func NewFitTerminal() Printer {
 
 func (f *FitTerminal) Print(i ...Item) {
 	if !f.disableBefore {
-		fire(f.BeforePrint, i...)
+		fire(f.BeforePrint, f, i...)
 	}
-
+	defer f.Flush()
 	s := make([]string, 0, len(i))
 	for _, v := range i {
 		s = append(s, v.OrderedContent())
@@ -143,13 +144,11 @@ func (f *FitTerminal) Print(i ...Item) {
 	f.printColumns(&s)
 
 	if !f.disableAfter {
-		fire(f.AfterPrint, i...)
+		fire(f.AfterPrint, f, i...)
 	}
 }
 
 func (f *FitTerminal) printColumns(strs *[]string) {
-	defer f.Flush()
-
 	maxLength, lengths, numCols, numRows := calculateRowCol(strs, 6)
 
 	// if we're forced into a single column, fall back to simple printing (one per line)
@@ -298,8 +297,9 @@ func NewCommaPrint() Printer {
 
 func (c *CommaPrint) Print(items ...Item) {
 	if !c.disableBefore {
-		fire(c.BeforePrint, items...)
+		fire(c.BeforePrint, c, items...)
 	}
+	defer c.Flush()
 	s := make([]string, 0, len(items))
 	for i, v := range items {
 		if i != len(items)-1 {
@@ -310,7 +310,7 @@ func (c *CommaPrint) Print(items ...Item) {
 	}
 	c.printRowWithNoSpace(&s)
 	if !c.disableAfter {
-		fire(c.AfterPrint, items...)
+		fire(c.AfterPrint, c, items...)
 	}
 }
 
@@ -328,15 +328,16 @@ func NewAcross() Printer {
 
 func (a *Across) Print(items ...Item) {
 	if !a.disableBefore {
-		fire(a.BeforePrint, items...)
+		fire(a.BeforePrint, a, items...)
 	}
+	defer a.Flush()
 	s := make([]string, 0, len(items))
 	for _, v := range items {
 		s = append(s, v.OrderedContent())
 	}
 	a.printRow(&s)
 	if !a.disableAfter {
-		fire(a.AfterPrint, items...)
+		fire(a.AfterPrint, a, items...)
 	}
 }
 
@@ -370,7 +371,6 @@ func (a *Across) printRowWithNoSpace(strs *[]string) {
 }
 
 func (a *Across) printRow(strs *[]string) {
-	defer a.Flush()
 	width := getTermWidth()
 
 	const m = 1
@@ -435,7 +435,7 @@ func NewZero() Printer {
 
 func (z *Zero) Print(items ...Item) {
 	if !z.disableBefore {
-		fire(z.BeforePrint, items...)
+		fire(z.BeforePrint, z, items...)
 	}
 	defer z.Flush()
 	for _, v := range items {
@@ -443,7 +443,7 @@ func (z *Zero) Print(items ...Item) {
 		_, _ = z.WriteString(v.OrderedContent())
 	}
 	if !z.disableAfter {
-		fire(z.AfterPrint, items...)
+		fire(z.AfterPrint, z, items...)
 	}
 }
 
@@ -470,7 +470,7 @@ func NewJsonPrinter() Printer {
 
 func (j *JsonPrinter) Print(items ...Item) {
 	if !j.disableBefore {
-		fire(j.BeforePrint, items...)
+		fire(j.BeforePrint, j, items...)
 	}
 	defer j.Flush()
 
@@ -523,7 +523,7 @@ func (j *JsonPrinter) Print(items ...Item) {
 	_, _ = j.Write(pretty)
 	_, _ = j.WriteString("\n")
 	if !j.disableAfter {
-		fire(j.AfterPrint, items...)
+		fire(j.AfterPrint, j, items...)
 	}
 }
 
@@ -564,9 +564,9 @@ func NewTablePrinter(opts ...func(writer table.Writer)) Printer {
 
 func (t *TablePrinter) PrintBase(fn func() string, s ...Item) {
 	if !t.disableBefore {
-		fire(t.BeforePrint, s...)
+		fire(t.BeforePrint, t, s...)
 	}
-	defer t.Writer.Flush()
+	defer t.Flush()
 	t.w.ResetRows()
 	t.setTB(s...)
 	t.w.AppendHeader(t.header)
@@ -577,7 +577,7 @@ func (t *TablePrinter) PrintBase(fn func() string, s ...Item) {
 	t.header = t.header[:0]
 
 	if !t.disableAfter {
-		fire(t.AfterPrint, s...)
+		fire(t.AfterPrint, t, s...)
 	}
 }
 

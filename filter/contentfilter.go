@@ -29,9 +29,10 @@ type LengthFixed interface {
 // fileMode size owner group time name
 
 type ContentFilter struct {
-	options  []ContentOption
-	wgs      []LengthFixed
-	sortFunc func(a, b os.FileInfo) bool
+	noOutputOptions []NoOutputOption
+	options         []ContentOption
+	wgs             []LengthFixed
+	sortFunc        func(a, b os.FileInfo) bool
 }
 
 func (cf *ContentFilter) AppendToLengthFixed(fixed ...LengthFixed) {
@@ -54,7 +55,18 @@ func (cf *ContentFilter) SetOptions(options ...ContentOption) {
 	cf.options = options
 }
 
-type ContentOption func(info os.FileInfo) (stringContent string, funcName string)
+func (cf *ContentFilter) AppendToNoOutputOptions(options ...NoOutputOption) {
+	cf.noOutputOptions = append(cf.noOutputOptions, options...)
+}
+
+func (cf *ContentFilter) SetNoOutputOptions(outputFunc ...NoOutputOption) {
+	cf.noOutputOptions = outputFunc
+}
+
+type (
+	ContentOption  func(info os.FileInfo) (stringContent string, funcName string)
+	NoOutputOption func(info os.FileInfo)
+)
 
 // FillBlank
 // if s is shorter than length, fill blank from left
@@ -172,17 +184,38 @@ func (cf *ContentFilter) EnableGroup(renderer *render.Renderer) ContentOption {
 	}
 }
 
-func NewContentFilter(options ...ContentOption) *ContentFilter {
+type ContentFilterOption func(cf *ContentFilter)
+
+func WithOptions(options ...ContentOption) ContentFilterOption {
+	return func(cf *ContentFilter) {
+		cf.options = options
+	}
+}
+
+func WithNoOutputOptions(options ...NoOutputOption) ContentFilterOption {
+	return func(cf *ContentFilter) {
+		cf.noOutputOptions = options
+	}
+}
+
+func NewContentFilter(options ...ContentFilterOption) *ContentFilter {
 	c := &ContentFilter{
-		options:  options,
 		sortFunc: nil,
-		wgs:      make([]LengthFixed, 0),
+	}
+
+	for _, option := range options {
+		option(c)
+	}
+
+	if c.options == nil {
+		c.options = make([]ContentOption, 0)
+	}
+	if c.noOutputOptions == nil {
+		c.noOutputOptions = make([]NoOutputOption, 0)
 	}
 
 	return c
 }
-
-type ContentFunc func(entry os.FileInfo) bool
 
 func (cf *ContentFilter) GetDisplayItems(e ...os.FileInfo) []*display.Item {
 	sort.Slice(e, func(i, j int) bool {
@@ -210,6 +243,10 @@ func (cf *ContentFilter) GetDisplayItems(e ...os.FileInfo) []*display.Item {
 				stringContent, funcName := option(entry)
 				content := display.ItemContent{Content: display.StringContent(stringContent), No: j}
 				res[i].Set(funcName, content)
+			}
+
+			for _, option := range cf.noOutputOptions {
+				option(entry)
 			}
 			wg.Done()
 		}(entry, i)

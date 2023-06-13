@@ -32,22 +32,25 @@ import (
 )
 
 var (
-	typeFunc      = make([]*filter.TypeFunc, 0)
-	contentFunc   = make([]filter.ContentOption, 0)
-	r             = render.NewRenderer(theme.DefaultTheme, theme.DefaultInfoTheme)
-	p             = display.NewFitTerminal()
-	timeFormat    = "02.Jan'06 15:04"
-	ReturnCode    = 0
-	contentFilter = filter.NewContentFilter()
-	CompiledAt    = ""
-	sort          = sorter.NewSorter()
-	timeType      = []string{"mod"}
-	sizeUint      = filtercontent.Auto
-	sizeEnabler   = filtercontent.NewSizeEnabler()
-	wgs           = make([]filter.LengthFixed, 0, 1)
-	depthLimitMap = make(map[string]int)
-	limitOnce     = util.Once{}
-	hookOnce      = util.Once{}
+	typeFunc        = make([]*filter.TypeFunc, 0)
+	contentFunc     = make([]filter.ContentOption, 0)
+	noOutputFunc    = make([]filter.NoOutputOption, 0)
+	r               = render.NewRenderer(theme.DefaultTheme, theme.DefaultInfoTheme)
+	p               = display.NewFitTerminal()
+	timeFormat      = "02.Jan'06 15:04"
+	ReturnCode      = 0
+	contentFilter   = filter.NewContentFilter()
+	CompiledAt      = ""
+	sort            = sorter.NewSorter()
+	timeType        = []string{"mod"}
+	sizeUint        = filtercontent.Auto
+	sizeEnabler     = filtercontent.NewSizeEnabler()
+	wgs             = make([]filter.LengthFixed, 0, 1)
+	depthLimitMap   = make(map[string]int)
+	limitOnce       = util.Once{}
+	hookOnce        = util.Once{}
+	duplicateDetect = filtercontent.NewDuplicateDetect()
+	hookAfter       = make([]func(display.Printer, ...display.Item), 0)
 )
 
 var Version = "0.7.0"
@@ -168,8 +171,9 @@ There is NO WARRANTY, to the extent permitted by law.`,
 			}
 			contentFilter.SetSortFunc(sort.Build())
 			contentFilter.SetOptions(contentFunc...)
+			contentFilter.SetNoOutputOptions(noOutputFunc...)
 
-			// if no path, use current path
+			// if no path, use the current path
 			if len(path) == 0 {
 				path = append(path, ".")
 			}
@@ -489,12 +493,12 @@ There is NO WARRANTY, to the extent permitted by law.`,
 							p.Print(*i)
 							p.EnableHookBefore()
 						}
-
 					}
 
-					if header {
-						_ = hookOnce.Do(func() error {
-							p.AddBeforePrint(func(item ...display.Item) {
+					_ = hookOnce.Do(func() error {
+						p.AddAfterPrint(hookAfter...)
+						if header {
+							p.AddBeforePrint(func(p display.Printer, item ...display.Item) {
 								// add header
 								allPart := item[0].KeysByOrder()
 								longestEachPart := make(map[string]int)
@@ -548,9 +552,9 @@ There is NO WARRANTY, to the extent permitted by law.`,
 								_, _ = fmt.Fprintln(display.Output, contentStrBuf.String())
 								bytebufferpool.Put(contentStrBuf)
 							})
-							return nil
-						})
-					}
+						}
+						return nil
+					})
 
 					itemsCopy := make([]display.Item, 0, len(items))
 					{
@@ -727,6 +731,21 @@ var viewFlag = []cli.Flag{
 		Name:     "statistic",
 		Usage:    "show statistic info",
 		Category: "VIEW",
+	},
+	&cli.BoolFlag{
+		Name:    "duplicate",
+		Aliases: []string{"dup"},
+		Usage:   "show duplicate files table",
+		Action: func(context *cli.Context, b bool) error {
+			if b {
+				noOutputFunc = append(noOutputFunc, duplicateDetect.Enable())
+				hookAfter = append(hookAfter, func(p display.Printer, item ...display.Item) {
+					duplicateDetect.Fprint(p)
+					duplicateDetect.Reset()
+				})
+			}
+			return nil
+		},
 	},
 	&cli.StringSliceFlag{
 		Name:        "time-type",
@@ -1562,6 +1581,7 @@ var displayFlag = []cli.Flag{
 			if err != nil {
 				return err
 			}
+			theme.SyncColorlessWithTheme()
 			return nil
 		},
 		Category: "DISPLAY",

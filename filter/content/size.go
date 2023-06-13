@@ -237,7 +237,7 @@ func (s *SizeEnabler) Size2String(b int64, blank int) string {
 		res = fmt.Sprintf("%g", v*float64(B)/float64(s.sizeUint))
 
 	case Auto:
-		for i := B; i <= ZB; i *= 1024 {
+		for i := B; i <= NB; i *= 1024 {
 			if v < 1024 {
 				res = strconv.FormatFloat(v, 'f', 1, 64)
 				if res == "0.0" {
