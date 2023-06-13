@@ -3,6 +3,7 @@ package content
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/Equationzhao/g/cached"
@@ -14,13 +15,13 @@ import (
 
 type (
 	Name struct {
-		Icon, Classify, FileType, git bool
-		Renderer                      *render.Renderer
-		GitCache                      *cached.Map[git.GitRepoPath, *git.FileGits]
-		statistics                    *Statistics
-		parent                        string
-		GitStyle                      gitStyle
-		Quote                         string
+		Icon, Classify, FileType, git, fullPath bool
+		Renderer                                *render.Renderer
+		GitCache                                *cached.Map[git.GitRepoPath, *git.FileGits]
+		statistics                              *Statistics
+		parent                                  string
+		Quote                                   string
+		GitStyle                                gitStyle
 	}
 )
 
@@ -45,6 +46,18 @@ const (
 	GitStyleSym
 	GitStyleDefault = GitStyleDot
 )
+
+func (n *Name) FullPath() bool {
+	return n.fullPath
+}
+
+func (n *Name) SetFullPath() {
+	n.fullPath = true
+}
+
+func (n *Name) UnsetFullPath() {
+	n.fullPath = false
+}
 
 func (n *Name) Statistics() *Statistics {
 	return n.statistics
@@ -239,6 +252,11 @@ func (n *Name) Enable() filter.ContentOption {
 
 		if n.Quote != "" {
 			str = strings.Replace(str, name, n.Quote+name+n.Quote, 1)
+		}
+
+		if n.fullPath {
+			fullPath := filepath.Join(n.parent, name)
+			str = strings.Replace(str, name, fullPath, 1)
 		}
 
 		return str, NameName

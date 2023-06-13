@@ -118,6 +118,9 @@ There is NO WARRANTY, to the extent permitted by law.`,
 			if context.Bool("git-status") {
 				nameToDisplay.SetGit()
 			}
+			if context.Bool("fp") {
+				nameToDisplay.SetFullPath()
+			}
 
 			fuzzy := context.Bool("fuzzy")
 			if fuzzy {
@@ -1141,6 +1144,13 @@ var viewFlag = []cli.Flag{
 		Name:               "show-icon",
 		Usage:              "show icon",
 		Aliases:            []string{"si", "icons", "icon"},
+		DisableDefaultText: true,
+		Category:           "VIEW",
+	},
+	&cli.BoolFlag{
+		Name:               "full-path",
+		Usage:              "show full path",
+		Aliases:            []string{"fp", "fullpath"},
 		DisableDefaultText: true,
 		Category:           "VIEW",
 	},
