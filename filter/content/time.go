@@ -23,7 +23,7 @@ func NewRelativeTimeEnabler() *RelativeTimeEnabler {
 	}
 }
 
-const RelativeTime = "Relative-time"
+const RelativeTime = "Relative-Time"
 
 func (r *RelativeTimeEnabler) Enable(renderer *render.Renderer) filter.ContentOption {
 	longestRt := 0
@@ -50,19 +50,24 @@ func (r *RelativeTimeEnabler) Enable(renderer *render.Renderer) filter.ContentOp
 
 	return func(info os.FileInfo) (string, string) {
 		var t time.Time
+		timeType := ""
 		switch r.Mode {
 		case "mod":
 			t = osbased.ModTime(info)
+			timeType = timeModified
 		case "create":
 			t = osbased.CreateTime(info)
+			timeType = timeCreated
 		case "access":
 			t = osbased.AccessTime(info)
+			timeType = timeAccessed
 		default:
 			t = osbased.ModTime(info)
+			timeType = timeModified
 		}
 		rt := renderer.Time(relativeTime(time.Now(), t))
 		done(rt)
-		return wait(rt), RelativeTime + " " + r.Mode
+		return wait(rt), RelativeTime + " " + timeType
 	}
 }
 
@@ -98,6 +103,9 @@ func EnableTime(format string, mode string, renderer *render.Renderer) filter.Co
 		case "access":
 			t = osbased.AccessTime(info)
 			timeType = timeAccessed
+		default:
+			t = osbased.ModTime(info)
+			timeType = timeModified
 		}
 		return renderer.Time(t.Format(format)), timeName + " " + timeType
 	}

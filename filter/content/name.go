@@ -135,7 +135,7 @@ func NewNameEnable() *Name {
 	return &Name{}
 }
 
-const NameName = "name"
+const NameName = "Name"
 
 func (n *Name) Enable() filter.ContentOption {
 	/*

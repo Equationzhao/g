@@ -84,9 +84,9 @@ var (
 )
 
 const (
-	OwnerName    = "owner"
-	OwnerUidName = "owner-uid"
-	OwnerSID     = "owner-sid"
+	OwnerName    = "Owner"
+	OwnerUidName = "Owner-uid"
+	OwnerSID     = "Owner-sid"
 )
 
 func (cf *ContentFilter) EnableOwner(renderer *render.Renderer) ContentOption {
@@ -134,9 +134,9 @@ func (cf *ContentFilter) EnableOwner(renderer *render.Renderer) ContentOption {
 }
 
 const (
-	GroupName    = "group"
-	GroupUidName = "group-uid"
-	GroupSID     = "group-sid"
+	GroupName    = "Group"
+	GroupUidName = "Group-uid"
+	GroupSID     = "Group-sid"
 )
 
 func (cf *ContentFilter) EnableGroup(renderer *render.Renderer) ContentOption {
@@ -268,7 +268,7 @@ const (
 	SumTypeCRC32
 )
 
-const SumName = "sum"
+const SumName = "Sum"
 
 func (cf *ContentFilter) EnableSum(sumTypes ...SumType) ContentOption {
 	length := 0
