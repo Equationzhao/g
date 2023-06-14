@@ -158,7 +158,7 @@ func RemoveGitIgnore(repoPath git.GitRepoPath) ItemFilterFunc {
 		ok = true
 		for _, fileGit := range *actual {
 			if fileGit.Status == git.Ignored {
-				if isOrIsParentOf(e.Name(), fileGit.Name) {
+				if isOrIsParentOf(fileGit.Name, e.Name()) {
 					ok = false
 				}
 			}
@@ -177,7 +177,7 @@ func isOrIsSonOf(a, b string) bool {
 	return false
 }
 
-func ExactFileTypeOnly(fileTypes ...string) ItemFilterFunc {
+func MimeTypeOnly(fileTypes ...string) ItemFilterFunc {
 	return func(e os.FileInfo) bool {
 		file, err := os.Open(e.Name())
 		if err != nil {
@@ -197,7 +197,7 @@ func ExactFileTypeOnly(fileTypes ...string) ItemFilterFunc {
 	}
 }
 
-func RemoveExactFileType(fileTypes ...string) ItemFilterFunc {
+func RemoveMimeType(fileTypes ...string) ItemFilterFunc {
 	return func(e os.FileInfo) bool {
 		file, err := os.Open(e.Name())
 		if err != nil {

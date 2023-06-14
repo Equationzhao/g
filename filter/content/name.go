@@ -244,7 +244,7 @@ func (n *Name) Enable() filter.ContentOption {
 		}
 
 		if n.Classify {
-			if (!n.FileType) && (mode&0o111 != 0) {
+			if char == "" && (!n.FileType) && (mode&0o111 != 0) && mode&os.ModeSymlink == 0 {
 				str += "*"
 			} else {
 				str += char

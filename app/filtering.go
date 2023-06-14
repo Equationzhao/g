@@ -197,7 +197,7 @@ var filteringFlag = []cli.Flag{
 				if err != nil {
 					return err
 				}
-				eft := filter.ExactFileTypeOnly(i...)
+				eft := filter.MimeTypeOnly(i...)
 				itemFiltetrFunc = append(itemFiltetrFunc, &eft)
 			}
 			return nil

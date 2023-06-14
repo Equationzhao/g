@@ -233,6 +233,9 @@ There is NO WARRANTY, to the extent permitted by law.`,
 							}
 						}
 					}
+					if gitignore {
+						*removeGitIgnore = filter.RemoveGitIgnore(path[i])
+					}
 
 					s, err, minorErrInTree := tree.NewTreeString(path[i], depth, itemFilter, contentFilter)
 					if pathErr := new(os.PathError); errors.As(err, &pathErr) {
