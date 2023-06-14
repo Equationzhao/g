@@ -392,7 +392,6 @@ func byUserCaseSensitiveName(a, b os.FileInfo, Ascend bool) bool {
 func byNameWidth(a, b os.FileInfo, Ascend bool) bool {
 	if Ascend {
 		return len(a.Name()) < len(b.Name())
-	} else {
-		return len(a.Name()) > len(b.Name())
 	}
+	return len(a.Name()) > len(b.Name())
 }

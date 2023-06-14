@@ -75,9 +75,8 @@ var indexFlags = []cli.Flag{
 			}
 			if errSum != nil {
 				return errSum
-			} else {
-				return Err4Exit{}
 			}
+			return Err4Exit{}
 		},
 	},
 	&cli.BoolFlag{

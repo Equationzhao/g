@@ -205,7 +205,8 @@ There is NO WARRANTY, to the extent permitted by law.`,
 					if fuzzy {
 						_, err := os.Stat(path[i])
 						if err != nil {
-							if newPath, b := fuzzyPath(path[i]); b != nil {
+							newPath, b := fuzzyPath(path[i])
+							if b != nil {
 								_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(err.Error()))
 								minorErr = true
 								continue
@@ -213,15 +214,9 @@ There is NO WARRANTY, to the extent permitted by law.`,
 								path[i] = newPath
 								_, err = os.Stat(path[i])
 								if err != nil {
-									if pathErr := new(os.PathError); errors.As(err, &pathErr) {
-										_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(fmt.Sprintf("%s: %s", pathErr.Err, pathErr.Path)))
-										seriousErr = true
-										continue
-									} else {
-										_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(err.Error()))
-										seriousErr = true
-										continue
-									}
+									checkErr(err)
+									seriousErr = true
+									continue
 								}
 								fmt.Println(path[i])
 							}
@@ -322,15 +317,9 @@ There is NO WARRANTY, to the extent permitted by law.`,
 									path[i] = newPath
 									stat, err = os.Stat(path[i])
 									if err != nil {
-										if pathErr := new(os.PathError); errors.As(err, &pathErr) {
-											_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(fmt.Sprintf("%s: %s", pathErr.Err, pathErr.Path)))
-											seriousErr = true
-											continue
-										} else {
-											_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(err.Error()))
-											seriousErr = true
-											continue
-										}
+										checkErr(err)
+										seriousErr = true
+										continue
 									}
 									fmt.Println(path[i])
 								}
@@ -340,11 +329,10 @@ There is NO WARRANTY, to the extent permitted by law.`,
 									_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(fmt.Sprintf("%s: %s", pathErr.Err, pathErr.Path)))
 									seriousErr = true
 									continue
-								} else {
-									_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(err.Error()))
-									seriousErr = true
-									continue
 								}
+								_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(err.Error()))
+								seriousErr = true
+								continue
 							}
 						}
 						if stat.IsDir() {
@@ -661,9 +649,8 @@ func fuzzyPath(path string) (newPath string, minorErr error) {
 	fuzzed, err := index.FuzzySearch(path)
 	if err == nil {
 		return fuzzed, nil
-	} else {
-		return "", err
 	}
+	return "", err
 }
 
 type Err4Exit struct{}
@@ -724,4 +711,12 @@ func initVersionHelpFlags() {
 
 func MakeErrorStr(msg string) string {
 	return fmt.Sprintf("%s × %s %s\n", theme.Error, msg, theme.Reset)
+}
+
+func checkErr(err error) {
+	if pathErr := new(os.PathError); errors.As(err, &pathErr) {
+		_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(fmt.Sprintf("%s: %s", pathErr.Err, pathErr.Path)))
+		return
+	}
+	_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(err.Error()))
 }

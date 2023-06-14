@@ -221,9 +221,8 @@ func (cf *ContentFilter) GetDisplayItems(e ...os.FileInfo) []*display.Item {
 	sort.Slice(e, func(i, j int) bool {
 		if cf.sortFunc != nil {
 			return cf.sortFunc(e[i], e[j])
-		} else {
-			return true
 		}
+		return true
 	})
 
 	wg := sync.WaitGroup{}
