@@ -26,13 +26,12 @@ type LengthFixed interface {
 	Add(delta int)
 }
 
-// fileMode size owner group time name
-
 type ContentFilter struct {
 	noOutputOptions []NoOutputOption
 	options         []ContentOption
 	wgs             []LengthFixed
 	sortFunc        func(a, b os.FileInfo) bool
+	LimitN          uint // <=0 means no limit
 }
 
 func (cf *ContentFilter) AppendToLengthFixed(fixed ...LengthFixed) {
@@ -225,6 +224,12 @@ func (cf *ContentFilter) GetDisplayItems(e ...os.FileInfo) []*display.Item {
 			return true
 		}
 	})
+
+	// limit number of entries
+	// 0 means no limit
+	if cf.LimitN != 0 && len(e) > int(cf.LimitN) {
+		e = e[:cf.LimitN]
+	}
 
 	wg := sync.WaitGroup{}
 	wg.Add(len(e))

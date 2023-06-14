@@ -140,7 +140,8 @@ There is NO WARRANTY, to the extent permitted by law.`,
 			wgUpdateIndex := sync.WaitGroup{}
 
 			{
-				s := context.String("git-status-style")
+				// git-status-style
+				s := context.String("gss")
 				switch s {
 				case "symbol", "sym":
 					nameToDisplay.GitStyle = filtercontent.GitStyleSym
@@ -151,19 +152,24 @@ There is NO WARRANTY, to the extent permitted by law.`,
 				}
 			}
 
+			// set quote
 			if context.Bool("Q") {
 				nameToDisplay.SetQuote(`"`)
 			}
+
+			// if no quote, set quote to empty
+			// this will override the quote set by -Q
 			if context.Bool("N") {
 				nameToDisplay.UnsetQuote()
 			}
 
+			// no path transform
 			transformEnabled := !context.Bool("np")
 
 			contentFunc = append(contentFunc, nameToDisplay.Enable())
 			itemFilter := filter.NewItemFilter(itemFiltetrFunc...)
 
-			gitignore := context.Bool("hide-git-ignore")
+			gitignore := context.Bool("git-ignore")
 			removeGitIgnore := new(filter.ItemFilterFunc)
 			if gitignore {
 				itemFilter.AppendTo(removeGitIgnore)
@@ -273,15 +279,18 @@ There is NO WARRANTY, to the extent permitted by law.`,
 			} else {
 				startDir, _ := os.Getwd()
 
-				// flag: if d is set
+				// flag: if d is set, display directory them self
 				flagd := context.Bool("d")
 				// flag: if A is set
 				flagA := context.Bool("A")
 				flagR := context.Bool("R")
-
-				header := context.Bool("header")
-				if context.Bool("statistic") {
+				header := context.Bool("statistic")
+				if header {
 					nameToDisplay.SetStatistics(&filtercontent.Statistics{})
+				}
+
+				if n := context.Uint("n"); n > 0 {
+					contentFilter.LimitN = n
 				}
 
 				flagSharp := context.Bool("#")

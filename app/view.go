@@ -279,13 +279,6 @@ var viewFlag = []cli.Flag{
 		Category: "VIEW",
 	},
 	&cli.BoolFlag{
-		Name:               "hide-git-ignore",
-		Aliases:            []string{"gi", "hgi"},
-		Usage:              "hide git ignored file/dir [if git is installed]",
-		DisableDefaultText: true,
-		Category:           "VIEW",
-	},
-	&cli.BoolFlag{
 		Name:               "inode",
 		Aliases:            []string{"i"},
 		Usage:              "show inode[linux/darwin only]",

@@ -8,6 +8,14 @@ import (
 )
 
 var filteringFlag = []cli.Flag{
+	&cli.UintFlag{
+		Name:        "limitN",
+		Aliases:     []string{"n", "limit"},
+		Usage:       "limit n items(n <=0 means unlimited)",
+		Value:       0,
+		DefaultText: "unlimited",
+		Category:    "FILTERING",
+	},
 	&cli.StringSliceFlag{
 		Name:    "ignore-glob",
 		Aliases: []string{"I", "ignore", "ig"},
@@ -194,5 +202,12 @@ var filteringFlag = []cli.Flag{
 			}
 			return nil
 		},
+	},
+	&cli.BoolFlag{
+		Name:               "hide-git-ignore",
+		Aliases:            []string{"gi", "hgi", "git-ignore"},
+		Usage:              "hide git ignored file/dir [if git is installed]",
+		DisableDefaultText: true,
+		Category:           "FILTERING",
 	},
 }

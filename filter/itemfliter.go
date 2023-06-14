@@ -85,7 +85,7 @@ func ExtOnly(ext ...string) ItemFilterFunc {
 }
 
 // RemoveGlob if all pattern complied successfully, return a func and nil error,
-// if match any one, the fn will return false, else return false
+// if match any one, the fn will return remove, else return keep
 // if error occurred, return nil func and error
 func RemoveGlob(globPattern ...string) (ItemFilterFunc, error) {
 	compiled := make([]glob.Glob, 0, len(globPattern))
@@ -108,7 +108,7 @@ func RemoveGlob(globPattern ...string) (ItemFilterFunc, error) {
 }
 
 // GlobOnly if all pattern complied successfully, return a func and nil error,
-// if match any one, the fn will return true, else return false
+// if match any one, the fn will return keep, else return remove
 // if error occurred, return nil func and error
 func GlobOnly(globPattern ...string) (ItemFilterFunc, error) {
 	compiled := make([]glob.Glob, 0, len(globPattern))
