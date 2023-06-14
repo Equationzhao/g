@@ -195,13 +195,13 @@ var viewFlag = []cli.Flag{
 		Action: func(context *cli.Context, b bool) error {
 			if b {
 				// remove filter.RemoveHidden
-				newFF := make([]*filter.TypeFunc, 0, len(typeFunc))
-				for _, typeFunc := range typeFunc {
+				newFF := make([]*filter.ItemFilterFunc, 0, len(itemFiltetrFunc))
+				for _, typeFunc := range itemFiltetrFunc {
 					if typeFunc != &filter.RemoveHidden {
 						newFF = append(newFF, typeFunc)
 					}
 				}
-				typeFunc = newFF
+				itemFiltetrFunc = newFF
 				contentFunc = append(contentFunc, content.EnableFileMode(r), sizeEnabler.EnableSize(sizeUint), contentFilter.EnableGroup(r))
 				for _, s := range timeType {
 					contentFunc = append(contentFunc, content.EnableTime(timeFormat, s, r))
@@ -221,13 +221,13 @@ var viewFlag = []cli.Flag{
 		Action: func(context *cli.Context, b bool) error {
 			if b {
 				// remove filter.RemoveHidden
-				newFF := make([]*filter.TypeFunc, 0, len(typeFunc))
-				for _, typeFunc := range typeFunc {
+				newFF := make([]*filter.ItemFilterFunc, 0, len(itemFiltetrFunc))
+				for _, typeFunc := range itemFiltetrFunc {
 					if typeFunc != &filter.RemoveHidden {
 						newFF = append(newFF, typeFunc)
 					}
 				}
-				typeFunc = newFF
+				itemFiltetrFunc = newFF
 				contentFunc = append(contentFunc, content.EnableFileMode(r), sizeEnabler.EnableSize(sizeUint), contentFilter.EnableOwner(r))
 				for _, s := range timeType {
 					contentFunc = append(contentFunc, content.EnableTime(timeFormat, s, r))
@@ -255,13 +255,13 @@ var viewFlag = []cli.Flag{
 		Action: func(context *cli.Context, b bool) error {
 			if b {
 				// remove filter.RemoveHidden
-				newFF := make([]*filter.TypeFunc, 0, len(typeFunc))
-				for _, typeFunc := range typeFunc {
+				newFF := make([]*filter.ItemFilterFunc, 0, len(itemFiltetrFunc))
+				for _, typeFunc := range itemFiltetrFunc {
 					if typeFunc != &filter.RemoveHidden {
 						newFF = append(newFF, typeFunc)
 					}
 				}
-				typeFunc = newFF
+				itemFiltetrFunc = newFF
 				sizeEnabler.SetEnableTotal()
 				contentFunc = append(contentFunc, content.EnableFileMode(r), sizeEnabler.EnableSize(sizeUint), contentFilter.EnableOwner(r))
 				if !context.Bool("G") {

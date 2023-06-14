@@ -34,7 +34,7 @@ func (n *Tree) MakeTreeStr() string {
 	return n.tree.String()
 }
 
-func NewTreeString(entry string, depthLimit int, typeFilter *filter.TypeFilter, contentFilter *filter.ContentFilter) (t *Tree, serious error, minor error) {
+func NewTreeString(entry string, depthLimit int, typeFilter *filter.ItemFilter, contentFilter *filter.ContentFilter) (t *Tree, serious error, minor error) {
 	stat, err := os.Stat(entry)
 	if err != nil {
 		return nil, err, nil
@@ -75,7 +75,7 @@ func NewTreeString(entry string, depthLimit int, typeFilter *filter.TypeFilter, 
 	return n, nil, errSum
 }
 
-func expand(node tree, depthLimit int, wg *sync.WaitGroup, parent string, s *statistic, typeFilter *filter.TypeFilter, contentFilter *filter.ContentFilter, cm *sync.Mutex, errSender chan<- error) {
+func expand(node tree, depthLimit int, wg *sync.WaitGroup, parent string, s *statistic, typeFilter *filter.ItemFilter, contentFilter *filter.ContentFilter, cm *sync.Mutex, errSender chan<- error) {
 	if depthLimit == 0 {
 		return
 	}
