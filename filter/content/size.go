@@ -409,7 +409,7 @@ func (b *BlockSizeEnabler) Enable() filter.ContentOption {
 
 	wait := func(size string) string {
 		b.Wait()
-		return filter.FillBlank(size, longestSize)
+		return filter.FillBlank(b.renderer.Size(size), longestSize)
 	}
 
 	return func(info os.FileInfo) (string, string) {
@@ -418,7 +418,7 @@ func (b *BlockSizeEnabler) Enable() filter.ContentOption {
 		if bs == 0 {
 			res = "-"
 		} else {
-			res = b.renderer.Size(strconv.FormatInt(bs, 10))
+			res = strconv.FormatInt(bs, 10)
 		}
 		done(res)
 		return wait(res), BlockSizeName

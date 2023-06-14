@@ -30,7 +30,7 @@ import (
 )
 
 var (
-	typeFunc        = make([]*filter.TypeFunc, 0)
+	itemFiltetrFunc = make([]*filter.ItemFilterFunc, 0)
 	contentFunc     = make([]filter.ContentOption, 0)
 	noOutputFunc    = make([]filter.NoOutputOption, 0)
 	r               = render.NewRenderer(theme.DefaultTheme, theme.DefaultInfoTheme)
@@ -57,7 +57,7 @@ var Version = "0.7.0"
 var G *cli.App
 
 func init() {
-	typeFunc = append(typeFunc, &filter.RemoveHidden)
+	itemFiltetrFunc = append(itemFiltetrFunc, &filter.RemoveHidden)
 	if CompiledAt == "" {
 		info, err := os.Stat(os.Args[0])
 		if err != nil {
@@ -140,7 +140,8 @@ There is NO WARRANTY, to the extent permitted by law.`,
 			wgUpdateIndex := sync.WaitGroup{}
 
 			{
-				s := context.String("git-status-style")
+				// git-status-style
+				s := context.String("gss")
 				switch s {
 				case "symbol", "sym":
 					nameToDisplay.GitStyle = filtercontent.GitStyleSym
@@ -151,22 +152,27 @@ There is NO WARRANTY, to the extent permitted by law.`,
 				}
 			}
 
+			// set quote
 			if context.Bool("Q") {
 				nameToDisplay.SetQuote(`"`)
 			}
+
+			// if no quote, set quote to empty
+			// this will override the quote set by -Q
 			if context.Bool("N") {
 				nameToDisplay.UnsetQuote()
 			}
 
+			// no path transform
 			transformEnabled := !context.Bool("np")
 
 			contentFunc = append(contentFunc, nameToDisplay.Enable())
-			typeFilter := filter.NewTypeFilter(typeFunc...)
+			itemFilter := filter.NewItemFilter(itemFiltetrFunc...)
 
-			gitignore := context.Bool("hide-git-ignore")
-			removeGitIgnore := new(filter.TypeFunc)
+			gitignore := context.Bool("git-ignore")
+			removeGitIgnore := new(filter.ItemFilterFunc)
 			if gitignore {
-				typeFilter.AppendTo(removeGitIgnore)
+				itemFilter.AppendTo(removeGitIgnore)
 			}
 
 			// set sort func
@@ -222,8 +228,11 @@ There is NO WARRANTY, to the extent permitted by law.`,
 							}
 						}
 					}
+					if gitignore {
+						*removeGitIgnore = filter.RemoveGitIgnore(path[i])
+					}
 
-					s, err, minorErrInTree := tree.NewTreeString(path[i], depth, typeFilter, contentFilter)
+					s, err, minorErrInTree := tree.NewTreeString(path[i], depth, itemFilter, contentFilter)
 					if pathErr := new(os.PathError); errors.As(err, &pathErr) {
 						_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(fmt.Sprintf("%s: %s", pathErr.Err, pathErr.Path)))
 						seriousErr = true
@@ -268,15 +277,18 @@ There is NO WARRANTY, to the extent permitted by law.`,
 			} else {
 				startDir, _ := os.Getwd()
 
-				// flag: if d is set
+				// flag: if d is set, display directory them self
 				flagd := context.Bool("d")
 				// flag: if A is set
 				flagA := context.Bool("A")
 				flagR := context.Bool("R")
-
-				header := context.Bool("header")
-				if context.Bool("statistic") {
+				header := context.Bool("statistic")
+				if header {
 					nameToDisplay.SetStatistics(&filtercontent.Statistics{})
+				}
+
+				if n := context.Uint("n"); n > 0 {
+					contentFilter.LimitN = n
 				}
 
 				flagSharp := context.Bool("#")
@@ -429,7 +441,7 @@ There is NO WARRANTY, to the extent permitted by law.`,
 
 					nameToDisplay.SetParent(path[i])
 					// remove non-display items
-					infos = typeFilter.Filter(infos...)
+					infos = itemFilter.Filter(infos...)
 
 					// if -R is set, add sub dir, insert into path[i+1]
 					if flagR {

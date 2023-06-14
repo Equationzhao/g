@@ -8,6 +8,14 @@ import (
 )
 
 var filteringFlag = []cli.Flag{
+	&cli.UintFlag{
+		Name:        "limitN",
+		Aliases:     []string{"n", "limit"},
+		Usage:       "limit n items(n <=0 means unlimited)",
+		Value:       0,
+		DefaultText: "unlimited",
+		Category:    "FILTERING",
+	},
 	&cli.StringSliceFlag{
 		Name:    "ignore-glob",
 		Aliases: []string{"I", "ignore", "ig"},
@@ -18,7 +26,7 @@ var filteringFlag = []cli.Flag{
 				if err != nil {
 					return err
 				}
-				typeFunc = append(typeFunc, &f)
+				itemFiltetrFunc = append(itemFiltetrFunc, &f)
 			}
 			return nil
 		},
@@ -34,7 +42,7 @@ var filteringFlag = []cli.Flag{
 				if err != nil {
 					return err
 				}
-				typeFunc = append(typeFunc, &f)
+				itemFiltetrFunc = append(itemFiltetrFunc, &f)
 			}
 			return nil
 		},
@@ -47,13 +55,13 @@ var filteringFlag = []cli.Flag{
 		Usage:              "show only hidden files(overridden by --show-hidden/-sh/-a/-A)",
 		Action: func(context *cli.Context, b bool) error {
 			if b {
-				newFF := make([]*filter.TypeFunc, 0, len(typeFunc))
-				for _, typeFunc := range typeFunc {
+				newFF := make([]*filter.ItemFilterFunc, 0, len(itemFiltetrFunc))
+				for _, typeFunc := range itemFiltetrFunc {
 					if typeFunc != &filter.RemoveHidden {
 						newFF = append(newFF, typeFunc)
 					}
 				}
-				typeFunc = append(newFF, &filter.HiddenOnly)
+				itemFiltetrFunc = append(newFF, &filter.HiddenOnly)
 			}
 			return nil
 		},
@@ -67,13 +75,13 @@ var filteringFlag = []cli.Flag{
 		Action: func(context *cli.Context, b bool) error {
 			if b {
 				// remove filter.RemoveHidden
-				newFF := make([]*filter.TypeFunc, 0, len(typeFunc))
-				for _, typeFunc := range typeFunc {
+				newFF := make([]*filter.ItemFilterFunc, 0, len(itemFiltetrFunc))
+				for _, typeFunc := range itemFiltetrFunc {
 					if typeFunc != &filter.RemoveHidden {
 						newFF = append(newFF, typeFunc)
 					}
 				}
-				typeFunc = newFF
+				itemFiltetrFunc = newFF
 			}
 			return nil
 		},
@@ -86,7 +94,7 @@ var filteringFlag = []cli.Flag{
 		Action: func(context *cli.Context, s []string) error {
 			if len(s) > 0 {
 				f := filter.ExtOnly(s...)
-				typeFunc = append(typeFunc, &f)
+				itemFiltetrFunc = append(itemFiltetrFunc, &f)
 			}
 			return nil
 		},
@@ -99,7 +107,7 @@ var filteringFlag = []cli.Flag{
 		Action: func(context *cli.Context, s []string) error {
 			if len(s) > 0 {
 				f := filter.RemoveByExt(s...)
-				typeFunc = append(typeFunc, &f)
+				itemFiltetrFunc = append(itemFiltetrFunc, &f)
 			}
 			return nil
 		},
@@ -112,7 +120,7 @@ var filteringFlag = []cli.Flag{
 		Usage:              "do not show directory",
 		Action: func(context *cli.Context, b bool) error {
 			if b {
-				typeFunc = append(typeFunc, &filter.RemoveDir)
+				itemFiltetrFunc = append(itemFiltetrFunc, &filter.RemoveDir)
 			}
 			return nil
 		},
@@ -125,7 +133,7 @@ var filteringFlag = []cli.Flag{
 		Usage:              "show directory only",
 		Action: func(context *cli.Context, b bool) error {
 			if b {
-				typeFunc = append(typeFunc, &filter.DirOnly)
+				itemFiltetrFunc = append(itemFiltetrFunc, &filter.DirOnly)
 			}
 			return nil
 		},
@@ -138,7 +146,7 @@ var filteringFlag = []cli.Flag{
 		Usage:              "do not list implied entries ending with ~",
 		Action: func(context *cli.Context, b bool) error {
 			if b {
-				typeFunc = append(typeFunc, &filter.RemoveBackups)
+				itemFiltetrFunc = append(itemFiltetrFunc, &filter.RemoveBackups)
 			}
 			return nil
 		},
@@ -152,13 +160,13 @@ var filteringFlag = []cli.Flag{
 		Action: func(context *cli.Context, b bool) error {
 			if b {
 				// remove filter.RemoveHidden
-				newFF := make([]*filter.TypeFunc, 0, len(typeFunc))
-				for _, typeFunc := range typeFunc {
+				newFF := make([]*filter.ItemFilterFunc, 0, len(itemFiltetrFunc))
+				for _, typeFunc := range itemFiltetrFunc {
 					if typeFunc != &filter.RemoveHidden {
 						newFF = append(newFF, typeFunc)
 					}
 				}
-				typeFunc = newFF
+				itemFiltetrFunc = newFF
 			}
 			return nil
 		},
@@ -189,10 +197,17 @@ var filteringFlag = []cli.Flag{
 				if err != nil {
 					return err
 				}
-				eft := filter.ExactFileTypeOnly(i...)
-				typeFunc = append(typeFunc, &eft)
+				eft := filter.MimeTypeOnly(i...)
+				itemFiltetrFunc = append(itemFiltetrFunc, &eft)
 			}
 			return nil
 		},
+	},
+	&cli.BoolFlag{
+		Name:               "hide-git-ignore",
+		Aliases:            []string{"gi", "hgi", "git-ignore"},
+		Usage:              "hide git ignored file/dir [if git is installed]",
+		DisableDefaultText: true,
+		Category:           "FILTERING",
 	},
 }

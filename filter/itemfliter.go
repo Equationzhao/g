@@ -14,19 +14,19 @@ const (
 	remove = false
 )
 
-type TypeFilter struct {
-	tfs []*TypeFunc
+type ItemFilter struct {
+	tfs []*ItemFilterFunc
 }
 
-func (tf *TypeFilter) AppendTo(typeFunc ...*TypeFunc) {
+func (tf *ItemFilter) AppendTo(typeFunc ...*ItemFilterFunc) {
 	tf.tfs = append(tf.tfs, typeFunc...)
 }
 
-func NewTypeFilter(tfs ...*TypeFunc) *TypeFilter {
-	return &TypeFilter{tfs: tfs}
+func NewItemFilter(tfs ...*ItemFilterFunc) *ItemFilter {
+	return &ItemFilter{tfs: tfs}
 }
 
-func (tf *TypeFilter) Filter(e ...os.FileInfo) (res []os.FileInfo) {
+func (tf *ItemFilter) Filter(e ...os.FileInfo) (res []os.FileInfo) {
 	for _, entry := range e {
 		ok := keep
 		for _, funcPtr := range tf.tfs {
@@ -42,9 +42,9 @@ func (tf *TypeFilter) Filter(e ...os.FileInfo) (res []os.FileInfo) {
 	return res
 }
 
-// TypeFunc return true -> Keep
+// ItemFilterFunc return true -> Keep
 // return false -> remove
-type TypeFunc = func(e os.FileInfo) bool
+type ItemFilterFunc = func(e os.FileInfo) bool
 
 var RemoveDir = func(e os.FileInfo) bool {
 	return !e.IsDir()
@@ -61,7 +61,7 @@ var DirOnly = func(e os.FileInfo) bool {
 //		RemoveByExt([]string{"go", "cxx"})
 //	result:
 //		b.c c.rs dir
-func RemoveByExt(ext ...string) TypeFunc {
+func RemoveByExt(ext ...string) ItemFilterFunc {
 	return func(e os.FileInfo) bool {
 		for _, extI := range ext {
 			if strings.HasSuffix(e.Name(), "."+extI) {
@@ -72,7 +72,7 @@ func RemoveByExt(ext ...string) TypeFunc {
 	}
 }
 
-func ExtOnly(ext ...string) TypeFunc {
+func ExtOnly(ext ...string) ItemFilterFunc {
 	return func(e os.FileInfo) bool {
 		for _, extI := range ext {
 			if strings.HasSuffix(e.Name(), "."+extI) {
@@ -85,9 +85,9 @@ func ExtOnly(ext ...string) TypeFunc {
 }
 
 // RemoveGlob if all pattern complied successfully, return a func and nil error,
-// if match any one, the fn will return false, else return false
+// if match any one, the fn will return remove, else return keep
 // if error occurred, return nil func and error
-func RemoveGlob(globPattern ...string) (TypeFunc, error) {
+func RemoveGlob(globPattern ...string) (ItemFilterFunc, error) {
 	compiled := make([]glob.Glob, 0, len(globPattern))
 	for _, v := range globPattern {
 		compile, err := glob.Compile(v)
@@ -108,9 +108,9 @@ func RemoveGlob(globPattern ...string) (TypeFunc, error) {
 }
 
 // GlobOnly if all pattern complied successfully, return a func and nil error,
-// if match any one, the fn will return true, else return false
+// if match any one, the fn will return keep, else return remove
 // if error occurred, return nil func and error
-func GlobOnly(globPattern ...string) (TypeFunc, error) {
+func GlobOnly(globPattern ...string) (ItemFilterFunc, error) {
 	compiled := make([]glob.Glob, 0, len(globPattern))
 	for _, v := range globPattern {
 		compile, err := glob.Compile(v)
@@ -142,7 +142,7 @@ var RemoveBackups = func(e os.FileInfo) bool {
 	return !strings.HasSuffix(e.Name(), "~")
 }
 
-func RemoveGitIgnore(repoPath git.GitRepoPath) TypeFunc {
+func RemoveGitIgnore(repoPath git.GitRepoPath) ItemFilterFunc {
 	isOrIsParentOf := func(parent, child string) bool {
 		if parent == child {
 			return true
@@ -158,7 +158,7 @@ func RemoveGitIgnore(repoPath git.GitRepoPath) TypeFunc {
 		ok = true
 		for _, fileGit := range *actual {
 			if fileGit.Status == git.Ignored {
-				if isOrIsParentOf(e.Name(), fileGit.Name) {
+				if isOrIsParentOf(fileGit.Name, e.Name()) {
 					ok = false
 				}
 			}
@@ -177,7 +177,7 @@ func isOrIsSonOf(a, b string) bool {
 	return false
 }
 
-func ExactFileTypeOnly(fileTypes ...string) TypeFunc {
+func MimeTypeOnly(fileTypes ...string) ItemFilterFunc {
 	return func(e os.FileInfo) bool {
 		file, err := os.Open(e.Name())
 		if err != nil {
@@ -197,7 +197,7 @@ func ExactFileTypeOnly(fileTypes ...string) TypeFunc {
 	}
 }
 
-func RemoveExactFileType(fileTypes ...string) TypeFunc {
+func RemoveMimeType(fileTypes ...string) ItemFilterFunc {
 	return func(e os.FileInfo) bool {
 		file, err := os.Open(e.Name())
 		if err != nil {
