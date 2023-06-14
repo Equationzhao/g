@@ -119,9 +119,6 @@ There is NO WARRANTY, to the extent permitted by law.`,
 			if context.Bool("git-status") {
 				nameToDisplay.SetGit()
 			}
-			if context.Bool("fp") {
-				nameToDisplay.SetFullPath()
-			}
 
 			fuzzy := context.Bool("fuzzy")
 			if fuzzy {
@@ -165,7 +162,17 @@ There is NO WARRANTY, to the extent permitted by law.`,
 
 			// no path transform
 			transformEnabled := !context.Bool("np")
-
+			if rp := context.String("relative-to"); rp != "" {
+				if transformEnabled {
+					rp = pathbeautify.Beautify(rp)
+				}
+				if temp, err := filepath.Abs(rp); err == nil {
+					rp = temp
+				}
+				nameToDisplay.SetRelativeTo(rp)
+			} else if context.Bool("fp") {
+				nameToDisplay.SetFullPath()
+			}
 			contentFunc = append(contentFunc, nameToDisplay.Enable())
 			itemFilter := filter.NewItemFilter(itemFiltetrFunc...)
 
@@ -282,8 +289,9 @@ There is NO WARRANTY, to the extent permitted by law.`,
 				// flag: if A is set
 				flagA := context.Bool("A")
 				flagR := context.Bool("R")
-				header := context.Bool("statistic")
-				if header {
+				header := context.Bool("header")
+				footer := context.Bool("footer")
+				if context.Bool("statistic") {
 					nameToDisplay.SetStatistics(&filtercontent.Statistics{})
 				}
 
@@ -507,63 +515,75 @@ There is NO WARRANTY, to the extent permitted by law.`,
 					}
 
 					_ = hookOnce.Do(func() error {
-						p.AddAfterPrint(hookAfter...)
-						if header {
-							p.AddBeforePrint(func(p display.Printer, item ...display.Item) {
-								// add header
-								allPart := item[0].KeysByOrder()
-								longestEachPart := make(map[string]int)
-								for _, it := range item {
-									for _, part := range allPart {
-										content, _ := it.Get(part)
-										l := display.WidthLen(content.Content.String())
-										if l > longestEachPart[part] {
-											longestEachPart[part] = l
+						if header || footer {
+							headerFooter := func(enableAddHeaderFooter bool) func(p display.Printer, item ...display.Item) {
+								return func(p display.Printer, item ...display.Item) {
+									//TBAddHeaderOnce, TBAddFooterOnce := sync.Once{}, sync.Once{}
+									// add header
+									allPart := item[0].KeysByOrder()
+									longestEachPart := make(map[string]int)
+									for _, it := range item {
+										for _, part := range allPart {
+											content, _ := it.Get(part)
+											l := display.WidthLen(content.Content.String())
+											if l > longestEachPart[part] {
+												longestEachPart[part] = l
+											}
+										}
+									}
+
+									// add longest - len(header) * space
+									// print header
+									headerFooterStrBuf := bytebufferpool.Get()
+									defer bytebufferpool.Put(headerFooterStrBuf)
+									prettyPrinter, isPrettyPrinter := p.(display.PrettyPrinter)
+
+									expand := func(s string, no, space int) {
+										_, _ = headerFooterStrBuf.WriteString(theme.Underline)
+										_, _ = headerFooterStrBuf.WriteString(s)
+										_, _ = headerFooterStrBuf.WriteString(theme.Reset)
+										if no != len(allPart)-1 {
+											_, _ = headerFooterStrBuf.WriteString(strings.Repeat(" ", space))
+										}
+									}
+
+									for i, s := range allPart {
+										if len(s) > longestEachPart[s] {
+											// expand the every item's content of this part
+											for _, it := range items {
+												content, _ := it.Get(s)
+												content.Content = display.StringContent(fmt.Sprintf("%s%s", strings.Repeat(" ", len(s)-longestEachPart[s]), content.Content.String()))
+												it.Set(s, content)
+											}
+											expand(s, i, 1)
+										} else {
+											expand(s, i, longestEachPart[s]-len(s)+1)
+										}
+										if isPrettyPrinter && enableAddHeaderFooter {
+											if header {
+												prettyPrinter.AddHeader(s)
+											}
+											if footer {
+												prettyPrinter.AddFooter(s)
+											}
+										}
+									}
+									res := headerFooterStrBuf.String()
+									if !isPrettyPrinter {
+										if header || footer {
+											_, _ = fmt.Fprintln(p, res)
 										}
 									}
 								}
-
-								// add longest - len(header) * space
-								// print header
-								contentStrBuf := bytebufferpool.Get()
-								prettyPrinter, isPrettyPrinter := p.(display.PrettyPrinter)
-								for i, s := range allPart {
-									if len(s) > longestEachPart[s] {
-										// expand the every item's content of this part
-										for _, it := range items {
-											content, _ := it.Get(s)
-											content.Content = display.StringContent(fmt.Sprintf("%s%s", strings.Repeat(" ", len(s)-longestEachPart[s]), content.Content.String()))
-
-											it.Set(s, content)
-										}
-										if !isPrettyPrinter {
-											_, _ = contentStrBuf.WriteString(theme.Underline)
-											_, _ = contentStrBuf.WriteString(s)
-											_, _ = contentStrBuf.WriteString(theme.Reset)
-											if i != len(allPart)-1 {
-												_, _ = contentStrBuf.WriteString(" ")
-											}
-										} else {
-											prettyPrinter.AddHeader(s)
-										}
-									} else {
-										if !isPrettyPrinter {
-											_, _ = contentStrBuf.WriteString(theme.Underline)
-											_, _ = contentStrBuf.WriteString(s)
-											_, _ = contentStrBuf.WriteString(theme.Reset)
-											if i != len(allPart)-1 {
-												_, _ = contentStrBuf.WriteString(strings.Repeat(" ", longestEachPart[s]-len(s)+1))
-											}
-										} else {
-											prettyPrinter.AddHeader(s)
-										}
-									}
-								}
-								_, _ = contentStrBuf.WriteString(theme.Reset)
-								_, _ = fmt.Fprintln(display.Output, contentStrBuf.String())
-								bytebufferpool.Put(contentStrBuf)
-							})
+							}
+							if header {
+								p.AddBeforePrint(headerFooter(true))
+							}
+							if footer {
+								p.AddAfterPrint(headerFooter(false))
+							}
 						}
+						p.AddAfterPrint(hookAfter...)
 						return nil
 					})
 

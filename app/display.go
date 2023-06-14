@@ -136,6 +136,22 @@ var displayFlag = []cli.Flag{
 		},
 		Category: "DISPLAY",
 	},
+	&cli.StringFlag{
+		Name:    "table-style",
+		Aliases: []string{"tablestyle"},
+		Usage:   "set table style (ascii(default)/unicode)",
+		Action: func(context *cli.Context, s string) error {
+			switch s {
+			case "ascii", "ASCII", "Ascii":
+				// no action needed
+			case "unicode", "Unicode", "UNICODE":
+				display.DefaultTBStyle = display.UNICODEStyle
+			default:
+				return fmt.Errorf("invalid table style: %s", s)
+			}
+			return nil
+		},
+	},
 	&cli.BoolFlag{
 		Name:               "table",
 		Aliases:            []string{"tb"},
@@ -207,7 +223,7 @@ var displayFlag = []cli.Flag{
 	&cli.StringFlag{
 		Name:        "format",
 		DefaultText: "C",
-		Usage:       "across  -x,  commas  -m, horizontal -x, long -l, single-column -1, verbose -l, vertical -C",
+		Usage:       "across  -x,  commas  -m, horizontal -x, long -l, single-column -1, verbose -l, vertical -C, table -tb, HTML -html, Markdown -md, CSV -csv, json -j",
 		Action: func(context *cli.Context, s string) error {
 			switch s {
 			case "across", "x", "horizontal":
@@ -234,12 +250,49 @@ var displayFlag = []cli.Flag{
 				if _, ok := p.(*display.FitTerminal); !ok {
 					p = display.NewFitTerminal()
 				}
+			case "table", "tb":
+				if _, ok := p.(*display.TablePrinter); !ok {
+					p = display.NewTablePrinter(display.DefaultTB)
+				}
+			case "HTML", "html":
+				if _, ok := p.(*display.HTMLPrinter); !ok {
+					p = display.NewHTMLPrinter()
+					r.SetTheme(theme.Colorless)
+					r.SetInfoTheme(theme.Colorless)
+					theme.Reset = ""
+					_ = context.Set("no-icon", "1")
+				}
+			case "Markdown", "md", "MD", "markdown":
+				if _, ok := p.(*display.MDPrinter); !ok {
+					p = display.NewMDPrinter()
+					r.SetTheme(theme.Colorless)
+					r.SetInfoTheme(theme.Colorless)
+					theme.Reset = ""
+					_ = context.Set("no-icon", "1")
+				}
+			case "CSV", "csv":
+				if _, ok := p.(*display.CSVPrinter); !ok {
+					p = display.NewCSVPrinter()
+					r.SetTheme(theme.Colorless)
+					r.SetInfoTheme(theme.Colorless)
+					theme.Reset = ""
+					_ = context.Set("no-icon", "1")
+				}
+			case "json", "j":
+				if _, ok := p.(*display.JsonPrinter); !ok {
+					p = display.NewJsonPrinter()
+					r.SetTheme(theme.Colorless)
+					r.SetInfoTheme(theme.Colorless)
+					theme.Reset = ""
+					_ = context.Set("no-icon", "1")
+				}
+			default:
+				return fmt.Errorf("unkown format option:%s", s)
 			}
 			return nil
 		},
 		Category: "DISPLAY",
 	},
-
 	&cli.BoolFlag{
 		Name:               "colorless",
 		Aliases:            []string{"nc", "no-color"},

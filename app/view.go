@@ -30,6 +30,19 @@ var viewFlag = []cli.Flag{
 		Category: "VIEW",
 	},
 	&cli.BoolFlag{
+		Name:  "footer",
+		Usage: "add a footer row",
+		Action: func(context *cli.Context, b bool) error {
+			if b {
+				if _, ok := p.(*display.Byline); !ok {
+					p = display.NewByline()
+				}
+			}
+			return nil
+		},
+		Category: "VIEW",
+	},
+	&cli.BoolFlag{
 		Name:     "statistic",
 		Usage:    "show statistic info",
 		Category: "VIEW",
@@ -37,7 +50,7 @@ var viewFlag = []cli.Flag{
 	&cli.BoolFlag{
 		Name:    "duplicate",
 		Aliases: []string{"dup"},
-		Usage:   "show duplicate files table",
+		Usage:   "show duplicate files",
 		Action: func(context *cli.Context, b bool) error {
 			if b {
 				noOutputFunc = append(noOutputFunc, duplicateDetect.Enable())
@@ -496,6 +509,12 @@ var viewFlag = []cli.Flag{
 		DisableDefaultText: true,
 		Category:           "VIEW",
 	},
+	&cli.StringFlag{
+		Name:        "relative-to",
+		Usage:       "show relative path to the given path",
+		DefaultText: "current directory",
+		Category:    "VIEW",
+	},
 	&cli.BoolFlag{
 		Name:               "show-total-size",
 		Usage:              "show total size",
@@ -505,6 +524,19 @@ var viewFlag = []cli.Flag{
 		Action: func(context *cli.Context, b bool) error {
 			if b {
 				sizeEnabler.SetEnableTotal()
+			}
+			return nil
+		},
+	},
+	&cli.BoolFlag{
+		Name:               "no-total-size",
+		Usage:              "disable total size(always override show-total-size)",
+		Aliases:            []string{"nts", "nototal-size"},
+		DisableDefaultText: true,
+		Category:           "VIEW",
+		Action: func(context *cli.Context, b bool) error {
+			if b {
+				sizeEnabler.DisableTotal()
 			}
 			return nil
 		},
