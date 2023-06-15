@@ -171,16 +171,45 @@ func ByMimeTypeDescend(a, b os.FileInfo) bool {
 	return byMimeType(a, b, false)
 }
 
-func byMimeType(a, b os.FileInfo, true bool) bool {
+func byMimeType(a, b os.FileInfo, ascend bool) bool {
+	mimeAstr, mimeBstr := getMimeName(a, b)
+	if ascend {
+		return mimeAstr < mimeBstr
+	}
+	return mimeBstr < mimeAstr
+}
+
+func getMimeName(a os.FileInfo, b os.FileInfo) (string, string) {
+	mimeAstr, mimeBstr := "", ""
 	mimeA, err := mt.DetectFile(a.Name())
 	if err != nil {
-		return false
+		if a.IsDir() {
+			mimeAstr = "directory"
+		} else if a.Mode()&os.ModeSymlink != 0 {
+			mimeAstr = "symlink"
+		} else if a.Mode()&os.ModeNamedPipe != 0 {
+			mimeAstr = "named_pipe"
+		} else if a.Mode()&os.ModeSocket != 0 {
+			mimeAstr = "socket"
+		}
+	} else {
+		mimeAstr = mimeA.String()
 	}
 	mimeB, err := mt.DetectFile(b.Name())
 	if err != nil {
-		return true
+		if b.IsDir() {
+			mimeBstr = "directory"
+		} else if b.Mode()&os.ModeSymlink != 0 {
+			mimeBstr = "symlink"
+		} else if b.Mode()&os.ModeNamedPipe != 0 {
+			mimeBstr = "named_pipe"
+		} else if b.Mode()&os.ModeSocket != 0 {
+			mimeBstr = "socket"
+		}
+	} else {
+		mimeBstr = mimeB.String()
 	}
-	return mimeA.String() < mimeB.String()
+	return mimeAstr, mimeBstr
 }
 
 func ByMimeTypeParentAscend(a, b os.FileInfo) bool {
@@ -192,15 +221,8 @@ func ByMimeTypeParentDescend(a, b os.FileInfo) bool {
 }
 
 func byMimeTypeParent(a, b os.FileInfo, true bool) bool {
-	mimeA, err := mt.DetectFile(a.Name())
-	if err != nil {
-		return false
-	}
-	mimeB, err := mt.DetectFile(b.Name())
-	if err != nil {
-		return true
-	}
-	return strings.SplitN(mimeA.String(), "/", 2)[0] < strings.SplitN(mimeB.String(), "/", 2)[0]
+	mimeAstr, mimeBstr := getMimeName(a, b)
+	return strings.SplitN(mimeAstr, "/", 2)[0] < strings.SplitN(mimeBstr, "/", 2)[0]
 }
 
 func dirFirst(a, b os.FileInfo) bool {

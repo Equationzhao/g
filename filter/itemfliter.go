@@ -79,7 +79,6 @@ func ExtOnly(ext ...string) ItemFilterFunc {
 				return keep
 			}
 		}
-
 		return remove
 	}
 }
