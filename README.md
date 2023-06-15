@@ -18,12 +18,12 @@
 g is a ls alternative with features:
 
 1. display items with type-specific icons and colors that are easy to be customized
-2. display in various layouts ( grid/across/byline/tree/zero/comma )
-3. user-friendly options with many alias
+2. display in various layouts ( grid/across/byline/tree/zero/comma/table/html/json/markdown )
+3. user-friendly options with many aliases
 4. distinguish file git-status with icons or char symbols
 5. highly customizable sort option
 6. cross-platform ( Linux/Windows/MacOS )
-7. option to fuzzy match path like [`zoxide`](https://github.com/ajeetdsouza/zoxide) with [`fzf`](https://github.com/junegunn/fzf) algorithm
+7. option to fuzzy match the path like [`zoxide`](https://github.com/ajeetdsouza/zoxide) with [`fzf`](https://github.com/junegunn/fzf) algorithm
 
 ## Screenshots
 
@@ -230,6 +230,16 @@ show git status with char symbol
 
 ```bash
 g -git -git-style=sym path
+```
+
+output in table
+```bash
+g -tb
+```
+
+output in markdown, and render with [glow](github.com/charmbracelet/glow)
+```bash
+g -md | glow 
 ```
 
 ...
