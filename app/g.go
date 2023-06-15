@@ -518,7 +518,7 @@ There is NO WARRANTY, to the extent permitted by law.`,
 						if header || footer {
 							headerFooter := func(enableAddHeaderFooter bool) func(p display.Printer, item ...display.Item) {
 								return func(p display.Printer, item ...display.Item) {
-									//TBAddHeaderOnce, TBAddFooterOnce := sync.Once{}, sync.Once{}
+									// TBAddHeaderOnce, TBAddFooterOnce := sync.Once{}, sync.Once{}
 									// add header
 									allPart := item[0].KeysByOrder()
 									longestEachPart := make(map[string]int)

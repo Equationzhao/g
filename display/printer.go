@@ -608,9 +608,11 @@ func (t *TablePrinter) setTB(s ...Item) {
 	}
 }
 
-var UNICODEStyle = table.StyleRounded
-var ASCIIStyle = table.StyleDefault
-var DefaultTBStyle = ASCIIStyle
+var (
+	UNICODEStyle   = table.StyleRounded
+	ASCIIStyle     = table.StyleDefault
+	DefaultTBStyle = ASCIIStyle
+)
 
 func DefaultTB(w table.Writer) {
 	w.SetAllowedRowLength(getTermWidth())
