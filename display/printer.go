@@ -388,12 +388,12 @@ func (a *Across) printRow(strs *[]string) {
 		maxLength = max(maxLength, strLen[i])
 	}
 
-	cols := (width + m) / (maxLength + m)
+	cols := (width + 1) / (maxLength + 1)
 	if cols == 0 {
 		cols = 1
 	}
 
-	colWidth := (width+m)/cols - m
+	colWidth := (width+1)/cols - 1
 
 	for i := 0; i < len(*strs); i += cols {
 		for j := 0; j < cols && i+j < len(*strs); j++ {
@@ -406,7 +406,7 @@ func (a *Across) printRow(strs *[]string) {
 			if j < cols-1 {
 				_, _ = fmt.Fprintf(a, "%s%s", str, a.stringOf(' ', padding+m))
 			} else {
-				_, _ = fmt.Fprintf(a, "%s%s", str, a.stringOf(' ', padding))
+				_, _ = fmt.Fprintf(a, "%s%s", str, a.stringOf(' ', padding+1))
 			}
 		}
 		_ = a.WriteByte('\n')

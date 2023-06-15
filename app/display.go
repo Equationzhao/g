@@ -151,6 +151,7 @@ var displayFlag = []cli.Flag{
 			}
 			return nil
 		},
+		Category: "DISPLAY",
 	},
 	&cli.BoolFlag{
 		Name:               "table",
@@ -165,6 +166,7 @@ var displayFlag = []cli.Flag{
 			}
 			return nil
 		},
+		Category: "DISPLAY",
 	},
 	&cli.BoolFlag{
 		Name:               "HTML",
@@ -183,6 +185,7 @@ var displayFlag = []cli.Flag{
 			}
 			return nil
 		},
+		Category: "DISPLAY",
 	},
 	&cli.BoolFlag{
 		Name:               "Markdown",
@@ -201,6 +204,7 @@ var displayFlag = []cli.Flag{
 			}
 			return nil
 		},
+		Category: "DISPLAY",
 	},
 	&cli.BoolFlag{
 		Name:               "CSV",
@@ -219,6 +223,7 @@ var displayFlag = []cli.Flag{
 			}
 			return nil
 		},
+		Category: "DISPLAY",
 	},
 	&cli.StringFlag{
 		Name:        "format",

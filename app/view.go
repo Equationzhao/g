@@ -95,6 +95,7 @@ var viewFlag = []cli.Flag{
 			}
 			return nil
 		},
+		Category: "VIEW",
 	},
 	&cli.BoolFlag{
 		Name:               "modify",
@@ -107,6 +108,7 @@ var viewFlag = []cli.Flag{
 			}
 			return nil
 		},
+		Category: "VIEW",
 	},
 	&cli.BoolFlag{
 		Name:               "create",
@@ -119,6 +121,7 @@ var viewFlag = []cli.Flag{
 			}
 			return nil
 		},
+		Category: "VIEW",
 	},
 	&cli.StringFlag{
 		Name:        "size-unit",
@@ -407,6 +410,7 @@ var viewFlag = []cli.Flag{
 	},
 	&cli.BoolFlag{
 		Name:               "block",
+		Aliases:            []string{"blocks"},
 		Usage:              "show block size",
 		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
@@ -418,6 +422,7 @@ var viewFlag = []cli.Flag{
 			}
 			return nil
 		},
+		Category: "VIEW",
 	},
 	&cli.BoolFlag{
 		Name:               "lh",
