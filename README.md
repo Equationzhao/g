@@ -110,7 +110,8 @@ g -time      path
 with access/create/mod time
 
 ```bash
-g -st -time-type="access" path
+g -st -time-type=access path
+g -st -ac/cr/mod path
 ```
 
 with fileperm
@@ -241,6 +242,7 @@ output in markdown, and render with [glow](github.com/charmbracelet/glow)
 ```bash
 g -md | glow 
 ```
+![image](https://github.com/Equationzhao/g/assets/75521101/7ec1e0d7-03cd-4968-ba48-2ec5375086fa)
 
 ...
 
