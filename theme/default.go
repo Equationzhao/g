@@ -520,31 +520,31 @@ var DefaultTheme = Theme{
 		Icon:  "",
 	},
 	"jpg": Style{
-		Color: Cyan,
+		Color: Purple,
 		Icon:  "\uF1C5",
 	},
 	"jpeg": Style{
-		Color: Cyan,
+		Color: Purple,
 		Icon:  "\uF1C5",
 	},
 	"png": Style{
-		Color: Cyan,
+		Color: Purple,
 		Icon:  "\uF1C5",
 	},
 	"bmp": Style{
-		Color: Cyan,
+		Color: Purple,
 		Icon:  "\uF1C5",
 	},
 	"tif": Style{
-		Color: Cyan,
+		Color: Purple,
 		Icon:  "\uF1C5",
 	},
 	"tiff": Style{
-		Color: Cyan,
+		Color: Purple,
 		Icon:  "\uF1C5",
 	},
 	"gif": Style{
-		Color: Cyan,
+		Color: Purple,
 		Icon:  "\uF1C5",
 	},
 	"mp4": Style{
