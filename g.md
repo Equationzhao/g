@@ -11,20 +11,23 @@ g
 [--CSV|--csv]
 [--HTML|--html]
 [--Markdown|--md|--MD|--markdown]
+[--access|--ac|--accessed]
 [--all|--la|-l|--long]
-[--block]
+[--block|--blocks]
 [--byline|--bl|-1|--oneline|--single-column]
 [--check-new-version]
 [--checksum-algorithm|--ca]=[value]
 [--checksum|--cs]
 [--classic]
 [--colorless|--nc|--no-color]
-[--depth]=[value]
+[--create|--cr|--created]
+[--depth|--level|-L]=[value]
 [--dir-first|--df|--group-directories-first]
 [--disable-index|--di|--no-update]
 [--duplicate|--dup]
 [--exact-detect-size|--eds|--detect-size|--ds]=[value]
 [--file-type|--ft]
+[--footer]
 [--format]=[value]
 [--full-path|--fp|--fullpath]
 [--full-time]
@@ -33,24 +36,28 @@ g
 [--git-status-style|--gss|--git-style]=[value]
 [--git-status|--gs|--git]
 [--header|--title]
-[--hide-git-ignore|--gi|--hgi]
+[--hide-git-ignore|--gi|--hgi|--git-ignore]
 [--ignore-glob|-I|--ignore|--ig]=[value]
 [--inode|-i]
 [--json|-j]
 [--lh|--human-readable|--hr]
+[--limitN|-n|--limit]=[value]
 [--link|-H]
 [--list-index|--li]
 [--literal|-N]
 [--match-glob|-M|--glob|--match]=[value]
 [--mime-parent|--mime-p|--mime-parent-type|--mime-type-parent]
 [--mime-type|--mime|--mimetype]
+[--modify|--mod|--modified]
 [--no-icon|--noicon|--ni]
 [--no-path-transform|--np]
+[--no-total-size|--nts|--nototal-size]
 [--numeric|--numeric-uid-gid]
 [--quote-name|-Q]
 [--rebuild-index|--ri|--remove-all]
 [--recurse|-R]
 [--relative-time|--rt]
+[--relative-to]=[value]
 [--remove-current-path|--rcp|--rc|--rmc]
 [--remove-index|--rm]=[value]
 [--show-exact-file-type-only|--et-only|--eto]=[value]
@@ -73,14 +80,15 @@ g
 [--sort-by-mimetype-parent-descend|--mimetypesort-parent-descend|--Mimetypesort-parent-descend|--sort-by-mime-parent-descend]
 [--sort-by-mimetype-parent|--mimetypesort-parent|--Mimetypesort-parent|--sort-by-mime-parent]
 [--sort-by-mimetype|--mimetypesort|--Mimetypesort|--sort-by-mime]
-[--sort-reverse|--sr|--reverse]
+[--sort-reverse|--sr|--reverse|-r]
 [--sort|--SORT_FIELD]=[value]
 [--statistic]
+[--table-style|--tablestyle]=[value]
 [--table|--tb]
 [--theme|--th]=[value]
 [--time-style]=[value]
 [--time-type|--tt]=[value]
-[--tree|-t]
+[--tree|-t|-T]
 [--uid]
 [--width]
 [--zero|-0]
@@ -115,9 +123,11 @@ g [options] [path]
 
 **--Markdown, --md, --MD, --markdown**: output in markdown-table format
 
+**--access, --ac, --accessed**: accessed time
+
 **--all, --la, -l, --long**: show all info/use a long listing format
 
-**--block**: show block size
+**--block, --blocks**: show block size
 
 **--byline, --bl, -1, --oneline, --single-column**: print by line
 
@@ -131,19 +141,23 @@ g [options] [path]
 
 **--colorless, --nc, --no-color**: without color
 
-**--depth**="": limit recursive depth, negative -> infinity (default: infinity)
+**--create, --cr, --created**: created time
+
+**--depth, --level, -L**="": limit recursive depth, negative -> infinity (default: infinity)
 
 **--dir-first, --df, --group-directories-first**: List directories before other files
 
 **--disable-index, --di, --no-update**: disable updating index
 
-**--duplicate, --dup**: show duplicate files table
+**--duplicate, --dup**: show duplicate files
 
 **--exact-detect-size, --eds, --detect-size, --ds**="": set exact size for mimetype detection eg:1M/nolimit/infinity (default: 1M)
 
 **--file-type, --ft**: likewise, except do not append '*'
 
-**--format**="": across  -x,  commas  -m, horizontal -x, long -l, single-column -1, verbose -l, vertical -C (default: C)
+**--footer**: add a footer row
+
+**--format**="": across  -x,  commas  -m, horizontal -x, long -l, single-column -1, verbose -l, vertical -C, table -tb, HTML -html, Markdown -md, CSV -csv, json -j (default: C)
 
 **--full-path, --fp, --fullpath**: show full path
 
@@ -159,7 +173,7 @@ g [options] [path]
 
 **--header, --title**: add a header row
 
-**--hide-git-ignore, --gi, --hgi**: hide git ignored file/dir [if git is installed]
+**--hide-git-ignore, --gi, --hgi, --git-ignore**: hide git ignored file/dir [if git is installed]
 
 **--ignore-glob, -I, --ignore, --ig**="": ignore Glob patterns
 
@@ -168,6 +182,8 @@ g [options] [path]
 **--json, -j**: output in json format
 
 **--lh, --human-readable, --hr**: show human readable size
+
+**--limitN, -n, --limit**="": limit n items(n <=0 means unlimited) (default: unlimited)
 
 **--link, -H**: list each file's number of hard links
 
@@ -181,9 +197,13 @@ g [options] [path]
 
 **--mime-type, --mime, --mimetype**: show mime file type
 
+**--modify, --mod, --modified**: modified time
+
 **--no-icon, --noicon, --ni**: disable icon(always override show-icon)
 
 **--no-path-transform, --np**: By default, .../a/b/c will be transformed to ../../a/b/c, and ~ will be replaced by homedir, using this flag to disable this feature
+
+**--no-total-size, --nts, --nototal-size**: disable total size(always override show-total-size)
 
 **--numeric, --numeric-uid-gid**:  List numeric user and group IDs instead of name [sid in windows]
 
@@ -194,6 +214,8 @@ g [options] [path]
 **--recurse, -R**: recurse into directories
 
 **--relative-time, --rt**: show relative time
+
+**--relative-to**="": show relative path to the given path (default: current directory)
 
 **--remove-current-path, --rcp, --rc, --rmc**: remove current path from index
 
@@ -231,7 +253,7 @@ g [options] [path]
 
 **--size-unit, --su, --block-size**="": size unit, b, k, m, g, t, p, e, z, y, bb, nb, auto (default: auto)
 
-**--sort, --SORT_FIELD**="": sort by field, default: ascending and case insensitive, field beginning with Uppercase is case sensitive, available fields: nature(default),none(nosort),name,size,time,owner,group,extension. following `-descend` to sort descending
+**--sort, --SORT_FIELD**="": sort by field, default: ascending and case insensitive, field beginning with Uppercase is case sensitive, available fields: nature(default),none(nosort),name,.name(sorts by name without a leading dot),size,time,owner,group,extension,inode. following `-descend` to sort descending
 
 **--sort-by-mimetype, --mimetypesort, --Mimetypesort, --sort-by-mime**: sort by mimetype
 
@@ -241,11 +263,13 @@ g [options] [path]
 
 **--sort-by-mimetype-parent-descend, --mimetypesort-parent-descend, --Mimetypesort-parent-descend, --sort-by-mime-parent-descend**: sort by mimetype parent
 
-**--sort-reverse, --sr, --reverse**: reverse the order of the sort
+**--sort-reverse, --sr, --reverse, -r**: reverse the order of the sort
 
 **--statistic**: show statistic info
 
 **--table, --tb**: output in table format
+
+**--table-style, --tablestyle**="": set table style (ascii(default)/unicode)
 
 **--theme, --th**="": apply theme `path/to/theme`
 
@@ -253,7 +277,7 @@ g [options] [path]
 
 **--time-type, --tt**="": time type, mod(default), create, access, all (default: mod)
 
-**--tree, -t**: recursively list in tree
+**--tree, -t, -T**: recursively list in tree
 
 **--uid**: show uid instead of username [sid in windows]
 
