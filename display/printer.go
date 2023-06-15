@@ -530,14 +530,15 @@ func (j *JsonPrinter) Print(items ...Item) {
 type PrettyPrinter interface {
 	SetTitle(title string)
 	AddHeader(headers string)
+	AddFooter(footer string)
 	Printer
 }
 
 type TablePrinter struct {
 	*bufio.Writer
 	*hook
-	header table.Row
-	w      table.Writer
+	header, footer table.Row
+	w              table.Writer
 }
 
 func (t *TablePrinter) SetTitle(title string) {
@@ -546,6 +547,10 @@ func (t *TablePrinter) SetTitle(title string) {
 
 func (t *TablePrinter) AddHeader(headers string) {
 	t.header = append(t.header, headers)
+}
+
+func (t *TablePrinter) AddFooter(footer string) {
+	t.footer = append(t.footer, footer)
 }
 
 func NewTablePrinter(opts ...func(writer table.Writer)) Printer {
@@ -569,12 +574,19 @@ func (t *TablePrinter) PrintBase(fn func() string, s ...Item) {
 	defer t.Flush()
 	t.w.ResetRows()
 	t.setTB(s...)
-	t.w.AppendHeader(t.header)
+	if len(t.header) != 0 {
+		t.w.AppendHeader(t.header)
+	}
+	if len(t.footer) != 0 {
+		t.w.AppendFooter(t.footer)
+	}
 	fn()
 	t.w.ResetHeaders()
+	t.w.ResetFooters()
 
-	// empty header
+	// empty header and footer
 	t.header = t.header[:0]
+	t.footer = t.footer[:0]
 
 	if !t.disableAfter {
 		fire(t.AfterPrint, t, s...)
@@ -596,11 +608,13 @@ func (t *TablePrinter) setTB(s ...Item) {
 	}
 }
 
+var UNICODEStyle = table.StyleRounded
+var ASCIIStyle = table.StyleDefault
+var DefaultTBStyle = ASCIIStyle
+
 func DefaultTB(w table.Writer) {
 	w.SetAllowedRowLength(getTermWidth())
-	if runtime.GOOS != "windows" {
-		w.SetStyle(table.StyleRounded)
-	}
+	w.SetStyle(DefaultTBStyle)
 	w.Style().Options.SeparateColumns = true
 	w.Style().Options.SeparateFooter = true
 	w.SetPageSize(1000)

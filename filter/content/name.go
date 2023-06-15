@@ -20,6 +20,7 @@ type (
 		Renderer                                *render.Renderer
 		GitCache                                *cached.Map[git.GitRepoPath, *git.FileGits]
 		statistics                              *Statistics
+		relativeTo                              string
 		parent                                  string
 		Quote                                   string
 		GitStyle                                gitStyle
@@ -58,6 +59,14 @@ func (n *Name) SetFullPath() {
 
 func (n *Name) UnsetFullPath() {
 	n.fullPath = false
+}
+
+func (n *Name) RelativeTo() string {
+	return n.relativeTo
+}
+
+func (n *Name) SetRelativeTo(relativeTo string) {
+	n.relativeTo = relativeTo
 }
 
 func (n *Name) Statistics() *Statistics {
@@ -255,7 +264,13 @@ func (n *Name) Enable() filter.ContentOption {
 			str = strings.Replace(str, name, n.Quote+name+n.Quote, 1)
 		}
 
-		if n.fullPath {
+		if n.relativeTo != "" {
+			relativePath, err := filepath.Rel(n.relativeTo, filepath.Join(n.parent, name))
+			if err != nil {
+				return str, NameName
+			}
+			str = strings.Replace(str, name, relativePath, 1)
+		} else if n.fullPath {
 			fullPath := filepath.Join(n.parent, name)
 			str = strings.Replace(str, name, fullPath, 1)
 		}

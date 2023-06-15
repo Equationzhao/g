@@ -90,12 +90,12 @@ func (d *DuplicateDetect) Reset() {
 func (d *DuplicateDetect) Fprint(w io.Writer) {
 	r := d.Result()
 	if len(r) != 0 {
-		fmt.Fprintln(w, "Duplicates:")
+		_, _ = fmt.Fprintln(w, "Duplicates:")
 		for _, i := range r {
 			for _, filename := range i.Filenames {
 				_, _ = fmt.Fprint(w, "    ", filename)
 			}
-			fmt.Fprintln(w)
+			_, _ = fmt.Fprintln(w)
 		}
 	}
 }
