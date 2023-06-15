@@ -220,9 +220,13 @@ func ByMimeTypeParentDescend(a, b os.FileInfo) bool {
 	return byMimeTypeParent(a, b, false)
 }
 
-func byMimeTypeParent(a, b os.FileInfo, true bool) bool {
+func byMimeTypeParent(a, b os.FileInfo, ascend bool) bool {
 	mimeAstr, mimeBstr := getMimeName(a, b)
-	return strings.SplitN(mimeAstr, "/", 2)[0] < strings.SplitN(mimeBstr, "/", 2)[0]
+	if ascend {
+		return strings.SplitN(mimeAstr, "/", 2)[0] < strings.SplitN(mimeBstr, "/", 2)[0]
+	} else {
+		return strings.SplitN(mimeAstr, "/", 2)[0] > strings.SplitN(mimeBstr, "/", 2)[0]
+	}
 }
 
 func dirFirst(a, b os.FileInfo) bool {
