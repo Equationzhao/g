@@ -3,8 +3,8 @@
   "bin": "bin/g.exe",
   "architecture": {
     "64bit": {
-      "url": "https://github.com/Equationzhao/g/releases/download/v0.7.0/g-amd64.exe",
-      "hash": "b4786d3c7b5ee43ab54394b934b0f942f140a474effca2ddfebe7937d4ab9a4b",
+      "url": "https://github.com/Equationzhao/g/releases/download/v0.8.0/g-amd64.exe",
+      "hash": "a02667f9bdd249c3c755451c15c481406638d4f0f1faff664c6c2e1a5e50c84c",
       "bin": "g-amd64.exe",
       "post_install":[
         "cd $scoopdir/shims",
@@ -19,8 +19,8 @@
       ]
     },
     "32bit": {
-      "url": "https://github.com/Equationzhao/g/releases/download/v0.7.0/g-386.exe",
-      "hash": "c3cff9511df2c81eb06c5bd1f0137c7024d0ca8c0e24d03618fb25382f7d7363",
+      "url": "https://github.com/Equationzhao/g/releases/download/v0.8.0/g-386.exe",
+      "hash": "e81b940e29e1c65d851a9d3573ec1b01cb2e5f826593c31ed0f45adf43d061ec",
       "bin": "g-386.exe",
       "post_install":[
         "cd $scoopdir/shims",
@@ -35,8 +35,8 @@
       ]
     },
     "arm64": {
-      "url": "https://github.com/Equationzhao/g/releases/download/v0.7.0/g-arm64.exe",
-      "hash": "2bd17c1a1f81fc703950546c395df36031512927e8c13791824daa816c62e1dc",
+      "url": "https://github.com/Equationzhao/g/releases/download/v0.8.0/g-arm64.exe",
+      "hash": "83422097658814212f10512ba0afd0692a65a77709e52a29af5267b085d36ae2",
       "bin": "g-arm64.exe",
       "post_install":[
         "cd $scoopdir/shims",
@@ -51,8 +51,8 @@
       ]
     },
     "arm": {
-      "url": "https://github.com/Equationzhao/g/releases/download/v0.7.0/g-arm.exe",
-      "hash": "8fe5932ec11d1e6252205c41c3d621e32794606d08e90b44fc55dbb1f3300e92",
+      "url": "https://github.com/Equationzhao/g/releases/download/v0.8.0/g-arm.exe",
+      "hash": "1888d94bc82dfe3a64d9656a6951cd891dc0ebd9460bc87241b17e1f99b11c18",
       "bin": "g-arm.exe",
       "post_install":[
         "cd $scoopdir/shims",
@@ -69,5 +69,5 @@
   },
 
   "license": "MIT",
-  "version": "v0.7.0"
+  "version": "v0.8.0"
 }
