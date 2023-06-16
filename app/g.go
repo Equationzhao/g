@@ -66,7 +66,7 @@ func init() {
 			CompiledAt = info.ModTime().Format(timeFormat)
 		}
 	} else {
-		CompiledAtTime, err := time.Parse("2006-01-02-15:04:05", CompiledAt)
+		CompiledAtTime, err := time.Parse(time.RFC3339, CompiledAt)
 		if err == nil {
 			CompiledAt = CompiledAtTime.UTC().Format(timeFormat)
 		}
