@@ -26,7 +26,7 @@ var filteringFlag = []cli.Flag{
 				if err != nil {
 					return err
 				}
-				itemFiltetrFunc = append(itemFiltetrFunc, &f)
+				itemFilterFunc = append(itemFilterFunc, &f)
 			}
 			return nil
 		},
@@ -42,7 +42,7 @@ var filteringFlag = []cli.Flag{
 				if err != nil {
 					return err
 				}
-				itemFiltetrFunc = append(itemFiltetrFunc, &f)
+				itemFilterFunc = append(itemFilterFunc, &f)
 			}
 			return nil
 		},
@@ -55,13 +55,13 @@ var filteringFlag = []cli.Flag{
 		Usage:              "show only hidden files(overridden by --show-hidden/-sh/-a/-A)",
 		Action: func(context *cli.Context, b bool) error {
 			if b {
-				newFF := make([]*filter.ItemFilterFunc, 0, len(itemFiltetrFunc))
-				for _, typeFunc := range itemFiltetrFunc {
+				newFF := make([]*filter.ItemFilterFunc, 0, len(itemFilterFunc))
+				for _, typeFunc := range itemFilterFunc {
 					if typeFunc != &filter.RemoveHidden {
 						newFF = append(newFF, typeFunc)
 					}
 				}
-				itemFiltetrFunc = append(newFF, &filter.HiddenOnly)
+				itemFilterFunc = append(newFF, &filter.HiddenOnly)
 			}
 			return nil
 		},
@@ -75,13 +75,13 @@ var filteringFlag = []cli.Flag{
 		Action: func(context *cli.Context, b bool) error {
 			if b {
 				// remove filter.RemoveHidden
-				newFF := make([]*filter.ItemFilterFunc, 0, len(itemFiltetrFunc))
-				for _, typeFunc := range itemFiltetrFunc {
+				newFF := make([]*filter.ItemFilterFunc, 0, len(itemFilterFunc))
+				for _, typeFunc := range itemFilterFunc {
 					if typeFunc != &filter.RemoveHidden {
 						newFF = append(newFF, typeFunc)
 					}
 				}
-				itemFiltetrFunc = newFF
+				itemFilterFunc = newFF
 			}
 			return nil
 		},
@@ -94,7 +94,7 @@ var filteringFlag = []cli.Flag{
 		Action: func(context *cli.Context, s []string) error {
 			if len(s) > 0 {
 				f := filter.ExtOnly(s...)
-				itemFiltetrFunc = append(itemFiltetrFunc, &f)
+				itemFilterFunc = append(itemFilterFunc, &f)
 			}
 			return nil
 		},
@@ -107,7 +107,7 @@ var filteringFlag = []cli.Flag{
 		Action: func(context *cli.Context, s []string) error {
 			if len(s) > 0 {
 				f := filter.RemoveByExt(s...)
-				itemFiltetrFunc = append(itemFiltetrFunc, &f)
+				itemFilterFunc = append(itemFilterFunc, &f)
 			}
 			return nil
 		},
@@ -120,7 +120,7 @@ var filteringFlag = []cli.Flag{
 		Usage:              "do not show directory",
 		Action: func(context *cli.Context, b bool) error {
 			if b {
-				itemFiltetrFunc = append(itemFiltetrFunc, &filter.RemoveDir)
+				itemFilterFunc = append(itemFilterFunc, &filter.RemoveDir)
 			}
 			return nil
 		},
@@ -133,7 +133,7 @@ var filteringFlag = []cli.Flag{
 		Usage:              "show directory only",
 		Action: func(context *cli.Context, b bool) error {
 			if b {
-				itemFiltetrFunc = append(itemFiltetrFunc, &filter.DirOnly)
+				itemFilterFunc = append(itemFilterFunc, &filter.DirOnly)
 			}
 			return nil
 		},
@@ -146,7 +146,7 @@ var filteringFlag = []cli.Flag{
 		Usage:              "do not list implied entries ending with ~",
 		Action: func(context *cli.Context, b bool) error {
 			if b {
-				itemFiltetrFunc = append(itemFiltetrFunc, &filter.RemoveBackups)
+				itemFilterFunc = append(itemFilterFunc, &filter.RemoveBackups)
 			}
 			return nil
 		},
@@ -160,13 +160,13 @@ var filteringFlag = []cli.Flag{
 		Action: func(context *cli.Context, b bool) error {
 			if b {
 				// remove filter.RemoveHidden
-				newFF := make([]*filter.ItemFilterFunc, 0, len(itemFiltetrFunc))
-				for _, typeFunc := range itemFiltetrFunc {
+				newFF := make([]*filter.ItemFilterFunc, 0, len(itemFilterFunc))
+				for _, typeFunc := range itemFilterFunc {
 					if typeFunc != &filter.RemoveHidden {
 						newFF = append(newFF, typeFunc)
 					}
 				}
-				itemFiltetrFunc = newFF
+				itemFilterFunc = newFF
 			}
 			return nil
 		},
@@ -198,7 +198,7 @@ var filteringFlag = []cli.Flag{
 					return err
 				}
 				eft := filter.MimeTypeOnly(i...)
-				itemFiltetrFunc = append(itemFiltetrFunc, &eft)
+				itemFilterFunc = append(itemFilterFunc, &eft)
 			}
 			return nil
 		},

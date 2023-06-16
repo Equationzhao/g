@@ -30,7 +30,7 @@ import (
 )
 
 var (
-	itemFiltetrFunc = make([]*filter.ItemFilterFunc, 0)
+	itemFilterFunc  = make([]*filter.ItemFilterFunc, 0)
 	contentFunc     = make([]filter.ContentOption, 0)
 	noOutputFunc    = make([]filter.NoOutputOption, 0)
 	r               = render.NewRenderer(theme.DefaultTheme, theme.DefaultInfoTheme)
@@ -57,7 +57,7 @@ var Version = "0.8.1"
 var G *cli.App
 
 func init() {
-	itemFiltetrFunc = append(itemFiltetrFunc, &filter.RemoveHidden)
+	itemFilterFunc = append(itemFilterFunc, &filter.RemoveHidden)
 	if CompiledAt == "" {
 		info, err := os.Stat(os.Args[0])
 		if err != nil {
@@ -174,7 +174,7 @@ There is NO WARRANTY, to the extent permitted by law.`,
 				nameToDisplay.SetFullPath()
 			}
 			contentFunc = append(contentFunc, nameToDisplay.Enable())
-			itemFilter := filter.NewItemFilter(itemFiltetrFunc...)
+			itemFilter := filter.NewItemFilter(itemFilterFunc...)
 
 			gitignore := context.Bool("git-ignore")
 			removeGitIgnore := new(filter.ItemFilterFunc)
