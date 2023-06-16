@@ -60,6 +60,7 @@ g
 [--relative-to]=[value]
 [--remove-current-path|--rcp|--rc|--rmc]
 [--remove-index|--rm]=[value]
+[--remove-invalid-path|--rip]
 [--show-exact-file-type-only|--et-only|--eto]=[value]
 [--show-group|--sg|--group]
 [--show-hidden|--sh|-a]
@@ -220,6 +221,8 @@ g [options] [path]
 **--remove-current-path, --rcp, --rc, --rmc**: remove current path from index
 
 **--remove-index, --rm**="": remove paths from index
+
+**--remove-invalid-path, --rip**: remove invalid paths from index
 
 **--show-exact-file-type-only, --et-only, --eto**="": only show file with given type
 

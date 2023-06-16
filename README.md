@@ -57,7 +57,7 @@ user can install `g` from AUR
 yay -S g-ls
 ```
 
-windows Scoop
+windows Scoop [unavailable now]
 
 ```powershell
 scoop install https://raw.githubusercontent.com/Equationzhao/g/master/scoop/g.json
@@ -82,9 +82,7 @@ homebrew: ***todo***
 
 ### Pre-built executable
 
-just download from [release page](https://github.com/Equationzhao/g/releases) and add the executable file to your `PATH`
-
-> binaries with -upx are compressed by [`upx`](https://github.com/upx/upx) with `--best` option
+just download from [release page](https://github.com/Equationzhao/g/releases), extract the gzip and add the executable file to your `PATH`
 
 ## usage
 
