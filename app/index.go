@@ -16,15 +16,21 @@ var indexFlags = []cli.Flag{
 		Name:               "disable-index",
 		Aliases:            []string{"di", "no-update"},
 		Usage:              "disable updating index",
-		Category:           "Index",
+		Category:           "INDEX",
 		DisableDefaultText: true,
+		Action: func(ctx *cli.Context, b bool) error {
+			if b {
+				index.SetReadOnly()
+			}
+			return nil
+		},
 	},
 	&cli.BoolFlag{
 		Name:               "rebuild-index",
 		Aliases:            []string{"ri", "remove-all"},
 		Usage:              "rebuild index",
 		DisableDefaultText: true,
-		Category:           "Index",
+		Category:           "INDEX",
 		Action: func(context *cli.Context, b bool) error {
 			if b {
 				err := index.RebuildIndex()
@@ -40,14 +46,14 @@ var indexFlags = []cli.Flag{
 		Aliases:            []string{"fz", "f"},
 		Usage:              "fuzzy search",
 		DisableDefaultText: true,
-		Category:           "Index",
+		Category:           "INDEX",
 		EnvVars:            []string{"G_FZF"},
 	},
 	&cli.StringSliceFlag{
 		Name:     "remove-index",
 		Aliases:  []string{"rm"},
 		Usage:    "remove paths from index",
-		Category: "Index",
+		Category: "INDEX",
 		Action: func(context *cli.Context, i []string) error {
 			var errSum error = nil
 
@@ -84,10 +90,10 @@ var indexFlags = []cli.Flag{
 		Aliases:            []string{"li"},
 		Usage:              "list index",
 		DisableDefaultText: true,
-		Category:           "Index",
+		Category:           "INDEX",
 		Action: func(context *cli.Context, b bool) error {
 			if b {
-				keys, _, err := index.All()
+				keys, err := index.All()
 				if err != nil {
 					return err
 				}
@@ -102,7 +108,7 @@ var indexFlags = []cli.Flag{
 		Name:     "remove-current-path",
 		Aliases:  []string{"rcp", "rc", "rmc"},
 		Usage:    "remove current path from index",
-		Category: "Index",
+		Category: "INDEX",
 		Action: func(context *cli.Context, b bool) error {
 			if b {
 				r, err := os.Getwd()
@@ -110,6 +116,32 @@ var indexFlags = []cli.Flag{
 					return err
 				}
 				err = index.Delete(r)
+				if err != nil {
+					return err
+				}
+			}
+			return Err4Exit{}
+		},
+	},
+	&cli.BoolFlag{
+		Name:     "remove-invalid-path",
+		Aliases:  []string{"rip"},
+		Usage:    "remove invalid paths from index",
+		Category: "INDEX",
+		Action: func(ctx *cli.Context, b bool) error {
+			if b {
+				paths, err := index.All()
+				if err != nil {
+					return err
+				}
+				invalid := make([]string, 0, len(paths))
+				for _, path := range paths {
+					_, err := os.Stat(path)
+					if err != nil {
+						invalid = append(invalid, path)
+					}
+				}
+				err = index.DeleteThose(invalid...)
 				if err != nil {
 					return err
 				}

@@ -1,6 +1,7 @@
 package index
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -18,6 +19,15 @@ var (
 	closeOnce gutil.Once
 	indexPath string
 )
+
+func SetReadOnly() {
+	db, err := getDB()
+	if err != nil {
+		return
+	}
+	_ = db.SetReadOnly()
+	return
+}
 
 func getDB() (*leveldb.DB, error) {
 	err := initOnce.Do(func() error {
@@ -107,19 +117,39 @@ remove:
 	return nil
 }
 
-func All() ([]string, []string, error) {
+func All() ([]string, error) {
 	db, err := getDB()
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
-	keys, values := make([]string, 0), make([]string, 0)
+	keys := make([]string, 0)
 	iter := db.NewIterator(nil, nil)
 	defer iter.Release()
 	for iter.Next() {
 		keys = append(keys, string(iter.Key()))
-		values = append(values, string(iter.Value()))
 	}
-	return keys, values, nil
+	return keys, nil
+}
+
+func DeleteThose(keys ...string) error {
+	db, err := getDB()
+	if err != nil {
+		return err
+	}
+	t, err := db.OpenTransaction()
+	defer t.Discard()
+	if err != nil {
+		return nil
+	}
+	var errSum error
+	for _, key := range keys {
+		err := t.Delete([]byte(key), nil)
+		if err != nil {
+			errSum = errors.Join(errSum, err)
+		}
+	}
+	errSum = errors.Join(errSum, t.Commit())
+	return errSum
 }
 
 func FuzzySearch(key string) (string, error) {

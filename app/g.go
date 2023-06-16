@@ -198,16 +198,11 @@ There is NO WARRANTY, to the extent permitted by law.`,
 			contentFilter.AppendToLengthFixed(wgs...)
 			depth := context.Int("depth")
 
-			printPath := false
-			if len(path) > 1 {
-				printPath = true
-			}
-
 			if context.Bool("tree") {
 				for i := 0; i < len(path); i++ {
 					start := time.Now()
 
-					if printPath {
+					if len(path) > 1 {
 						fmt.Printf("%s:\n", path[i])
 					}
 
@@ -304,7 +299,7 @@ There is NO WARRANTY, to the extent permitted by law.`,
 				for i := 0; i < len(path); i++ {
 					start := time.Now()
 
-					if printPath {
+					if len(path) > 1 {
 						fmt.Printf("%s:\n", path[i])
 					}
 
@@ -467,7 +462,7 @@ There is NO WARRANTY, to the extent permitted by law.`,
 									if info.Name() == "." || info.Name() == ".." {
 										continue
 									}
-									newPath := filepath.Join(path[i], info.Name())
+									newPath, _ := filepath.Rel(startDir, filepath.Join(path[i], info.Name()))
 									newPathLeft = append(newPathLeft, newPath)
 									depthLimitMap[newPath] = dep - 1
 								}
@@ -520,6 +515,10 @@ There is NO WARRANTY, to the extent permitted by law.`,
 								return func(p display.Printer, item ...display.Item) {
 									// TBAddHeaderOnce, TBAddFooterOnce := sync.Once{}, sync.Once{}
 									// add header
+									if len(item) == 0 {
+										return
+									}
+
 									allPart := item[0].KeysByOrder()
 									longestEachPart := make(map[string]int)
 									for _, it := range item {

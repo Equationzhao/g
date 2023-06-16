@@ -3,22 +3,20 @@ package main
 import (
 	"errors"
 	"fmt"
+	. "github.com/Equationzhao/g/app"
 	"os"
 	"path/filepath"
-	"runtime/debug"
-
-	. "github.com/Equationzhao/g/app"
 )
 
 func main() {
-	defer func() {
-		if err := recover(); err != nil {
-			fmt.Println(Version)
-			fmt.Println(MakeErrorStr(fmt.Sprint(err)))
-			fmt.Println(MakeErrorStr(string(debug.Stack())))
-		}
-		os.Exit(ReturnCode)
-	}()
+	//defer func() {
+	//	if err := recover(); err != nil {
+	//		fmt.Println(Version)
+	//		fmt.Println(MakeErrorStr(fmt.Sprint(err)))
+	//		fmt.Println(MakeErrorStr(string(debug.Stack())))
+	//	}
+	//	os.Exit(ReturnCode)
+	//}()
 
 	if doc {
 		md, _ := os.Create("g.md")
