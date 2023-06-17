@@ -52,7 +52,7 @@ var (
 	hookAfter       = make([]func(display.Printer, ...display.Item), 0)
 )
 
-var Version = "0.8.1"
+var Version = "0.8.2"
 
 var G *cli.App
 
@@ -511,7 +511,7 @@ There is NO WARRANTY, to the extent permitted by law.`,
 
 					_ = hookOnce.Do(func() error {
 						if header || footer {
-							headerFooter := func(enableAddHeaderFooter bool) func(p display.Printer, item ...display.Item) {
+							headerFooter := func(isBefore bool) func(p display.Printer, item ...display.Item) {
 								return func(p display.Printer, item ...display.Item) {
 									// TBAddHeaderOnce, TBAddFooterOnce := sync.Once{}, sync.Once{}
 									// add header
@@ -558,7 +558,7 @@ There is NO WARRANTY, to the extent permitted by law.`,
 										} else {
 											expand(s, i, longestEachPart[s]-len(s)+1)
 										}
-										if isPrettyPrinter && enableAddHeaderFooter {
+										if isPrettyPrinter && isBefore {
 											if header {
 												prettyPrinter.AddHeader(s)
 											}
@@ -569,16 +569,24 @@ There is NO WARRANTY, to the extent permitted by law.`,
 									}
 									res := headerFooterStrBuf.String()
 									if !isPrettyPrinter {
-										if header || footer {
+										if header && isBefore {
+											_, _ = fmt.Fprintln(p, res)
+										}
+										if footer && !isBefore {
 											_, _ = fmt.Fprintln(p, res)
 										}
 									}
 								}
 							}
 							if header {
+								// pre scan
 								p.AddBeforePrint(headerFooter(true))
 							}
 							if footer {
+								if !header {
+									// pre scan
+									p.AddBeforePrint(headerFooter(true))
+								}
 								p.AddAfterPrint(headerFooter(false))
 							}
 						}
