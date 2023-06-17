@@ -57,27 +57,6 @@ user can install `g` from AUR
 yay -S g-ls
 ```
 
-windows Scoop [unavailable now]
-
-```powershell
-scoop install https://raw.githubusercontent.com/Equationzhao/g/master/scoop/g.json
-```
-
-```powershell
-# upgrade
-scoop uninstall g # uninstall first
-scoop install https://raw.githubusercontent.com/Equationzhao/g/master/scoop/g.json
-# error msg like this can be ignored
-# Move-Item: 
-# Line |
-#    2 |  mv g-amd64.exe g.exe
-#      |  ~~~~~~~~~~~~~~~~~~~~
-# Move-Item: 
-# Line |
-#    3 |  mv g-amd64.shim g.shim
-#      |  ~~~~~~~~~~~~~~~~~~~~~~
-```
-
 homebrew: ***todo***
 
 ### Pre-built executable
@@ -236,7 +215,8 @@ output in table
 g -tb
 ```
 
-output in markdown, and render with [glow](github.com/charmbracelet/glow)
+output in markdown, and render with [glow](github.com/charmbracelet/glow) 
+(icons and colors are not supported in markdown )
 ```bash
 g -md | glow 
 ```
