@@ -38,7 +38,7 @@ type Size struct {
 	Bytes uint64
 }
 
-var allSizeUints = []SizeUnit{
+var allSizeUnits = []SizeUnit{
 	Bit,
 	B,
 	KB,
@@ -54,13 +54,14 @@ var allSizeUints = []SizeUnit{
 }
 
 func ParseSize(size string) (Size, error) {
-	for _, sizeUint := range allSizeUints {
-		for _, sizeString := range sizeStringSets(sizeUint) {
+	for _, sizeUint := range allSizeUnits {
+		sets := sizeStringSets(sizeUint)
+		for _, sizeString := range sets {
 			if strings.HasSuffix(size, sizeString) {
 				size = strings.TrimSuffix(size, sizeString)
 				sizeFloat, err := strconv.ParseFloat(size, 64)
 				if err != nil {
-					return Size{}, err
+					continue
 				}
 				return Size{
 					Bytes: uint64(sizeFloat * float64(sizeUint)),
