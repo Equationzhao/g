@@ -173,9 +173,9 @@ var filteringFlag = []cli.Flag{
 		Category: "FILTERING",
 	},
 	&cli.StringSliceFlag{
-		Name:     "show-exact-file-type-only",
-		Usage:    "only show file with given type",
-		Aliases:  []string{"et-only", "eto"},
+		Name:     "show-mime-file-type-only",
+		Usage:    "only show file with given mime type",
+		Aliases:  []string{"mime-only"},
 		Category: "FILTERING",
 		Action: func(context *cli.Context, i []string) error {
 			if len(i) > 0 {
