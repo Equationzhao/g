@@ -178,6 +178,9 @@ func isOrIsSonOf(a, b string) bool {
 
 func MimeTypeOnly(fileTypes ...string) ItemFilterFunc {
 	return func(e os.FileInfo) bool {
+		if e.IsDir() {
+			return keep
+		}
 		file, err := os.Open(e.Name())
 		if err != nil {
 			return keep
@@ -186,9 +189,13 @@ func MimeTypeOnly(fileTypes ...string) ItemFilterFunc {
 		if err != nil {
 			return keep
 		}
-
+		s := mtype.String()
 		for i := range fileTypes {
-			if isOrIsSonOf(mtype.String(), fileTypes[i]) {
+			if strings.Contains(s, ";") {
+				// remove charset
+				s = strings.SplitN(s, ";", 2)[0]
+			}
+			if isOrIsSonOf(s, fileTypes[i]) {
 				return keep
 			}
 		}
@@ -207,7 +214,12 @@ func RemoveMimeType(fileTypes ...string) ItemFilterFunc {
 			return keep
 		}
 
+		s := mtype.String()
 		for i := range fileTypes {
+			if strings.Contains(s, ";") {
+				// remove charset
+				s = strings.SplitN(s, ";", 2)[0]
+			}
 			if fileTypes[i] == mtype.String() {
 				return remove
 			}

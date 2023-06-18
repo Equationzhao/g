@@ -61,10 +61,10 @@ g
 [--remove-current-path|--rcp|--rc|--rmc]
 [--remove-index|--rm]=[value]
 [--remove-invalid-path|--rip]
-[--show-exact-file-type-only|--et-only|--eto]=[value]
 [--show-group|--sg|--group]
 [--show-hidden|--sh|-a]
 [--show-icon|--si|--icons|--icon]
+[--show-mime-file-type-only|--mime-only]=[value]
 [--show-no-dir|--nd|--nodir|--no-dir|--file]
 [--show-no-ext|--sne|--noext]=[value]
 [--show-only-dir|--sd|--dir|--only-dir|-D]
@@ -224,13 +224,13 @@ g [options] [path]
 
 **--remove-invalid-path, --rip**: remove invalid paths from index
 
-**--show-exact-file-type-only, --et-only, --eto**="": only show file with given type
-
 **--show-group, --sg, --group**: show group
 
 **--show-hidden, --sh, -a**: show hidden files
 
 **--show-icon, --si, --icons, --icon**: show icon
+
+**--show-mime-file-type-only, --mime-only**="": only show file with given mime type
 
 **--show-no-dir, --nd, --nodir, --no-dir, --file**: do not show directory
 
