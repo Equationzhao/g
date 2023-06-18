@@ -144,15 +144,13 @@ var viewFlag = []cli.Flag{
 	},
 	&cli.StringFlag{
 		Name:        "time-style",
-		Usage:       "time/date format with -l, Valid timestamp styles are `default', `iso`, `long iso`, `full-iso`, `locale`, custom `+FORMAT` like date(1).",
+		Usage:       "time/date format with -l, Valid timestamp styles are default, iso, long iso, full-iso, locale, custom +FORMAT like date(1).",
 		EnvVars:     []string{"TIME_STYLE"},
 		DefaultText: "+%d.%b'%y %H:%M (like 02.Jan'06 15:04)",
 		Action: func(context *cli.Context, s string) error {
 			/*
 				The TIME_STYLE argument can be full-iso, long-iso, iso, locale, or  +FORMAT.
 				FORMAT is interpreted like in date(1).
-				If FORMAT is FORMAT1<newline>FORMAT2, then FORMAT1 applies to non-recent files and FORMAT2 to recent files.
-				TIME_STYLE prefixed with 'posix-' takes effect only outside the POSIX locale.
 				Also, the TIME_STYLE environment variable sets the default style to use.
 			*/
 			if strings.HasPrefix(s, "+") {
