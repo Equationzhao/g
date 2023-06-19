@@ -199,7 +199,7 @@ var displayFlag = []cli.Flag{
 					r.SetTheme(theme.Colorless)
 					r.SetInfoTheme(theme.Colorless)
 					theme.Reset = ""
-					_ = context.Set("no-icon", "1")
+					// _ = context.Set("no-icon", "1")
 				}
 			}
 			return nil
@@ -273,7 +273,7 @@ var displayFlag = []cli.Flag{
 					r.SetTheme(theme.Colorless)
 					r.SetInfoTheme(theme.Colorless)
 					theme.Reset = ""
-					_ = context.Set("no-icon", "1")
+					// _ = context.Set("no-icon", "1")
 				}
 			case "CSV", "csv":
 				if _, ok := p.(*display.CSVPrinter); !ok {
