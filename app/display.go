@@ -200,6 +200,10 @@ var displayFlag = []cli.Flag{
 					r.SetInfoTheme(theme.Colorless)
 					theme.Reset = ""
 					// _ = context.Set("no-icon", "1")
+					err := context.Set("header", "1")
+					if err != nil {
+						return err
+					}
 				}
 			}
 			return nil
@@ -273,6 +277,10 @@ var displayFlag = []cli.Flag{
 					r.SetTheme(theme.Colorless)
 					r.SetInfoTheme(theme.Colorless)
 					theme.Reset = ""
+					err := context.Set("header", "1")
+					if err != nil {
+						return err
+					}
 					// _ = context.Set("no-icon", "1")
 				}
 			case "CSV", "csv":

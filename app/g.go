@@ -52,7 +52,7 @@ var (
 	hookAfter       = make([]func(display.Printer, ...display.Item), 0)
 )
 
-var Version = "0.8.2"
+var Version = "0.8.4"
 
 var G *cli.App
 
