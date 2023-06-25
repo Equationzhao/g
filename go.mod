@@ -10,11 +10,11 @@ require (
 	github.com/gobwas/glob v0.2.3
 	github.com/hako/durafmt v0.0.0-20210608085754-5c1018a4e16b
 	github.com/jedib0t/go-pretty/v6 v6.4.6
-	github.com/junegunn/fzf v0.0.0-20230614153741-d471067e3f46
+	github.com/junegunn/fzf v0.0.0-20230622080006-01302d097c39
 	github.com/mattn/go-runewidth v0.0.14
 	github.com/olekukonko/ts v0.0.0-20171002115256-78ecb04241c0
 	github.com/syndtr/goleveldb v1.0.0
-	github.com/urfave/cli/v2 v2.25.6
+	github.com/urfave/cli/v2 v2.25.7
 	github.com/valyala/bytebufferpool v1.0.0
 	github.com/wk8/go-ordered-map/v2 v2.1.7
 	go.szostok.io/version v1.2.0
