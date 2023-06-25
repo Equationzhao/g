@@ -39,9 +39,17 @@ var sortingFlags = []cli.Flag{
 				case ".Name-descend":
 					sort.AddOption(sorter.ByNameWithoutALeadingDotCaseSensitiveDescend)
 				case "size-descend", "S", "sizesort":
-					sort.AddOption(sorter.BySizeDescend)
+					if context.Bool("srs") {
+						sort.AddOption(sorter.ByRecursiveSizeDescend(context.Int("depth")))
+					} else {
+						sort.AddOption(sorter.BySizeDescend)
+					}
 				case "size":
-					sort.AddOption(sorter.BySizeAscend)
+					if context.Bool("srs") {
+						sort.AddOption(sorter.ByRecursiveSizeAscend(context.Int("depth")))
+					} else {
+						sort.AddOption(sorter.BySizeAscend)
+					}
 				case "time-descend":
 					sort.AddOption(sorter.ByTimeDescend(timeType[0]))
 				case "time":
@@ -162,7 +170,11 @@ var sortingFlags = []cli.Flag{
 		Usage:              "sort by file size, largest first(descending)",
 		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
-			sort.Reset()
+			if context.Bool("srs") { // recursive size
+				sort.AddOption(sorter.ByRecursiveSizeDescend(context.Int("depth")))
+			} else {
+				sort.AddOption(sorter.BySizeDescend)
+			}
 			return nil
 		},
 		Category: "SORTING",

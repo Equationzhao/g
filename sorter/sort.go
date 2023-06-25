@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/Equationzhao/g/osbased"
+	"github.com/Equationzhao/g/util"
 	mt "github.com/gabriel-vasile/mimetype"
 )
 
@@ -67,6 +68,18 @@ func BySizeDescend(a, b os.FileInfo) bool {
 
 func BySizeAscend(a, b os.FileInfo) bool {
 	return a.Size() < b.Size()
+}
+
+func ByRecursiveSizeDescend(depth int) FileSortFunc {
+	return func(a, b os.FileInfo) bool {
+		return util.RecursivelySizeOf(a, depth) > util.RecursivelySizeOf(b, depth)
+	}
+}
+
+func ByRecursiveSizeAscend(depth int) FileSortFunc {
+	return func(a, b os.FileInfo) bool {
+		return util.RecursivelySizeOf(a, depth) < util.RecursivelySizeOf(b, depth)
+	}
 }
 
 func ByTimeDescend(timeType string) FileSortFunc {

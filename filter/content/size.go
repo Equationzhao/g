@@ -3,7 +3,6 @@ package content
 import (
 	"fmt"
 	"os"
-	"path/filepath"
 	"strconv"
 	"strings"
 	"sync"
@@ -12,6 +11,7 @@ import (
 	"github.com/Equationzhao/g/filter"
 	"github.com/Equationzhao/g/osbased"
 	"github.com/Equationzhao/g/render"
+	"github.com/Equationzhao/g/util"
 )
 
 const Unknown SizeUnit = -1
@@ -264,58 +264,6 @@ func (s *SizeEnabler) Size2String(b int64, blank int) string {
 	return s.renderer.Size(filter.FillBlank(res, blank))
 }
 
-func recursivelySizeOf(info os.FileInfo, depth int) int64 {
-	currentDepth := 0
-	if info.IsDir() {
-		totalSize := info.Size()
-		if depth < 0 {
-			// -1 means no limit
-			_ = filepath.WalkDir(info.Name(), func(path string, dir os.DirEntry, err error) error {
-				if err != nil {
-					return err
-				}
-
-				if !dir.IsDir() {
-					info, err := dir.Info()
-					if err == nil {
-						totalSize += info.Size()
-					}
-				}
-
-				return nil
-			})
-		} else {
-			_ = filepath.WalkDir(info.Name(), func(path string, dir os.DirEntry, err error) error {
-				if err != nil {
-					return err
-				}
-				if currentDepth > depth {
-					if dir.IsDir() {
-						return filepath.SkipDir
-					}
-					return nil
-				}
-
-				if !dir.IsDir() {
-					info, err := dir.Info()
-					if err == nil {
-						totalSize += info.Size()
-					}
-				}
-
-				if dir.IsDir() {
-					currentDepth++
-				}
-
-				return nil
-			})
-		}
-
-		return totalSize
-	}
-	return info.Size()
-}
-
 func (s *SizeEnabler) EnableSize(size SizeUnit) filter.ContentOption {
 	s.sizeUint = size
 
@@ -345,7 +293,7 @@ func (s *SizeEnabler) EnableSize(size SizeUnit) filter.ContentOption {
 		return func(info os.FileInfo) (string, string) {
 			var v int64
 			if s.recursive != nil {
-				v = recursivelySizeOf(info, s.recursive.depth)
+				v = util.RecursivelySizeOf(info, s.recursive.depth)
 			} else {
 				v = info.Size()
 			}
@@ -361,7 +309,7 @@ func (s *SizeEnabler) EnableSize(size SizeUnit) filter.ContentOption {
 	return func(info os.FileInfo) (string, string) {
 		var v int64
 		if s.recursive != nil {
-			v = recursivelySizeOf(info, s.recursive.depth)
+			v = util.RecursivelySizeOf(info, s.recursive.depth)
 		} else {
 			v = info.Size()
 		}
