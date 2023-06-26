@@ -4,7 +4,6 @@ package theme
 
 import (
 	"path/filepath"
-	"sort"
 
 	"gopkg.in/ini.v1"
 )
@@ -23,8 +22,13 @@ func init() {
 	for k, v := range DefaultInfoTheme {
 		infoArray = append(infoArray, kv{k, color2str(v.Color)})
 	}
-	sort.Slice(infoArray, func(i, j int) bool {
-		return infoArray[i].key < infoArray[j].key
+	slices.SortFunc(infoArray, func(a, b kv) int {
+		if a.key < b.key {
+			return -1
+		} else if a.key > b.key {
+			return 1
+		}
+		return 0
 	})
 	for _, v := range infoArray {
 		_, _ = info.NewKey(v.key, v.value.(string))
@@ -35,8 +39,13 @@ func init() {
 		default_ = append(default_, kv{k, v})
 	}
 
-	sort.Slice(default_, func(i, j int) bool {
-		return default_[i].key < default_[j].key
+	slices.SortFunc(default_, func(a, b kv) int {
+		if a.key < b.key {
+			return -1
+		} else if a.key > b.key {
+			return 1
+		}
+		return 0
 	})
 
 	for _, k := range default_ {

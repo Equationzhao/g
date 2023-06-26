@@ -9,9 +9,10 @@ import (
 	"hash"
 	"hash/crc32"
 	"io"
+	"io/fs"
 	"os"
 	"runtime"
-	"sort"
+	"slices"
 	"strings"
 	"sync"
 
@@ -217,11 +218,15 @@ func NewContentFilter(options ...ContentFilterOption) *ContentFilter {
 }
 
 func (cf *ContentFilter) GetDisplayItems(e ...os.FileInfo) []*display.Item {
-	sort.Slice(e, func(i, j int) bool {
+	slices.SortFunc(e, func(a, b fs.FileInfo) int {
 		if cf.sortFunc != nil {
-			return cf.sortFunc(e[i], e[j])
+			if cf.sortFunc(a, b) {
+				return -1
+			} else {
+				return 1
+			}
 		}
-		return true
+		return 0
 	})
 
 	// limit number of entries

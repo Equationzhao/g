@@ -9,7 +9,7 @@ import (
 	"math"
 	"os"
 	"runtime"
-	"sort"
+	"slices"
 	"strings"
 
 	"github.com/Equationzhao/g/util"
@@ -275,13 +275,6 @@ func tableCoordsToColIndex(x, y, numRows int) int {
 	return y + numRows*x
 }
 
-func max(a int, b int) int {
-	if a > b {
-		return a
-	}
-	return b
-}
-
 type CommaPrint struct {
 	*Across
 	*hook
@@ -501,8 +494,13 @@ func (j *JsonPrinter) Print(items ...Item) {
 			}
 		}
 
-		sort.Slice(order, func(i, j int) bool {
-			return order[i].no < order[j].no
+		slices.SortFunc(order, func(a, b orderItem) int {
+			if a.no < b.no {
+				return -1
+			} else if a.no > b.no {
+				return 1
+			}
+			return 0
 		})
 
 		s := orderedmap.New[string, string](

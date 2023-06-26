@@ -1,7 +1,7 @@
 package display
 
 import (
-	"sort"
+	"slices"
 
 	"github.com/Equationzhao/g/util"
 	"github.com/valyala/bytebufferpool"
@@ -57,8 +57,16 @@ func (i *Item) KeysByOrder() []string {
 		})
 	}
 
-	sort.Slice(kNo, func(i, j int) bool {
-		return kNo[i].no < kNo[j].no
+	slices.SortFunc(kNo, func(a, b struct {
+		k  string
+		no int
+	}) int {
+		if a.no < b.no {
+			return -1
+		} else if a.no > b.no {
+			return 1
+		}
+		return 0
 	})
 
 	for _, v := range kNo {
@@ -92,8 +100,14 @@ func (i *Item) ExcludeOrderedContent(key ...string) string {
 		}
 		ics = append(ics, v)
 	}
-	sort.Slice(ics, func(i, j int) bool {
-		return ics[i].No < ics[j].No
+
+	slices.SortFunc(ics, func(a, b ItemContent) int {
+		if a.No < b.No {
+			return -1
+		} else if a.No > b.No {
+			return 1
+		}
+		return 0
 	})
 
 	for _, v := range ics {
@@ -115,8 +129,14 @@ func (i *Item) IncludeOrderedContent(names ...string) string {
 		}
 		ics = append(ics, v)
 	}
-	sort.Slice(ics, func(i, j int) bool {
-		return ics[i].No < ics[j].No
+
+	slices.SortFunc(ics, func(a, b ItemContent) int {
+		if a.No < b.No {
+			return -1
+		} else if a.No > b.No {
+			return 1
+		}
+		return 0
 	})
 
 	for _, v := range ics {
@@ -135,8 +155,14 @@ func (i *Item) OrderedContent() string {
 	for _, v := range i.internal {
 		ics = append(ics, v)
 	}
-	sort.Slice(ics, func(i, j int) bool {
-		return ics[i].No < ics[j].No
+
+	slices.SortFunc(ics, func(a, b ItemContent) int {
+		if a.No < b.No {
+			return -1
+		} else if a.No > b.No {
+			return 1
+		}
+		return 0
 	})
 
 	for j, v := range ics {
@@ -155,8 +181,14 @@ func (i *Item) GetAllOrdered() []ItemContent {
 	for _, v := range i.internal {
 		ics = append(ics, v)
 	}
-	sort.Slice(ics, func(i, j int) bool {
-		return ics[i].No < ics[j].No
+
+	slices.SortFunc(ics, func(a, b ItemContent) int {
+		if a.No < b.No {
+			return -1
+		} else if a.No > b.No {
+			return 1
+		}
+		return 0
 	})
 
 	return ics

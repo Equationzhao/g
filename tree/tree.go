@@ -2,9 +2,10 @@ package tree
 
 import (
 	"errors"
+	"io/fs"
 	"os"
 	"path/filepath"
-	"sort"
+	"slices"
 	"sync"
 	"sync/atomic"
 
@@ -99,13 +100,15 @@ func expand(node tree, depthLimit int, wg *sync.WaitGroup, parent string, s *sta
 		infos = typeFilter.Filter(infos...)
 	}
 
-	sort.Slice(infos, func(i, j int) bool {
-		if contentFilter.SortFunc() != nil {
-			return contentFilter.SortFunc()(infos[i], infos[j])
-		} else {
-			return true
-		}
-	})
+	if funcs := contentFilter.SortFunc(); funcs != nil {
+		slices.SortFunc(infos, func(a, b fs.FileInfo) int {
+			if funcs(a, b) {
+				return -1
+			} else {
+				return 1
+			}
+		})
+	}
 
 	for _, v := range infos {
 		if v.IsDir() {

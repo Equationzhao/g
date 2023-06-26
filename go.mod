@@ -1,6 +1,6 @@
 module github.com/Equationzhao/g
 
-go 1.20
+go 1.21
 
 require (
 	github.com/Equationzhao/pathbeautify v0.0.6
