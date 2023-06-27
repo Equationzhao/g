@@ -10,6 +10,7 @@ import (
 	"github.com/Equationzhao/g/cached"
 	"github.com/Equationzhao/g/filter"
 	"github.com/Equationzhao/g/git"
+	"github.com/Equationzhao/g/item"
 	"github.com/Equationzhao/g/render"
 	"github.com/valyala/bytebufferpool"
 )
@@ -171,7 +172,7 @@ func (n *Name) Enable() filter.ContentOption {
 		return value
 	}
 
-	return func(info os.FileInfo) (string, string) {
+	return func(info *item.FileInfo) (string, string) {
 		buffer := bytebufferpool.Get()
 		defer bytebufferpool.Put(buffer)
 		name := info.Name()

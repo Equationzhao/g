@@ -2,11 +2,11 @@ package content
 
 import (
 	"fmt"
-	"os"
 	"sync"
 	"time"
 
 	"github.com/Equationzhao/g/filter"
+	"github.com/Equationzhao/g/item"
 	"github.com/Equationzhao/g/osbased"
 	"github.com/Equationzhao/g/render"
 	"github.com/hako/durafmt"
@@ -48,7 +48,7 @@ func (r *RelativeTimeEnabler) Enable(renderer *render.Renderer) filter.ContentOp
 		return filter.FillBlank(size, longestRt)
 	}
 
-	return func(info os.FileInfo) (string, string) {
+	return func(info *item.FileInfo) (string, string) {
 		var t time.Time
 		timeType := ""
 		switch r.Mode {
@@ -89,7 +89,7 @@ const (
 )
 
 func EnableTime(format string, mode string, renderer *render.Renderer) filter.ContentOption {
-	return func(info os.FileInfo) (string, string) {
+	return func(info *item.FileInfo) (string, string) {
 		// get mod time/ create time/ access time
 		var t time.Time
 		timeType := ""

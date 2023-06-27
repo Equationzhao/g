@@ -22,16 +22,26 @@ type ItemContent struct {
 	Content Content
 }
 
+func (i ItemContent) String() string {
+	return i.Content.String()
+}
+
+func (i ItemContent) NO() int {
+	return i.No
+}
+
+// Deprecated: Item is a display item
 type Item struct {
 	Delimiter string
 	internal  map[string]ItemContent
 }
 
+// Deprecated: GetAll return all content
 func (i *Item) GetAll() map[string]ItemContent {
 	return i.internal
 }
 
-// Keys return all keys in random order
+// Deprecated: Keys return all keys in random order
 func (i *Item) Keys() []string {
 	res := make([]string, 0, len(i.internal))
 	for k := range i.internal {
@@ -40,7 +50,7 @@ func (i *Item) Keys() []string {
 	return res
 }
 
-// KeysByOrder return Keys(ordered by itemContent.No, ascending)
+// Deprecated: KeysByOrder return Keys(ordered by itemContent.No, ascending)
 func (i *Item) KeysByOrder() []string {
 	res := make([]string, 0, len(i.internal))
 	kNo := make([]struct {
@@ -67,22 +77,23 @@ func (i *Item) KeysByOrder() []string {
 	return res
 }
 
+// Deprecated: Del delete content by key
 func (i *Item) Del(key string) {
 	delete(i.internal, key)
 }
 
-// Get content by key
+// Deprecated: Get content by key
 func (i *Item) Get(key string) (ItemContent, bool) {
 	c, ok := i.internal[key]
 	return c, ok
 }
 
-// Set content by key
+// Deprecated: Set content by key
 func (i *Item) Set(key string, ic ItemContent) {
 	i.internal[key] = ic
 }
 
-// ExcludeOrderedContent get content in order, exclude those match given parameter(ordered by itemContent.No, ascending)
+// Deprecated: ExcludeOrderedContent get content in order, exclude those match given parameter(ordered by itemContent.No, ascending)
 func (i *Item) ExcludeOrderedContent(key ...string) string {
 	res := bytebufferpool.Get()
 	ics := make([]ItemContent, 0, len(i.internal))
@@ -105,7 +116,7 @@ func (i *Item) ExcludeOrderedContent(key ...string) string {
 	return res.String()
 }
 
-// IncludeOrderedContent return those content inorder(ordered by itemContent.No, ascending)
+// Deprecated: IncludeOrderedContent return those content inorder(ordered by itemContent.No, ascending)
 func (i *Item) IncludeOrderedContent(names ...string) string {
 	res := bytebufferpool.Get()
 	ics := make([]ItemContent, 0, len(i.internal))
@@ -128,7 +139,7 @@ func (i *Item) IncludeOrderedContent(names ...string) string {
 	return res.String()
 }
 
-// OrderedContent return all content in order(ordered by itemContent.No, ascending)
+// Deprecated: OrderedContent return all content in order(ordered by itemContent.No, ascending)
 func (i *Item) OrderedContent() string {
 	res := bytebufferpool.Get()
 	ics := make([]ItemContent, 0, len(i.internal))
@@ -150,6 +161,7 @@ func (i *Item) OrderedContent() string {
 	return res.String()
 }
 
+// Deprecated: GetAllOrdered return all content in order(ordered by itemContent.No, ascending)
 func (i *Item) GetAllOrdered() []ItemContent {
 	ics := make([]ItemContent, 0, len(i.internal))
 	for _, v := range i.internal {
@@ -164,6 +176,7 @@ func (i *Item) GetAllOrdered() []ItemContent {
 
 type ItemOptions func(*Item)
 
+// Deprecated: NewItem return a new Item
 func NewItem(Ops ...ItemOptions) *Item {
 	res := &Item{internal: make(map[string]ItemContent)}
 	for _, op := range Ops {

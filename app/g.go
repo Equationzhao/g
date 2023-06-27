@@ -14,6 +14,7 @@ import (
 	"github.com/Equationzhao/g/filter"
 	filtercontent "github.com/Equationzhao/g/filter/content"
 	"github.com/Equationzhao/g/index"
+	"github.com/Equationzhao/g/item"
 	"github.com/Equationzhao/g/render"
 	"github.com/Equationzhao/g/sorter"
 	"github.com/Equationzhao/g/theme"
@@ -44,12 +45,11 @@ var (
 	sizeUint        = filtercontent.Auto
 	sizeEnabler     = filtercontent.NewSizeEnabler()
 	blockEnabler    = filtercontent.NewBlockSizeEnabler()
-	wgs             = make([]filter.LengthFixed, 0, 1)
 	depthLimitMap   = make(map[string]int)
 	limitOnce       = util.Once{}
 	hookOnce        = util.Once{}
 	duplicateDetect = filtercontent.NewDuplicateDetect()
-	hookAfter       = make([]func(display.Printer, ...display.Item), 0)
+	hookAfter       = make([]func(display.Printer, ...*item.FileInfo), 0)
 )
 
 var Version = "0.8.5"
@@ -71,10 +71,6 @@ func init() {
 			CompiledAt = CompiledAtTime.UTC().Format(timeFormat)
 		}
 	}
-	sizeEnabler.SetRenderer(r)
-	blockEnabler.SetRenderer(r)
-	wgs = append(wgs, sizeEnabler)
-	wgs = append(wgs, blockEnabler)
 
 	G = &cli.App{
 		Name:      "g",
@@ -195,7 +191,6 @@ There is NO WARRANTY, to the extent permitted by law.`,
 				path = append(path, ".")
 			}
 			contentFilter.SetOptions(contentFunc...)
-			contentFilter.AppendToLengthFixed(wgs...)
 			depth := context.Int("depth")
 
 			if context.Bool("tree") {
@@ -307,7 +302,7 @@ There is NO WARRANTY, to the extent permitted by law.`,
 						path[i] = pathbeautify.Transform(path[i])
 					}
 
-					infos := make([]os.FileInfo, 0, 20)
+					infos := make([]*item.FileInfo, 0, 20)
 
 					isFile := false
 
@@ -353,11 +348,23 @@ There is NO WARRANTY, to the extent permitted by law.`,
 						if stat.IsDir() {
 							if flagd {
 								// when -d is set, treat dir as file
-								infos = append(infos, stat)
+								info, err := item.NewFileInfoWithOption(item.WithFileInfo(stat), item.WithPath(path[i]))
+								if err != nil {
+									checkErr(err)
+									seriousErr = true
+									continue
+								}
+								infos = append(infos, info)
 								isFile = true
 							}
 						} else {
-							infos = append(infos, stat)
+							info, err := item.NewFileInfoWithOption(item.WithFileInfo(stat), item.WithPath(path[i]))
+							if err != nil {
+								checkErr(err)
+								seriousErr = true
+								continue
+							}
+							infos = append(infos, info)
 							isFile = true
 						}
 					}
@@ -395,7 +402,7 @@ There is NO WARRANTY, to the extent permitted by law.`,
 						if err != nil {
 							_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(err.Error()))
 						} else {
-							statCurrent, err := os.Stat(".")
+							FileInfoCurrent, err := item.NewFileInfo(".")
 							if err != nil {
 								if pathErr := new(os.PathError); errors.As(err, &pathErr) {
 									_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(fmt.Sprintf("%s: %s", pathErr.Err, pathErr.Path)))
@@ -405,10 +412,10 @@ There is NO WARRANTY, to the extent permitted by law.`,
 									seriousErr = true
 								}
 							} else {
-								infos = append(infos, statCurrent)
+								infos = append(infos, FileInfoCurrent)
 							}
 
-							statParent, err := os.Stat("..")
+							FileInfoParent, err := item.NewFileInfo("..")
 							if err != nil {
 								if pathErr := new(os.PathError); errors.As(err, &pathErr) {
 									_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(fmt.Sprintf("%s: %s", pathErr.Err, pathErr.Path)))
@@ -418,7 +425,7 @@ There is NO WARRANTY, to the extent permitted by law.`,
 									minorErr = true
 								}
 							} else {
-								infos = append(infos, statParent)
+								infos = append(infos, FileInfoParent)
 							}
 						}
 					}
@@ -434,6 +441,12 @@ There is NO WARRANTY, to the extent permitted by law.`,
 								_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(err.Error()))
 							}
 						} else {
+							info, err := item.NewFileInfoWithOption(item.WithFileInfo(info), item.WithPath(v.Name()))
+							if err != nil {
+								checkErr(err)
+								seriousErr = true
+								continue
+							}
 							infos = append(infos, info)
 						}
 					}
@@ -472,16 +485,17 @@ There is NO WARRANTY, to the extent permitted by law.`,
 					}
 
 				final:
-					items := contentFilter.GetDisplayItems(infos...)
+					contentFilter.GetDisplayItems(infos...)
 
+					// add total && statistics
 					{
-						var i *display.Item
+						var i *item.FileInfo
 						// if -l/show-total-size is set, add total size
 						_, isPrettyPrinter := p.(display.PrettyPrinter)
 
 						if total, ok := sizeEnabler.Total(); ok {
 							if !isPrettyPrinter {
-								i = display.NewItem()
+								i, _ = item.NewFileInfoWithOption()
 								i.Set("total", display.ItemContent{No: 0, Content: display.StringContent(fmt.Sprintf("  total %s", sizeEnabler.Size2String(total, 0)))})
 							} else {
 								_, _ = display.RawPrint(fmt.Sprintf("  total %s\n", sizeEnabler.Size2String(total, 0)))
@@ -491,7 +505,7 @@ There is NO WARRANTY, to the extent permitted by law.`,
 							if !isPrettyPrinter {
 								tFormat := "\n  underwent %s"
 								if i == nil {
-									i = display.NewItem()
+									i, _ = item.NewFileInfoWithOption()
 									tFormat = "  underwent %s"
 								}
 								i.Set("underwent", display.ItemContent{No: 1, Content: display.StringContent(fmt.Sprintf(tFormat, r.Time(durafmt.Parse(time.Since(start)).LimitToUnit("ms").String())))})
@@ -504,16 +518,18 @@ There is NO WARRANTY, to the extent permitted by law.`,
 						}
 						if i != nil {
 							p.DisableHookBefore()
-							p.Print(*i)
+							p.Print(i)
 							p.EnableHookBefore()
 						}
 					}
 
+					// do scan
+					// get max length for each Meta[key].Value
+
 					_ = hookOnce.Do(func() error {
 						if header || footer {
-							headerFooter := func(isBefore bool) func(p display.Printer, item ...display.Item) {
-								return func(p display.Printer, item ...display.Item) {
-									// TBAddHeaderOnce, TBAddFooterOnce := sync.Once{}, sync.Once{}
+							headerFooter := func(isBefore bool) func(p display.Printer, items ...*item.FileInfo) {
+								return func(p display.Printer, item ...*item.FileInfo) {
 									// add header
 									if len(item) == 0 {
 										return
@@ -549,7 +565,7 @@ There is NO WARRANTY, to the extent permitted by law.`,
 									for i, s := range allPart {
 										if len(s) > longestEachPart[s] {
 											// expand the every item's content of this part
-											for _, it := range items {
+											for _, it := range infos {
 												content, _ := it.Get(s)
 												content.Content = display.StringContent(fmt.Sprintf("%s%s", strings.Repeat(" ", len(s)-longestEachPart[s]), content.Content.String()))
 												it.Set(s, content)

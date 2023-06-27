@@ -6,6 +6,7 @@ import (
 	"sync"
 
 	"github.com/Equationzhao/g/filter"
+	"github.com/Equationzhao/g/item"
 	"github.com/gabriel-vasile/mimetype"
 )
 
@@ -24,28 +25,7 @@ func NewMimeFileTypeEnabler() *MimeFileTypeEnabler {
 const MimeTypeName = "Mime-type"
 
 func (e *MimeFileTypeEnabler) Enable() filter.ContentOption {
-	longestTypeName := 0
-	m := sync.RWMutex{}
-	done := func(tn string) {
-		defer e.Done()
-		m.RLock()
-		if longestTypeName >= len(tn) {
-			m.RUnlock()
-			return
-		}
-		m.RUnlock()
-		m.Lock()
-		if longestTypeName < len(tn) {
-			longestTypeName = len(tn)
-		}
-		m.Unlock()
-	}
-
-	wait := func(tn string) string {
-		e.Wait()
-		return filter.FillBlank(tn, longestTypeName)
-	}
-	return func(info os.FileInfo) (string, string) {
+	return func(info *item.FileInfo) (string, string) {
 		tn := ""
 		returnName := MimeTypeName
 		if e.ParentOnly {
@@ -60,19 +40,14 @@ func (e *MimeFileTypeEnabler) Enable() filter.ContentOption {
 		} else if info.Mode()&os.ModeSocket != 0 {
 			tn = "socket"
 		} else {
-			file, err := os.Open(info.Name())
+			file, err := os.Open(info.FullPath)
 			defer file.Close()
 			if err != nil {
-				// tn = err.Error()
-				tn = "failed_to_read"
-				done(tn)
-				return wait(tn), returnName
+				return "failed_to_read", returnName
 			}
 			mtype, err := mimetype.DetectReader(file)
 			if err != nil {
-				tn = err.Error()
-				done(tn)
-				return wait(tn), returnName
+				return err.Error(), returnName
 			}
 			tn = mtype.String()
 
@@ -86,7 +61,6 @@ func (e *MimeFileTypeEnabler) Enable() filter.ContentOption {
 			}
 
 		}
-		done(tn)
-		return wait(tn), returnName
+		return tn, returnName
 	}
 }

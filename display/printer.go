@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/Equationzhao/g/item"
 	"io"
 	"math"
 	"os"
@@ -31,13 +32,13 @@ func RawPrint(toPrint ...any) (n int, err error) {
 // print style control
 
 type hook struct {
-	BeforePrint   []func(Printer, ...Item)
-	AfterPrint    []func(Printer, ...Item)
+	BeforePrint   []func(Printer, ...*item.FileInfo)
+	AfterPrint    []func(Printer, ...*item.FileInfo)
 	disableBefore bool
 	disableAfter  bool
 }
 
-func fire(h []func(Printer, ...Item), p Printer, i ...Item) {
+func fire(h []func(Printer, ...*item.FileInfo), p Printer, i ...*item.FileInfo) {
 	for _, fn := range h {
 		if fn == nil {
 			continue
@@ -48,16 +49,16 @@ func fire(h []func(Printer, ...Item), p Printer, i ...Item) {
 
 func newHook() *hook {
 	return &hook{
-		BeforePrint: make([]func(Printer, ...Item), 0, 5),
-		AfterPrint:  make([]func(Printer, ...Item), 0, 5),
+		BeforePrint: make([]func(Printer, ...*item.FileInfo), 0, 5),
+		AfterPrint:  make([]func(Printer, ...*item.FileInfo), 0, 5),
 	}
 }
 
-func (h *hook) AddBeforePrint(f ...func(Printer, ...Item)) {
+func (h *hook) AddBeforePrint(f ...func(Printer, ...*item.FileInfo)) {
 	h.BeforePrint = append(h.BeforePrint, f...)
 }
 
-func (h *hook) AddAfterPrint(f ...func(Printer, ...Item)) {
+func (h *hook) AddAfterPrint(f ...func(Printer, ...*item.FileInfo)) {
 	h.AfterPrint = append(h.AfterPrint, f...)
 }
 
@@ -78,8 +79,8 @@ func (h *hook) EnableHookAfter() {
 }
 
 type Hook interface {
-	AddBeforePrint(...func(Printer, ...Item))
-	AddAfterPrint(...func(Printer, ...Item))
+	AddBeforePrint(...func(Printer, ...*item.FileInfo))
+	AddAfterPrint(...func(Printer, ...*item.FileInfo))
 	DisableHookBefore()
 	EnableHookBefore()
 	DisableHookAfter()
@@ -87,7 +88,7 @@ type Hook interface {
 }
 
 type Printer interface {
-	Print(s ...Item)
+	Print(s ...*item.FileInfo)
 	Hook
 	io.Writer
 }
@@ -104,7 +105,7 @@ func NewByline() Printer {
 	}
 }
 
-func (b *Byline) Print(i ...Item) {
+func (b *Byline) Print(i ...*item.FileInfo) {
 	if !b.disableBefore {
 		fire(b.BeforePrint, b, i...)
 	}
@@ -132,7 +133,7 @@ func NewFitTerminal() Printer {
 	}
 }
 
-func (f *FitTerminal) Print(i ...Item) {
+func (f *FitTerminal) Print(i ...*item.FileInfo) {
 	if !f.disableBefore {
 		fire(f.BeforePrint, f, i...)
 	}
@@ -295,7 +296,7 @@ func NewCommaPrint() Printer {
 	}
 }
 
-func (c *CommaPrint) Print(items ...Item) {
+func (c *CommaPrint) Print(items ...*item.FileInfo) {
 	if !c.disableBefore {
 		fire(c.BeforePrint, c, items...)
 	}
@@ -326,7 +327,7 @@ func NewAcross() Printer {
 	}
 }
 
-func (a *Across) Print(items ...Item) {
+func (a *Across) Print(items ...*item.FileInfo) {
 	if !a.disableBefore {
 		fire(a.BeforePrint, a, items...)
 	}
@@ -433,7 +434,7 @@ func NewZero() Printer {
 	}
 }
 
-func (z *Zero) Print(items ...Item) {
+func (z *Zero) Print(items ...*item.FileInfo) {
 	if !z.disableBefore {
 		fire(z.BeforePrint, z, items...)
 	}
@@ -468,7 +469,7 @@ func NewJsonPrinter() Printer {
 	}
 }
 
-func (j *JsonPrinter) Print(items ...Item) {
+func (j *JsonPrinter) Print(items ...*item.FileInfo) {
 	if !j.disableBefore {
 		fire(j.BeforePrint, j, items...)
 	}
@@ -567,7 +568,7 @@ func NewTablePrinter(opts ...func(writer table.Writer)) Printer {
 	return t
 }
 
-func (t *TablePrinter) PrintBase(fn func() string, s ...Item) {
+func (t *TablePrinter) PrintBase(fn func() string, s ...*item.FileInfo) {
 	if !t.disableBefore {
 		fire(t.BeforePrint, t, s...)
 	}
@@ -593,11 +594,11 @@ func (t *TablePrinter) PrintBase(fn func() string, s ...Item) {
 	}
 }
 
-func (t *TablePrinter) Print(s ...Item) {
+func (t *TablePrinter) Print(s ...*item.FileInfo) {
 	t.PrintBase(t.w.Render, s...)
 }
 
-func (t *TablePrinter) setTB(s ...Item) {
+func (t *TablePrinter) setTB(s ...*item.FileInfo) {
 	for _, v := range s {
 		all := v.GetAllOrdered()
 		row := make(table.Row, 0, len(all))
@@ -632,7 +633,7 @@ func NewMDPrinter() Printer {
 	return m
 }
 
-func (m *MDPrinter) Print(s ...Item) {
+func (m *MDPrinter) Print(s ...*item.FileInfo) {
 	m.PrintBase(m.w.RenderMarkdown, s...)
 }
 
@@ -646,7 +647,7 @@ func NewHTMLPrinter() Printer {
 	return h
 }
 
-func (p *HTMLPrinter) Print(s ...Item) {
+func (p *HTMLPrinter) Print(s ...*item.FileInfo) {
 	p.PrintBase(p.w.RenderHTML, s...)
 }
 
@@ -660,6 +661,6 @@ func NewCSVPrinter() Printer {
 	return c
 }
 
-func (c *CSVPrinter) Print(s ...Item) {
+func (c *CSVPrinter) Print(s ...*item.FileInfo) {
 	c.PrintBase(c.w.RenderCSV, s...)
 }
