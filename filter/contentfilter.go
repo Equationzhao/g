@@ -16,26 +16,16 @@ import (
 	"sync"
 
 	"github.com/Equationzhao/g/display"
+	"github.com/Equationzhao/g/item"
 	"github.com/Equationzhao/g/osbased"
 	"github.com/Equationzhao/g/render"
 )
 
-type LengthFixed interface {
-	Done()
-	Wait()
-	Add(delta int)
-}
-
 type ContentFilter struct {
 	noOutputOptions []NoOutputOption
 	options         []ContentOption
-	wgs             []LengthFixed
 	sortFunc        func(a, b os.FileInfo) bool
 	LimitN          uint // <=0 means no limit
-}
-
-func (cf *ContentFilter) AppendToLengthFixed(fixed ...LengthFixed) {
-	cf.wgs = append(cf.wgs, fixed...)
 }
 
 func (cf *ContentFilter) SortFunc() func(a, b os.FileInfo) bool {
@@ -63,8 +53,8 @@ func (cf *ContentFilter) SetNoOutputOptions(outputFunc ...NoOutputOption) {
 }
 
 type (
-	ContentOption  func(info os.FileInfo) (stringContent string, funcName string)
-	NoOutputOption func(info os.FileInfo)
+	ContentOption  func(info *item.FileInfo) (stringContent string, funcName string)
+	NoOutputOption func(info *item.FileInfo)
 )
 
 // FillBlank
@@ -93,7 +83,6 @@ func (cf *ContentFilter) EnableOwner(renderer *render.Renderer) ContentOption {
 	longestOwner := 0
 
 	wg := new(sync.WaitGroup)
-	cf.wgs = append(cf.wgs, wg)
 	wait := func(res string) string {
 		wg.Wait()
 		return renderer.Owner(FillBlank(res, longestOwner))
@@ -113,7 +102,7 @@ func (cf *ContentFilter) EnableOwner(renderer *render.Renderer) ContentOption {
 			m.RUnlock()
 		}
 	}
-	return func(info os.FileInfo) (string, string) {
+	return func(info *item.FileInfo) (string, string) {
 		name := ""
 		returnFuncName := ""
 		if Uid {
@@ -143,7 +132,6 @@ func (cf *ContentFilter) EnableGroup(renderer *render.Renderer) ContentOption {
 	longestGroup := 0
 
 	wg := new(sync.WaitGroup)
-	cf.wgs = append(cf.wgs, wg)
 	wait := func(name string) string {
 		wg.Wait()
 		return renderer.Group(FillBlank(name, longestGroup))
@@ -164,7 +152,7 @@ func (cf *ContentFilter) EnableGroup(renderer *render.Renderer) ContentOption {
 		}
 	}
 
-	return func(info os.FileInfo) (string, string) {
+	return func(info *item.FileInfo) (string, string) {
 		name := ""
 		returnFuncName := ""
 		if Gid {
@@ -216,7 +204,7 @@ func NewContentFilter(options ...ContentFilterOption) *ContentFilter {
 	return c
 }
 
-func (cf *ContentFilter) GetDisplayItems(e ...os.FileInfo) []*display.Item {
+func (cf *ContentFilter) GetDisplayItems(e ...*item.FileInfo) {
 	sort.Slice(e, func(i, j int) bool {
 		if cf.sortFunc != nil {
 			return cf.sortFunc(e[i], e[j])
@@ -232,21 +220,13 @@ func (cf *ContentFilter) GetDisplayItems(e ...os.FileInfo) []*display.Item {
 
 	wg := sync.WaitGroup{}
 	wg.Add(len(e))
-	for i := range cf.wgs {
-		cf.wgs[i].Add(len(e))
-	}
-
-	res := make([]*display.Item, 0, len(e))
-	for i := 0; i < len(e); i++ {
-		res = append(res, display.NewItem(display.WithDelimiter(" ")))
-	}
 
 	for i, entry := range e {
-		go func(entry os.FileInfo, i int) {
+		go func(entry *item.FileInfo, i int) {
 			for j, option := range cf.options {
 				stringContent, funcName := option(entry)
 				content := display.ItemContent{Content: display.StringContent(stringContent), No: j}
-				res[i].Set(funcName, content)
+				entry.Set(funcName, content)
 			}
 
 			for _, option := range cf.noOutputOptions {
@@ -256,8 +236,6 @@ func (cf *ContentFilter) GetDisplayItems(e ...os.FileInfo) []*display.Item {
 		}(entry, i)
 	}
 	wg.Wait()
-
-	return res
 }
 
 type SumType int
@@ -304,7 +282,7 @@ func (cf *ContentFilter) EnableSum(sumTypes ...SumType) ContentOption {
 	}
 	length += len(sumTypes) - 1
 	sumName := fmt.Sprintf("%s(%s)", SumName, strings.Join(types, ","))
-	return func(info os.FileInfo) (string, string) {
+	return func(info *item.FileInfo) (string, string) {
 		if info.IsDir() {
 			return FillBlank("", length), sumName
 		}

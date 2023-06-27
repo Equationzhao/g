@@ -10,6 +10,7 @@ import (
 
 	"github.com/Equationzhao/g/filter"
 	"github.com/Equationzhao/g/filter/content"
+	"github.com/Equationzhao/g/item"
 )
 
 type statistic struct {
@@ -41,7 +42,15 @@ func NewTreeString(entry string, depthLimit int, typeFilter *filter.ItemFilter, 
 	}
 	cm := sync.Mutex{}
 	cm.Lock()
-	ExtraName := contentFilter.GetDisplayItems(stat)[0]
+	abs, err := filepath.Abs(stat.Name())
+	if err != nil {
+		return nil, err, nil
+	}
+	ExtraName := contentFilter.GetDisplayItems(&item.FileInfo{
+		FileInfo: stat,
+		FullPath: abs,
+		Meta:     make(map[string]item.Item),
+	})[0]
 	extra := ExtraName.ExcludeOrderedContent(content.NameName)
 	name, _ := ExtraName.Get(content.NameName)
 	cm.Unlock()
@@ -85,14 +94,23 @@ func expand(node tree, depthLimit int, wg *sync.WaitGroup, parent string, s *sta
 		errSender <- err
 	}
 
-	infos := make([]os.FileInfo, 0, len(d))
+	infos := make([]*item.FileInfo, 0, len(d))
 	for _, entry := range d {
 		info, err := entry.Info()
 		if err != nil {
 			errSender <- err
 			continue
 		}
-		infos = append(infos, info)
+		abs, err := filepath.Abs(info.Name())
+		if err != nil {
+			errSender <- err
+			continue
+		}
+		infos = append(infos, &item.FileInfo{
+			FileInfo: info,
+			FullPath: abs,
+			Meta:     make(map[string]item.Item),
+		})
 	}
 
 	if typeFilter != nil {

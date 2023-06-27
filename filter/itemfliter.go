@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/Equationzhao/g/git"
+	"github.com/Equationzhao/g/item"
 	"github.com/gabriel-vasile/mimetype"
 	"github.com/gobwas/glob"
 )
@@ -26,7 +27,7 @@ func NewItemFilter(tfs ...*ItemFilterFunc) *ItemFilter {
 	return &ItemFilter{tfs: tfs}
 }
 
-func (tf *ItemFilter) Filter(e ...os.FileInfo) (res []os.FileInfo) {
+func (tf *ItemFilter) Filter(e ...*item.FileInfo) (res []*item.FileInfo) {
 	for _, entry := range e {
 		ok := keep
 		for _, funcPtr := range tf.tfs {

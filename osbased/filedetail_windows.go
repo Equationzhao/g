@@ -2,6 +2,7 @@ package osbased
 
 import (
 	"fmt"
+	"github.com/Equationzhao/g/item"
 	"os"
 	"syscall"
 	"unsafe"
@@ -29,9 +30,8 @@ type byHandleFileInformation struct {
 	FileIndexLow       uint32
 }
 
-func getNumberOfHardLinks(info os.FileInfo) (uint64, error) {
-	path := info.Name()
-	utf16PtrFromString, err := syscall.UTF16PtrFromString(path)
+func getNumberOfHardLinks(info *item.FileInfo) (uint64, error) {
+	utf16PtrFromString, err := syscall.UTF16PtrFromString(info.FullPath)
 	if err != nil {
 		return 0, err
 	}
@@ -63,7 +63,7 @@ func getNumberOfHardLinks(info os.FileInfo) (uint64, error) {
 	return uint64(fileInfo.NumberOfLinks), nil
 }
 
-func LinkCount(info os.FileInfo) uint64 {
+func LinkCount(info *item.FileInfo) uint64 {
 	n, err := getNumberOfHardLinks(info)
 	if err != nil {
 		return 0

@@ -10,6 +10,7 @@ import (
 	"os"
 
 	"github.com/Equationzhao/g/filter"
+	"github.com/Equationzhao/g/item"
 	"github.com/Equationzhao/g/util"
 	"github.com/Equationzhao/tsmap"
 )
@@ -53,7 +54,7 @@ func DetectorFallthrough(d *DuplicateDetect) {
 }
 
 func (d *DuplicateDetect) Enable() filter.NoOutputOption {
-	return func(info os.FileInfo) {
+	return func(info *item.FileInfo) {
 		afterHash, err := fileHash(info, d.IsThrough)
 		if err != nil {
 			return
@@ -105,7 +106,7 @@ var thresholdFileSize = int64(16 * KB)
 // fileHash calculates the hash of the file provided.
 // If isThorough is true, then it uses SHA256 of the entire file.
 // Otherwise, it uses CRC32 of "crucial bytes" of the file.
-func fileHash(fileInfo os.FileInfo, isThorough bool) (string, error) {
+func fileHash(fileInfo *item.FileInfo, isThorough bool) (string, error) {
 	if !fileInfo.Mode().IsRegular() {
 		return "", fmt.Errorf("can't compute hash of non-regular file")
 	}
@@ -113,13 +114,13 @@ func fileHash(fileInfo os.FileInfo, isThorough bool) (string, error) {
 	var bytes []byte
 	var fileReadErr error
 	if isThorough {
-		bytes, fileReadErr = os.ReadFile(fileInfo.Name())
+		bytes, fileReadErr = os.ReadFile(fileInfo.FullPath)
 	} else if fileInfo.Size() <= thresholdFileSize {
 		prefix = "f"
-		bytes, fileReadErr = os.ReadFile(fileInfo.Name())
+		bytes, fileReadErr = os.ReadFile(fileInfo.FullPath)
 	} else {
 		prefix = "s"
-		bytes, fileReadErr = readCrucialBytes(fileInfo.Name(), fileInfo.Size())
+		bytes, fileReadErr = readCrucialBytes(fileInfo.FullPath, fileInfo.Size())
 	}
 	if fileReadErr != nil {
 		return "", fmt.Errorf("couldn't calculate hash: %w", fileReadErr)
