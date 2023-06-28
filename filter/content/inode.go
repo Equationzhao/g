@@ -22,7 +22,6 @@ func NewInodeEnabler() *InodeEnabler {
 const Inode = "Inode"
 
 func (i *InodeEnabler) Enable(renderer *render.Renderer) filter.ContentOption {
-
 	wait := func(res string) string {
 		i.Wait()
 		return renderer.Inode(res)

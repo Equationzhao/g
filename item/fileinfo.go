@@ -2,10 +2,11 @@ package item
 
 import (
 	"errors"
-	"github.com/Equationzhao/tsmap"
 	"os"
 	"path/filepath"
 	"sort"
+
+	"github.com/Equationzhao/tsmap"
 )
 
 type FileInfo struct {

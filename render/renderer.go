@@ -55,11 +55,11 @@ func (r *Renderer) FileMode(toRender string) string {
 	return bb.String()
 }
 
-func (r *Renderer) Size(toRender string) string {
+func (r *Renderer) Size(toRender, unit string) string {
 	if strings.HasSuffix(toRender, "-") {
 		return r.infoByName(toRender, "-")
 	}
-	return r.infoByName(toRender, "size")
+	return r.infoByName(toRender, unit)
 }
 
 func (r *Renderer) Owner(toRender string) string {
@@ -68,6 +68,7 @@ func (r *Renderer) Owner(toRender string) string {
 	toRenderNoSpace := strings.Replace(toRender, " ", "", -1)
 	if toRenderNoSpace == "root" {
 		_, _ = bb.WriteString(r.infoTheme["root"].Color)
+		_, _ = bb.WriteString("\ue315")
 	} else {
 		_, _ = bb.WriteString(r.infoTheme["owner"].Color)
 	}
@@ -83,6 +84,7 @@ func (r *Renderer) Group(toRender string) string {
 	toRenderNoSpace := strings.Replace(toRender, " ", "", -1)
 	if toRenderNoSpace == "root" {
 		_, _ = bb.WriteString(r.infoTheme["root"].Color)
+		_, _ = bb.WriteString("\ue315")
 	} else {
 		_, _ = bb.WriteString(r.infoTheme["group"].Color)
 	}
@@ -93,6 +95,10 @@ func (r *Renderer) Group(toRender string) string {
 }
 
 func (r *Renderer) Time(toRender string) string {
+	return r.infoByName(toRender, "time")
+}
+
+func (r *Renderer) RTime(toRender string) string {
 	return r.infoByName(toRender, "time")
 }
 
@@ -146,8 +152,7 @@ func (r *Renderer) ByExtIcon(toRender string) string {
 	return bb.String()
 }
 
-// SymlinkIconPlus returns the icon and the name of the file
-// ! refactor this: dereference symlink outside method and make it as parameter or render it in a different method
+// SymlinkIconPlus returns the icon and the name of the file, and dereferences the symlink
 func (r *Renderer) SymlinkIconPlus(toRender string, path string, plus string) string {
 	icon := r.Icon("symlink")
 	bb := bytebufferpool.Get()
@@ -174,12 +179,24 @@ func (r *Renderer) SymlinkIconPlus(toRender string, path string, plus string) st
 	return bb.String()
 }
 
+// SymlinkIconNoDereferencePlus returns the icon and the name of the file, but does not dereference the symlink
+func (r *Renderer) SymlinkIconNoDereferencePlus(toRender string, path string, plus string) string {
+	icon := r.Icon("symlink")
+	bb := bytebufferpool.Get()
+	defer bytebufferpool.Put(bb)
+	_, _ = bb.WriteString(r.theme["symlink"].Color)
+	_, _ = bb.WriteString(icon)
+	_, _ = bb.WriteString(" ")
+	_, _ = bb.WriteString(toRender + plus)
+	_, _ = bb.WriteString(r.infoTheme["reset"].Color)
+	return bb.String()
+}
+
 func (r *Renderer) SymlinkIcon(toRender string, path string) string {
 	return r.SymlinkIconPlus(toRender, path, "")
 }
 
 // SymlinkPlus returns the icon and the name of the file
-// ! refactor this: dereference symlink outside method and make it as parameter or render it in a different method
 func (r *Renderer) SymlinkPlus(toRender string, path string, plus string) string {
 	bb := bytebufferpool.Get()
 	defer bytebufferpool.Put(bb)
@@ -199,6 +216,15 @@ func (r *Renderer) SymlinkPlus(toRender string, path string, plus string) string
 	_, _ = bb.WriteString(toRender + plus)
 	_, _ = bb.WriteString(theme.Success)
 	_, _ = bb.WriteString(" -> " + symlinks)
+	_, _ = bb.WriteString(r.infoTheme["reset"].Color)
+	return bb.String()
+}
+
+func (r *Renderer) SymlinkNoTargetPlus(toRender string, plus string) string {
+	bb := bytebufferpool.Get()
+	defer bytebufferpool.Put(bb)
+	_, _ = bb.WriteString(r.theme["symlink"].Color)
+	_, _ = bb.WriteString(toRender + plus)
 	_, _ = bb.WriteString(r.infoTheme["reset"].Color)
 	return bb.String()
 }
