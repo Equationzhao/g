@@ -2,11 +2,12 @@ package content
 
 import (
 	"fmt"
-	"github.com/Equationzhao/g/item"
 	"strconv"
 	"strings"
 	"sync"
 	"sync/atomic"
+
+	"github.com/Equationzhao/g/item"
 
 	"github.com/Equationzhao/g/filter"
 	"github.com/Equationzhao/g/osbased"

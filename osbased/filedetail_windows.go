@@ -2,10 +2,11 @@ package osbased
 
 import (
 	"fmt"
-	"github.com/Equationzhao/g/item"
 	"os"
 	"syscall"
 	"unsafe"
+
+	"github.com/Equationzhao/g/item"
 )
 
 func Inode(info os.FileInfo) string {

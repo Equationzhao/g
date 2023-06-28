@@ -1,29 +1,13 @@
 package theme
 
 import (
+	"errors"
+	"fmt"
+	"strconv"
 	"strings"
 
 	"gopkg.in/ini.v1"
 )
-
-const (
-	Black     = "\033[1;30m"
-	Red       = "\033[1;31m"
-	Green     = "\033[1;32m"
-	Yellow    = "\033[1;33m"
-	Blue      = "\033[1;34m"
-	Purple    = "\033[1;35m"
-	Cyan      = "\033[1;36m"
-	White     = "\033[1;37m"
-	Success   = "\033[1;32m"
-	Error     = "\033[1;31m"
-	Warn      = "\033[1;33m"
-	Underline = "\033[4m"
-	Bold      = "\033[1m"
-	Reverse   = "\033[7m"
-)
-
-var Reset = "\033[0m"
 
 type Style struct {
 	// Color of the text.
@@ -53,59 +37,143 @@ func color2str(color string) string {
 		return "white"
 	case Black:
 		return "black"
+	case BrightRed:
+		return "BrightPed"
+	case BrightGreen:
+		return "BrightPreen"
+	case BrightYellow:
+		return "BrightYellow"
+	case BrightBlue:
+		return "BrightBlue"
+	case BrightPurple:
+		return "BrightPurple"
+	case BrightCyan:
+		return "BrightCyan"
+	case BrightWhite:
+		return "BrightWhite"
+	case BrightBlack:
+		return "BrightPlack"
 	case Reset:
 		return "reset"
 	case Underline:
 		return "underline"
-	case Bold:
-		return "bold"
-	case Reverse:
-		return "reverse"
 	default:
+		// detect format:
+		strReader := strings.NewReader(color)
+
+		// 1.8bit/256 color
+		var c uint8
+		_, err := fmt.Fscanf(strReader, Color256Format, &c)
+		if err == nil {
+			return fmt.Sprintf("[%d]@256", c)
+		}
+		// 2.rgb
+		var (
+			r uint8 = 0
+			g uint8 = 0
+			b uint8 = 0
+		)
+		_, err = fmt.Fscanf(strReader, RGBFormat, &r, &g, &b)
+		if err == nil {
+			return fmt.Sprintf("[%d,%d,%d]@rgb", r, g, b)
+		}
 		return ""
 	}
 }
 
-func str2color(str string) string {
+// str2color convert string to color
+// support: red, green, yellow, blue, purple, cyan, white, black, and their bright version
+// Underline
+// [value]@256
+// [values]@rgb
+// [values]@hex (will be turned to rgb)
+func str2color(str string) (string, error) {
 	switch str {
 	case "":
-		return ""
+		return "", nil
 	case "red", "Red":
-		return Red
+		return Red, nil
 	case "green", "Green":
-		return Green
+		return Green, nil
 	case "yellow", "Yellow":
-		return Yellow
+		return Yellow, nil
 	case "blue", "Blue":
-		return Blue
+		return Blue, nil
 	case "purple", "Purple":
-		return Purple
+		return Purple, nil
 	case "cyan", "Cyan":
-		return Cyan
+		return Cyan, nil
 	case "white", "White":
-		return White
-	case "black", "Black":
-		return Black
+		return White, nil
+	case "bright-red", "BrightRed":
+		return BrightRed, nil
+	case "bright-green", "BrightGreen":
+		return BrightGreen, nil
+	case "bright-yellow", "BrightYellow":
+		return BrightYellow, nil
+	case "bright-blue", "BrightBlue":
+		return BrightBlue, nil
+	case "bright-purple", "BrightPurple":
+		return BrightPurple, nil
+	case "bright-cyan", "BrightCyan":
+		return BrightCyan, nil
+	case "bright-white", "BrightWhite":
+		return BrightWhite, nil
+	case "bright-black", "BrightBlack":
+		return BrightBlack, nil
 	case "reset", "Reset":
-		return Reset
+		return Reset, nil
 	case "underline", "Underline":
-		return Underline
-	case "bold", "Bold":
-		return Bold
-	case "reverse", "Reverse":
-		return Reverse
+		return Underline, nil
 	default:
-		str = strings.ReplaceAll(str, " ", "")
-		if strings.HasPrefix(str, "Reverse+") || strings.HasPrefix(str, "reverse+") {
-			return Reverse + str2color(str[8:])
+		// remove spaces
+		str = strings.TrimSpace(str)
+
+		// 256 color
+		if strings.HasSuffix(str, "@256") {
+			code, err := strconv.Atoi(strings.Trim(str[:len(str)-4], "[]"))
+			if err != nil {
+				return "", err
+			}
+			colorStr, err := Color256(code)
+			if err != nil {
+				return "", err
+			}
+			return colorStr, nil
 		}
-		// if strings.HasPrefix(str, "Bold+") || strings.HasPrefix(str, "bold+") {
-		// 	return Bold + str2color(str[8:])
-		// }
-		// if strings.HasPrefix(str, "Underline+") || strings.HasPrefix(str, "underline+") {
-		// 	return Bold + str2color(str[8:])
-		// }
-		return Reset
+
+		// rgb color
+		if strings.HasSuffix(str, "@rgb") {
+			code := strings.Trim(str[:len(str)-4], "[]")
+			rgb := strings.Split(code, ",")
+			if len(rgb) != 3 {
+				return "", errors.New("too many or too few rgb values")
+			}
+			r, err1 := strconv.Atoi(rgb[0])
+			g, err2 := strconv.Atoi(rgb[1])
+			b, err3 := strconv.Atoi(rgb[2])
+			if err1 != nil || err2 != nil || err3 != nil {
+				return "", errors.New("rgb values must be numbers")
+			}
+			colorStr, err := RGB(uint8(r), uint8(g), uint8(b))
+			if err != nil {
+				return "", err
+			}
+			return colorStr, nil
+		}
+
+		// hex
+		if strings.HasSuffix(str, "@hex") {
+			code := strings.Trim(str[:len(str)-4], "[]")
+			rgb := HexToRgb(code)
+			colorStr, err := RGB(rgb[0], rgb[1], rgb[2])
+			if err != nil {
+				return "", errors.New("rgb values must be numbers")
+			}
+			return colorStr, nil
+		}
+
+		return Reset, nil
 	}
 }
 
@@ -143,7 +211,25 @@ color = White
 icon = 📄
 
 ......
+// if using 256 color, you can use color code like this:
+[info]
+d 		= [0-255]@256
+// if using rgb color, you can use color code like this:
+[info]
+d 		= [0-255,0-255,0-255]@rgb
+// if using hex color, you can use color code like this:
+[info]
+d 		= [hex]@hex
 */
+
+type ErrBadColor struct {
+	name string
+	error
+}
+
+func (e ErrBadColor) Error() string {
+	return fmt.Sprintf("bad color for %s:%s", e.name, e.error)
+}
 
 func GetTheme(path string) error {
 	cfg, err := ini.Load(path)
@@ -151,21 +237,28 @@ func GetTheme(path string) error {
 		return err
 	}
 	cfg.BlockMode = false
-
+	var errSum error
 	sections := cfg.Sections()
 	for _, section := range sections {
 		if section.Name() == "DEFAULT" || section.Name() == "info" {
 			keys := section.Keys()
 			for _, v := range keys {
 				o := DefaultInfoTheme[v.Name()]
-				o.Color = str2color(v.String())
+				o.Color, err = str2color(v.String())
+				if err != nil {
+					errSum = errors.Join(errSum, ErrBadColor{v.Name(), err})
+				}
 				DefaultInfoTheme[v.Name()] = o
 			}
 			continue
 		}
 
 		names := strings.Split(section.Name(), ",")
-		color := str2color(section.Key("color").String())
+		color, err := str2color(section.Key("color").String())
+		if err != nil {
+			errSum = errors.Join(errSum, ErrBadColor{section.Name(), err})
+		}
+
 		icon := section.Key("icon").String()
 		for _, name := range names {
 			DefaultTheme[name] = Style{

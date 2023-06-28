@@ -37,9 +37,6 @@ var DefaultInfoTheme = Theme{
 	"time": Style{
 		Color: Blue,
 	},
-	"size": Style{
-		Color: Green,
-	},
 	"owner": Style{
 		Color: Yellow,
 	},
@@ -107,6 +104,42 @@ var DefaultInfoTheme = Theme{
 	"git_ignored_sym": Style{
 		Color: Black,
 		Icon:  "!",
+	},
+	"bit": Style{
+		Color: rgb(0, 255, 0),
+	},
+	"B": Style{
+		Color: rgb(0, 230, 0),
+	},
+	"KB": Style{
+		Color: rgb(0, 207, 0),
+	},
+	"MB": Style{
+		Color: rgb(0, 188, 0),
+	},
+	"GB": Style{
+		Color: rgb(0, 170, 0),
+	},
+	"TB": Style{
+		Color: rgb(0, 153, 0),
+	},
+	"PB": Style{
+		Color: rgb(0, 138, 0),
+	},
+	"EB": Style{
+		Color: rgb(0, 125, 0),
+	},
+	"ZB": Style{
+		Color: rgb(0, 112, 0),
+	},
+	"YB": Style{
+		Color: rgb(0, 100, 0),
+	},
+	"BB": Style{
+		Color: rgb(0, 90, 0),
+	},
+	"NB": Style{
+		Color: rgb(0, 80, 0),
 	},
 }
 
@@ -855,5 +888,4 @@ var DefaultTheme = Theme{
 		Color: Purple,
 		Icon:  "\ueb15",
 	},
-	"swp": Style{},
 }

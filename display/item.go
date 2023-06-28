@@ -18,8 +18,25 @@ func (s StringContent) String() string {
 }
 
 type ItemContent struct {
-	No      int
-	Content Content
+	No             int
+	Content        Content
+	Prefix, Suffix string
+}
+
+func (i ItemContent) SetPrefix(s string) {
+	i.Prefix = s
+}
+
+func (i ItemContent) SetSuffix(s string) {
+	i.Suffix = s
+}
+
+func (i ItemContent) GetPrefix() string {
+	return i.Prefix
+}
+
+func (i ItemContent) GetSuffix() string {
+	return i.Suffix
 }
 
 func (i ItemContent) String() string {

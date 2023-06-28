@@ -525,6 +525,17 @@ There is NO WARRANTY, to the extent permitted by law.`,
 
 					// do scan
 					// get max length for each Meta[key].Value
+					allPart := infos[0].KeysByOrder()
+					longestEachPart := make(map[string]int)
+					for _, it := range infos {
+						for _, part := range allPart {
+							content, _ := it.Get(part)
+							l := display.WidthLen(content.String())
+							if l > longestEachPart[part] {
+								longestEachPart[part] = l
+							}
+						}
+					}
 
 					_ = hookOnce.Do(func() error {
 						if header || footer {
@@ -533,18 +544,6 @@ There is NO WARRANTY, to the extent permitted by law.`,
 									// add header
 									if len(item) == 0 {
 										return
-									}
-
-									allPart := item[0].KeysByOrder()
-									longestEachPart := make(map[string]int)
-									for _, it := range item {
-										for _, part := range allPart {
-											content, _ := it.Get(part)
-											l := display.WidthLen(content.Content.String())
-											if l > longestEachPart[part] {
-												longestEachPart[part] = l
-											}
-										}
 									}
 
 									// add longest - len(header) * space
@@ -567,7 +566,10 @@ There is NO WARRANTY, to the extent permitted by law.`,
 											// expand the every item's content of this part
 											for _, it := range infos {
 												content, _ := it.Get(s)
-												content.Content = display.StringContent(fmt.Sprintf("%s%s", strings.Repeat(" ", len(s)-longestEachPart[s]), content.Content.String()))
+												content = display.ItemContent{
+													Content: display.StringContent(fmt.Sprintf("%s%s", strings.Repeat(" ", len(s)-longestEachPart[s]), content.String())),
+													No:      content.NO(),
+												}
 												it.Set(s, content)
 											}
 											expand(s, i, 1)
@@ -610,15 +612,15 @@ There is NO WARRANTY, to the extent permitted by law.`,
 						return nil
 					})
 
-					itemsCopy := make([]display.Item, 0, len(items))
+					itemsCopy := make([]*item.FileInfo, 0, len(infos))
 					{
 						// if is table printer, set title
 						prettyPrinter, isTablePrinter := p.(display.PrettyPrinter)
 						if isTablePrinter {
 							prettyPrinter.SetTitle(path[i])
 						}
-						l := len(strconv.Itoa(len(items)))
-						for i, item := range items {
+						l := len(strconv.Itoa(len(infos)))
+						for i, item := range infos {
 							// if there is #, add No
 							if flagSharp {
 								item.Set("#", display.ItemContent{
@@ -626,7 +628,7 @@ There is NO WARRANTY, to the extent permitted by law.`,
 									Content: display.StringContent(fmt.Sprintf("%d%s", i, strings.Repeat(" ", l-len(strconv.Itoa(i))))),
 								})
 							}
-							itemsCopy = append(itemsCopy, *item)
+							itemsCopy = append(itemsCopy, item)
 						}
 					}
 
