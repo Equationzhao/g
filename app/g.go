@@ -18,7 +18,6 @@ import (
 	"github.com/Equationzhao/g/render"
 	"github.com/Equationzhao/g/sorter"
 	"github.com/Equationzhao/g/theme"
-	"github.com/Equationzhao/g/tree"
 	"github.com/Equationzhao/g/util"
 	"github.com/Equationzhao/pathbeautify"
 	"github.com/hako/durafmt"
@@ -45,6 +44,8 @@ var (
 	sizeUint        = filtercontent.Auto
 	sizeEnabler     = filtercontent.NewSizeEnabler()
 	blockEnabler    = filtercontent.NewBlockSizeEnabler()
+	ownerEnabler    = filtercontent.NewOwnerEnabler()
+	groupEnabler    = filtercontent.NewGroupEnabler()
 	depthLimitMap   = make(map[string]int)
 	limitOnce       = util.Once{}
 	hookOnce        = util.Once{}
@@ -52,7 +53,7 @@ var (
 	hookAfter       = make([]func(display.Printer, ...*item.FileInfo), 0)
 )
 
-var Version = "0.8.5"
+var Version = "0.9.0"
 
 var G *cli.App
 
@@ -101,7 +102,7 @@ There is NO WARRANTY, to the extent permitted by law.`,
 
 			path := context.Args().Slice()
 
-			nameToDisplay := filtercontent.NewNameEnable().SetRenderer(r)
+			nameToDisplay := filtercontent.NewNameEnable()
 			if !context.Bool("no-icon") && (context.Bool("show-icon") || context.Bool("all")) {
 				nameToDisplay.SetIcon()
 			}
@@ -169,7 +170,7 @@ There is NO WARRANTY, to the extent permitted by law.`,
 			} else if context.Bool("fp") {
 				nameToDisplay.SetFullPath()
 			}
-			contentFunc = append(contentFunc, nameToDisplay.Enable())
+			contentFunc = append(contentFunc, nameToDisplay.Enable(r))
 			itemFilter := filter.NewItemFilter(itemFilterFunc...)
 
 			gitignore := context.Bool("git-ignore")
@@ -193,29 +194,139 @@ There is NO WARRANTY, to the extent permitted by law.`,
 			contentFilter.SetOptions(contentFunc...)
 			depth := context.Int("depth")
 
-			if context.Bool("tree") {
-				for i := 0; i < len(path); i++ {
-					start := time.Now()
+			// if context.Bool("tree") {
+			// 	for i := 0; i < len(path); i++ {
+			// 		start := time.Now()
+			//
+			// 		if len(path) > 1 {
+			// 			fmt.Printf("%s:\n", path[i])
+			// 		}
+			//
+			// 		if transformEnabled {
+			// 			path[i] = pathbeautify.Transform(path[i])
+			// 		}
+			// 		// fuzzy search
+			// 		if fuzzy {
+			// 			_, err := os.Stat(path[i])
+			// 			if err != nil {
+			// 				newPath, b := fuzzyPath(path[i])
+			// 				if b != nil {
+			// 					_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(err.Error()))
+			// 					minorErr = true
+			// 					continue
+			// 				} else {
+			// 					path[i] = newPath
+			// 					_, err = os.Stat(path[i])
+			// 					if err != nil {
+			// 						checkErr(err)
+			// 						seriousErr = true
+			// 						continue
+			// 					}
+			// 					fmt.Println(path[i])
+			// 				}
+			// 			}
+			// 		}
+			// 		if gitignore {
+			// 			*removeGitIgnore = filter.RemoveGitIgnore(path[i])
+			// 		}
+			//
+			// 		s, err, minorErrInTree := tree.NewTreeString(path[i], depth, itemFilter, contentFilter)
+			// 		if pathErr := new(os.PathError); errors.As(err, &pathErr) {
+			// 			_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(fmt.Sprintf("%s: %s", pathErr.Err, pathErr.Path)))
+			// 			seriousErr = true
+			// 			continue
+			// 		} else if err != nil {
+			// 			_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(err.Error()))
+			// 			seriousErr = true
+			// 			continue
+			// 		}
+			//
+			// 		if pathErr := new(os.PathError); errors.As(minorErrInTree, &pathErr) {
+			// 			_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(fmt.Sprintf("%s: %s", pathErr.Err, pathErr.Path)))
+			// 			minorErr = true
+			// 		} else if minorErrInTree != nil {
+			// 			_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(err.Error()))
+			// 			minorErr = true
+			// 		}
+			//
+			// 		absPath, err := filepath.Abs(path[i])
+			// 		if err != nil {
+			// 			minorErr = true
+			// 		} else {
+			// 			if !disableIndex {
+			// 				wgUpdateIndex.Add(1)
+			// 				go func() {
+			// 					if err = fuzzyUpdate(absPath); err != nil {
+			// 						minorErr = true
+			// 					}
+			// 					wgUpdateIndex.Done()
+			// 				}()
+			// 			}
+			// 		}
+			//
+			// 		fmt.Println(s.MakeTreeStr())
+			// 		fmt.Printf("\n%d directories, %d files\nunderwent %s\n", s.Directory(), s.File(), time.Since(start).String())
+			//
+			// 		if i != len(path)-1 {
+			// 			//goland:noinspection GoPrintFunctions
+			// 			fmt.Println("\n") //nolint:govet
+			// 		}
+			// 	}
+			// } else {
+			startDir, _ := os.Getwd()
 
-					if len(path) > 1 {
-						fmt.Printf("%s:\n", path[i])
-					}
+			// flag: if d is set, display directory them self
+			flagd := context.Bool("d")
+			// flag: if A is set
+			flagA := context.Bool("A")
+			flagR := context.Bool("R")
+			header := context.Bool("header")
+			footer := context.Bool("footer")
+			if context.Bool("statistic") {
+				nameToDisplay.SetStatistics(&filtercontent.Statistics{})
+			}
 
-					if transformEnabled {
-						path[i] = pathbeautify.Transform(path[i])
-					}
-					// fuzzy search
-					if fuzzy {
-						_, err := os.Stat(path[i])
-						if err != nil {
-							newPath, b := fuzzyPath(path[i])
-							if b != nil {
+			if n := context.Uint("n"); n > 0 {
+				contentFilter.LimitN = n
+			}
+
+			flagSharp := context.Bool("#")
+
+			for i := 0; i < len(path); i++ {
+				start := time.Now()
+
+				if len(path) > 1 {
+					fmt.Printf("%s:\n", path[i])
+				}
+
+				if transformEnabled {
+					path[i] = pathbeautify.Transform(path[i])
+				}
+
+				infos := make([]*item.FileInfo, 0, 20)
+
+				isFile := false
+
+				// get the abs path
+				absPath, err := filepath.Abs(path[i])
+				if err != nil {
+					_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(fmt.Sprintf("Not a valid path: %s", absPath)))
+				} else {
+					path[i] = absPath
+				}
+
+				if path[i] != "." {
+					stat, err := os.Stat(path[i])
+					if err != nil {
+						// no match
+						if fuzzy {
+							// start fuzzy search
+							if newPath, err := fuzzyPath(filepath.Base(path[i])); err != nil {
 								_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(err.Error()))
 								minorErr = true
-								continue
 							} else {
 								path[i] = newPath
-								_, err = os.Stat(path[i])
+								stat, err = os.Stat(path[i])
 								if err != nil {
 									checkErr(err)
 									seriousErr = true
@@ -223,141 +334,21 @@ There is NO WARRANTY, to the extent permitted by law.`,
 								}
 								fmt.Println(path[i])
 							}
-						}
-					}
-					if gitignore {
-						*removeGitIgnore = filter.RemoveGitIgnore(path[i])
-					}
-
-					s, err, minorErrInTree := tree.NewTreeString(path[i], depth, itemFilter, contentFilter)
-					if pathErr := new(os.PathError); errors.As(err, &pathErr) {
-						_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(fmt.Sprintf("%s: %s", pathErr.Err, pathErr.Path)))
-						seriousErr = true
-						continue
-					} else if err != nil {
-						_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(err.Error()))
-						seriousErr = true
-						continue
-					}
-
-					if pathErr := new(os.PathError); errors.As(minorErrInTree, &pathErr) {
-						_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(fmt.Sprintf("%s: %s", pathErr.Err, pathErr.Path)))
-						minorErr = true
-					} else if minorErrInTree != nil {
-						_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(err.Error()))
-						minorErr = true
-					}
-
-					absPath, err := filepath.Abs(path[i])
-					if err != nil {
-						minorErr = true
-					} else {
-						if !disableIndex {
-							wgUpdateIndex.Add(1)
-							go func() {
-								if err = fuzzyUpdate(absPath); err != nil {
-									minorErr = true
-								}
-								wgUpdateIndex.Done()
-							}()
-						}
-					}
-
-					fmt.Println(s.MakeTreeStr())
-					fmt.Printf("\n%d directories, %d files\nunderwent %s\n", s.Directory(), s.File(), time.Since(start).String())
-
-					if i != len(path)-1 {
-						//goland:noinspection GoPrintFunctions
-						fmt.Println("\n") //nolint:govet
-					}
-				}
-			} else {
-				startDir, _ := os.Getwd()
-
-				// flag: if d is set, display directory them self
-				flagd := context.Bool("d")
-				// flag: if A is set
-				flagA := context.Bool("A")
-				flagR := context.Bool("R")
-				header := context.Bool("header")
-				footer := context.Bool("footer")
-				if context.Bool("statistic") {
-					nameToDisplay.SetStatistics(&filtercontent.Statistics{})
-				}
-
-				if n := context.Uint("n"); n > 0 {
-					contentFilter.LimitN = n
-				}
-
-				flagSharp := context.Bool("#")
-
-				for i := 0; i < len(path); i++ {
-					start := time.Now()
-
-					if len(path) > 1 {
-						fmt.Printf("%s:\n", path[i])
-					}
-
-					if transformEnabled {
-						path[i] = pathbeautify.Transform(path[i])
-					}
-
-					infos := make([]*item.FileInfo, 0, 20)
-
-					isFile := false
-
-					// get the abs path
-					absPath, err := filepath.Abs(path[i])
-					if err != nil {
-						_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(fmt.Sprintf("Not a valid path: %s", absPath)))
-					} else {
-						path[i] = absPath
-					}
-
-					if path[i] != "." {
-						stat, err := os.Stat(path[i])
-						if err != nil {
-							// no match
-							if fuzzy {
-								// start fuzzy search
-								if newPath, err := fuzzyPath(filepath.Base(path[i])); err != nil {
-									_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(err.Error()))
-									minorErr = true
-								} else {
-									path[i] = newPath
-									stat, err = os.Stat(path[i])
-									if err != nil {
-										checkErr(err)
-										seriousErr = true
-										continue
-									}
-									fmt.Println(path[i])
-								}
-							} else {
-								// output error
-								if pathErr := new(os.PathError); errors.As(err, &pathErr) {
-									_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(fmt.Sprintf("%s: %s", pathErr.Err, pathErr.Path)))
-									seriousErr = true
-									continue
-								}
-								_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(err.Error()))
+						} else {
+							// output error
+							if pathErr := new(os.PathError); errors.As(err, &pathErr) {
+								_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(fmt.Sprintf("%s: %s", pathErr.Err, pathErr.Path)))
 								seriousErr = true
 								continue
 							}
+							_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(err.Error()))
+							seriousErr = true
+							continue
 						}
-						if stat.IsDir() {
-							if flagd {
-								// when -d is set, treat dir as file
-								info, err := item.NewFileInfoWithOption(item.WithFileInfo(stat), item.WithPath(path[i]))
-								if err != nil {
-									checkErr(err)
-									seriousErr = true
-									continue
-								}
-								infos = append(infos, info)
-								isFile = true
-							}
-						} else {
+					}
+					if stat.IsDir() {
+						if flagd {
+							// when -d is set, treat dir as file
 							info, err := item.NewFileInfoWithOption(item.WithFileInfo(stat), item.WithPath(path[i]))
 							if err != nil {
 								checkErr(err)
@@ -367,285 +358,296 @@ There is NO WARRANTY, to the extent permitted by law.`,
 							infos = append(infos, info)
 							isFile = true
 						}
-					}
-
-					if !disableIndex {
-						wgUpdateIndex.Add(1)
-						go func(i int) {
-							if err = fuzzyUpdate(path[i]); err != nil {
-								minorErr = true
-							}
-							wgUpdateIndex.Done()
-						}(i)
-					}
-
-					var d []os.DirEntry
-					if isFile {
-						goto final
-					}
-
-					d, err = os.ReadDir(path[i])
-					if err != nil {
-						if pathErr := new(os.PathError); errors.As(err, &pathErr) {
-							_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(fmt.Sprintf("%s: %s", pathErr.Err, pathErr.Path)))
-							seriousErr = true
-						} else {
-							_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(err.Error()))
-							seriousErr = true
-						}
-						continue
-					}
-
-					// if -A(almost-all) is not set, add the "."/".." info
-					if !flagA {
-						err := os.Chdir(path[i])
+					} else {
+						info, err := item.NewFileInfoWithOption(item.WithFileInfo(stat), item.WithPath(path[i]))
 						if err != nil {
-							_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(err.Error()))
-						} else {
-							FileInfoCurrent, err := item.NewFileInfo(".")
-							if err != nil {
-								if pathErr := new(os.PathError); errors.As(err, &pathErr) {
-									_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(fmt.Sprintf("%s: %s", pathErr.Err, pathErr.Path)))
-									seriousErr = true
-								} else {
-									_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(err.Error()))
-									seriousErr = true
-								}
-							} else {
-								infos = append(infos, FileInfoCurrent)
-							}
-
-							FileInfoParent, err := item.NewFileInfo("..")
-							if err != nil {
-								if pathErr := new(os.PathError); errors.As(err, &pathErr) {
-									_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(fmt.Sprintf("%s: %s", pathErr.Err, pathErr.Path)))
-									minorErr = true
-								} else {
-									_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(err.Error()))
-									minorErr = true
-								}
-							} else {
-								infos = append(infos, FileInfoParent)
-							}
+							checkErr(err)
+							seriousErr = true
+							continue
 						}
+						infos = append(infos, info)
+						isFile = true
 					}
+				}
 
-					for _, v := range d {
-						info, err := v.Info()
+				if !disableIndex {
+					wgUpdateIndex.Add(1)
+					go func(i int) {
+						if err = fuzzyUpdate(path[i]); err != nil {
+							minorErr = true
+						}
+						wgUpdateIndex.Done()
+					}(i)
+				}
+
+				var d []os.DirEntry
+				if isFile {
+					goto final
+				}
+
+				d, err = os.ReadDir(path[i])
+				if err != nil {
+					if pathErr := new(os.PathError); errors.As(err, &pathErr) {
+						_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(fmt.Sprintf("%s: %s", pathErr.Err, pathErr.Path)))
+						seriousErr = true
+					} else {
+						_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(err.Error()))
+						seriousErr = true
+					}
+					continue
+				}
+
+				// if -A(almost-all) is not set, add the "."/".." info
+				if !flagA {
+					err := os.Chdir(path[i])
+					if err != nil {
+						_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(err.Error()))
+					} else {
+						FileInfoCurrent, err := item.NewFileInfo(".")
+						if err != nil {
+							if pathErr := new(os.PathError); errors.As(err, &pathErr) {
+								_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(fmt.Sprintf("%s: %s", pathErr.Err, pathErr.Path)))
+								seriousErr = true
+							} else {
+								_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(err.Error()))
+								seriousErr = true
+							}
+						} else {
+							infos = append(infos, FileInfoCurrent)
+						}
+
+						FileInfoParent, err := item.NewFileInfo("..")
 						if err != nil {
 							if pathErr := new(os.PathError); errors.As(err, &pathErr) {
 								_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(fmt.Sprintf("%s: %s", pathErr.Err, pathErr.Path)))
 								minorErr = true
 							} else {
-								minorErr = true
 								_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(err.Error()))
+								minorErr = true
 							}
 						} else {
-							info, err := item.NewFileInfoWithOption(item.WithFileInfo(info), item.WithPath(v.Name()))
-							if err != nil {
-								checkErr(err)
-								seriousErr = true
-								continue
-							}
-							infos = append(infos, info)
+							infos = append(infos, FileInfoParent)
 						}
 					}
+				}
 
-					if gitignore {
-						*removeGitIgnore = filter.RemoveGitIgnore(path[i])
-					}
-
-					nameToDisplay.SetParent(path[i])
-					// remove non-display items
-					infos = itemFilter.Filter(infos...)
-
-					// if -R is set, add sub dir, insert into path[i+1]
-					if flagR {
-
-						// set depth
-						dep, ok := depthLimitMap[path[i]]
-						if !ok {
-							depthLimitMap[path[i]] = depth
-							dep = depth
+				for _, v := range d {
+					info, err := v.Info()
+					if err != nil {
+						if pathErr := new(os.PathError); errors.As(err, &pathErr) {
+							_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(fmt.Sprintf("%s: %s", pathErr.Err, pathErr.Path)))
+							minorErr = true
+						} else {
+							minorErr = true
+							_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(err.Error()))
 						}
-						if dep >= 2 || dep <= -1 {
-							newPathLeft := make([]string, 0, len(path)-i)
-							for _, info := range infos {
-								if info.IsDir() {
-									if info.Name() == "." || info.Name() == ".." {
-										continue
-									}
-									newPath, _ := filepath.Rel(startDir, filepath.Join(path[i], info.Name()))
-									newPathLeft = append(newPathLeft, newPath)
-									depthLimitMap[newPath] = dep - 1
+					} else {
+						info, err := item.NewFileInfoWithOption(item.WithFileInfo(info), item.WithPath(v.Name()))
+						if err != nil {
+							checkErr(err)
+							seriousErr = true
+							continue
+						}
+						infos = append(infos, info)
+					}
+				}
+
+				if gitignore {
+					*removeGitIgnore = filter.RemoveGitIgnore(path[i])
+				}
+
+				// remove non-display items
+				infos = itemFilter.Filter(infos...)
+
+				// if -R is set, add sub dir, insert into path[i+1]
+				if flagR {
+
+					// set depth
+					dep, ok := depthLimitMap[path[i]]
+					if !ok {
+						depthLimitMap[path[i]] = depth
+						dep = depth
+					}
+					if dep >= 2 || dep <= -1 {
+						newPathLeft := make([]string, 0, len(path)-i)
+						for _, info := range infos {
+							if info.IsDir() {
+								if info.Name() == "." || info.Name() == ".." {
+									continue
 								}
+								newPath, _ := filepath.Rel(startDir, filepath.Join(path[i], info.Name()))
+								newPathLeft = append(newPathLeft, newPath)
+								depthLimitMap[newPath] = dep - 1
 							}
-							path = append(path[:i+1], append(newPathLeft, path[i+1:]...)...)
+						}
+						path = append(path[:i+1], append(newPathLeft, path[i+1:]...)...)
+					}
+				}
+
+			final:
+				contentFilter.GetDisplayItems(infos...)
+
+				// add total && statistics
+				{
+					var i *item.FileInfo
+					// if -l/show-total-size is set, add total size
+					_, isPrettyPrinter := p.(display.PrettyPrinter)
+
+					if total, ok := sizeEnabler.Total(); ok {
+						if !isPrettyPrinter {
+							i, _ = item.NewFileInfoWithOption()
+							s, _ := sizeEnabler.Size2String(total)
+							i.Set("total", display.ItemContent{No: 0, Content: display.StringContent(fmt.Sprintf("  total %s", s))})
+						} else {
+							s, _ := sizeEnabler.Size2String(total)
+							_, _ = display.RawPrint(fmt.Sprintf("  total %s\n", s))
 						}
 					}
-
-				final:
-					contentFilter.GetDisplayItems(infos...)
-
-					// add total && statistics
-					{
-						var i *item.FileInfo
-						// if -l/show-total-size is set, add total size
-						_, isPrettyPrinter := p.(display.PrettyPrinter)
-
-						if total, ok := sizeEnabler.Total(); ok {
-							if !isPrettyPrinter {
+					if s := nameToDisplay.Statistics(); s != nil {
+						if !isPrettyPrinter {
+							tFormat := "\n  underwent %s"
+							if i == nil {
 								i, _ = item.NewFileInfoWithOption()
-								i.Set("total", display.ItemContent{No: 0, Content: display.StringContent(fmt.Sprintf("  total %s", sizeEnabler.Size2String(total, 0)))})
-							} else {
-								_, _ = display.RawPrint(fmt.Sprintf("  total %s\n", sizeEnabler.Size2String(total, 0)))
+								tFormat = "  underwent %s"
 							}
+							i.Set("underwent", display.ItemContent{No: 1, Content: display.StringContent(fmt.Sprintf(tFormat, r.Time(durafmt.Parse(time.Since(start)).LimitToUnit("ms").String())))})
+							i.Set("statistic", display.ItemContent{No: 2, Content: display.StringContent(fmt.Sprintf("\n  statistic: %s", s))})
+						} else {
+							_, _ = display.RawPrint(fmt.Sprintf("  underwent %s", r.Time(durafmt.Parse(time.Since(start)).LimitToUnit("ms").String())))
+							_, _ = display.RawPrint(fmt.Sprintf("\n  statistic: %s\n", s))
 						}
-						if s := nameToDisplay.Statistics(); s != nil {
-							if !isPrettyPrinter {
-								tFormat := "\n  underwent %s"
-								if i == nil {
-									i, _ = item.NewFileInfoWithOption()
-									tFormat = "  underwent %s"
+						s.Reset()
+					}
+					if i != nil {
+						p.DisableHookBefore()
+						p.Print(i)
+						p.EnableHookBefore()
+					}
+				}
+
+				// do scan
+				// get max length for each Meta[key].Value
+				allPart := infos[0].KeysByOrder()
+				longestEachPart := make(map[string]int)
+				for _, it := range infos {
+					for _, part := range allPart {
+						content, _ := it.Get(part)
+						l := display.WidthLen(content.String())
+						if l > longestEachPart[part] {
+							longestEachPart[part] = l
+						}
+					}
+				}
+
+				_ = hookOnce.Do(func() error {
+					if header || footer {
+						headerFooter := func(isBefore bool) func(p display.Printer, items ...*item.FileInfo) {
+							return func(p display.Printer, item ...*item.FileInfo) {
+								// add header
+								if len(item) == 0 {
+									return
 								}
-								i.Set("underwent", display.ItemContent{No: 1, Content: display.StringContent(fmt.Sprintf(tFormat, r.Time(durafmt.Parse(time.Since(start)).LimitToUnit("ms").String())))})
-								i.Set("statistic", display.ItemContent{No: 2, Content: display.StringContent(fmt.Sprintf("\n  statistic: %s", s))})
-							} else {
-								_, _ = display.RawPrint(fmt.Sprintf("  underwent %s", r.Time(durafmt.Parse(time.Since(start)).LimitToUnit("ms").String())))
-								_, _ = display.RawPrint(fmt.Sprintf("\n  statistic: %s\n", s))
-							}
-							s.Reset()
-						}
-						if i != nil {
-							p.DisableHookBefore()
-							p.Print(i)
-							p.EnableHookBefore()
-						}
-					}
 
-					// do scan
-					// get max length for each Meta[key].Value
-					allPart := infos[0].KeysByOrder()
-					longestEachPart := make(map[string]int)
-					for _, it := range infos {
-						for _, part := range allPart {
-							content, _ := it.Get(part)
-							l := display.WidthLen(content.String())
-							if l > longestEachPart[part] {
-								longestEachPart[part] = l
-							}
-						}
-					}
+								// add longest - len(header) * space
+								// print header
+								headerFooterStrBuf := bytebufferpool.Get()
+								defer bytebufferpool.Put(headerFooterStrBuf)
+								prettyPrinter, isPrettyPrinter := p.(display.PrettyPrinter)
 
-					_ = hookOnce.Do(func() error {
-						if header || footer {
-							headerFooter := func(isBefore bool) func(p display.Printer, items ...*item.FileInfo) {
-								return func(p display.Printer, item ...*item.FileInfo) {
-									// add header
-									if len(item) == 0 {
-										return
+								expand := func(s string, no, space int) {
+									_, _ = headerFooterStrBuf.WriteString(theme.Underline)
+									_, _ = headerFooterStrBuf.WriteString(s)
+									_, _ = headerFooterStrBuf.WriteString(theme.Reset)
+									if no != len(allPart)-1 {
+										_, _ = headerFooterStrBuf.WriteString(strings.Repeat(" ", space))
 									}
+								}
 
-									// add longest - len(header) * space
-									// print header
-									headerFooterStrBuf := bytebufferpool.Get()
-									defer bytebufferpool.Put(headerFooterStrBuf)
-									prettyPrinter, isPrettyPrinter := p.(display.PrettyPrinter)
-
-									expand := func(s string, no, space int) {
-										_, _ = headerFooterStrBuf.WriteString(theme.Underline)
-										_, _ = headerFooterStrBuf.WriteString(s)
-										_, _ = headerFooterStrBuf.WriteString(theme.Reset)
-										if no != len(allPart)-1 {
-											_, _ = headerFooterStrBuf.WriteString(strings.Repeat(" ", space))
+								for i, s := range allPart {
+									if len(s) > longestEachPart[s] {
+										// expand the every item's content of this part
+										for _, it := range infos {
+											content, _ := it.Get(s)
+											content = display.ItemContent{
+												Content: display.StringContent(fmt.Sprintf("%s%s", strings.Repeat(" ", len(s)-longestEachPart[s]), content.String())),
+												No:      content.NO(),
+											}
+											it.Set(s, content)
 										}
+										expand(s, i, 1)
+									} else {
+										expand(s, i, longestEachPart[s]-len(s)+1)
 									}
-
-									for i, s := range allPart {
-										if len(s) > longestEachPart[s] {
-											// expand the every item's content of this part
-											for _, it := range infos {
-												content, _ := it.Get(s)
-												content = display.ItemContent{
-													Content: display.StringContent(fmt.Sprintf("%s%s", strings.Repeat(" ", len(s)-longestEachPart[s]), content.String())),
-													No:      content.NO(),
-												}
-												it.Set(s, content)
-											}
-											expand(s, i, 1)
-										} else {
-											expand(s, i, longestEachPart[s]-len(s)+1)
+									if isPrettyPrinter && isBefore {
+										if header {
+											prettyPrinter.AddHeader(s)
 										}
-										if isPrettyPrinter && isBefore {
-											if header {
-												prettyPrinter.AddHeader(s)
-											}
-											if footer {
-												prettyPrinter.AddFooter(s)
-											}
-										}
-									}
-									res := headerFooterStrBuf.String()
-									if !isPrettyPrinter {
-										if header && isBefore {
-											_, _ = fmt.Fprintln(p, res)
-										}
-										if footer && !isBefore {
-											_, _ = fmt.Fprintln(p, res)
+										if footer {
+											prettyPrinter.AddFooter(s)
 										}
 									}
 								}
+								res := headerFooterStrBuf.String()
+								if !isPrettyPrinter {
+									if header && isBefore {
+										_, _ = fmt.Fprintln(p, res)
+									}
+									if footer && !isBefore {
+										_, _ = fmt.Fprintln(p, res)
+									}
+								}
 							}
-							if header {
+						}
+						if header {
+							// pre scan
+							p.AddBeforePrint(headerFooter(true))
+						}
+						if footer {
+							if !header {
 								// pre scan
 								p.AddBeforePrint(headerFooter(true))
 							}
-							if footer {
-								if !header {
-									// pre scan
-									p.AddBeforePrint(headerFooter(true))
-								}
-								p.AddAfterPrint(headerFooter(false))
-							}
-						}
-						p.AddAfterPrint(hookAfter...)
-						return nil
-					})
-
-					itemsCopy := make([]*item.FileInfo, 0, len(infos))
-					{
-						// if is table printer, set title
-						prettyPrinter, isTablePrinter := p.(display.PrettyPrinter)
-						if isTablePrinter {
-							prettyPrinter.SetTitle(path[i])
-						}
-						l := len(strconv.Itoa(len(infos)))
-						for i, item := range infos {
-							// if there is #, add No
-							if flagSharp {
-								item.Set("#", display.ItemContent{
-									No:      -1,
-									Content: display.StringContent(fmt.Sprintf("%d%s", i, strings.Repeat(" ", l-len(strconv.Itoa(i))))),
-								})
-							}
-							itemsCopy = append(itemsCopy, item)
+							p.AddAfterPrint(headerFooter(false))
 						}
 					}
+					p.AddAfterPrint(hookAfter...)
+					return nil
+				})
 
-					p.Print(itemsCopy...)
-
-					// switch back to start dir
-					if i != len(path)-1 {
-						//goland:noinspection GoPrintFunctions
-						fmt.Println("\n") //nolint:govet
-						err = os.Chdir(startDir)
-						if err != nil {
-							seriousErr = true
+				itemsCopy := make([]*item.FileInfo, 0, len(infos))
+				{
+					// if is table printer, set title
+					prettyPrinter, isTablePrinter := p.(display.PrettyPrinter)
+					if isTablePrinter {
+						prettyPrinter.SetTitle(path[i])
+					}
+					l := len(strconv.Itoa(len(infos)))
+					for i, info := range infos {
+						// if there is #, add No
+						if flagSharp {
+							info.Set("#", display.ItemContent{
+								No:      -1,
+								Content: display.StringContent(fmt.Sprintf("%d%s", i, strings.Repeat(" ", l-len(strconv.Itoa(i))))),
+							})
 						}
-						sizeEnabler.Reset()
+						itemsCopy = append(itemsCopy, info)
 					}
 				}
+
+				p.Print(itemsCopy...)
+
+				// switch back to start dir
+				if i != len(path)-1 {
+					//goland:noinspection GoPrintFunctions
+					fmt.Println("\n") //nolint:govet
+					err = os.Chdir(startDir)
+					if err != nil {
+						seriousErr = true
+					}
+					sizeEnabler.Reset()
+				}
 			}
+			// }
 			wgUpdateIndex.Wait()
 
 			if seriousErr {

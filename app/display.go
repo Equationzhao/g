@@ -244,7 +244,7 @@ var displayFlag = []cli.Flag{
 					p = display.NewCommaPrint()
 				}
 			case "long", "l", "verbose":
-				contentFunc = append(contentFunc, content.EnableFileMode(r), sizeEnabler.EnableSize(sizeUint), contentFilter.EnableOwner(r), contentFilter.EnableGroup(r))
+				contentFunc = append(contentFunc, content.EnableFileMode(r), sizeEnabler.EnableSize(sizeUint, r), ownerEnabler.EnableOwner(r), groupEnabler.EnableGroup(r))
 				for _, s := range timeType {
 					contentFunc = append(contentFunc, content.EnableTime(timeFormat, s, r))
 				}

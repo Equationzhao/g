@@ -112,7 +112,7 @@ func (b *Byline) Print(i ...*item.FileInfo) {
 	}
 	defer b.Flush()
 	for _, v := range i {
-		_, _ = b.WriteString(v.OrderedContent())
+		_, _ = b.WriteString(v.OrderedContent(" "))
 		_ = b.WriteByte('\n')
 	}
 	if !b.disableAfter {
@@ -141,7 +141,7 @@ func (f *FitTerminal) Print(i ...*item.FileInfo) {
 	defer f.Flush()
 	s := make([]string, 0, len(i))
 	for _, v := range i {
-		s = append(s, v.OrderedContent())
+		s = append(s, v.OrderedContent(" "))
 	}
 	f.printColumns(&s)
 
@@ -305,9 +305,9 @@ func (c *CommaPrint) Print(items ...*item.FileInfo) {
 	s := make([]string, 0, len(items))
 	for i, v := range items {
 		if i != len(items)-1 {
-			s = append(s, v.OrderedContent()+",")
+			s = append(s, v.OrderedContent(" ")+",")
 		} else {
-			s = append(s, v.OrderedContent())
+			s = append(s, v.OrderedContent(" "))
 		}
 	}
 	c.printRowWithNoSpace(&s)
@@ -335,7 +335,7 @@ func (a *Across) Print(items ...*item.FileInfo) {
 	defer a.Flush()
 	s := make([]string, 0, len(items))
 	for _, v := range items {
-		s = append(s, v.OrderedContent())
+		s = append(s, v.OrderedContent(" "))
 	}
 	a.printRow(&s)
 	if !a.disableAfter {
@@ -441,8 +441,7 @@ func (z *Zero) Print(items ...*item.FileInfo) {
 	}
 	defer z.Flush()
 	for _, v := range items {
-		v.Delimiter = ""
-		_, _ = z.WriteString(v.OrderedContent())
+		_, _ = z.WriteString(v.OrderedContent(" "))
 	}
 	if !z.disableAfter {
 		fire(z.AfterPrint, z, items...)
@@ -478,7 +477,7 @@ func (j *JsonPrinter) Print(items ...*item.FileInfo) {
 
 	list := make([]*orderedmap.OrderedMap[string, string], 0, len(items))
 	for _, v := range items {
-		all := v.GetAll()
+		all := v.Meta.Pairs()
 
 		type orderItem struct {
 			name    string
@@ -489,17 +488,17 @@ func (j *JsonPrinter) Print(items ...*item.FileInfo) {
 		order := make([]orderItem, 0, len(all))
 
 		// sort by v.Content.No
-		for name, v := range all {
-			c := stripansi.Strip(v.Content.String())
-			if name == "name" {
-				order = append(order, orderItem{name: name, content: c, no: v.No})
+		for _, v := range all {
+			c := stripansi.Strip(v.Value().String())
+			if name := v.Key(); name == "name" {
+				order = append(order, orderItem{name: name, content: c, no: v.Value().NO()})
 			} else if name == "underwent" || name == "statistic" {
-				order = append(order, orderItem{name: name, content: strings.TrimLeft(c, "\n "), no: v.No})
+				order = append(order, orderItem{name: name, content: strings.TrimLeft(c, "\n "), no: v.Value().NO()})
 			} else if name == "total" {
-				order = append(order, orderItem{name: name, content: strings.TrimPrefix(c, "  total "), no: v.No})
+				order = append(order, orderItem{name: name, content: strings.TrimPrefix(c, "  total "), no: v.Value().NO()})
 			} else {
 				// remove all leading spaces
-				order = append(order, orderItem{name: name, content: strings.TrimLeft(c, " "), no: v.No})
+				order = append(order, orderItem{name: name, content: strings.TrimLeft(c, " "), no: v.Value().NO()})
 			}
 		}
 
@@ -601,10 +600,10 @@ func (t *TablePrinter) Print(s ...*item.FileInfo) {
 
 func (t *TablePrinter) setTB(s ...*item.FileInfo) {
 	for _, v := range s {
-		all := v.GetAllOrdered()
+		all := v.Values()
 		row := make(table.Row, 0, len(all))
 		for _, v := range all {
-			row = append(row, strings.TrimLeft(v.Content.String(), " "))
+			row = append(row, strings.TrimLeft(v.String(), " "))
 		}
 		t.w.AppendRow(row)
 	}

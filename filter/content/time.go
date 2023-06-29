@@ -2,7 +2,6 @@ package content
 
 import (
 	"fmt"
-	"sync"
 	"time"
 
 	"github.com/Equationzhao/g/filter"
@@ -13,41 +12,16 @@ import (
 )
 
 type RelativeTimeEnabler struct {
-	*sync.WaitGroup
 	Mode string
 }
 
 func NewRelativeTimeEnabler() *RelativeTimeEnabler {
-	return &RelativeTimeEnabler{
-		WaitGroup: new(sync.WaitGroup),
-	}
+	return &RelativeTimeEnabler{}
 }
 
 const RelativeTime = "Relative-Time"
 
 func (r *RelativeTimeEnabler) Enable(renderer *render.Renderer) filter.ContentOption {
-	longestRt := 0
-	m := sync.RWMutex{}
-	done := func(rt string) {
-		defer r.Done()
-		m.RLock()
-		if longestRt >= len(rt) {
-			m.RUnlock()
-			return
-		}
-		m.RUnlock()
-		m.Lock()
-		if longestRt < len(rt) {
-			longestRt = len(rt)
-		}
-		m.Unlock()
-	}
-
-	wait := func(size string) string {
-		r.Wait()
-		return filter.FillBlank(size, longestRt)
-	}
-
 	return func(info *item.FileInfo) (string, string) {
 		var t time.Time
 		timeType := ""
@@ -65,9 +39,7 @@ func (r *RelativeTimeEnabler) Enable(renderer *render.Renderer) filter.ContentOp
 			t = osbased.ModTime(info)
 			timeType = timeModified
 		}
-		rt := renderer.Time(relativeTime(time.Now(), t))
-		done(rt)
-		return wait(rt), RelativeTime + " " + timeType
+		return renderer.Time(relativeTime(time.Now(), t)), RelativeTime + " " + timeType
 	}
 }
 

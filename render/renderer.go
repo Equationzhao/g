@@ -62,6 +62,17 @@ func (r *Renderer) Size(toRender, unit string) string {
 	return r.infoByName(toRender, unit)
 }
 
+func (r *Renderer) BlockSize(toRender string) string {
+	if strings.HasSuffix(toRender, "-") {
+		return r.infoByName(toRender, "-")
+	}
+	return r.infoByName(toRender, "bit")
+}
+
+func (r *Renderer) Link(toRender string) string {
+	return r.infoByName(toRender, "link")
+}
+
 func (r *Renderer) Owner(toRender string) string {
 	bb := bytebufferpool.Get()
 	defer bytebufferpool.Put(bb)
@@ -160,7 +171,7 @@ func (r *Renderer) SymlinkIconPlus(toRender string, path string, plus string) st
 	_, _ = bb.WriteString(r.theme["symlink"].Color)
 	_, _ = bb.WriteString(icon)
 	_, _ = bb.WriteString(" ")
-	symlinks, err := filepath.EvalSymlinks(filepath.Join(path, toRender))
+	symlinks, err := filepath.EvalSymlinks(path)
 	if err != nil {
 		var pathErr *fs.PathError
 		if errors.As(err, &pathErr) {
@@ -180,7 +191,7 @@ func (r *Renderer) SymlinkIconPlus(toRender string, path string, plus string) st
 }
 
 // SymlinkIconNoDereferencePlus returns the icon and the name of the file, but does not dereference the symlink
-func (r *Renderer) SymlinkIconNoDereferencePlus(toRender string, path string, plus string) string {
+func (r *Renderer) SymlinkIconNoDereferencePlus(toRender string, plus string) string {
 	icon := r.Icon("symlink")
 	bb := bytebufferpool.Get()
 	defer bytebufferpool.Put(bb)
@@ -192,6 +203,10 @@ func (r *Renderer) SymlinkIconNoDereferencePlus(toRender string, path string, pl
 	return bb.String()
 }
 
+func (r *Renderer) SymlinkIconNoDereference(toRender string) string {
+	return r.SymlinkIconNoDereferencePlus(toRender, "")
+}
+
 func (r *Renderer) SymlinkIcon(toRender string, path string) string {
 	return r.SymlinkIconPlus(toRender, path, "")
 }
@@ -201,7 +216,7 @@ func (r *Renderer) SymlinkPlus(toRender string, path string, plus string) string
 	bb := bytebufferpool.Get()
 	defer bytebufferpool.Put(bb)
 	_, _ = bb.WriteString(r.theme["symlink"].Color)
-	symlinks, err := filepath.EvalSymlinks(filepath.Join(path, toRender))
+	symlinks, err := filepath.EvalSymlinks(path)
 	if err != nil {
 		var pathErr *fs.PathError
 		if errors.As(err, &pathErr) {
@@ -220,13 +235,17 @@ func (r *Renderer) SymlinkPlus(toRender string, path string, plus string) string
 	return bb.String()
 }
 
-func (r *Renderer) SymlinkNoTargetPlus(toRender string, plus string) string {
+func (r *Renderer) SymlinkNoDereferencePlus(toRender string, plus string) string {
 	bb := bytebufferpool.Get()
 	defer bytebufferpool.Put(bb)
 	_, _ = bb.WriteString(r.theme["symlink"].Color)
 	_, _ = bb.WriteString(toRender + plus)
 	_, _ = bb.WriteString(r.infoTheme["reset"].Color)
 	return bb.String()
+}
+
+func (r *Renderer) SymlinkNoDereference(str string) string {
+	return r.SymlinkNoDereferencePlus(str, "")
 }
 
 func (r *Renderer) Symlink(toRender string, path string) string {

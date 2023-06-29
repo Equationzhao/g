@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
-	"sync"
 	"sync/atomic"
 
 	"github.com/Equationzhao/g/item"
+	"github.com/Equationzhao/g/render"
 
 	"github.com/Equationzhao/g/filter"
 	"github.com/Equationzhao/g/osbased"
@@ -149,7 +149,6 @@ type SizeEnabler struct {
 	enableTotal bool
 	sizeUint    SizeUnit
 	recursive   *SizeRecursive
-	*sync.WaitGroup
 }
 
 func (s *SizeEnabler) Recursive() *SizeRecursive {
@@ -174,7 +173,6 @@ func NewSizeEnabler() *SizeEnabler {
 		enableTotal: false,
 		sizeUint:    Auto,
 		recursive:   nil,
-		WaitGroup:   new(sync.WaitGroup),
 	}
 }
 
@@ -203,8 +201,9 @@ func (s *SizeEnabler) Reset() {
 	}
 }
 
-func (s *SizeEnabler) Size2String(b int64, blank int) string {
+func (s *SizeEnabler) Size2String(b int64) (string, SizeUnit) {
 	var res string
+	actualUnit := s.sizeUint
 	v := float64(b)
 	switch s.sizeUint {
 	case Bit:
@@ -241,7 +240,8 @@ func (s *SizeEnabler) Size2String(b int64, blank int) string {
 				} else {
 					res += Convert2SizeString(i)
 				}
-				return res
+				actualUnit = i
+				return res, actualUnit
 			}
 			v /= 1024
 		}
@@ -255,10 +255,10 @@ func (s *SizeEnabler) Size2String(b int64, blank int) string {
 	} else {
 		res += Convert2SizeString(s.sizeUint)
 	}
-	return res
+	return res, actualUnit
 }
 
-func (s *SizeEnabler) EnableSize(size SizeUnit) filter.ContentOption {
+func (s *SizeEnabler) EnableSize(size SizeUnit, renderer *render.Renderer) filter.ContentOption {
 	s.sizeUint = size
 	return func(info *item.FileInfo) (string, string) {
 		var v int64
@@ -270,23 +270,20 @@ func (s *SizeEnabler) EnableSize(size SizeUnit) filter.ContentOption {
 		if s.enableTotal {
 			s.total.Add(v)
 		}
-		return s.Size2String(v, 0), SizeName
+		res, unit := s.Size2String(v)
+		return renderer.Size(res, Convert2SizeString(unit)), SizeName
 	}
 }
 
-type BlockSizeEnabler struct {
-	*sync.WaitGroup
-}
+type BlockSizeEnabler struct{}
 
 func NewBlockSizeEnabler() *BlockSizeEnabler {
-	return &BlockSizeEnabler{
-		WaitGroup: new(sync.WaitGroup),
-	}
+	return &BlockSizeEnabler{}
 }
 
 const BlockSizeName = "Blocks"
 
-func (b *BlockSizeEnabler) Enable() filter.ContentOption {
+func (b *BlockSizeEnabler) Enable(renderer *render.Renderer) filter.ContentOption {
 	return func(info *item.FileInfo) (string, string) {
 		res := ""
 		bs := osbased.BlockSize(info)
@@ -295,6 +292,6 @@ func (b *BlockSizeEnabler) Enable() filter.ContentOption {
 		} else {
 			res = strconv.FormatInt(bs, 10)
 		}
-		return res, BlockSizeName
+		return renderer.BlockSize(res), BlockSizeName
 	}
 }
