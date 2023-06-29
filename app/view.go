@@ -7,7 +7,8 @@ import (
 
 	"github.com/Equationzhao/g/display"
 	"github.com/Equationzhao/g/filter"
-	"github.com/Equationzhao/g/filter/content"
+	filtercontent "github.com/Equationzhao/g/filter/content"
+	"github.com/Equationzhao/g/item"
 	"github.com/Equationzhao/g/timeparse"
 	"github.com/gabriel-vasile/mimetype"
 	"github.com/urfave/cli/v2"
@@ -54,7 +55,7 @@ var viewFlag = []cli.Flag{
 		Action: func(context *cli.Context, b bool) error {
 			if b {
 				noOutputFunc = append(noOutputFunc, duplicateDetect.Enable())
-				hookAfter = append(hookAfter, func(p display.Printer, item ...display.Item) {
+				hookAfter = append(hookAfter, func(p display.Printer, item ...*item.FileInfo) {
 					duplicateDetect.Fprint(p)
 					duplicateDetect.Reset()
 				})
@@ -133,8 +134,8 @@ var viewFlag = []cli.Flag{
 			if strings.EqualFold(s, "auto") {
 				return nil
 			}
-			sizeUint = content.ConvertFromSizeString(s)
-			if sizeUint == content.Unknown {
+			sizeUint = filtercontent.ConvertFromSizeString(s)
+			if sizeUint == filtercontent.Unknown {
 				ReturnCode = 1
 				return fmt.Errorf("invalid size unit: %s", s)
 			}
@@ -197,7 +198,7 @@ var viewFlag = []cli.Flag{
 		Category:           "DISPLAY",
 		Action: func(context *cli.Context, b bool) error {
 			if b {
-				contentFunc = append(contentFunc, content.NewIndexEnabler().Enable())
+				contentFunc = append(contentFunc, filtercontent.NewIndexEnabler().Enable())
 			}
 			return nil
 		},
@@ -216,9 +217,9 @@ var viewFlag = []cli.Flag{
 					}
 				}
 				itemFilterFunc = newFF
-				contentFunc = append(contentFunc, content.EnableFileMode(r), sizeEnabler.EnableSize(sizeUint), contentFilter.EnableGroup(r))
+				contentFunc = append(contentFunc, filtercontent.EnableFileMode(r), sizeEnabler.EnableSize(sizeUint, r), groupEnabler.EnableGroup(r))
 				for _, s := range timeType {
-					contentFunc = append(contentFunc, content.EnableTime(timeFormat, s, r))
+					contentFunc = append(contentFunc, filtercontent.EnableTime(timeFormat, s, r))
 				}
 				if _, ok := p.(*display.Byline); !ok {
 					p = display.NewByline()
@@ -242,9 +243,9 @@ var viewFlag = []cli.Flag{
 					}
 				}
 				itemFilterFunc = newFF
-				contentFunc = append(contentFunc, content.EnableFileMode(r), sizeEnabler.EnableSize(sizeUint), contentFilter.EnableOwner(r))
+				contentFunc = append(contentFunc, filtercontent.EnableFileMode(r), sizeEnabler.EnableSize(sizeUint, r), ownerEnabler.EnableOwner(r))
 				for _, s := range timeType {
-					contentFunc = append(contentFunc, content.EnableTime(timeFormat, s, r))
+					contentFunc = append(contentFunc, filtercontent.EnableTime(timeFormat, s, r))
 				}
 				if _, ok := p.(*display.Byline); !ok {
 					p = display.NewByline()
@@ -277,12 +278,12 @@ var viewFlag = []cli.Flag{
 				}
 				itemFilterFunc = newFF
 				sizeEnabler.SetEnableTotal()
-				contentFunc = append(contentFunc, content.EnableFileMode(r), sizeEnabler.EnableSize(sizeUint), contentFilter.EnableOwner(r))
+				contentFunc = append(contentFunc, filtercontent.EnableFileMode(r), sizeEnabler.EnableSize(sizeUint, r), ownerEnabler.EnableOwner(r))
 				if !context.Bool("G") {
-					contentFunc = append(contentFunc, contentFilter.EnableGroup(r))
+					contentFunc = append(contentFunc, groupEnabler.EnableGroup(r))
 				}
 				for _, s := range timeType {
-					contentFunc = append(contentFunc, content.EnableTime(timeFormat, s, r))
+					contentFunc = append(contentFunc, filtercontent.EnableTime(timeFormat, s, r))
 				}
 				if _, ok := p.(*display.Byline); !ok {
 					p = display.NewByline()
@@ -298,8 +299,7 @@ var viewFlag = []cli.Flag{
 		Usage:              "show inode[linux/darwin only]",
 		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
-			i := content.NewInodeEnabler()
-			wgs = append(wgs, i)
+			i := filtercontent.NewInodeEnabler()
 			contentFunc = append(contentFunc, i.Enable(r))
 			return nil
 		},
@@ -311,7 +311,7 @@ var viewFlag = []cli.Flag{
 		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
 			if b {
-				filter.Uid = true
+				ownerEnabler.EnableNumeric()
 			}
 			return nil
 		},
@@ -323,7 +323,7 @@ var viewFlag = []cli.Flag{
 		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
 			if b {
-				filter.Gid = true
+				groupEnabler.EnableNumeric()
 			}
 			return nil
 		},
@@ -336,8 +336,8 @@ var viewFlag = []cli.Flag{
 		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
 			if b {
-				filter.Gid = true
-				filter.Uid = true
+				ownerEnabler.EnableNumeric()
+				groupEnabler.EnableNumeric()
 			}
 			return nil
 		},
@@ -350,10 +350,9 @@ var viewFlag = []cli.Flag{
 		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
 			if b {
-				rt := content.NewRelativeTimeEnabler()
+				rt := filtercontent.NewRelativeTimeEnabler()
 				rt.Mode = timeType[0]
 				contentFunc = append(contentFunc, rt.Enable(r))
-				wgs = append(wgs, rt)
 			}
 			return nil
 		},
@@ -367,7 +366,7 @@ var viewFlag = []cli.Flag{
 		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
 			if b {
-				contentFunc = append(contentFunc, content.EnableFileMode(r))
+				contentFunc = append(contentFunc, filtercontent.EnableFileMode(r))
 				if _, ok := p.(*display.Byline); !ok {
 					p = display.NewByline()
 				}
@@ -383,7 +382,7 @@ var viewFlag = []cli.Flag{
 		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
 			if b {
-				contentFunc = append(contentFunc, sizeEnabler.EnableSize(sizeUint))
+				contentFunc = append(contentFunc, sizeEnabler.EnableSize(sizeUint, r))
 				if _, ok := p.(*display.Byline); !ok {
 					p = display.NewByline()
 				}
@@ -400,7 +399,7 @@ var viewFlag = []cli.Flag{
 		Action: func(context *cli.Context, b bool) error {
 			if b {
 				n := context.Int("depth")
-				sizeEnabler.SetRecursive(content.NewSizeRecursive(n))
+				sizeEnabler.SetRecursive(filtercontent.NewSizeRecursive(n))
 			}
 			return nil
 		},
@@ -413,7 +412,7 @@ var viewFlag = []cli.Flag{
 		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
 			if b {
-				contentFunc = append(contentFunc, blockEnabler.Enable())
+				contentFunc = append(contentFunc, blockEnabler.Enable(r))
 				if _, ok := p.(*display.Byline); !ok {
 					p = display.NewByline()
 				}
@@ -429,9 +428,9 @@ var viewFlag = []cli.Flag{
 		Usage:              "show human readable size",
 		Action: func(context *cli.Context, b bool) error {
 			if b {
-				contentFunc = append(contentFunc, content.EnableFileMode(r), sizeEnabler.EnableSize(sizeUint), contentFilter.EnableOwner(r), contentFilter.EnableGroup(r))
+				contentFunc = append(contentFunc, filtercontent.EnableFileMode(r), sizeEnabler.EnableSize(sizeUint, r), ownerEnabler.EnableOwner(r), groupEnabler.EnableGroup(r))
 				for _, s := range timeType {
-					contentFunc = append(contentFunc, content.EnableTime(timeFormat, s, r))
+					contentFunc = append(contentFunc, filtercontent.EnableTime(timeFormat, s, r))
 				}
 				if _, ok := p.(*display.Byline); !ok {
 					p = display.NewByline()
@@ -448,7 +447,7 @@ var viewFlag = []cli.Flag{
 		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
 			if b {
-				contentFunc = append(contentFunc, contentFilter.EnableOwner(r))
+				contentFunc = append(contentFunc, ownerEnabler.EnableOwner(r))
 				if _, ok := p.(*display.Byline); !ok {
 					p = display.NewByline()
 				}
@@ -464,7 +463,7 @@ var viewFlag = []cli.Flag{
 		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
 			if b {
-				contentFunc = append(contentFunc, contentFilter.EnableGroup(r))
+				contentFunc = append(contentFunc, groupEnabler.EnableGroup(r))
 				if _, ok := p.(*display.Byline); !ok {
 					p = display.NewByline()
 				}
@@ -481,7 +480,7 @@ var viewFlag = []cli.Flag{
 		Action: func(context *cli.Context, b bool) error {
 			if b {
 				for _, s := range timeType {
-					contentFunc = append(contentFunc, content.EnableTime(timeFormat, s, r))
+					contentFunc = append(contentFunc, filtercontent.EnableTime(timeFormat, s, r))
 				}
 				if _, ok := p.(*display.Byline); !ok {
 					p = display.NewByline()
@@ -560,7 +559,7 @@ var viewFlag = []cli.Flag{
 		Category:           "VIEW",
 		Action: func(context *cli.Context, b bool) error {
 			if b {
-				exact := content.NewMimeFileTypeEnabler()
+				exact := filtercontent.NewMimeFileTypeEnabler()
 
 				err := limitOnce.Do(func() error {
 					size := context.String("exact-detect-size")
@@ -568,7 +567,7 @@ var viewFlag = []cli.Flag{
 					if size == "0" || strings.EqualFold(size, "infinity") || strings.EqualFold(size, "nolimit") {
 						bytes = 0
 					} else if size != "" {
-						sizeUint, err := content.ParseSize(size)
+						sizeUint, err := filtercontent.ParseSize(size)
 						if err != nil {
 							return err
 						}
@@ -581,7 +580,6 @@ var viewFlag = []cli.Flag{
 					return err
 				}
 				contentFunc = append(contentFunc, exact.Enable())
-				wgs = append(wgs, exact)
 			}
 			return nil
 		},
@@ -593,7 +591,7 @@ var viewFlag = []cli.Flag{
 		Category: "VIEW",
 		Action: func(context *cli.Context, b bool) error {
 			if b {
-				exact := content.NewMimeFileTypeEnabler()
+				exact := filtercontent.NewMimeFileTypeEnabler()
 				exact.ParentOnly = true
 
 				err := limitOnce.Do(func() error {
@@ -602,7 +600,7 @@ var viewFlag = []cli.Flag{
 					if size == "0" || strings.EqualFold(size, "infinity") || strings.EqualFold(size, "nolimit") {
 						bytes = 0
 					} else if size != "" {
-						sizeUint, err := content.ParseSize(size)
+						sizeUint, err := filtercontent.ParseSize(size)
 						if err != nil {
 							return err
 						}
@@ -615,7 +613,6 @@ var viewFlag = []cli.Flag{
 					return err
 				}
 				contentFunc = append(contentFunc, exact.Enable())
-				wgs = append(wgs, exact)
 			}
 			return nil
 		},
@@ -638,28 +635,28 @@ var viewFlag = []cli.Flag{
 			if ss == nil {
 				ss = []string{"sha1"}
 			}
-			sums := make([]filter.SumType, 0, len(ss))
+			sums := make([]filtercontent.SumType, 0, len(ss))
 			for _, s := range ss {
 				switch s {
 				case "md5":
-					sums = append(sums, filter.SumTypeMd5)
+					sums = append(sums, filtercontent.SumTypeMd5)
 				case "sha1":
-					sums = append(sums, filter.SumTypeSha1)
+					sums = append(sums, filtercontent.SumTypeSha1)
 				case "sha224":
-					sums = append(sums, filter.SumTypeSha224)
+					sums = append(sums, filtercontent.SumTypeSha224)
 				case "sha256":
-					sums = append(sums, filter.SumTypeSha256)
+					sums = append(sums, filtercontent.SumTypeSha256)
 				case "sha384":
-					sums = append(sums, filter.SumTypeSha384)
+					sums = append(sums, filtercontent.SumTypeSha384)
 				case "sha512":
-					sums = append(sums, filter.SumTypeSha512)
+					sums = append(sums, filtercontent.SumTypeSha512)
 				case "crc32":
-					sums = append(sums, filter.SumTypeCRC32)
+					sums = append(sums, filtercontent.SumTypeCRC32)
 				}
 			}
 
 			if b {
-				contentFunc = append(contentFunc, contentFilter.EnableSum(sums...))
+				contentFunc = append(contentFunc, filtercontent.SumEnabler{}.EnableSum(sums...))
 				if _, ok := p.(*display.Byline); !ok {
 					p = display.NewByline()
 				}
@@ -704,9 +701,8 @@ var viewFlag = []cli.Flag{
 		Usage:   "list each file's number of hard links",
 		Action: func(context *cli.Context, b bool) error {
 			if b {
-				link := content.NewLinkEnabler()
-				contentFunc = append(contentFunc, link.Enable())
-				wgs = append(wgs, link)
+				link := filtercontent.NewLinkEnabler()
+				contentFunc = append(contentFunc, link.Enable(r))
 			}
 			return nil
 		},

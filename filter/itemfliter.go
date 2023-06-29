@@ -45,13 +45,13 @@ func (tf *ItemFilter) Filter(e ...*item.FileInfo) (res []*item.FileInfo) {
 
 // ItemFilterFunc return true -> Keep
 // return false -> remove
-type ItemFilterFunc = func(e os.FileInfo) bool
+type ItemFilterFunc = func(e *item.FileInfo) bool
 
-var RemoveDir = func(e os.FileInfo) bool {
+var RemoveDir = func(e *item.FileInfo) bool {
 	return !e.IsDir()
 }
 
-var DirOnly = func(e os.FileInfo) bool {
+var DirOnly = func(e *item.FileInfo) bool {
 	return e.IsDir()
 }
 
@@ -63,7 +63,7 @@ var DirOnly = func(e os.FileInfo) bool {
 //	result:
 //		b.c c.rs dir
 func RemoveByExt(ext ...string) ItemFilterFunc {
-	return func(e os.FileInfo) bool {
+	return func(e *item.FileInfo) bool {
 		for _, extI := range ext {
 			if strings.HasSuffix(e.Name(), "."+extI) {
 				return remove
@@ -74,7 +74,7 @@ func RemoveByExt(ext ...string) ItemFilterFunc {
 }
 
 func ExtOnly(ext ...string) ItemFilterFunc {
-	return func(e os.FileInfo) bool {
+	return func(e *item.FileInfo) bool {
 		for _, extI := range ext {
 			if strings.HasSuffix(e.Name(), "."+extI) {
 				return keep
@@ -97,7 +97,7 @@ func RemoveGlob(globPattern ...string) (ItemFilterFunc, error) {
 		compiled = append(compiled, compile)
 	}
 
-	return func(e os.FileInfo) bool {
+	return func(e *item.FileInfo) bool {
 		for _, r := range compiled {
 			if r.Match(e.Name()) {
 				return remove
@@ -120,7 +120,7 @@ func GlobOnly(globPattern ...string) (ItemFilterFunc, error) {
 		compiled = append(compiled, compile)
 	}
 
-	return func(e os.FileInfo) bool {
+	return func(e *item.FileInfo) bool {
 		for _, r := range compiled {
 			if r.Match(e.Name()) {
 				return keep
@@ -130,19 +130,19 @@ func GlobOnly(globPattern ...string) (ItemFilterFunc, error) {
 	}, nil
 }
 
-var RemoveHidden = func(e os.FileInfo) bool {
+var RemoveHidden = func(e *item.FileInfo) bool {
 	return !strings.HasPrefix(e.Name(), ".")
 }
 
-var HiddenOnly = func(e os.FileInfo) bool {
+var HiddenOnly = func(e *item.FileInfo) bool {
 	return strings.HasPrefix(e.Name(), ".")
 }
 
-var RemoveBackups = func(e os.FileInfo) bool {
+var RemoveBackups = func(e *item.FileInfo) bool {
 	return !strings.HasSuffix(e.Name(), "~")
 }
 
-func RemoveGitIgnore(repoPath git.GitRepoPath) ItemFilterFunc {
+func RemoveGitIgnore(repoPath git.RepoPath) ItemFilterFunc {
 	isOrIsParentOf := func(parent, child string) bool {
 		if parent == child {
 			return true
@@ -153,11 +153,11 @@ func RemoveGitIgnore(repoPath git.GitRepoPath) ItemFilterFunc {
 		return false
 	}
 	ignoredCache := git.GetCache()
-	return func(e os.FileInfo) (ok bool) {
+	return func(e *item.FileInfo) (ok bool) {
 		actual, _ := ignoredCache.GetOrInit(repoPath, git.DefaultInit(repoPath))
 		ok = true
 		for _, fileGit := range *actual {
-			if fileGit.Status == git.Ignored {
+			if fileGit.X == git.Ignored || fileGit.Y == git.Ignored {
 				if isOrIsParentOf(fileGit.Name, e.Name()) {
 					ok = false
 				}
@@ -178,7 +178,7 @@ func isOrIsSonOf(a, b string) bool {
 }
 
 func MimeTypeOnly(fileTypes ...string) ItemFilterFunc {
-	return func(e os.FileInfo) bool {
+	return func(e *item.FileInfo) bool {
 		if e.IsDir() {
 			return keep
 		}
@@ -205,7 +205,7 @@ func MimeTypeOnly(fileTypes ...string) ItemFilterFunc {
 }
 
 func RemoveMimeType(fileTypes ...string) ItemFilterFunc {
-	return func(e os.FileInfo) bool {
+	return func(e *item.FileInfo) bool {
 		file, err := os.Open(e.Name())
 		if err != nil {
 			return keep

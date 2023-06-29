@@ -1,51 +1,25 @@
 package content
 
 import (
-	"os"
 	"strconv"
-	"sync"
 
 	"github.com/Equationzhao/g/filter"
+	"github.com/Equationzhao/g/item"
 	"github.com/Equationzhao/g/osbased"
+	"github.com/Equationzhao/g/render"
 )
 
-type LinkEnabler struct {
-	// List each file's number of hard links.
-	*sync.WaitGroup
-}
+// LinkEnabler List each file's number of hard links.
+type LinkEnabler struct{}
 
 func NewLinkEnabler() *LinkEnabler {
-	return &LinkEnabler{
-		WaitGroup: &sync.WaitGroup{},
-	}
+	return &LinkEnabler{}
 }
 
-func (l *LinkEnabler) Enable() filter.ContentOption {
-	var longestLinkNum string
-	m := sync.RWMutex{}
-	done := func(linkNumStr string) {
-		defer l.Done()
-		m.RLock()
-		if len(longestLinkNum) >= len(linkNumStr) {
-			m.RUnlock()
-			return
-		}
-		m.RUnlock()
-		m.Lock()
-		if len(longestLinkNum) < len(linkNumStr) {
-			longestLinkNum = linkNumStr
-		}
-		m.Unlock()
-	}
+const Link = "Link"
 
-	wait := func(linkNumStr string) string {
-		l.Wait()
-		return filter.FillBlank(linkNumStr, len(longestLinkNum))
-	}
-
-	return func(info os.FileInfo) (string, string) {
-		n := strconv.FormatUint(osbased.LinkCount(info), 10)
-		done(n)
-		return wait(n), "links"
+func (l *LinkEnabler) Enable(renderer *render.Renderer) filter.ContentOption {
+	return func(info *item.FileInfo) (string, string) {
+		return renderer.Link(strconv.FormatUint(osbased.LinkCount(info), 10)), Link
 	}
 }

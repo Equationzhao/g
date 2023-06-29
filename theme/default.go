@@ -49,61 +49,26 @@ var DefaultInfoTheme = Theme{
 	"root": Style{
 		Color: Red,
 	},
-	"git_modified_dot": Style{
-		Color: Yellow,
-		Icon:  "\uf111",
-	},
-	"git_renamed_dot": Style{
-		Color: Blue,
-		Icon:  "\uf111",
-	},
-	"git_copied_dot": Style{
+	"link": Style{
 		Color: Purple,
-		Icon:  "\uf111",
 	},
-	"git_deleted_dot": Style{
-		Color: Red,
-		Icon:  "\uF111",
-	},
-	"git_added_dot": Style{
-		Color: Green,
-		Icon:  "\uF111",
-	},
-	"git_untracked_dot": Style{
-		Color: Cyan,
-		Icon:  "\uF111",
-	},
-	"git_ignored_dot": Style{
-		Color: Black,
-		Icon:  "\uF111",
-	},
-	"git_modified_sym": Style{
+	"M": Style{
 		Color: Yellow,
-		Icon:  "~",
 	},
-	"git_renamed_sym": Style{
+	"R": Style{
 		Color: Blue,
-		Icon:  "|",
 	},
-	"git_copied_sym": Style{
+	"C": Style{
 		Color: Purple,
-		Icon:  "=",
 	},
-	"git_deleted_sym": Style{
+	"D": Style{
 		Color: Red,
-		Icon:  "-",
 	},
-	"git_added_sym": Style{
+	"A": Style{
 		Color: Green,
-		Icon:  "+",
 	},
-	"git_untracked_sym": Style{
+	"U": Style{
 		Color: Cyan,
-		Icon:  "?",
-	},
-	"git_ignored_sym": Style{
-		Color: Black,
-		Icon:  "!",
 	},
 	"bit": Style{
 		Color: rgb(0, 255, 0),

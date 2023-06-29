@@ -7,6 +7,7 @@ import (
 	"sort"
 
 	"github.com/Equationzhao/tsmap"
+	"github.com/valyala/bytebufferpool"
 )
 
 type FileInfo struct {
@@ -121,7 +122,7 @@ func (i *FileInfo) Values() []Item {
 	return i.Meta.Values()
 }
 
-// ValuesByOrdered return all content(ordered by No, ascending)
+// ValuesByOrdered return all content (ordered by No, ascending)
 func (i *FileInfo) ValuesByOrdered() []Item {
 	ics := i.Meta.Values()
 	sort.Slice(ics, func(i, j int) bool {
@@ -129,4 +130,17 @@ func (i *FileInfo) ValuesByOrdered() []Item {
 	})
 
 	return ics
+}
+
+func (i *FileInfo) OrderedContent(delimiter string) string {
+	res := bytebufferpool.Get()
+	defer bytebufferpool.Put(res)
+	items := i.ValuesByOrdered()
+	for j, item := range items {
+		_, _ = res.WriteString(item.String())
+		if j != len(items)-1 {
+			_, _ = res.WriteString(delimiter)
+		}
+	}
+	return res.String()
 }
