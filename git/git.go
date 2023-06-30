@@ -61,6 +61,12 @@ func (f *FileGit) set(XY string) {
 			*s = Untracked
 		case '!':
 			*s = Ignored
+		case ' ':
+			*s = Unmodified
+		case 'T':
+			*s = TypeChanged
+		case 'U':
+			*s = UpdatedBuUnmerged
 		}
 	}
 	set(&f.X, XY[0])
@@ -73,20 +79,33 @@ type RepoPath = string
 
 // GetShortGitStatus read the git status of the repository located at path
 func GetShortGitStatus(repoPath RepoPath) (string, error) {
-	out, err := exec.Command("git", "-C", repoPath, "status", "-s", "--ignored", "--porcelain").Output()
+	out, err := exec.Command("git", "status", "-s", "--ignored", "--porcelain", repoPath).Output()
 	return string(out), err
+}
+
+func getTopLevel(path RepoPath) (string, error) {
+	out, err := exec.Command("git", "rev-parse", "--show-toplevel", path).Output()
+	if err != nil {
+		return "", err
+	}
+	// 	 get the first line
+	lines := strings.Split(string(out), "\n")[0]
+	return lines, err
 }
 
 type Status int
 
 const (
-	Modified  Status = iota + 1 // M ~
-	Added                       // A +
-	Deleted                     // D -
-	Renamed                     // R |
-	Copied                      // C =
-	Untracked                   // ? ?
-	Ignored                     // ! !
+	Unmodified        Status = iota + 1 //
+	Modified                            // M
+	Added                               // A
+	Deleted                             // D
+	Renamed                             // R
+	Copied                              // C
+	Untracked                           // ?
+	Ignored                             // !
+	TypeChanged                         // T
+	UpdatedBuUnmerged                   // U
 )
 
 // ParseShort parses a git status output command
@@ -111,7 +130,7 @@ func ParseShort(r string) (res FileGits) {
 		}
 		status := str[0:2]
 		fg.set(status)
-		fg.Name = str[2:]
+		fg.Name = str[3:]
 		res = append(res, fg)
 		if !s.Scan() {
 			break

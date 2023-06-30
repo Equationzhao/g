@@ -11,13 +11,15 @@ import (
 
 var displayFlag = []cli.Flag{
 	// DISPLAY
-	&cli.BoolFlag{
-		Name:               "tree",
-		Aliases:            []string{"t", "T"},
-		Usage:              "recursively list in tree",
-		DisableDefaultText: true,
-		Category:           "DISPLAY",
-	},
+
+	// todo
+	// &cli.BoolFlag{
+	// 	Name:               "tree",
+	// 	Aliases:            []string{"t", "T"},
+	// 	Usage:              "recursively list in tree",
+	// 	DisableDefaultText: true,
+	// 	Category:           "DISPLAY",
+	// },
 	&cli.IntFlag{
 		Name:        "depth",
 		Aliases:     []string{"level", "L"},
@@ -66,6 +68,11 @@ var displayFlag = []cli.Flag{
 				if _, ok := p.(*display.Zero); !ok {
 					p = display.NewZero()
 				}
+				_ = context.Set("header", "0")
+				_ = context.Set("footer", "0")
+				_ = context.Set("statistic", "0")
+				_ = context.Set("total-size", "0")
+				sizeEnabler.DisableTotal()
 			}
 			return nil
 		},
@@ -179,7 +186,7 @@ var displayFlag = []cli.Flag{
 					p = display.NewHTMLPrinter()
 					r.SetTheme(theme.Colorless)
 					r.SetInfoTheme(theme.Colorless)
-					theme.Reset = ""
+
 					_ = context.Set("no-icon", "1")
 				}
 			}
@@ -198,7 +205,7 @@ var displayFlag = []cli.Flag{
 					p = display.NewMDPrinter()
 					r.SetTheme(theme.Colorless)
 					r.SetInfoTheme(theme.Colorless)
-					theme.Reset = ""
+
 					// _ = context.Set("no-icon", "1")
 					err := context.Set("header", "1")
 					if err != nil {
@@ -221,7 +228,7 @@ var displayFlag = []cli.Flag{
 					p = display.NewCSVPrinter()
 					r.SetTheme(theme.Colorless)
 					r.SetInfoTheme(theme.Colorless)
-					theme.Reset = ""
+
 					_ = context.Set("no-icon", "1")
 				}
 			}
@@ -244,7 +251,10 @@ var displayFlag = []cli.Flag{
 					p = display.NewCommaPrint()
 				}
 			case "long", "l", "verbose":
-				contentFunc = append(contentFunc, content.EnableFileMode(r), sizeEnabler.EnableSize(sizeUint, r), ownerEnabler.EnableOwner(r), groupEnabler.EnableGroup(r))
+				contentFunc = append(
+					contentFunc, content.EnableFileMode(r), sizeEnabler.EnableSize(sizeUint, r),
+					ownerEnabler.EnableOwner(r), groupEnabler.EnableGroup(r),
+				)
 				for _, s := range timeType {
 					contentFunc = append(contentFunc, content.EnableTime(timeFormat, s, r))
 				}
@@ -268,7 +278,7 @@ var displayFlag = []cli.Flag{
 					p = display.NewHTMLPrinter()
 					r.SetTheme(theme.Colorless)
 					r.SetInfoTheme(theme.Colorless)
-					theme.Reset = ""
+
 					_ = context.Set("no-icon", "1")
 				}
 			case "Markdown", "md", "MD", "markdown":
@@ -276,7 +286,7 @@ var displayFlag = []cli.Flag{
 					p = display.NewMDPrinter()
 					r.SetTheme(theme.Colorless)
 					r.SetInfoTheme(theme.Colorless)
-					theme.Reset = ""
+
 					err := context.Set("header", "1")
 					if err != nil {
 						return err
@@ -288,7 +298,7 @@ var displayFlag = []cli.Flag{
 					p = display.NewCSVPrinter()
 					r.SetTheme(theme.Colorless)
 					r.SetInfoTheme(theme.Colorless)
-					theme.Reset = ""
+
 					_ = context.Set("no-icon", "1")
 				}
 			case "json", "j":
@@ -296,7 +306,7 @@ var displayFlag = []cli.Flag{
 					p = display.NewJsonPrinter()
 					r.SetTheme(theme.Colorless)
 					r.SetInfoTheme(theme.Colorless)
-					theme.Reset = ""
+
 					_ = context.Set("no-icon", "1")
 				}
 			default:
@@ -315,7 +325,7 @@ var displayFlag = []cli.Flag{
 			if b {
 				r.SetTheme(theme.Colorless)
 				r.SetInfoTheme(theme.Colorless)
-				theme.Reset = ""
+
 			}
 			return nil
 		},
@@ -342,7 +352,7 @@ var displayFlag = []cli.Flag{
 			if b {
 				r.SetTheme(theme.Colorless)
 				r.SetInfoTheme(theme.Colorless)
-				theme.Reset = ""
+
 				err := context.Set("no-icon", "1")
 				if err != nil {
 					return err

@@ -2,10 +2,12 @@ package filter
 
 import (
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/Equationzhao/g/git"
 	"github.com/Equationzhao/g/item"
+	"github.com/Equationzhao/pathbeautify"
 	"github.com/gabriel-vasile/mimetype"
 	"github.com/gobwas/glob"
 )
@@ -147,20 +149,28 @@ func RemoveGitIgnore(repoPath git.RepoPath) ItemFilterFunc {
 		if parent == child {
 			return true
 		}
-		if strings.HasPrefix(child, parent+"/") { // should not use filepath.Separator
+		if strings.HasPrefix(child, parent+string(filepath.Separator)) { // should not use filepath.Separator
 			return true
 		}
 		return false
 	}
 	ignoredCache := git.GetCache()
+
 	return func(e *item.FileInfo) (ok bool) {
 		actual, _ := ignoredCache.GetOrInit(repoPath, git.DefaultInit(repoPath))
 		ok = true
+		topLevel, err := git.GetTopLevel(repoPath)
+		if err != nil {
+			return keep
+		}
+		rel, err := filepath.Rel(topLevel, e.FullPath)
+		if err != nil {
+			return keep
+		}
 		for _, fileGit := range *actual {
-			if fileGit.X == git.Ignored || fileGit.Y == git.Ignored {
-				if isOrIsParentOf(fileGit.Name, e.Name()) {
-					ok = false
-				}
+			if isOrIsParentOf(pathbeautify.CleanSeparator(fileGit.Name), rel) {
+				ok = remove
+				break
 			}
 		}
 		return

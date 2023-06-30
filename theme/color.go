@@ -36,7 +36,7 @@ const (
 	Underline    = "\033[4m"
 )
 
-var Reset = "\033[0m"
+const Reset = "\033[0m"
 
 const (
 	BasicFormat    = "\033[1;%dm"

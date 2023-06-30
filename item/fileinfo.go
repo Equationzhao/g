@@ -74,7 +74,7 @@ func NewFileInfo(name string) (*FileInfo, error) {
 	return &FileInfo{
 		FileInfo: info,
 		FullPath: abs,
-		Meta:     tsmap.NewTSMap[string, Item](200),
+		Meta:     tsmap.NewTSMap[string, Item](20),
 	}, nil
 }
 
@@ -92,9 +92,11 @@ func (i *FileInfo) Keys() []string {
 func (i *FileInfo) KeysByOrder() []string {
 	kNo := i.Meta.Pairs()
 
-	sort.Slice(kNo, func(i, j int) bool {
-		return kNo[i].Value().NO() < kNo[j].Value().NO()
-	})
+	sort.Slice(
+		kNo, func(i, j int) bool {
+			return kNo[i].Value().NO() < kNo[j].Value().NO()
+		},
+	)
 
 	res := make([]string, 0, len(kNo))
 	for _, v := range kNo {
@@ -125,9 +127,11 @@ func (i *FileInfo) Values() []Item {
 // ValuesByOrdered return all content (ordered by No, ascending)
 func (i *FileInfo) ValuesByOrdered() []Item {
 	ics := i.Meta.Values()
-	sort.Slice(ics, func(i, j int) bool {
-		return ics[i].NO() < ics[j].NO()
-	})
+	sort.Slice(
+		ics, func(i, j int) bool {
+			return ics[i].NO() < ics[j].NO()
+		},
+	)
 
 	return ics
 }

@@ -46,6 +46,7 @@ var (
 	blockEnabler    = filtercontent.NewBlockSizeEnabler()
 	ownerEnabler    = filtercontent.NewOwnerEnabler()
 	groupEnabler    = filtercontent.NewGroupEnabler()
+	gitEnabler      = filtercontent.NewGitEnabler()
 	depthLimitMap   = make(map[string]int)
 	limitOnce       = util.Once{}
 	hookOnce        = util.Once{}
@@ -113,8 +114,12 @@ There is NO WARRANTY, to the extent permitted by law.`,
 				nameToDisplay.SetClassify()
 				nameToDisplay.SetFileType()
 			}
-			if context.Bool("git-status") {
-				nameToDisplay.SetGit()
+			git := context.Bool("git")
+			if git {
+				contentFunc = append(contentFunc, gitEnabler.Enable(r))
+			}
+			if context.Bool("no-dereference") {
+				nameToDisplay.SetNoDeference()
 			}
 
 			fuzzy := context.Bool("fuzzy")
@@ -337,7 +342,9 @@ There is NO WARRANTY, to the extent permitted by law.`,
 						} else {
 							// output error
 							if pathErr := new(os.PathError); errors.As(err, &pathErr) {
-								_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(fmt.Sprintf("%s: %s", pathErr.Err, pathErr.Path)))
+								_, _ = fmt.Fprintln(
+									os.Stderr, MakeErrorStr(fmt.Sprintf("%s: %s", pathErr.Err, pathErr.Path)),
+								)
 								seriousErr = true
 								continue
 							}
@@ -406,7 +413,9 @@ There is NO WARRANTY, to the extent permitted by law.`,
 						FileInfoCurrent, err := item.NewFileInfo(".")
 						if err != nil {
 							if pathErr := new(os.PathError); errors.As(err, &pathErr) {
-								_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(fmt.Sprintf("%s: %s", pathErr.Err, pathErr.Path)))
+								_, _ = fmt.Fprintln(
+									os.Stderr, MakeErrorStr(fmt.Sprintf("%s: %s", pathErr.Err, pathErr.Path)),
+								)
 								seriousErr = true
 							} else {
 								_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(err.Error()))
@@ -419,7 +428,9 @@ There is NO WARRANTY, to the extent permitted by law.`,
 						FileInfoParent, err := item.NewFileInfo("..")
 						if err != nil {
 							if pathErr := new(os.PathError); errors.As(err, &pathErr) {
-								_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(fmt.Sprintf("%s: %s", pathErr.Err, pathErr.Path)))
+								_, _ = fmt.Fprintln(
+									os.Stderr, MakeErrorStr(fmt.Sprintf("%s: %s", pathErr.Err, pathErr.Path)),
+								)
 								minorErr = true
 							} else {
 								_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(err.Error()))
@@ -435,7 +446,9 @@ There is NO WARRANTY, to the extent permitted by law.`,
 					info, err := v.Info()
 					if err != nil {
 						if pathErr := new(os.PathError); errors.As(err, &pathErr) {
-							_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(fmt.Sprintf("%s: %s", pathErr.Err, pathErr.Path)))
+							_, _ = fmt.Fprintln(
+								os.Stderr, MakeErrorStr(fmt.Sprintf("%s: %s", pathErr.Err, pathErr.Path)),
+							)
 							minorErr = true
 						} else {
 							minorErr = true
@@ -454,6 +467,10 @@ There is NO WARRANTY, to the extent permitted by law.`,
 
 				if gitignore {
 					*removeGitIgnore = filter.RemoveGitIgnore(path[i])
+				}
+				if git {
+					gitEnabler.Path = path[i]
+					gitEnabler.InitCache(path[i])
 				}
 
 				// remove non-display items
@@ -485,7 +502,7 @@ There is NO WARRANTY, to the extent permitted by law.`,
 				}
 
 			final:
-				contentFilter.GetDisplayItems(infos...)
+				contentFilter.GetDisplayItems(&infos)
 
 				// add total && statistics
 				{
@@ -497,7 +514,13 @@ There is NO WARRANTY, to the extent permitted by law.`,
 						if !isPrettyPrinter {
 							i, _ = item.NewFileInfoWithOption()
 							s, _ := sizeEnabler.Size2String(total)
-							i.Set("total", display.ItemContent{No: 0, Content: display.StringContent(fmt.Sprintf("  total %s", s))})
+							i.Set(
+								"total", &display.ItemContent{No: 0, Content: display.StringContent(
+									fmt.Sprintf(
+										"  total %s", s,
+									),
+								)},
+							)
 						} else {
 							s, _ := sizeEnabler.Size2String(total)
 							_, _ = display.RawPrint(fmt.Sprintf("  total %s\n", s))
@@ -510,10 +533,27 @@ There is NO WARRANTY, to the extent permitted by law.`,
 								i, _ = item.NewFileInfoWithOption()
 								tFormat = "  underwent %s"
 							}
-							i.Set("underwent", display.ItemContent{No: 1, Content: display.StringContent(fmt.Sprintf(tFormat, r.Time(durafmt.Parse(time.Since(start)).LimitToUnit("ms").String())))})
-							i.Set("statistic", display.ItemContent{No: 2, Content: display.StringContent(fmt.Sprintf("\n  statistic: %s", s))})
+							i.Set(
+								"underwent", &display.ItemContent{No: 1, Content: display.StringContent(
+									fmt.Sprintf(
+										tFormat, r.Time(durafmt.Parse(time.Since(start)).LimitToUnit("ms").String()),
+									),
+								)},
+							)
+							i.Set(
+								"statistic", &display.ItemContent{No: 2, Content: display.StringContent(
+									fmt.Sprintf(
+										"\n  statistic: %s", s,
+									),
+								)},
+							)
 						} else {
-							_, _ = display.RawPrint(fmt.Sprintf("  underwent %s", r.Time(durafmt.Parse(time.Since(start)).LimitToUnit("ms").String())))
+							_, _ = display.RawPrint(
+								fmt.Sprintf(
+									"  underwent %s",
+									r.Time(durafmt.Parse(time.Since(start)).LimitToUnit("ms").String()),
+								),
+							)
 							_, _ = display.RawPrint(fmt.Sprintf("\n  statistic: %s\n", s))
 						}
 						s.Reset()
@@ -525,10 +565,29 @@ There is NO WARRANTY, to the extent permitted by law.`,
 					}
 				}
 
+				// if is table printer, set title
+				prettyPrinter, isTablePrinter := p.(display.PrettyPrinter)
+				if isTablePrinter {
+					prettyPrinter.SetTitle(path[i])
+				}
+				l := len(strconv.Itoa(len(infos)))
+				for i, info := range infos {
+					// if there is #, add No
+					if flagSharp {
+						no := &display.ItemContent{
+							No:      -1,
+							Content: display.StringContent(strconv.Itoa(i)),
+						}
+						no.SetSuffix(strings.Repeat(" ", l-len(strconv.Itoa(i))))
+						info.Set("#", no)
+					}
+				}
+
 				// do scan
 				// get max length for each Meta[key].Value
 				allPart := infos[0].KeysByOrder()
 				longestEachPart := make(map[string]int)
+
 				for _, it := range infos {
 					for _, part := range allPart {
 						content, _ := it.Get(part)
@@ -539,102 +598,99 @@ There is NO WARRANTY, to the extent permitted by law.`,
 					}
 				}
 
-				_ = hookOnce.Do(func() error {
-					if header || footer {
-						headerFooter := func(isBefore bool) func(p display.Printer, items ...*item.FileInfo) {
-							return func(p display.Printer, item ...*item.FileInfo) {
-								// add header
-								if len(item) == 0 {
-									return
-								}
-
-								// add longest - len(header) * space
-								// print header
-								headerFooterStrBuf := bytebufferpool.Get()
-								defer bytebufferpool.Put(headerFooterStrBuf)
-								prettyPrinter, isPrettyPrinter := p.(display.PrettyPrinter)
-
-								expand := func(s string, no, space int) {
-									_, _ = headerFooterStrBuf.WriteString(theme.Underline)
-									_, _ = headerFooterStrBuf.WriteString(s)
-									_, _ = headerFooterStrBuf.WriteString(theme.Reset)
-									if no != len(allPart)-1 {
-										_, _ = headerFooterStrBuf.WriteString(strings.Repeat(" ", space))
-									}
-								}
-
-								for i, s := range allPart {
-									if len(s) > longestEachPart[s] {
-										// expand the every item's content of this part
-										for _, it := range infos {
-											content, _ := it.Get(s)
-											content = display.ItemContent{
-												Content: display.StringContent(fmt.Sprintf("%s%s", strings.Repeat(" ", len(s)-longestEachPart[s]), content.String())),
-												No:      content.NO(),
-											}
-											it.Set(s, content)
-										}
-										expand(s, i, 1)
-									} else {
-										expand(s, i, longestEachPart[s]-len(s)+1)
-									}
-									if isPrettyPrinter && isBefore {
-										if header {
-											prettyPrinter.AddHeader(s)
-										}
-										if footer {
-											prettyPrinter.AddFooter(s)
-										}
-									}
-								}
-								res := headerFooterStrBuf.String()
-								if !isPrettyPrinter {
-									if header && isBefore {
-										_, _ = fmt.Fprintln(p, res)
-									}
-									if footer && !isBefore {
-										_, _ = fmt.Fprintln(p, res)
-									}
-								}
+				for _, it := range infos {
+					for _, part := range allPart {
+						content, _ := it.Get(part)
+						l := display.WidthLen(content.String())
+						if l < longestEachPart[part] {
+							// expand
+							if part != filtercontent.NameName {
+								content.SetSuffix(strings.Repeat(" ", longestEachPart[part]-l))
+								it.Set(part, content)
 							}
 						}
-						if header {
-							// pre scan
-							p.AddBeforePrint(headerFooter(true))
-						}
-						if footer {
-							if !header {
-								// pre scan
-								p.AddBeforePrint(headerFooter(true))
-							}
-							p.AddAfterPrint(headerFooter(false))
-						}
-					}
-					p.AddAfterPrint(hookAfter...)
-					return nil
-				})
-
-				itemsCopy := make([]*item.FileInfo, 0, len(infos))
-				{
-					// if is table printer, set title
-					prettyPrinter, isTablePrinter := p.(display.PrettyPrinter)
-					if isTablePrinter {
-						prettyPrinter.SetTitle(path[i])
-					}
-					l := len(strconv.Itoa(len(infos)))
-					for i, info := range infos {
-						// if there is #, add No
-						if flagSharp {
-							info.Set("#", display.ItemContent{
-								No:      -1,
-								Content: display.StringContent(fmt.Sprintf("%d%s", i, strings.Repeat(" ", l-len(strconv.Itoa(i))))),
-							})
-						}
-						itemsCopy = append(itemsCopy, info)
 					}
 				}
 
-				p.Print(itemsCopy...)
+				_ = hookOnce.Do(
+					func() error {
+						if header || footer {
+							headerFooter := func(isBefore bool) func(p display.Printer, items ...*item.FileInfo) {
+								return func(p display.Printer, item ...*item.FileInfo) {
+									// add header
+									if len(item) == 0 {
+										return
+									}
+
+									// add longest - len(header) * space
+									// print header
+									headerFooterStrBuf := bytebufferpool.Get()
+									defer bytebufferpool.Put(headerFooterStrBuf)
+									prettyPrinter, isPrettyPrinter := p.(display.PrettyPrinter)
+
+									expand := func(s string, no, space int) {
+										_, _ = headerFooterStrBuf.WriteString(theme.Underline)
+										_, _ = headerFooterStrBuf.WriteString(s)
+										_, _ = headerFooterStrBuf.WriteString(theme.Reset)
+										if no != len(allPart)-1 {
+											_, _ = headerFooterStrBuf.WriteString(strings.Repeat(" ", space))
+										}
+									}
+
+									for i, s := range allPart {
+										if len(s) > longestEachPart[s] {
+											// expand the every item's content of this part
+											for _, it := range infos {
+												content, _ := it.Get(s)
+												content.AddSuffix(
+													strings.Repeat(
+														" ", len(s)-display.WidthLen(content.String()),
+													),
+												)
+												it.Set(s, content)
+											}
+											expand(s, i, 1)
+										} else {
+											expand(s, i, longestEachPart[s]-len(s)+1)
+										}
+										if isPrettyPrinter && isBefore {
+											if header {
+												prettyPrinter.AddHeader(s)
+											}
+											if footer {
+												prettyPrinter.AddFooter(s)
+											}
+										}
+									}
+									res := headerFooterStrBuf.String()
+									if !isPrettyPrinter {
+										if header && isBefore {
+											_, _ = fmt.Fprintln(p, res)
+										}
+										if footer && !isBefore {
+											_, _ = fmt.Fprintln(p, res)
+										}
+									}
+								}
+							}
+							if header {
+								// pre scan
+								p.AddBeforePrint(headerFooter(true))
+							}
+							if footer {
+								if !header {
+									// pre scan
+									p.AddBeforePrint(headerFooter(true))
+								}
+								p.AddAfterPrint(headerFooter(false))
+							}
+						}
+						p.AddAfterPrint(hookAfter...)
+						return nil
+					},
+				)
+
+				p.Print(infos...)
 
 				// switch back to start dir
 				if i != len(path)-1 {
@@ -659,7 +715,8 @@ There is NO WARRANTY, to the extent permitted by law.`,
 			return nil
 		},
 	}
-	G.Flags = append(G.Flags,
+	G.Flags = append(
+		G.Flags,
 		&cli.BoolFlag{
 			Name:     "check-new-version",
 			Usage:    "check if there's new release",
@@ -681,7 +738,8 @@ There is NO WARRANTY, to the extent permitted by law.`,
 			Aliases:            []string{"np"},
 			DisableDefaultText: true,
 			Usage:              "By default, .../a/b/c will be transformed to ../../a/b/c, and ~ will be replaced by homedir, using this flag to disable this feature",
-		})
+		},
+	)
 
 	G.Flags = append(G.Flags, viewFlag...)
 	G.Flags = append(G.Flags, displayFlag...)
@@ -719,12 +777,14 @@ func (c Err4Exit) Error() string {
 }
 
 func initHelpTemp() {
-	cli.AppHelpTemplate = fmt.Sprintf(`%s
+	cli.AppHelpTemplate = fmt.Sprintf(
+		`%s
 REPO:
 	https://github.com/Equationzhao/g
 
 %s compiled at %s
-`, cli.AppHelpTemplate, Version, CompiledAt)
+`, cli.AppHelpTemplate, Version, CompiledAt,
+	)
 }
 
 func initVersionHelpFlags() {

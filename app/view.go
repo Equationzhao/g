@@ -708,4 +708,9 @@ var viewFlag = []cli.Flag{
 		},
 		Category: "VIEW",
 	},
+	&cli.BoolFlag{
+		Name:     "no-dereference",
+		Usage:    "do not dereference symbolic links",
+		Category: "VIEW",
+	},
 }
