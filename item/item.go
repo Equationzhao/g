@@ -5,6 +5,6 @@ type Item interface {
 	NO() int // NO return the No. of item
 	SetPrefix(string)
 	SetSuffix(string)
-	GetPrefix() string
-	GetSuffix() string
+	AddPrefix(string)
+	AddSuffix(string)
 }

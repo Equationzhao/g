@@ -50,7 +50,7 @@ type (
 // if s is shorter than length, fill blank from left
 // if s is longer than length, panic
 func FillBlank(s string, length int) string {
-	if len(s) > length {
+	if len(s) >= length {
 		return s
 	}
 	return strings.Repeat(" ", length-len(s)) + s
@@ -89,29 +89,31 @@ func NewContentFilter(options ...ContentFilterOption) *ContentFilter {
 	return c
 }
 
-func (cf *ContentFilter) GetDisplayItems(e ...*item.FileInfo) {
-	sort.Slice(e, func(i, j int) bool {
-		if cf.sortFunc != nil {
-			return cf.sortFunc(e[i], e[j])
-		}
-		return true
-	})
+func (cf *ContentFilter) GetDisplayItems(e *[]*item.FileInfo) {
+	sort.Slice(
+		*e, func(i, j int) bool {
+			if cf.sortFunc != nil {
+				return cf.sortFunc((*e)[i], (*e)[j])
+			}
+			return true
+		},
+	)
 
 	// limit number of entries
 	// 0 means no limit
-	if cf.LimitN != 0 && len(e) > int(cf.LimitN) {
-		e = e[:cf.LimitN]
+	if cf.LimitN != 0 && len(*e) > int(cf.LimitN) {
+		*e = (*e)[:cf.LimitN]
 	}
 
 	wg := sync.WaitGroup{}
-	wg.Add(len(e))
+	wg.Add(len(*e))
 
-	for i, entry := range e {
+	for i, entry := range *e {
 		go func(entry *item.FileInfo, i int) {
 			for j, option := range cf.options {
 				stringContent, funcName := option(entry)
 				content := display.ItemContent{Content: display.StringContent(stringContent), No: j}
-				entry.Set(funcName, content)
+				entry.Set(funcName, &content)
 			}
 
 			for _, option := range cf.noOutputOptions {

@@ -8,7 +8,6 @@ import (
 	"io"
 	"math"
 	"os"
-	"runtime"
 	"sort"
 	"strings"
 
@@ -214,11 +213,7 @@ func WidthLen(str string) int {
 	colorless := stripansi.Strip(str)
 	// len() is insufficient here, as it counts emojis as 4 characters each
 	length := runewidth.StringWidth(colorless)
-	if runtime.GOOS == "windows" || runtime.GOOS == "darwin" {
-		if strings.ContainsRune(colorless, dot) {
-			length--
-		}
-	}
+
 	return length
 }
 
@@ -351,22 +346,22 @@ func (a *Across) printRowWithNoSpace(strs *[]string) {
 	for _, str := range *strs {
 		colorless := stripansi.Strip(str)
 		maxLength += runewidth.StringWidth(stripansi.Strip(str))
-		if runtime.GOOS == "windows" || runtime.GOOS == "darwin" {
-			if strings.ContainsRune(colorless, dot) {
-				maxLength--
-			}
-		}
+		// if runtime.GOOS == "windows" || runtime.GOOS == "darwin" {
+		// 	if strings.ContainsRune(colorless, dot) {
+		// 		maxLength--
+		// 	}
+		// }
 
 		if maxLength <= width {
 			_, _ = a.WriteString(str)
 		} else {
 			_, _ = a.WriteString("\n" + str)
 			maxLength = runewidth.StringWidth(colorless)
-			if runtime.GOOS == "windows" || runtime.GOOS == "darwin" {
-				if strings.ContainsRune(colorless, dot) {
-					maxLength--
-				}
-			}
+			// if runtime.GOOS == "windows" || runtime.GOOS == "darwin" {
+			// 	if strings.ContainsRune(colorless, dot) {
+			// 		maxLength--
+			// 	}
+			// }
 		}
 	}
 	_ = a.WriteByte('\n')
@@ -382,11 +377,11 @@ func (a *Across) printRow(strs *[]string) {
 	for i, str := range *strs {
 		colorless := stripansi.Strip(str)
 		strLen[i] = runewidth.StringWidth(colorless)
-		if runtime.GOOS == "windows" {
-			if strings.ContainsRune(colorless, dot) {
-				strLen[i]--
-			}
-		}
+		// if runtime.GOOS == "windows" {
+		// 	if strings.ContainsRune(colorless, dot) {
+		// 		strLen[i]--
+		// 	}
+		// }
 		maxLength = max(maxLength, strLen[i])
 	}
 

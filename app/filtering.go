@@ -10,7 +10,7 @@ import (
 var filteringFlag = []cli.Flag{
 	&cli.UintFlag{
 		Name:        "limitN",
-		Aliases:     []string{"n", "limit"},
+		Aliases:     []string{"n", "limit", "topN", "top"},
 		Usage:       "limit n items(n <=0 means unlimited)",
 		Value:       0,
 		DefaultText: "unlimited",
@@ -179,21 +179,23 @@ var filteringFlag = []cli.Flag{
 		Category: "FILTERING",
 		Action: func(context *cli.Context, i []string) error {
 			if len(i) > 0 {
-				err := limitOnce.Do(func() error {
-					size := context.String("exact-detect-size")
-					var bytes uint64 = 1024 * 1024
-					if size == "0" || size == "infinity" {
-						bytes = 0
-					} else if size != "" {
-						sizeUint, err := content.ParseSize(size)
-						if err != nil {
-							return err
+				err := limitOnce.Do(
+					func() error {
+						size := context.String("exact-detect-size")
+						var bytes uint64 = 1024 * 1024
+						if size == "0" || size == "infinity" {
+							bytes = 0
+						} else if size != "" {
+							sizeUint, err := content.ParseSize(size)
+							if err != nil {
+								return err
+							}
+							bytes = sizeUint.Bytes
 						}
-						bytes = sizeUint.Bytes
-					}
-					mimetype.SetLimit(uint32(bytes))
-					return nil
-				})
+						mimetype.SetLimit(uint32(bytes))
+						return nil
+					},
+				)
 				if err != nil {
 					return err
 				}

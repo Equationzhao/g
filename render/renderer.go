@@ -2,11 +2,17 @@ package render
 
 import (
 	"errors"
+	"fmt"
 	"io/fs"
+	"math"
 	"path/filepath"
+	"runtime"
 	"strings"
+	"time"
 
 	"github.com/Equationzhao/g/theme"
+	"github.com/hako/durafmt"
+	"github.com/jwalton/go-supportscolor"
 	"github.com/valyala/bytebufferpool"
 )
 
@@ -77,9 +83,12 @@ func (r *Renderer) Owner(toRender string) string {
 	bb := bytebufferpool.Get()
 	defer bytebufferpool.Put(bb)
 	toRenderNoSpace := strings.Replace(toRender, " ", "", -1)
-	if toRenderNoSpace == "root" {
+	root := "root"
+	if runtime.GOOS == "windows" {
+		root = "Administrators"
+	}
+	if toRenderNoSpace == root {
 		_, _ = bb.WriteString(r.infoTheme["root"].Color)
-		_, _ = bb.WriteString("\ue315")
 	} else {
 		_, _ = bb.WriteString(r.infoTheme["owner"].Color)
 	}
@@ -93,9 +102,12 @@ func (r *Renderer) Group(toRender string) string {
 	bb := bytebufferpool.Get()
 	defer bytebufferpool.Put(bb)
 	toRenderNoSpace := strings.Replace(toRender, " ", "", -1)
-	if toRenderNoSpace == "root" {
+	root := "root"
+	if runtime.GOOS == "windows" {
+		root = "Administrators"
+	}
+	if toRenderNoSpace == root {
 		_, _ = bb.WriteString(r.infoTheme["root"].Color)
-		_, _ = bb.WriteString("\ue315")
 	} else {
 		_, _ = bb.WriteString(r.infoTheme["group"].Color)
 	}
@@ -109,8 +121,71 @@ func (r *Renderer) Time(toRender string) string {
 	return r.infoByName(toRender, "time")
 }
 
-func (r *Renderer) RTime(toRender string) string {
-	return r.infoByName(toRender, "time")
+func calculateRTimeColor(dura time.Duration) string {
+	dura = dura.Abs()
+
+	const (
+		day  = time.Hour * 24
+		week = day * 7
+	)
+
+	var r, g, b float64 = 205, 100, 255
+	// if dura <= time.Hour*1 {
+	// 	// skip
+	// } else
+	if dura <= time.Hour*6 {
+		r *= 0.95
+		// g *= 0.95
+		b *= 0.95
+	} else if dura <= day {
+		r *= 0.90
+		// g *= 0.88
+		b *= 0.90
+	} else if dura <= day*3 {
+		r *= 0.85
+		// g *= 0.79
+		b *= 0.85
+	} else if dura <= week {
+		r *= 0.80
+		// g *= 0.70
+		b *= 0.80
+	} else if dura <= week*6 {
+		r *= 0.73
+		// g *= 0.66
+		b *= 0.73
+	} else if dura <= week*52 {
+		r *= 0.66
+		// g *= 0.59
+		b *= 0.66
+	} else {
+		r *= 0.53
+		// g *= 0.53
+		b *= 0.53
+	}
+	rUint, gUint, bUint := uint8(math.Round(r)), uint8(math.Round(g)), uint8(math.Round(b))
+	res, _ := theme.RGB(rUint, gUint, bUint)
+
+	if supportscolor.Ansi256 < theme.ColorLevel && theme.ColorLevel < supportscolor.Ansi16m {
+		res, _ = theme.RGBTo256(rUint, gUint, bUint)
+	} else if theme.ColorLevel < supportscolor.Ansi256 {
+		res, _ = theme.RGBToBasic(rUint, gUint, bUint)
+	}
+
+	return res
+}
+
+func (r *Renderer) RTime(now, modTime time.Time) string {
+	t := now.Sub(modTime)
+	var dura *durafmt.Durafmt
+	if t > 0 {
+		dura = durafmt.Parse(t)
+		return fmt.Sprintf("%s%s ago%s", calculateRTimeColor(t), dura.LimitFirstN(1).String(), theme.Reset)
+	} else if t == 0 {
+		return "now"
+	} else {
+		dura = durafmt.Parse(-t)
+		return fmt.Sprintf("%sin %s%s", calculateRTimeColor(t), dura.LimitFirstN(1).String(), theme.Reset)
+	}
 }
 
 func (r *Renderer) Name(toRender string) string {
@@ -332,63 +407,47 @@ func (r *Renderer) Icon(name string) string {
 }
 
 func (r *Renderer) gitByStatus(name string, status string) string {
-	return r.infoTheme[status].Color + r.infoTheme[status].Icon + r.infoTheme["reset"].Color + " " + name
+	return r.infoTheme[status].Color + name + r.infoTheme["reset"].Color
+}
+
+func (r *Renderer) GitUnmodified(name string) string {
+	return r.gitByStatus(name, "git_unmodified")
 }
 
 func (r *Renderer) GitModified(name string) string {
-	return r.gitByStatus(name, "git_modified_dot")
+	return r.gitByStatus(name, "git_modified")
 }
 
 func (r *Renderer) GitUntracked(name string) string {
-	return r.gitByStatus(name, "git_untracked_dot")
+	return r.gitByStatus(name, "git_untracked")
 }
 
 func (r *Renderer) GitAdded(name string) string {
-	return r.gitByStatus(name, "git_added_dot")
+	return r.gitByStatus(name, "git_added")
 }
 
 func (r *Renderer) GitRenamed(name string) string {
-	return r.gitByStatus(name, "git_renamed_dot")
+	return r.gitByStatus(name, "git_renamed")
 }
 
 func (r *Renderer) GitDeleted(name string) string {
-	return r.gitByStatus(name, "git_deleted_dot")
+	return r.gitByStatus(name, "git_deleted")
 }
 
 func (r *Renderer) GitIgnored(name string) string {
-	return r.gitByStatus(name, "git_ignored_dot")
+	return r.gitByStatus(name, "git_ignored")
 }
 
 func (r *Renderer) GitCopied(name string) string {
-	return r.gitByStatus(name, "git_copied_dot")
+	return r.gitByStatus(name, "git_copied")
 }
 
-func (r *Renderer) GitModifiedSym(name string) string {
-	return r.gitByStatus(name, "git_modified_sym")
+func (r *Renderer) GitTypeChanged(s string) string {
+	return r.gitByStatus(s, "git_type_changed")
 }
 
-func (r *Renderer) GitUntrackedSym(name string) string {
-	return r.gitByStatus(name, "git_untracked_sym")
-}
-
-func (r *Renderer) GitAddedSym(name string) string {
-	return r.gitByStatus(name, "git_added_sym")
-}
-
-func (r *Renderer) GitRenamedSym(name string) string {
-	return r.gitByStatus(name, "git_renamed_sym")
-}
-
-func (r *Renderer) GitDeletedSym(name string) string {
-	return r.gitByStatus(name, "git_deleted_sym")
-}
-
-func (r *Renderer) GitIgnoredSym(name string) string {
-	return r.gitByStatus(name, "git_ignored_sym")
-}
-
-func (r *Renderer) GitCopiedSym(name string) string {
-	return r.gitByStatus(name, "git_copied_sym")
+func (r *Renderer) GitUpdatedButUnmerged(s string) string {
+	return r.gitByStatus(s, "git_updated_but_unmerged")
 }
 
 func (r *Renderer) Inode(inode string) string {

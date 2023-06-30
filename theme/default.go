@@ -71,58 +71,88 @@ var DefaultInfoTheme = Theme{
 		Color: Cyan,
 	},
 	"bit": Style{
-		Color: rgb(0, 255, 0),
+		Color: rgb(20, 255, 100),
 	},
 	"B": Style{
-		Color: rgb(0, 230, 0),
+		Color: rgb(20, 230, 100),
 	},
 	"KB": Style{
-		Color: rgb(0, 207, 0),
+		Color: rgb(20, 207, 100),
 	},
 	"MB": Style{
-		Color: rgb(0, 188, 0),
+		Color: rgb(20, 188, 100),
 	},
 	"GB": Style{
-		Color: rgb(0, 170, 0),
+		Color: rgb(20, 170, 100),
 	},
 	"TB": Style{
-		Color: rgb(0, 153, 0),
+		Color: rgb(20, 153, 100),
 	},
 	"PB": Style{
-		Color: rgb(0, 138, 0),
+		Color: rgb(20, 138, 100),
 	},
 	"EB": Style{
-		Color: rgb(0, 125, 0),
+		Color: rgb(20, 125, 100),
 	},
 	"ZB": Style{
-		Color: rgb(0, 112, 0),
+		Color: rgb(20, 112, 100),
 	},
 	"YB": Style{
-		Color: rgb(0, 100, 0),
+		Color: rgb(20, 100, 100),
 	},
 	"BB": Style{
-		Color: rgb(0, 90, 0),
+		Color: rgb(20, 90, 100),
 	},
 	"NB": Style{
-		Color: rgb(0, 80, 0),
+		Color: rgb(20, 70, 100),
+	},
+	"git_unmodified": Style{
+		Color: BrightBlack,
+	},
+	"git_modified": Style{
+		Color: Yellow,
+	},
+	"git_renamed": Style{
+		Color: Blue,
+	},
+	"git_copied": Style{
+		Color: Purple,
+	},
+	"git_deleted": Style{
+		Color: Red,
+	},
+	"git_added": Style{
+		Color: Green,
+	},
+	"git_untracked": Style{
+		Color: BrightBlack,
+	},
+	"git_ignored": Style{
+		Color: BrightRed,
+	},
+	"git_type_changed": Style{
+		Color: Yellow,
+	},
+	"git_updated_but_unmerged": Style{
+		Color: BrightYellow,
 	},
 }
 
 var DefaultTheme = Theme{
 	"dir": {
-		Color: Blue,
+		Color: BrightBlue,
 		Icon:  "\uF115",
 	},
 	"home": {
-		Color: Blue,
+		Color: BrightBlue,
 		Icon:  "\ue617",
 	},
 	"desktop": {
-		Color: Blue,
+		Color: BrightBlue,
 		Icon:  "\uf108",
 	},
 	"downloads": {
-		Color: Blue,
+		Color: BrightBlue,
 		Icon:  "\uf498",
 	},
 	"exe": Style{

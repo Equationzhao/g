@@ -23,27 +23,27 @@ type ItemContent struct {
 	Prefix, Suffix string
 }
 
-func (i ItemContent) SetPrefix(s string) {
+func (i *ItemContent) SetPrefix(s string) {
 	i.Prefix = s
 }
 
-func (i ItemContent) SetSuffix(s string) {
+func (i *ItemContent) SetSuffix(s string) {
 	i.Suffix = s
 }
 
-func (i ItemContent) GetPrefix() string {
-	return i.Prefix
+func (i *ItemContent) AddPrefix(add string) {
+	i.Prefix = add + i.Prefix
 }
 
-func (i ItemContent) GetSuffix() string {
-	return i.Suffix
+func (i *ItemContent) AddSuffix(add string) {
+	i.Suffix = add + i.Suffix
 }
 
-func (i ItemContent) String() string {
-	return i.Content.String()
+func (i *ItemContent) String() string {
+	return i.Prefix + i.Content.String() + i.Suffix
 }
 
-func (i ItemContent) NO() int {
+func (i *ItemContent) NO() int {
 	return i.No
 }
 

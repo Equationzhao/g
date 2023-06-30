@@ -236,12 +236,12 @@ func (s *SizeEnabler) Size2String(b int64) (string, SizeUnit) {
 			if v < 1024 {
 				res = strconv.FormatFloat(v, 'f', 1, 64)
 				if res == "0.0" {
-					res = "-"
+					return "      -", actualUnit
 				} else {
 					res += Convert2SizeString(i)
 				}
 				actualUnit = i
-				return res, actualUnit
+				return filter.FillBlank(res, 7), actualUnit
 			}
 			v /= 1024
 		}

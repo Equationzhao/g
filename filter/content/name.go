@@ -7,9 +7,7 @@ import (
 	"strings"
 	"sync/atomic"
 
-	"github.com/Equationzhao/g/cached"
 	"github.com/Equationzhao/g/filter"
-	"github.com/Equationzhao/g/git"
 	"github.com/Equationzhao/g/item"
 	"github.com/Equationzhao/g/render"
 	"github.com/valyala/bytebufferpool"
@@ -18,7 +16,6 @@ import (
 type (
 	Name struct {
 		icon, classify, fileType, git, fullPath, noDeference bool
-		GitCache                                             *cached.Map[git.RepoPath, *git.FileGits]
 		statistics                                           *Statistics
 		relativeTo                                           string
 		Quote                                                string
@@ -99,12 +96,6 @@ func (n *Name) UnsetQuote() *Name {
 	return n
 }
 
-func (n *Name) UnsetGit() *Name {
-	n.git = false
-	git.FreeCache()
-	return n
-}
-
 func (n *Name) UnsetIcon() *Name {
 	n.icon = false
 	return n
@@ -117,12 +108,6 @@ func (n *Name) UnsetClassify() *Name {
 
 func (n *Name) UnsetFileType() *Name {
 	n.fileType = false
-	return n
-}
-
-func (n *Name) SetGit() *Name {
-	n.git = true
-	n.GitCache = git.GetCache()
 	return n
 }
 
@@ -271,59 +256,4 @@ func (n *Name) Enable(renderer *render.Renderer) filter.ContentOption {
 
 		return str, NameName
 	}
-}
-
-func (n *Name) GitByName(name string, status string, style gitStyle, renderer render.Renderer) string {
-	switch status {
-	case "~":
-		switch style {
-		case GitStyleDot:
-			return renderer.GitModified(name)
-		case GitStyleSym:
-			return renderer.GitModifiedSym(name)
-		}
-	case "?":
-		switch style {
-		case GitStyleDot:
-			return renderer.GitUntracked(name)
-		case GitStyleSym:
-			return renderer.GitUntrackedSym(name)
-		}
-	case "+":
-		switch style {
-		case GitStyleDot:
-			return renderer.GitAdded(name)
-		case GitStyleSym:
-			return renderer.GitAddedSym(name)
-		}
-	case "|":
-		switch style {
-		case GitStyleDot:
-			return renderer.GitRenamed(name)
-		case GitStyleSym:
-			return renderer.GitRenamedSym(name)
-		}
-	case "-":
-		switch style {
-		case GitStyleDot:
-			return renderer.GitDeleted(name)
-		case GitStyleSym:
-			return renderer.GitDeletedSym(name)
-		}
-	case "=":
-		switch style {
-		case GitStyleDot:
-			return renderer.GitCopied(name)
-		case GitStyleSym:
-			return renderer.GitCopiedSym(name)
-		}
-	case "!":
-		switch style {
-		case GitStyleDot:
-			return renderer.GitIgnored(name)
-		case GitStyleSym:
-			return renderer.GitIgnoredSym(name)
-		}
-	}
-	return ""
 }

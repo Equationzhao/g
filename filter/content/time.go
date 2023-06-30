@@ -1,14 +1,12 @@
 package content
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/Equationzhao/g/filter"
 	"github.com/Equationzhao/g/item"
 	"github.com/Equationzhao/g/osbased"
 	"github.com/Equationzhao/g/render"
-	"github.com/hako/durafmt"
 )
 
 type RelativeTimeEnabler struct {
@@ -39,17 +37,7 @@ func (r *RelativeTimeEnabler) Enable(renderer *render.Renderer) filter.ContentOp
 			t = osbased.ModTime(info)
 			timeType = timeModified
 		}
-		return renderer.Time(relativeTime(time.Now(), t)), RelativeTime + " " + timeType
-	}
-}
-
-func relativeTime(now, modTime time.Time) string {
-	if t := now.Sub(modTime); t > 0 {
-		return fmt.Sprintf("%s ago", durafmt.Parse(t).LimitFirstN(1).String())
-	} else if t == 0 {
-		return "now"
-	} else {
-		return fmt.Sprintf("in %s", durafmt.Parse(-t).LimitFirstN(1).String())
+		return renderer.RTime(time.Now(), t), RelativeTime + " " + timeType
 	}
 }
 
