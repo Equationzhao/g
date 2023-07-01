@@ -7,11 +7,10 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/gookit/color"
-	"github.com/jwalton/go-supportscolor"
+	colortool "github.com/gookit/color"
 )
 
-var ColorLevel = supportscolor.Stdout().Level
+var ColorLevel = colortool.DetectColorLevel()
 
 const (
 	Black        = "\033[1;30m" // 0,0,0
@@ -157,7 +156,7 @@ func RGBTo256(r, g, b uint8) (string, error) {
 }
 
 func RGBToBasicInt(r, g, b uint8) string {
-	return fmt.Sprintf(BasicFormat, color.Rgb2ansi(r, g, b, true))
+	return fmt.Sprintf(BasicFormat, colortool.Rgb2ansi(r, g, b, false))
 }
 
 // RGBToBasic convert rgb color to basic color
@@ -186,7 +185,7 @@ func Color256ToRGB(str256 string) (string, error) {
 }
 
 func c256ToRGB(v uint8) (string, error) {
-	c256ToRgb := color.C256ToRgb(v)
+	c256ToRgb := colortool.C256ToRgb(v)
 	r, g, b := c256ToRgb[0], c256ToRgb[1], c256ToRgb[2]
 	return rgb(r, g, b), nil
 }
@@ -202,7 +201,7 @@ func Color256ToBasic(str256 string) (string, error) {
 }
 
 func c256ToBasic(v uint8) (string, error) {
-	c256ToRgb := color.C256ToRgb(v)
+	c256ToRgb := colortool.C256ToRgb(v)
 	r, g, b := c256ToRgb[0], c256ToRgb[1], c256ToRgb[2]
 	return RGBToBasicInt(r, g, b), nil
 }
@@ -272,29 +271,32 @@ func RGBMultiply(rgbStr string, radio float64) string {
 	return rgb(r, g, b)
 }
 
-type colorType int
-
 const (
-	_ colorType = iota
-	ascii
-	c256
-	trueColor
+	None      = colortool.LevelNo
+	Ascii     = colortool.Level16
+	C256      = colortool.Level256
+	TrueColor = colortool.LevelRgb
 )
 
 type ErrUnknownColorType struct {
-	colorType
+	colortool.Level
 }
 
 func (e ErrUnknownColorType) Error() string {
-	return fmt.Sprintf("unknown color type:%d", e.colorType)
+	return fmt.Sprintf("unknown color type:%d", e.Level)
 }
 
-func ConvertColor(to colorType, src string) (string, error) {
+func ConvertColor(to colortool.Level, src string) (string, error) {
+	if to == None {
+		return "", nil
+	}
+
 	switch src {
 	case "":
 		return "", nil
 	case
 		// 1.basic
+		Reset,
 		Red,
 		Green,
 		Yellow,
@@ -311,14 +313,14 @@ func ConvertColor(to colorType, src string) (string, error) {
 		BrightCyan,
 		BrightWhite:
 		switch to {
-		case ascii:
+		case Ascii:
 			return src, nil
-		case c256:
+		case C256:
 			return BasicTo256(src), nil
-		case trueColor:
+		case TrueColor:
 			return BasicToRGB(src), nil
 		default:
-			return "", ErrUnknownColorType{colorType: to}
+			return "", ErrUnknownColorType{Level: to}
 		}
 	case Underline:
 		return src, nil
@@ -331,14 +333,14 @@ func ConvertColor(to colorType, src string) (string, error) {
 		_, err := fmt.Fscanf(strReader, Color256Format, &c)
 		if err == nil {
 			switch to {
-			case ascii:
+			case Ascii:
 				return c256ToBasic(c)
-			case c256:
+			case C256:
 				return src, nil
-			case trueColor:
+			case TrueColor:
 				return c256ToRGB(c)
 			default:
-				return "", ErrUnknownColorType{colorType: to}
+				return "", ErrUnknownColorType{Level: to}
 			}
 		}
 
@@ -348,17 +350,93 @@ func ConvertColor(to colorType, src string) (string, error) {
 			g uint8 = 0
 			b uint8 = 0
 		)
+		strReader = strings.NewReader(src)
 		_, err = fmt.Fscanf(strReader, RGBFormat, &r, &g, &b)
 		if err == nil {
 			switch to {
-			case ascii:
+			case Ascii:
 				return RGBToBasic(r, g, b)
-			case c256:
+			case C256:
 				return RGBTo256(r, g, b)
-			case trueColor:
+			case TrueColor:
 				return src, nil
 			default:
-				return "", ErrUnknownColorType{colorType: to}
+				return "", ErrUnknownColorType{Level: to}
+			}
+		}
+		return "", errors.New("unknown color type")
+	}
+}
+
+func ConvertColorIfGreaterThanExpect(to colortool.Level, src string) (string, error) {
+	if to == None {
+		return "", nil
+	}
+
+	switch src {
+	case "":
+		return "", nil
+	case
+		// 1.basic
+		Reset,
+		Black,
+		Red,
+		Green,
+		Yellow,
+		Blue,
+		Purple,
+		Cyan,
+		White,
+		BrightBlack,
+		BrightRed,
+		BrightGreen,
+		BrightYellow,
+		BrightBlue,
+		BrightPurple,
+		BrightCyan,
+		BrightWhite:
+		return src, nil
+	case Underline:
+		return src, nil
+	default:
+
+		strReader := strings.NewReader(src)
+
+		// 2.8bit/256 color
+		var c uint8
+		_, err := fmt.Fscanf(strReader, Color256Format, &c)
+		if err == nil {
+			switch to {
+			case Ascii:
+				return c256ToBasic(c)
+			case C256:
+				return src, nil
+			case TrueColor:
+				return src, nil
+			default:
+				return "", ErrUnknownColorType{Level: to}
+			}
+		}
+
+		// 3.rgb
+		var (
+			r uint8 = 0
+			g uint8 = 0
+			b uint8 = 0
+		)
+		strReader = strings.NewReader(src)
+
+		_, err = fmt.Fscanf(strReader, RGBFormat, &r, &g, &b)
+		if err == nil {
+			switch to {
+			case Ascii:
+				return RGBToBasic(r, g, b)
+			case C256:
+				return RGBTo256(r, g, b)
+			case TrueColor:
+				return src, nil
+			default:
+				return "", ErrUnknownColorType{Level: to}
 			}
 		}
 		return "", errors.New("unknown color type")

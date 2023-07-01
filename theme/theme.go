@@ -73,6 +73,7 @@ func color2str(color string) string {
 			g uint8 = 0
 			b uint8 = 0
 		)
+		strReader = strings.NewReader(color)
 		_, err = fmt.Fscanf(strReader, RGBFormat, &r, &g, &b)
 		if err == nil {
 			return fmt.Sprintf("[%d,%d,%d]@rgb", r, g, b)
@@ -269,4 +270,27 @@ func GetTheme(path string) error {
 	}
 	SyncColorlessWithTheme()
 	return nil
+}
+
+func ConvertThemeColor() {
+	for key := range DefaultTheme {
+		color, err := ConvertColorIfGreaterThanExpect(ColorLevel, DefaultTheme[key].Color)
+		if err != nil {
+			continue
+		}
+		DefaultTheme[key] = Style{
+			Icon:  DefaultTheme[key].Icon,
+			Color: color,
+		}
+	}
+
+	for key := range DefaultInfoTheme {
+		color, err := ConvertColorIfGreaterThanExpect(ColorLevel, DefaultInfoTheme[key].Color)
+		if err != nil {
+			continue
+		}
+		DefaultInfoTheme[key] = Style{
+			Color: color,
+		}
+	}
 }
