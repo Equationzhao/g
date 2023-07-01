@@ -35,7 +35,7 @@ func DefaultInit(repoPath RepoPath) func() *FileGits {
 	return func() *FileGits {
 		res := make(FileGits, 0)
 		out, err := GetShortGitStatus(repoPath)
-		if err == nil {
+		if err == nil && out != "" {
 			res = ParseShort(out)
 		}
 		return &res
