@@ -344,22 +344,6 @@ var viewFlag = []cli.Flag{
 		Category: "VIEW",
 	},
 	&cli.BoolFlag{
-		Name:               "relative-time",
-		Aliases:            []string{"rt"},
-		Usage:              "show relative time",
-		DisableDefaultText: true,
-		Action: func(context *cli.Context, b bool) error {
-			if b {
-				rt := filtercontent.NewRelativeTimeEnabler()
-				rt.Mode = timeType[0]
-				contentFunc = append(contentFunc, rt.Enable(r))
-			}
-			return nil
-		},
-		Category: "VIEW",
-	},
-
-	&cli.BoolFlag{
 		Name:               "show-perm",
 		Aliases:            []string{"sp", "permission", "perm"},
 		Usage:              "show permission",
@@ -491,6 +475,23 @@ var viewFlag = []cli.Flag{
 		Category: "VIEW",
 	},
 	&cli.BoolFlag{
+		Name:               "relative-time",
+		Aliases:            []string{"rt"},
+		Usage:              "show relative time",
+		DisableDefaultText: true,
+		Action: func(context *cli.Context, b bool) error {
+			if b {
+				for _, s := range timeType {
+					rt := filtercontent.NewRelativeTimeEnabler()
+					rt.Mode = s
+					contentFunc = append(contentFunc, rt.Enable(r))
+				}
+			}
+			return nil
+		},
+		Category: "VIEW",
+	},
+	&cli.BoolFlag{
 		Name:               "no-icon",
 		Usage:              "disable icon(always override show-icon)",
 		Aliases:            []string{"noicon", "ni"},
@@ -552,6 +553,13 @@ var viewFlag = []cli.Flag{
 		Category:    "VIEW",
 	},
 	&cli.BoolFlag{
+		Name:               "mime-charset",
+		Usage:              "show charset of text file",
+		Aliases:            []string{"charset"},
+		DisableDefaultText: true,
+		Category:           "VIEW",
+	},
+	&cli.BoolFlag{
 		Name:               "mime-type",
 		Usage:              "show mime file type",
 		Aliases:            []string{"mime", "mimetype"},
@@ -560,7 +568,9 @@ var viewFlag = []cli.Flag{
 		Action: func(context *cli.Context, b bool) error {
 			if b {
 				exact := filtercontent.NewMimeFileTypeEnabler()
-
+				if context.Bool("charset") {
+					exact.EnableCharset = true
+				}
 				err := limitOnce.Do(func() error {
 					size := context.String("exact-detect-size")
 					var bytes uint64 = 1024 * 1024
@@ -666,16 +676,10 @@ var viewFlag = []cli.Flag{
 	},
 	&cli.BoolFlag{
 		Name:               "git-status",
-		Usage:              "show git status: ? untracked, + added, ! deleted, ~ modified, | renamed, = copied, $ ignored [if git is installed]",
+		Usage:              "show git status [if git is installed]",
 		Aliases:            []string{"gs", "git"},
 		DisableDefaultText: true,
 		Category:           "VIEW",
-	},
-	&cli.StringFlag{
-		Name:     "git-status-style",
-		Usage:    "git status style: colored-symbol: {? untracked, + added, - deleted, ~ modified, | renamed, = copied, ! ignored} colored-dot",
-		Aliases:  []string{"gss", "git-style"},
-		Category: "VIEW",
 	},
 
 	&cli.BoolFlag{

@@ -18,12 +18,6 @@ var indexFlags = []cli.Flag{
 		Usage:              "disable updating index",
 		Category:           "INDEX",
 		DisableDefaultText: true,
-		// Action: func(ctx *cli.Context, b bool) error {
-		// 	if b {
-		// 		index.SetReadOnly()
-		// 	}
-		// 	return nil
-		// },
 	},
 	&cli.BoolFlag{
 		Name:               "rebuild-index",

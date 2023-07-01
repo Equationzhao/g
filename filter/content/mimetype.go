@@ -3,7 +3,6 @@ package content
 import (
 	"os"
 	"strings"
-	"sync"
 
 	"github.com/Equationzhao/g/filter"
 	"github.com/Equationzhao/g/item"
@@ -11,25 +10,27 @@ import (
 )
 
 type MimeFileTypeEnabler struct {
-	*sync.WaitGroup
-	ParentOnly bool
+	ParentOnly, EnableCharset bool
 }
 
 func NewMimeFileTypeEnabler() *MimeFileTypeEnabler {
 	return &MimeFileTypeEnabler{
-		WaitGroup:  &sync.WaitGroup{},
-		ParentOnly: false,
+		ParentOnly:    false,
+		EnableCharset: false,
 	}
 }
 
-const MimeTypeName = "Mime-type"
+const (
+	MimeTypeName       = "Mime-type"
+	ParentMimeTypeName = "Parent-Mime-type"
+)
 
 func (e *MimeFileTypeEnabler) Enable() filter.ContentOption {
 	return func(info *item.FileInfo) (string, string) {
 		tn := ""
 		returnName := MimeTypeName
 		if e.ParentOnly {
-			returnName = "parent-" + returnName
+			returnName = ParentMimeTypeName
 		}
 		if info.IsDir() {
 			tn = "directory"
@@ -55,9 +56,11 @@ func (e *MimeFileTypeEnabler) Enable() filter.ContentOption {
 				tn = strings.SplitN(tn, "/", 2)[0]
 			}
 
-			if strings.Contains(tn, ";") {
-				// remove charset
-				tn = strings.SplitN(tn, ";", 2)[0]
+			if !e.EnableCharset {
+				if strings.Contains(tn, ";") {
+					// remove charset
+					tn = strings.SplitN(tn, ";", 2)[0]
+				}
 			}
 
 		}

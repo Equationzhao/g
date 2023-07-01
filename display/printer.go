@@ -377,11 +377,6 @@ func (a *Across) printRow(strs *[]string) {
 	for i, str := range *strs {
 		colorless := stripansi.Strip(str)
 		strLen[i] = runewidth.StringWidth(colorless)
-		// if runtime.GOOS == "windows" {
-		// 	if strings.ContainsRune(colorless, dot) {
-		// 		strLen[i]--
-		// 	}
-		// }
 		maxLength = max(maxLength, strLen[i])
 	}
 
@@ -485,7 +480,7 @@ func (j *JsonPrinter) Print(items ...*item.FileInfo) {
 		// sort by v.Content.No
 		for _, v := range all {
 			c := stripansi.Strip(v.Value().String())
-			if name := v.Key(); name == "name" {
+			if name := v.Key(); name == "Name" {
 				order = append(order, orderItem{name: name, content: c, no: v.Value().NO()})
 			} else if name == "underwent" || name == "statistic" {
 				order = append(order, orderItem{name: name, content: strings.TrimLeft(c, "\n "), no: v.Value().NO()})
@@ -493,7 +488,7 @@ func (j *JsonPrinter) Print(items ...*item.FileInfo) {
 				order = append(order, orderItem{name: name, content: strings.TrimPrefix(c, "  total "), no: v.Value().NO()})
 			} else {
 				// remove all leading spaces
-				order = append(order, orderItem{name: name, content: strings.TrimLeft(c, " "), no: v.Value().NO()})
+				order = append(order, orderItem{name: name, content: strings.TrimSpace(c), no: v.Value().NO()})
 			}
 		}
 
@@ -595,7 +590,7 @@ func (t *TablePrinter) Print(s ...*item.FileInfo) {
 
 func (t *TablePrinter) setTB(s ...*item.FileInfo) {
 	for _, v := range s {
-		all := v.Values()
+		all := v.ValuesByOrdered()
 		row := make(table.Row, 0, len(all))
 		for _, v := range all {
 			row = append(row, strings.TrimLeft(v.String(), " "))

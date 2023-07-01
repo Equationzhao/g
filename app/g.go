@@ -137,7 +137,6 @@ There is NO WARRANTY, to the extent permitted by law.`,
 
 			disableIndex := context.Bool("di")
 			wgUpdateIndex := sync.WaitGroup{}
-
 			{
 				// git-status-style
 				s := context.String("gss")
@@ -296,6 +295,9 @@ There is NO WARRANTY, to the extent permitted by law.`,
 			}
 
 			flagSharp := context.Bool("#")
+			theme.ConvertThemeColor()
+
+			longestEachPart := make(map[string]int)
 
 			for i := 0; i < len(path); i++ {
 				start := time.Now()
@@ -503,6 +505,9 @@ There is NO WARRANTY, to the extent permitted by law.`,
 
 			final:
 				contentFilter.GetDisplayItems(&infos)
+				if len(infos) == 0 {
+					continue
+				}
 
 				// add total && statistics
 				{
@@ -586,7 +591,6 @@ There is NO WARRANTY, to the extent permitted by law.`,
 				// do scan
 				// get max length for each Meta[key].Value
 				allPart := infos[0].KeysByOrder()
-				longestEachPart := make(map[string]int)
 
 				for _, it := range infos {
 					for _, part := range allPart {
@@ -648,6 +652,7 @@ There is NO WARRANTY, to the extent permitted by law.`,
 													),
 												)
 												it.Set(s, content)
+												longestEachPart[s] = len(s)
 											}
 											expand(s, i, 1)
 										} else {

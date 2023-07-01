@@ -7,6 +7,8 @@ import (
 	"strings"
 	"sync/atomic"
 
+	"github.com/Equationzhao/g/util"
+
 	"github.com/Equationzhao/g/filter"
 	"github.com/Equationzhao/g/item"
 	"github.com/Equationzhao/g/render"
@@ -171,13 +173,13 @@ func (n *Name) Enable(renderer *render.Renderer) filter.ContentOption {
 					if n.noDeference {
 						str = renderer.SymlinkIconNoDereferencePlus(str, "@")
 					} else {
-						str = renderer.SymlinkIconPlus(str, info.FullPath, "@")
+						str = renderer.SymlinkIconPlus(str, info.FullPath, "@", !n.fullPath)
 					}
 				} else {
 					if n.noDeference {
 						str = renderer.SymlinkIconNoDereference(str)
 					} else {
-						str = renderer.SymlinkIcon(str, info.FullPath)
+						str = renderer.SymlinkIcon(str, info.FullPath, !n.fullPath)
 					}
 				}
 			} else {
@@ -209,13 +211,13 @@ func (n *Name) Enable(renderer *render.Renderer) filter.ContentOption {
 					if n.noDeference {
 						str = renderer.SymlinkNoDereferencePlus(str, "@")
 					} else {
-						str = renderer.SymlinkPlus(str, info.FullPath, "@")
+						str = renderer.SymlinkPlus(str, info.FullPath, "@", !n.fullPath)
 					}
 				} else {
 					if n.noDeference {
 						str = renderer.SymlinkNoDereference(str)
 					} else {
-						str = renderer.Symlink(str, info.FullPath)
+						str = renderer.Symlink(str, info.FullPath, !n.fullPath)
 					}
 				}
 			} else {
@@ -235,7 +237,7 @@ func (n *Name) Enable(renderer *render.Renderer) filter.ContentOption {
 		}
 
 		if n.classify {
-			if char == "" && (!n.fileType) && (mode&0o111 != 0) && mode&os.ModeSymlink == 0 {
+			if char == "" && (!n.fileType) && util.IsExecutableMode(mode) && mode&os.ModeSymlink == 0 {
 				str += "*"
 			} else {
 				str += char

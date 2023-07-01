@@ -12,7 +12,6 @@ require (
 	github.com/hako/durafmt v0.0.0-20210608085754-5c1018a4e16b
 	github.com/jedib0t/go-pretty/v6 v6.4.6
 	github.com/junegunn/fzf v0.0.0-20230622080006-01302d097c39
-	github.com/jwalton/go-supportscolor v1.1.0
 	github.com/mattn/go-runewidth v0.0.14
 	github.com/olekukonko/ts v0.0.0-20171002115256-78ecb04241c0
 	github.com/syndtr/goleveldb v1.0.0
@@ -59,7 +58,6 @@ require (
 	golang.org/x/crypto v0.10.0 // indirect
 	golang.org/x/net v0.11.0 // indirect
 	golang.org/x/sys v0.9.0 // indirect
-	golang.org/x/term v0.9.0 // indirect
 	golang.org/x/xerrors v0.0.0-20220907171357-04be3eba64a2 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
