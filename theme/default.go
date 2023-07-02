@@ -143,6 +143,9 @@ var DefaultInfoTheme = Theme{
 	"symlink_broken_path": Style{
 		Color: Red,
 	},
+	"DevToolsUser": Style{
+		Color: color256(202),
+	},
 }
 
 var DefaultTheme = Theme{
@@ -190,6 +193,12 @@ var DefaultTheme = Theme{
 		Icon: "\ueb44",
 	},
 	"applications": Style{
+		Icon: "\ueb44",
+	},
+	"program files": Style{
+		Icon: "\ueb44",
+	},
+	"program files (x86)": Style{
 		Icon: "\ueb44",
 	},
 	"msi": Style{

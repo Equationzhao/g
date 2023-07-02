@@ -181,87 +181,6 @@ func init() {
 			contentFilter.SetOptions(contentFunc...)
 			depth := context.Int("depth")
 
-			// if context.Bool("tree") {
-			// 	for i := 0; i < len(path); i++ {
-			// 		start := time.Now()
-			//
-			// 		if len(path) > 1 {
-			// 			fmt.Printf("%s:\n", path[i])
-			// 		}
-			//
-			// 		if transformEnabled {
-			// 			path[i] = pathbeautify.Transform(path[i])
-			// 		}
-			// 		// fuzzy search
-			// 		if fuzzy {
-			// 			_, err := os.Stat(path[i])
-			// 			if err != nil {
-			// 				newPath, b := fuzzyPath(path[i])
-			// 				if b != nil {
-			// 					_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(err.Error()))
-			// 					minorErr = true
-			// 					continue
-			// 				} else {
-			// 					path[i] = newPath
-			// 					_, err = os.Stat(path[i])
-			// 					if err != nil {
-			// 						checkErr(err)
-			// 						seriousErr = true
-			// 						continue
-			// 					}
-			// 					fmt.Println(path[i])
-			// 				}
-			// 			}
-			// 		}
-			// 		if gitignore {
-			// 			*removeGitIgnore = filter.RemoveGitIgnore(path[i])
-			// 		}
-			//
-			// 		s, err, minorErrInTree := tree.NewTreeString(path[i], depth, itemFilter, contentFilter)
-			// 		if pathErr := new(os.PathError); errors.As(err, &pathErr) {
-			// 			_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(fmt.Sprintf("%s: %s", pathErr.Err, pathErr.Path)))
-			// 			seriousErr = true
-			// 			continue
-			// 		} else if err != nil {
-			// 			_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(err.Error()))
-			// 			seriousErr = true
-			// 			continue
-			// 		}
-			//
-			// 		if pathErr := new(os.PathError); errors.As(minorErrInTree, &pathErr) {
-			// 			_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(fmt.Sprintf("%s: %s", pathErr.Err, pathErr.Path)))
-			// 			minorErr = true
-			// 		} else if minorErrInTree != nil {
-			// 			_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(err.Error()))
-			// 			minorErr = true
-			// 		}
-			//
-			// 		absPath, err := filepath.Abs(path[i])
-			// 		if err != nil {
-			// 			minorErr = true
-			// 		} else {
-			// 			if !disableIndex {
-			// 				wgUpdateIndex.Add(1)
-			// 				go func() {
-			// 					if err = fuzzyUpdate(absPath); err != nil {
-			// 						minorErr = true
-			// 					}
-			// 					wgUpdateIndex.Done()
-			// 				}()
-			// 			}
-			// 		}
-			//
-			// 		fmt.Println(s.MakeTreeStr())
-			// 		fmt.Printf("\n%d directories, %d files\nunderwent %s\n", s.Directory(), s.File(), time.Since(start).String())
-			//
-			// 		if i != len(path)-1 {
-			// 			//goland:noinspection GoPrintFunctions
-			// 			fmt.Println("\n") //nolint:govet
-			// 		}
-			// 	}
-			// } else {
-			startDir, _ := os.Getwd()
-
 			// flag: if d is set, display directory them self
 			flagd := context.Bool("d")
 			// flag: if A is set
@@ -281,6 +200,7 @@ func init() {
 			theme.ConvertThemeColor()
 
 			longestEachPart := make(map[string]int)
+			startDir, _ := os.Getwd()
 
 			for i := 0; i < len(path); i++ {
 				start := time.Now()
@@ -734,10 +654,12 @@ func init() {
 			Action: func(context *cli.Context, b bool) error {
 				if b {
 					noOutputFunc = append(noOutputFunc, duplicateDetect.Enable())
-					hookPost = append(hookPost, func(p display.Printer, item ...*item.FileInfo) {
-						duplicateDetect.Fprint(p)
-						duplicateDetect.Reset()
-					})
+					hookPost = append(
+						hookPost, func(p display.Printer, item ...*item.FileInfo) {
+							duplicateDetect.Fprint(p)
+							duplicateDetect.Reset()
+						},
+					)
 				}
 				return nil
 			},
