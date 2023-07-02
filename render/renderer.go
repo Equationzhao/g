@@ -217,7 +217,7 @@ func (rd *Renderer) ByExt(toRender string) string {
 	} else {
 		ext = toRender // if no ext, try to color by name
 	}
-	return rd.byName(toRender, ext)
+	return rd.byName(toRender, strings.ToLower(ext))
 }
 
 // ByExtIcon returns the icon and the name of the file
@@ -230,6 +230,7 @@ func (rd *Renderer) ByExtIcon(toRender string) string {
 	} else {
 		ext = toRender // if no ext, try to color by name
 	}
+	ext = strings.ToLower(ext)
 	icon := rd.Icon(ext)
 	if icon == "" {
 		ext = "file"
@@ -426,6 +427,7 @@ func (rd *Renderer) DirIcon(toRender string) string {
 	} else {
 		ext = toRender // if no ext, try to color by name
 	}
+	ext = strings.ToLower(ext)
 	icon := rd.Icon(ext)
 	if icon == "" {
 		icon = rd.Icon("dir")

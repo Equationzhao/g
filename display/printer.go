@@ -62,29 +62,29 @@ func (h *hook) AddAfterPrint(f ...func(Printer, ...*item.FileInfo)) {
 	h.AfterPrint = append(h.AfterPrint, f...)
 }
 
-func (h *hook) DisableHookBefore() {
+func (h *hook) DisablePreHook() {
 	h.disableBefore = true
 }
 
-func (h *hook) EnableHookBefore() {
+func (h *hook) EnablePreHook() {
 	h.disableBefore = false
 }
 
-func (h *hook) DisableHookAfter() {
+func (h *hook) DisablePostHook() {
 	h.disableAfter = true
 }
 
-func (h *hook) EnableHookAfter() {
+func (h *hook) EnablePostHook() {
 	h.disableAfter = false
 }
 
 type Hook interface {
 	AddBeforePrint(...func(Printer, ...*item.FileInfo))
 	AddAfterPrint(...func(Printer, ...*item.FileInfo))
-	DisableHookBefore()
-	EnableHookBefore()
-	DisableHookAfter()
-	EnableHookAfter()
+	DisablePreHook()
+	EnablePreHook()
+	DisablePostHook()
+	EnablePostHook()
 }
 
 type Printer interface {

@@ -47,7 +47,11 @@ func Color256(color int) (string, error) {
 	if color < 0 || color > 255 {
 		return "", fmt.Errorf("color must between 0 and 255")
 	}
-	return fmt.Sprintf(Color256Format, color), nil
+	return color256(color), nil
+}
+
+func color256(color int) string {
+	return fmt.Sprintf(Color256Format, color)
 }
 
 func rgb(r, g, b uint8) string {

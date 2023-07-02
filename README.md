@@ -18,9 +18,9 @@
 g is a ls alternative with features:
 
 1. display items with type-specific icons and colors that are easy to be customized
-2. display in various layouts ( grid/across/byline/tree/zero/comma/table/html/json/markdown )
+2. display in various layouts ( grid/across/byline/zero/comma/table/html/json/markdown )
 3. user-friendly options with many aliases
-4. distinguish file git-status with icons or char symbols
+4. check file git-status with icon
 5. highly customizable sort option
 6. cross-platform ( Linux/Windows/MacOS )
 7. option to fuzzy match the path like [`zoxide`](https://github.com/ajeetdsouza/zoxide) with [`fzf`](https://github.com/junegunn/fzf) algorithm
@@ -36,7 +36,7 @@ g is a ls alternative with features:
 go version required >= 1.20
 
 ```bash
-go install -ldflags="-s -w -v"  github.com/Equationzhao/g@latest
+go install -ldflags="-s -w"  github.com/Equationzhao/g@latest
 ```
 
 or Clone this repo
@@ -188,6 +188,13 @@ disable color
 g -nc        path
 g -no-color  path
 g -colorless path
+```
+
+set color 
+```bash
+g --color=always path
+g --color=auto   path # default
+g --color=never  path 
 ```
 
 show checksum (md5,sha1,sha224,sha256,sha384,sha512,crc32)

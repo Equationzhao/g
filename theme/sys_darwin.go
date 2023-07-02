@@ -5,6 +5,6 @@ package theme
 func init() {
 	DefaultTheme["System"] = Style{
 		Icon:  "\uF179",
-		Color: BrightBlue,
+		Color: dir,
 	}
 }
