@@ -83,21 +83,26 @@ func (rd *Renderer) Link(toRender string) string {
 func (rd *Renderer) Owner(toRender string) string {
 	bb := bytebufferpool.Get()
 	defer bytebufferpool.Put(bb)
-	toRenderNoSpace := strings.Replace(toRender, " ", "", -1)
 	var root []string
+	var byName []string
 	switch runtime.GOOS {
 	case "windows":
 		root = []string{"Administrators", "SYSTEM", "TrustedInstaller"}
+		byName = []string{"DevToolsUser"}
 	case "darwin":
 		root = []string{"root"}
 	default:
 		root = []string{"root"}
 	}
 
-	if util.SliceContains(root, toRenderNoSpace) {
+	if util.SliceContains(root, toRender) {
 		_, _ = bb.WriteString(rd.infoTheme["root"].Color)
 	} else {
-		_, _ = bb.WriteString(rd.infoTheme["owner"].Color)
+		if util.SliceContains(byName, toRender) {
+			_, _ = bb.WriteString(rd.infoTheme[toRender].Color)
+		} else {
+			_, _ = bb.WriteString(rd.infoTheme["owner"].Color)
+		}
 	}
 
 	_, _ = bb.WriteString(toRender)
@@ -108,21 +113,26 @@ func (rd *Renderer) Owner(toRender string) string {
 func (rd *Renderer) Group(toRender string) string {
 	bb := bytebufferpool.Get()
 	defer bytebufferpool.Put(bb)
-	toRenderNoSpace := strings.Replace(toRender, " ", "", -1)
 	var root []string
+	var byName []string
 	switch runtime.GOOS {
 	case "windows":
 		root = []string{"Administrators", "SYSTEM"}
+		byName = []string{"DevToolsUser"}
 	case "darwin":
 		root = []string{"wheel", "admin"}
 	default:
 		root = []string{"root"}
 	}
 
-	if util.SliceContains(root, toRenderNoSpace) {
+	if util.SliceContains(root, toRender) {
 		_, _ = bb.WriteString(rd.infoTheme["root"].Color)
 	} else {
-		_, _ = bb.WriteString(rd.infoTheme["group"].Color)
+		if util.SliceContains(byName, toRender) {
+			_, _ = bb.WriteString(rd.infoTheme["byName"].Color)
+		} else {
+			_, _ = bb.WriteString(rd.infoTheme["group"].Color)
+		}
 	}
 
 	_, _ = bb.WriteString(toRender)
@@ -187,12 +197,16 @@ func (rd *Renderer) RTime(now, modTime time.Time) string {
 	var dura *durafmt.Durafmt
 	if t > 0 {
 		dura = durafmt.Parse(t)
-		return fmt.Sprintf("%s%s ago%s", rd.calculateRTimeColor(t), dura.LimitFirstN(1).String(), theme.Reset)
+		return fmt.Sprintf(
+			"%s%s ago%s", rd.calculateRTimeColor(t), dura.LimitFirstN(1).String(), rd.infoTheme["reset"].Color,
+		)
 	} else if t == 0 {
 		return "now"
 	} else {
 		dura = durafmt.Parse(-t)
-		return fmt.Sprintf("%sin %s%s", rd.calculateRTimeColor(t), dura.LimitFirstN(1).String(), theme.Reset)
+		return fmt.Sprintf(
+			"%sin %s%s", rd.calculateRTimeColor(t), dura.LimitFirstN(1).String(), rd.infoTheme["reset"].Color,
+		)
 	}
 }
 
