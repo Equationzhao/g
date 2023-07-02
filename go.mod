@@ -3,7 +3,6 @@ module github.com/Equationzhao/g
 go 1.20
 
 require (
-	github.com/Delta456/box-cli-maker/v2 v2.3.0
 	github.com/Equationzhao/pathbeautify v0.0.6
 	github.com/Equationzhao/tsmap v0.0.6
 	github.com/acarl005/stripansi v0.0.0-20180116102854-5a71ef0e047d
@@ -15,6 +14,7 @@ require (
 	github.com/junegunn/fzf v0.0.0-20230622080006-01302d097c39
 	github.com/mattn/go-runewidth v0.0.14
 	github.com/olekukonko/ts v0.0.0-20171002115256-78ecb04241c0
+	github.com/savioxavier/termlink v1.3.0
 	github.com/syndtr/goleveldb v1.0.0
 	github.com/urfave/cli/v2 v2.25.7
 	github.com/valyala/bytebufferpool v1.0.0
@@ -48,7 +48,6 @@ require (
 	github.com/mattn/go-isatty v0.0.19 // indirect
 	github.com/mitchellh/copystructure v1.2.0 // indirect
 	github.com/mitchellh/reflectwalk v1.0.2 // indirect
-	github.com/muesli/reflow v0.3.0 // indirect
 	github.com/muesli/termenv v0.15.2 // indirect
 	github.com/rivo/uniseg v0.4.4 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
@@ -60,7 +59,6 @@ require (
 	golang.org/x/crypto v0.10.0 // indirect
 	golang.org/x/net v0.11.0 // indirect
 	golang.org/x/sys v0.9.0 // indirect
-	golang.org/x/term v0.9.0 // indirect
 	golang.org/x/xerrors v0.0.0-20220907171357-04be3eba64a2 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

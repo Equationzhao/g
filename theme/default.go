@@ -154,24 +154,40 @@ var DefaultTheme = Theme{
 		Icon:  "\uF115",
 	},
 	"home": Style{
-		Color: dir,
-		Icon:  "\ue617",
+		Icon: "\ue617",
 	},
 	"desktop": Style{
-		Color: dir,
-		Icon:  "\uf108",
+		Icon: "\uf108",
 	},
 	"downloads": Style{
-		Color: dir,
-		Icon:  "\uf498",
+		Icon: "\uf498",
 	},
 	"trash": Style{
-		Color: Red,
-		Icon:  "\uf1f8",
+		Icon: "\uf1f8",
 	},
 	"searches": Style{
-		Color: dir,
-		Icon:  "\uf422",
+		Icon: "\uf422",
+	},
+	"microsoft": Style{
+		Icon: "\uF17A",
+	},
+	"google": Style{
+		Icon: "\uf1a0",
+	},
+	"onedrive": Style{
+		Icon: "\ue762",
+	},
+	"onedrivetemp": Style{
+		Icon: "\ue762",
+	},
+	"favorites": Style{
+		Icon: "\ue623",
+	},
+	"azure": Style{
+		Icon: "\uebd8",
+	},
+	"contacts": Style{
+		Icon: "\uf0c0",
 	},
 	"ds_store": Style{
 		Color: Black,
@@ -242,6 +258,10 @@ var DefaultTheme = Theme{
 		Icon: "\uea62",
 	},
 	"link": Style{
+		Color: Purple,
+		Icon:  "\ueb15",
+	},
+	"links": Style{
 		Color: Purple,
 		Icon:  "\ueb15",
 	},
@@ -428,7 +448,26 @@ var DefaultTheme = Theme{
 	"font": Style{
 		Icon: "\uf031",
 	},
+	"fonts": Style{
+		Icon: "\uf031",
+	},
 	"ttf": Style{
+		Color: Cyan,
+		Icon:  "\uf031",
+	},
+	"otf": Style{
+		Color: Cyan,
+		Icon:  "\uf031",
+	},
+	"woff": Style{
+		Color: Cyan,
+		Icon:  "\uf031",
+	},
+	"woff2": Style{
+		Color: Cyan,
+		Icon:  "\uf031",
+	},
+	"eot": Style{
 		Color: Cyan,
 		Icon:  "\uf031",
 	},
@@ -545,8 +584,10 @@ var DefaultTheme = Theme{
 		Icon:  "\uf121",
 	},
 	"history": Style{
-		Color: dir,
-		Icon:  "\uF1DA",
+		Icon: "\uF1DA",
+	},
+	"recovery": Style{
+		Icon: "\uF1DA",
 	},
 	"apple": Style{
 		Color: Black,
@@ -623,7 +664,7 @@ var DefaultTheme = Theme{
 		Color: tar,
 		Icon:  "",
 	},
-	"Pictures": Style{
+	"pictures": Style{
 		Icon: "\uF1C5",
 	},
 	"jpg": Style{
@@ -654,6 +695,26 @@ var DefaultTheme = Theme{
 		Color: pic,
 		Icon:  "\uF1C5",
 	},
+	"svg": Style{
+		Color: pic,
+		Icon:  "\uF1C5",
+	},
+	"webp": Style{
+		Color: pic,
+		Icon:  "\uF1C5",
+	},
+	"pcx": Style{
+		Color: pic,
+		Icon:  "\uF1C5",
+	},
+	"avif": Style{
+		Color: pic,
+		Icon:  "\uF1C5",
+	},
+	"psd": Style{
+		Color: pic,
+		Icon:  "\ue67f",
+	},
 	"videos": {
 		Icon: "",
 	},
@@ -669,6 +730,10 @@ var DefaultTheme = Theme{
 		Icon:  "",
 	},
 	"avi": Style{
+		Color: video,
+		Icon:  "",
+	},
+	"m4v": Style{
 		Color: video,
 		Icon:  "",
 	},

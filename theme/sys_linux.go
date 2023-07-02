@@ -3,7 +3,7 @@
 package theme
 
 func init() {
-	DefaultTheme["dir"] = Style{
+	DefaultTheme["sys"] = Style{
 		Icon:  "\ue712",
 		Color: BrightBlue,
 	}

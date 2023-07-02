@@ -8,11 +8,11 @@ import (
 	"io"
 	"math"
 	"os"
+	"regexp"
 	"sort"
 	"strings"
 
 	"github.com/Equationzhao/g/item"
-
 	"github.com/Equationzhao/g/util"
 	"github.com/acarl005/stripansi"
 	"github.com/jedib0t/go-pretty/v6/table"
@@ -209,7 +209,28 @@ func calculateRowCol(strs *[]string, margin int) (maxLength int, lengths []int, 
 	return
 }
 
+var IncludeHyperlink = false
+
+func parseLink(link string) (name string, ok bool) {
+	re := regexp.MustCompile(`\033]8;;(.*?)\033\\(.*?)\033]8;;\033\\`)
+	matches := re.FindStringSubmatch(link)
+
+	if len(matches) == 3 {
+		name = matches[2]
+	} else {
+		return "", false
+	}
+
+	return name, true
+}
+
 func WidthLen(str string) int {
+	if IncludeHyperlink {
+		name, ok := parseLink(str)
+		if ok {
+			str = name
+		}
+	}
 	colorless := stripansi.Strip(str)
 	// len() is insufficient here, as it counts emojis as 4 characters each
 	length := runewidth.StringWidth(colorless)
@@ -225,14 +246,16 @@ var (
 // getTermWidth returns the width of the terminal in characters
 // this is a modified version
 func getTermWidth() int {
-	if err := getTermWidthOnce.Do(func() error {
-		var err error
-		size, err = ts.GetSize()
-		if err != nil {
-			return err
-		}
-		return nil
-	}); err != nil {
+	if err := getTermWidthOnce.Do(
+		func() error {
+			var err error
+			size, err = ts.GetSize()
+			if err != nil {
+				return err
+			}
+			return nil
+		},
+	); err != nil {
 		return 0
 	}
 	return size.Col()
@@ -485,16 +508,20 @@ func (j *JsonPrinter) Print(items ...*item.FileInfo) {
 			} else if name == "underwent" || name == "statistic" {
 				order = append(order, orderItem{name: name, content: strings.TrimLeft(c, "\n "), no: v.Value().NO()})
 			} else if name == "total" {
-				order = append(order, orderItem{name: name, content: strings.TrimPrefix(c, "  total "), no: v.Value().NO()})
+				order = append(
+					order, orderItem{name: name, content: strings.TrimPrefix(c, "  total "), no: v.Value().NO()},
+				)
 			} else {
 				// remove all leading spaces
 				order = append(order, orderItem{name: name, content: strings.TrimSpace(c), no: v.Value().NO()})
 			}
 		}
 
-		sort.Slice(order, func(i, j int) bool {
-			return order[i].no < order[j].no
-		})
+		sort.Slice(
+			order, func(i, j int) bool {
+				return order[i].no < order[j].no
+			},
+		)
 
 		s := orderedmap.New[string, string](
 			orderedmap.WithCapacity[string, string](len(order)),

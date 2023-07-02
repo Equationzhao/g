@@ -16,9 +16,10 @@ import (
 var viewFlag = []cli.Flag{
 	// VIEW
 	&cli.BoolFlag{
-		Name:    "header",
-		Aliases: []string{"title"},
-		Usage:   "add a header row",
+		Name:               "header",
+		Aliases:            []string{"title"},
+		Usage:              "add a header row",
+		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
 			if b {
 				if _, ok := p.(*display.Byline); !ok {
@@ -30,8 +31,9 @@ var viewFlag = []cli.Flag{
 		Category: "VIEW",
 	},
 	&cli.BoolFlag{
-		Name:  "footer",
-		Usage: "add a footer row",
+		Name:               "footer",
+		Usage:              "add a footer row",
+		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
 			if b {
 				if _, ok := p.(*display.Byline); !ok {
@@ -43,9 +45,10 @@ var viewFlag = []cli.Flag{
 		Category: "VIEW",
 	},
 	&cli.BoolFlag{
-		Name:     "statistic",
-		Usage:    "show statistic info",
-		Category: "VIEW",
+		Name:               "statistic",
+		Usage:              "show statistic info",
+		DisableDefaultText: true,
+		Category:           "VIEW",
 	},
 	&cli.StringSliceFlag{
 		Name:        "time-type",
@@ -201,7 +204,10 @@ var viewFlag = []cli.Flag{
 					}
 				}
 				itemFilterFunc = newFF
-				contentFunc = append(contentFunc, filtercontent.EnableFileMode(r), sizeEnabler.EnableSize(sizeUint, r), groupEnabler.EnableGroup(r))
+				contentFunc = append(
+					contentFunc, filtercontent.EnableFileMode(r), sizeEnabler.EnableSize(sizeUint, r),
+					groupEnabler.EnableGroup(r),
+				)
 				for _, s := range timeType {
 					contentFunc = append(contentFunc, filtercontent.EnableTime(timeFormat, s, r))
 				}
@@ -227,7 +233,10 @@ var viewFlag = []cli.Flag{
 					}
 				}
 				itemFilterFunc = newFF
-				contentFunc = append(contentFunc, filtercontent.EnableFileMode(r), sizeEnabler.EnableSize(sizeUint, r), ownerEnabler.EnableOwner(r))
+				contentFunc = append(
+					contentFunc, filtercontent.EnableFileMode(r), sizeEnabler.EnableSize(sizeUint, r),
+					ownerEnabler.EnableOwner(r),
+				)
 				for _, s := range timeType {
 					contentFunc = append(contentFunc, filtercontent.EnableTime(timeFormat, s, r))
 				}
@@ -262,7 +271,10 @@ var viewFlag = []cli.Flag{
 				}
 				itemFilterFunc = newFF
 				sizeEnabler.SetEnableTotal()
-				contentFunc = append(contentFunc, filtercontent.EnableFileMode(r), sizeEnabler.EnableSize(sizeUint, r), ownerEnabler.EnableOwner(r))
+				contentFunc = append(
+					contentFunc, filtercontent.EnableFileMode(r), sizeEnabler.EnableSize(sizeUint, r),
+					ownerEnabler.EnableOwner(r),
+				)
 				if !context.Bool("G") {
 					contentFunc = append(contentFunc, groupEnabler.EnableGroup(r))
 				}
@@ -396,7 +408,10 @@ var viewFlag = []cli.Flag{
 		Usage:              "show human readable size",
 		Action: func(context *cli.Context, b bool) error {
 			if b {
-				contentFunc = append(contentFunc, filtercontent.EnableFileMode(r), sizeEnabler.EnableSize(sizeUint, r), ownerEnabler.EnableOwner(r), groupEnabler.EnableGroup(r))
+				contentFunc = append(
+					contentFunc, filtercontent.EnableFileMode(r), sizeEnabler.EnableSize(sizeUint, r),
+					ownerEnabler.EnableOwner(r), groupEnabler.EnableGroup(r),
+				)
 				for _, s := range timeType {
 					contentFunc = append(contentFunc, filtercontent.EnableTime(timeFormat, s, r))
 				}
@@ -555,21 +570,23 @@ var viewFlag = []cli.Flag{
 				if context.Bool("charset") {
 					exact.EnableCharset = true
 				}
-				err := limitOnce.Do(func() error {
-					size := context.String("exact-detect-size")
-					var bytes uint64 = 1024 * 1024
-					if size == "0" || strings.EqualFold(size, "infinity") || strings.EqualFold(size, "nolimit") {
-						bytes = 0
-					} else if size != "" {
-						sizeUint, err := filtercontent.ParseSize(size)
-						if err != nil {
-							return err
+				err := limitOnce.Do(
+					func() error {
+						size := context.String("exact-detect-size")
+						var bytes uint64 = 1024 * 1024
+						if size == "0" || strings.EqualFold(size, "infinity") || strings.EqualFold(size, "nolimit") {
+							bytes = 0
+						} else if size != "" {
+							sizeUint, err := filtercontent.ParseSize(size)
+							if err != nil {
+								return err
+							}
+							bytes = sizeUint.Bytes
 						}
-						bytes = sizeUint.Bytes
-					}
-					mimetype.SetLimit(uint32(bytes))
-					return nil
-				})
+						mimetype.SetLimit(uint32(bytes))
+						return nil
+					},
+				)
 				if err != nil {
 					return err
 				}
@@ -579,30 +596,33 @@ var viewFlag = []cli.Flag{
 		},
 	},
 	&cli.BoolFlag{
-		Name:     "mime-parent",
-		Usage:    "show mime parent type",
-		Aliases:  []string{"mime-p", "mime-parent-type", "mime-type-parent"},
-		Category: "VIEW",
+		Name:               "mime-parent",
+		Usage:              "show mime parent type",
+		Aliases:            []string{"mime-p", "mime-parent-type", "mime-type-parent"},
+		Category:           "VIEW",
+		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
 			if b {
 				exact := filtercontent.NewMimeFileTypeEnabler()
 				exact.ParentOnly = true
 
-				err := limitOnce.Do(func() error {
-					size := context.String("exact-detect-size")
-					var bytes uint64 = 1024 * 1024
-					if size == "0" || strings.EqualFold(size, "infinity") || strings.EqualFold(size, "nolimit") {
-						bytes = 0
-					} else if size != "" {
-						sizeUint, err := filtercontent.ParseSize(size)
-						if err != nil {
-							return err
+				err := limitOnce.Do(
+					func() error {
+						size := context.String("exact-detect-size")
+						var bytes uint64 = 1024 * 1024
+						if size == "0" || strings.EqualFold(size, "infinity") || strings.EqualFold(size, "nolimit") {
+							bytes = 0
+						} else if size != "" {
+							sizeUint, err := filtercontent.ParseSize(size)
+							if err != nil {
+								return err
+							}
+							bytes = sizeUint.Bytes
 						}
-						bytes = sizeUint.Bytes
-					}
-					mimetype.SetLimit(uint32(bytes))
-					return nil
-				})
+						mimetype.SetLimit(uint32(bytes))
+						return nil
+					},
+				)
 				if err != nil {
 					return err
 				}
@@ -665,28 +685,25 @@ var viewFlag = []cli.Flag{
 		DisableDefaultText: true,
 		Category:           "VIEW",
 	},
-
 	&cli.BoolFlag{
-		Name:     "quote-name",
-		Aliases:  []string{"Q"},
-		Usage:    "enclose entry names in double quotes(overridden by --literal)",
-		Category: "VIEW",
-	},
-	// &cli.StringFlag{
-	// 	Name:    "quoting-style",
-	// 	Aliases: []string{"Qs"},
-	// 	Usage:   "use quoting style: literal, shell, shell-always, c, escape, locale, clocale",
-	// },
-	&cli.BoolFlag{
-		Name:     "literal",
-		Aliases:  []string{"N"},
-		Usage:    "print entry names without quoting",
-		Category: "VIEW",
+		Name:               "quote-name",
+		Aliases:            []string{"Q"},
+		Usage:              "enclose entry names in double quotes(overridden by --literal)",
+		DisableDefaultText: true,
+		Category:           "VIEW",
 	},
 	&cli.BoolFlag{
-		Name:    "link",
-		Aliases: []string{"H"},
-		Usage:   "list each file's number of hard links",
+		Name:               "literal",
+		Aliases:            []string{"N"},
+		Usage:              "print entry names without quoting",
+		DisableDefaultText: true,
+		Category:           "VIEW",
+	},
+	&cli.BoolFlag{
+		Name:               "link",
+		Aliases:            []string{"H"},
+		Usage:              "list each file's number of hard links",
+		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
 			if b {
 				link := filtercontent.NewLinkEnabler()
@@ -697,8 +714,33 @@ var viewFlag = []cli.Flag{
 		Category: "VIEW",
 	},
 	&cli.BoolFlag{
-		Name:     "no-dereference",
-		Usage:    "do not dereference symbolic links",
-		Category: "VIEW",
+		Name:               "no-dereference",
+		Usage:              "do not follow symbolic links",
+		DisableDefaultText: true,
+		Category:           "VIEW",
+	},
+	&cli.BoolFlag{
+		Name:               "dereference",
+		Usage:              "dereference symbolic links",
+		DisableDefaultText: true,
+		Category:           "VIEW",
+	},
+	&cli.StringFlag{
+		Name:        "hyperlink",
+		Usage:       "Attach hyperlink to filenames [auto|always|never]",
+		Category:    "VIEW",
+		DefaultText: "auto",
+		Action: func(context *cli.Context, s string) error {
+			if strings.EqualFold(s, "auto") {
+				_ = context.Set("hyperlink", "auto")
+			} else if strings.EqualFold(s, "always") {
+				_ = context.Set("hyperlink", "always")
+			} else if strings.EqualFold(s, "never") {
+				_ = context.Set("hyperlink", "never")
+			} else {
+				return fmt.Errorf("invalid hyperlink value: %s", s)
+			}
+			return nil
+		},
 	},
 }

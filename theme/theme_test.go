@@ -1,8 +1,9 @@
 package theme
 
 import (
-	colortool "github.com/gookit/color"
 	"testing"
+
+	colortool "github.com/gookit/color"
 )
 
 func TestAll(t *testing.T) {
