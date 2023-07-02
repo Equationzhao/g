@@ -21,6 +21,7 @@ import (
 	"github.com/Equationzhao/g/util"
 	"github.com/Equationzhao/pathbeautify"
 	"github.com/hako/durafmt"
+	"github.com/savioxavier/termlink"
 	"github.com/urfave/cli/v2"
 	"github.com/valyala/bytebufferpool"
 	versionInfo "go.szostok.io/version"
@@ -192,6 +193,21 @@ func init() {
 				nameToDisplay.SetStatistics(&filtercontent.Statistics{})
 			}
 
+			hyperlink := context.String("hyperlink")
+			switch hyperlink {
+			case "never":
+			case "always":
+				nameToDisplay.SetHyperlink()
+				display.IncludeHyperlink = true
+			default:
+				fallthrough
+			case "auto":
+				if termlink.SupportsHyperlinks() {
+					nameToDisplay.SetHyperlink()
+					display.IncludeHyperlink = true
+				}
+			}
+
 			if n := context.Uint("n"); n > 0 {
 				contentFilter.LimitN = n
 			}
@@ -201,6 +217,7 @@ func init() {
 
 			longestEachPart := make(map[string]int)
 			startDir, _ := os.Getwd()
+			dereference := context.Bool("dereference")
 
 			for i := 0; i < len(path); i++ {
 				start := time.Now()
@@ -380,6 +397,24 @@ func init() {
 
 				// remove non-display items
 				infos = itemFilter.Filter(infos...)
+
+				// dereference
+				if dereference {
+					for i := range infos {
+						if util.IsSymLink(infos[i]) {
+							symlinks, err := filepath.EvalSymlinks(infos[i].FullPath)
+							if err != nil {
+								continue
+							}
+							info, err := os.Stat(symlinks)
+							if err != nil {
+								continue
+							}
+							infos[i].FileInfo = info
+							infos[i].FullPath = symlinks
+						}
+					}
+				}
 
 				// if -R is set, add sub dir, insert into path[i+1]
 				if flagR {

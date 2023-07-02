@@ -379,8 +379,9 @@ var displayFlag = []cli.Flag{
 		Category: "DISPLAY",
 	},
 	&cli.BoolFlag{
-		Name:  "classic",
-		Usage: "Enable classic mode (no colours or icons)",
+		Name:               "classic",
+		Usage:              "Enable classic mode (no colours or icons)",
+		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
 			if b {
 				r.SetTheme(theme.Colorless)

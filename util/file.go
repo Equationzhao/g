@@ -5,6 +5,10 @@ import (
 	"path/filepath"
 )
 
+func IsSymLink(file os.FileInfo) bool {
+	return file.Mode()&os.ModeSymlink != 0
+}
+
 func IsExecutable(file os.FileInfo) bool {
 	return file.Mode()&0o111 != 0
 }
@@ -21,45 +25,49 @@ func RecursivelySizeOf(info os.FileInfo, depth int) int64 {
 		totalSize := info.Size()
 		if depth < 0 {
 			// -1 means no limit
-			_ = filepath.WalkDir(info.Name(), func(path string, dir os.DirEntry, err error) error {
-				if err != nil {
-					return err
-				}
-
-				if !dir.IsDir() {
-					info, err := dir.Info()
-					if err == nil {
-						totalSize += info.Size()
+			_ = filepath.WalkDir(
+				info.Name(), func(path string, dir os.DirEntry, err error) error {
+					if err != nil {
+						return err
 					}
-				}
 
-				return nil
-			})
-		} else {
-			_ = filepath.WalkDir(info.Name(), func(path string, dir os.DirEntry, err error) error {
-				if err != nil {
-					return err
-				}
-				if currentDepth > depth {
-					if dir.IsDir() {
-						return filepath.SkipDir
+					if !dir.IsDir() {
+						info, err := dir.Info()
+						if err == nil {
+							totalSize += info.Size()
+						}
 					}
+
 					return nil
-				}
-
-				if !dir.IsDir() {
-					info, err := dir.Info()
-					if err == nil {
-						totalSize += info.Size()
+				},
+			)
+		} else {
+			_ = filepath.WalkDir(
+				info.Name(), func(path string, dir os.DirEntry, err error) error {
+					if err != nil {
+						return err
 					}
-				}
+					if currentDepth > depth {
+						if dir.IsDir() {
+							return filepath.SkipDir
+						}
+						return nil
+					}
 
-				if dir.IsDir() {
-					currentDepth++
-				}
+					if !dir.IsDir() {
+						info, err := dir.Info()
+						if err == nil {
+							totalSize += info.Size()
+						}
+					}
 
-				return nil
-			})
+					if dir.IsDir() {
+						currentDepth++
+					}
+
+					return nil
+				},
+			)
 		}
 
 		return totalSize

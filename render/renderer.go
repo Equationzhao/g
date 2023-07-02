@@ -6,13 +6,13 @@ import (
 	"io/fs"
 	"math"
 	"path/filepath"
+	"regexp"
 	"runtime"
 	"strings"
 	"time"
 
-	"github.com/Equationzhao/g/util"
-
 	"github.com/Equationzhao/g/theme"
+	"github.com/Equationzhao/g/util"
 	"github.com/hako/durafmt"
 	"github.com/valyala/bytebufferpool"
 )
@@ -80,6 +80,10 @@ func (rd *Renderer) Link(toRender string) string {
 	return rd.infoByName(toRender, "link")
 }
 
+const adminSidPattern = `^S-1-5-(?:\d+-)*\d+-500$`
+
+var rootSid = regexp.MustCompile(adminSidPattern)
+
 func (rd *Renderer) Owner(toRender string) string {
 	bb := bytebufferpool.Get()
 	defer bytebufferpool.Put(bb)
@@ -87,12 +91,12 @@ func (rd *Renderer) Owner(toRender string) string {
 	var byName []string
 	switch runtime.GOOS {
 	case "windows":
-		root = []string{"Administrators", "SYSTEM", "TrustedInstaller"}
+		root = []string{"Administrators", "SYSTEM", "TrustedInstaller", "S-1-5-32-544", "S-1-5-18"}
 		byName = []string{"DevToolsUser"}
 	case "darwin":
-		root = []string{"root"}
+		root = []string{"root", "0"}
 	default:
-		root = []string{"root"}
+		root = []string{"root", "0"}
 	}
 
 	if util.SliceContains(root, toRender) {
@@ -100,6 +104,8 @@ func (rd *Renderer) Owner(toRender string) string {
 	} else {
 		if util.SliceContains(byName, toRender) {
 			_, _ = bb.WriteString(rd.infoTheme[toRender].Color)
+		} else if runtime.GOOS == "windows" && rootSid.MatchString(toRender) {
+			_, _ = bb.WriteString(rd.infoTheme["root"].Color)
 		} else {
 			_, _ = bb.WriteString(rd.infoTheme["owner"].Color)
 		}
@@ -117,12 +123,12 @@ func (rd *Renderer) Group(toRender string) string {
 	var byName []string
 	switch runtime.GOOS {
 	case "windows":
-		root = []string{"Administrators", "SYSTEM"}
+		root = []string{"Administrators", "SYSTEM", "S-1-5-32-544", "S-1-5-18"}
 		byName = []string{"DevToolsUser"}
 	case "darwin":
-		root = []string{"wheel", "admin"}
+		root = []string{"wheel", "admin", "0"}
 	default:
-		root = []string{"root"}
+		root = []string{"root", "0"}
 	}
 
 	if util.SliceContains(root, toRender) {
@@ -130,6 +136,8 @@ func (rd *Renderer) Group(toRender string) string {
 	} else {
 		if util.SliceContains(byName, toRender) {
 			_, _ = bb.WriteString(rd.infoTheme["byName"].Color)
+		} else if runtime.GOOS == "windows" && rootSid.MatchString(toRender) {
+			_, _ = bb.WriteString(rd.infoTheme["root"].Color)
 		} else {
 			_, _ = bb.WriteString(rd.infoTheme["group"].Color)
 		}

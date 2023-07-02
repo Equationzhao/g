@@ -7,21 +7,20 @@ import (
 	"strings"
 	"sync/atomic"
 
-	"github.com/Equationzhao/g/util"
-
 	"github.com/Equationzhao/g/filter"
 	"github.com/Equationzhao/g/item"
 	"github.com/Equationzhao/g/render"
+	"github.com/Equationzhao/g/util"
 	"github.com/valyala/bytebufferpool"
 )
 
 type (
 	Name struct {
-		icon, classify, fileType, git, fullPath, noDeference bool
-		statistics                                           *Statistics
-		relativeTo                                           string
-		Quote                                                string
-		GitStyle                                             gitStyle
+		icon, classify, fileType, git, fullPath, noDeference, hyperLink bool
+		statistics                                                      *Statistics
+		relativeTo                                                      string
+		Quote                                                           string
+		GitStyle                                                        gitStyle
 	}
 )
 
@@ -54,6 +53,16 @@ func (n *Name) SetNoDeference() *Name {
 
 func (n *Name) UnsetNoDeference() *Name {
 	n.noDeference = false
+	return n
+}
+
+func (n *Name) SetHyperlink() *Name {
+	n.hyperLink = true
+	return n
+}
+
+func (n *Name) UnsetHyperlink() *Name {
+	n.hyperLink = false
 	return n
 }
 
@@ -137,6 +146,12 @@ func NewNameEnable() *Name {
 
 const NameName = "Name"
 
+func makeLink(abs string, name string) string {
+	return fmt.Sprintf("\033]8;;%s\033\\%s\033]8;;\033\\", abs, name)
+}
+
+// Enable enable name filter
+// todo refactor
 func (n *Name) Enable(renderer *render.Renderer) filter.ContentOption {
 	/*
 		 -F      Display a slash (`/`) immediately after each pathname that is a
@@ -247,7 +262,9 @@ func (n *Name) Enable(renderer *render.Renderer) filter.ContentOption {
 		if n.Quote != "" {
 			str = strings.Replace(str, name, n.Quote+name+n.Quote, 1)
 		}
-
+		if n.hyperLink {
+			str = makeLink(info.FullPath, str)
+		}
 		if n.relativeTo != "" {
 			relativePath, err := filepath.Rel(n.relativeTo, info.FullPath)
 			if err != nil {

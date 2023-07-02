@@ -4,6 +4,8 @@ import (
 	"os"
 	"syscall"
 	"unsafe"
+
+	"github.com/Equationzhao/g/item"
 )
 
 /*
@@ -38,6 +40,9 @@ var (
 
 func Group(info os.FileInfo) string {
 	path := info.Name()
+	if info.(*item.FileInfo).FullPath != "" {
+		path = info.(*item.FileInfo).FullPath
+	}
 
 	var needed uint32
 	fromString, err := syscall.UTF16PtrFromString(path)
@@ -49,7 +54,8 @@ func Group(info os.FileInfo) string {
 		0x00000001, /* OWNER_SECURITY_INFORMATION */
 		0,
 		0,
-		uintptr(unsafe.Pointer(&needed)))
+		uintptr(unsafe.Pointer(&needed)),
+	)
 
 	if needed == 0 {
 		return "unknown"
@@ -61,7 +67,8 @@ func Group(info os.FileInfo) string {
 		0x00000001, /* OWNER_SECURITY_INFORMATION */
 		uintptr(unsafe.Pointer(&buf[0])),
 		uintptr(needed),
-		uintptr(unsafe.Pointer(&needed)))
+		uintptr(unsafe.Pointer(&needed)),
+	)
 	if r1 == 0 && err != nil {
 		return "unknown"
 	}
@@ -70,7 +77,8 @@ func Group(info os.FileInfo) string {
 	r1, _, err = procGetSecurityDescriptorOwner.Call(
 		uintptr(unsafe.Pointer(&buf[0])),
 		uintptr(unsafe.Pointer(&sid)),
-		uintptr(unsafe.Pointer(&ownerDefaulted)))
+		uintptr(unsafe.Pointer(&ownerDefaulted)),
+	)
 	if r1 == 0 && err != nil {
 		return "unknown"
 	}
@@ -78,13 +86,17 @@ func Group(info os.FileInfo) string {
 	if r1 == 0 && err != nil {
 		return "unknown"
 	}
-
+	if name == "" {
+		return "unknown"
+	}
 	return name
 }
 
 func Owner(info os.FileInfo) string {
 	path := info.Name()
-
+	if info.(*item.FileInfo).FullPath != "" {
+		path = info.(*item.FileInfo).FullPath
+	}
 	var needed uint32
 	fromString, err := syscall.UTF16PtrFromString(path)
 	if err != nil {
@@ -95,7 +107,8 @@ func Owner(info os.FileInfo) string {
 		0x00000001, /* OWNER_SECURITY_INFORMATION */
 		0,
 		0,
-		uintptr(unsafe.Pointer(&needed)))
+		uintptr(unsafe.Pointer(&needed)),
+	)
 	buf := make([]byte, needed)
 
 	if needed == 0 {
@@ -107,7 +120,8 @@ func Owner(info os.FileInfo) string {
 		0x00000001, /* OWNER_SECURITY_INFORMATION */
 		uintptr(unsafe.Pointer(&buf[0])),
 		uintptr(needed),
-		uintptr(unsafe.Pointer(&needed)))
+		uintptr(unsafe.Pointer(&needed)),
+	)
 	if r1 == 0 && err != nil {
 		return "unknown"
 	}
@@ -116,7 +130,8 @@ func Owner(info os.FileInfo) string {
 	r1, _, err = procGetSecurityDescriptorOwner.Call(
 		uintptr(unsafe.Pointer(&buf[0])),
 		uintptr(unsafe.Pointer(&sid)),
-		uintptr(unsafe.Pointer(&ownerDefaulted)))
+		uintptr(unsafe.Pointer(&ownerDefaulted)),
+	)
 	if r1 == 0 && err != nil {
 		return "unknown"
 	}
@@ -124,12 +139,17 @@ func Owner(info os.FileInfo) string {
 	if r1 == 0 && err != nil {
 		return "unknown"
 	}
+	if name == "" {
+		return "unknown"
+	}
 	return name
 }
 
 func OwnerID(a os.FileInfo) string {
 	path := a.Name()
-
+	if a.(*item.FileInfo).FullPath != "" {
+		path = a.(*item.FileInfo).FullPath
+	}
 	fromString, err := syscall.UTF16PtrFromString(path)
 	if err != nil {
 		return "unknown"
@@ -140,7 +160,8 @@ func OwnerID(a os.FileInfo) string {
 		0x00000001, /* OWNER_SECURITY_INFORMATION */
 		0,
 		0,
-		uintptr(unsafe.Pointer(&needed)))
+		uintptr(unsafe.Pointer(&needed)),
+	)
 	buf := make([]byte, needed)
 
 	if needed == 0 {
@@ -152,7 +173,8 @@ func OwnerID(a os.FileInfo) string {
 		0x00000001, /* OWNER_SECURITY_INFORMATION */
 		uintptr(unsafe.Pointer(&buf[0])),
 		uintptr(needed),
-		uintptr(unsafe.Pointer(&needed)))
+		uintptr(unsafe.Pointer(&needed)),
+	)
 	if r1 == 0 && err != nil {
 		return "unknown"
 	}
@@ -161,17 +183,23 @@ func OwnerID(a os.FileInfo) string {
 	r1, _, err = procGetSecurityDescriptorOwner.Call(
 		uintptr(unsafe.Pointer(&buf[0])),
 		uintptr(unsafe.Pointer(&sid)),
-		uintptr(unsafe.Pointer(&ownerDefaulted)))
+		uintptr(unsafe.Pointer(&ownerDefaulted)),
+	)
 	if r1 == 0 && err != nil {
 		return "unknown"
 	}
 	s, _ := sid.String()
+	if s == "" {
+		return "unknown"
+	}
 	return s
 }
 
 func GroupID(info os.FileInfo) string {
 	path := info.Name()
-
+	if info.(*item.FileInfo).FullPath != "" {
+		path = info.(*item.FileInfo).FullPath
+	}
 	var needed uint32
 	fromString, err := syscall.UTF16PtrFromString(path)
 	if err != nil {
@@ -182,7 +210,8 @@ func GroupID(info os.FileInfo) string {
 		0x00000001, /* OWNER_SECURITY_INFORMATION */
 		0,
 		0,
-		uintptr(unsafe.Pointer(&needed)))
+		uintptr(unsafe.Pointer(&needed)),
+	)
 
 	if needed == 0 {
 		return "unknown"
@@ -194,7 +223,8 @@ func GroupID(info os.FileInfo) string {
 		0x00000001, /* OWNER_SECURITY_INFORMATION */
 		uintptr(unsafe.Pointer(&buf[0])),
 		uintptr(needed),
-		uintptr(unsafe.Pointer(&needed)))
+		uintptr(unsafe.Pointer(&needed)),
+	)
 	if r1 == 0 && err != nil {
 		return "unknown"
 	}
@@ -203,11 +233,14 @@ func GroupID(info os.FileInfo) string {
 	r1, _, err = procGetSecurityDescriptorOwner.Call(
 		uintptr(unsafe.Pointer(&buf[0])),
 		uintptr(unsafe.Pointer(&sid)),
-		uintptr(unsafe.Pointer(&ownerDefaulted)))
+		uintptr(unsafe.Pointer(&ownerDefaulted)),
+	)
 	if r1 == 0 && err != nil {
 		return "unknown"
 	}
 	s, _ := sid.String()
-
+	if s == "" {
+		return "unknown"
+	}
 	return s
 }

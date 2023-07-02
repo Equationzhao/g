@@ -99,10 +99,11 @@ var indexFlags = []cli.Flag{
 		},
 	},
 	&cli.BoolFlag{
-		Name:     "remove-current-path",
-		Aliases:  []string{"rcp", "rc", "rmc"},
-		Usage:    "remove current path from index",
-		Category: "INDEX",
+		Name:               "remove-current-path",
+		Aliases:            []string{"rcp", "rc", "rmc"},
+		Usage:              "remove current path from index",
+		Category:           "INDEX",
+		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
 			if b {
 				r, err := os.Getwd()
@@ -118,10 +119,11 @@ var indexFlags = []cli.Flag{
 		},
 	},
 	&cli.BoolFlag{
-		Name:     "remove-invalid-path",
-		Aliases:  []string{"rip"},
-		Usage:    "remove invalid paths from index",
-		Category: "INDEX",
+		Name:               "remove-invalid-path",
+		Aliases:            []string{"rip"},
+		Usage:              "remove invalid paths from index",
+		Category:           "INDEX",
+		DisableDefaultText: true,
 		Action: func(ctx *cli.Context, b bool) error {
 			if b {
 				paths, err := index.All()
