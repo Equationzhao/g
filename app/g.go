@@ -38,7 +38,6 @@ var (
 	timeFormat      = "02.Jan'06 15:04"
 	ReturnCode      = 0
 	contentFilter   = filter.NewContentFilter()
-	CompiledAt      = ""
 	sort            = sorter.NewSorter()
 	timeType        = []string{"mod"}
 	sizeUint        = filtercontent.Auto
@@ -51,7 +50,7 @@ var (
 	limitOnce       = util.Once{}
 	hookOnce        = util.Once{}
 	duplicateDetect = filtercontent.NewDuplicateDetect()
-	hookAfter       = make([]func(display.Printer, ...*item.FileInfo), 0)
+	hookPost        = make([]func(display.Printer, ...*item.FileInfo), 0)
 )
 
 var Version = "0.9.0"
@@ -60,28 +59,12 @@ var G *cli.App
 
 func init() {
 	itemFilterFunc = append(itemFilterFunc, &filter.RemoveHidden)
-	if CompiledAt == "" {
-		info, err := os.Stat(os.Args[0])
-		if err != nil {
-			CompiledAt = time.Now().Format(timeFormat)
-		} else {
-			CompiledAt = info.ModTime().Format(timeFormat)
-		}
-	} else {
-		CompiledAtTime, err := time.Parse(time.RFC3339, CompiledAt)
-		if err == nil {
-			CompiledAt = CompiledAtTime.UTC().Format(timeFormat)
-		}
-	}
 
 	G = &cli.App{
 		Name:      "g",
 		Usage:     "a powerful ls",
 		UsageText: "g [options] [path]",
-		Copyright: `Copyright (C) 2023 Equationzhao. MIT License
-This is free software: you are free to change and redistribute it.
-There is NO WARRANTY, to the extent permitted by law.`,
-		Version: Version,
+		Version:   Version,
 		Authors: []*cli.Author{
 			{
 				Name:  "Equationzhao",
@@ -564,9 +547,9 @@ There is NO WARRANTY, to the extent permitted by law.`,
 						s.Reset()
 					}
 					if i != nil {
-						p.DisableHookBefore()
+						p.DisablePreHook()
 						p.Print(i)
-						p.EnableHookBefore()
+						p.EnablePreHook()
 					}
 				}
 
@@ -690,7 +673,7 @@ There is NO WARRANTY, to the extent permitted by law.`,
 								p.AddAfterPrint(headerFooter(false))
 							}
 						}
-						p.AddAfterPrint(hookAfter...)
+						p.AddAfterPrint(hookPost...)
 						return nil
 					},
 				)
@@ -728,8 +711,7 @@ There is NO WARRANTY, to the extent permitted by law.`,
 			Category: "software info",
 			Action: func(context *cli.Context, b bool) error {
 				if b {
-					fmt.Println(context.App.Name + " - " + context.App.Usage)
-					upgrade.WithUpdateCheckTimeout(1 * time.Second)
+					upgrade.WithUpdateCheckTimeout(5 * time.Second)
 					notice := upgrade.NewGitHubDetector("Equationzhao", "g")
 					_ = notice.PrintIfFoundGreater(os.Stderr, Version)
 					return Err4Exit{}
@@ -743,6 +725,22 @@ There is NO WARRANTY, to the extent permitted by law.`,
 			Aliases:            []string{"np"},
 			DisableDefaultText: true,
 			Usage:              "By default, .../a/b/c will be transformed to ../../a/b/c, and ~ will be replaced by homedir, using this flag to disable this feature",
+		},
+		&cli.BoolFlag{
+			Name:               "duplicate",
+			Aliases:            []string{"dup"},
+			Usage:              "show duplicate files",
+			DisableDefaultText: true,
+			Action: func(context *cli.Context, b bool) error {
+				if b {
+					noOutputFunc = append(noOutputFunc, duplicateDetect.Enable())
+					hookPost = append(hookPost, func(p display.Printer, item ...*item.FileInfo) {
+						duplicateDetect.Fprint(p)
+						duplicateDetect.Reset()
+					})
+				}
+				return nil
+			},
 		},
 	)
 
@@ -782,33 +780,64 @@ func (c Err4Exit) Error() string {
 }
 
 func initHelpTemp() {
-	cli.AppHelpTemplate = fmt.Sprintf(
-		`%s
-REPO:
-	https://github.com/Equationzhao/g
+	cli.AppHelpTemplate = `NAME:
+   {{template "helpNameTemplate" .}}
 
-%s compiled at %s
-`, cli.AppHelpTemplate, Version, CompiledAt,
-	)
+USAGE:
+   {{if .UsageText}}{{wrap .UsageText 3}}{{else}}{{.HelpName}} {{if .VisibleFlags}}[global options]{{end}}{{if .Commands}} command [command options]{{end}} {{if .ArgsUsage}}{{.ArgsUsage}}{{else}}[arguments...]{{end}}{{end}}{{if .Version}}{{if not .HideVersion}}
+
+VERSION:
+   {{.Version}}{{end}}{{end}}{{if .Description}}
+
+DESCRIPTION:
+   {{template "descriptionTemplate" .}}{{end}}
+{{- if len .Authors}}
+
+AUTHOR{{template "authorsTemplate" .}}{{end}}{{if .VisibleCommands}}
+
+COMMANDS:{{template "visibleCommandCategoryTemplate" .}}{{end}}{{if .VisibleFlagCategories}}
+
+GLOBAL OPTIONS:{{template "visibleFlagCategoryTemplate" .}}{{else if .VisibleFlags}}
+
+GLOBAL OPTIONS:{{template "visibleFlagTemplate" .}}{{end}}
+`
 }
 
 func initVersionHelpFlags() {
-	repos := "https://github.com/Equationzhao/g"
 	info := versionInfo.Get()
 	info.Version = Version
-	info.BuildDate = CompiledAt
-	info.ExtraFields = repos
-	format := style.Formatting{
-		Header: style.Header{
-			Prefix: "💡 ",
-			FormatPrimitive: style.FormatPrimitive{
-				Color:   "Green",
-				Options: []string{"Bold"},
+	config := &style.Config{
+		Formatting: style.Formatting{
+			Header: style.Header{
+				Prefix: "💡 ",
+				FormatPrimitive: style.FormatPrimitive{
+					Color:   "Green",
+					Options: []string{"Bold"},
+				},
 			},
+			Key: style.Key{
+				FormatPrimitive: style.FormatPrimitive{
+					Color:      "Yellow",
+					Background: "",
+					Options:    nil,
+				},
+			},
+		},
+		Layout: style.Layout{
+			GoTemplate: `{{ Header .Meta.CLIName }}
+| {{ Key "Version"     }}        {{ .Version                     | Val   }}
+| {{ Key "Go Version"  }}        {{ .GoVersion  | trimPrefix "go"| Val   }}
+| {{ Key "Compiler"    }}        {{ .Compiler                    | Val   }}
+| {{ Key "Platform"    }}        {{ .Platform                    | Val   }}
+   
+Copyright (C) 2023 Equationzhao. MIT License
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
+`,
 		},
 	}
 
-	c := vp.New(vp.WithPrettyFormatting(&format))
+	c := vp.New(vp.WithPrettyStyle(config))
 	cli.VersionPrinter = func(cCtx *cli.Context) {
 		info.Meta = versionInfo.Meta{
 			CLIName: cCtx.App.Name + " - " + cCtx.App.Usage,

@@ -8,7 +8,6 @@ import (
 	"github.com/Equationzhao/g/display"
 	"github.com/Equationzhao/g/filter"
 	filtercontent "github.com/Equationzhao/g/filter/content"
-	"github.com/Equationzhao/g/item"
 	"github.com/Equationzhao/g/timeparse"
 	"github.com/gabriel-vasile/mimetype"
 	"github.com/urfave/cli/v2"
@@ -47,21 +46,6 @@ var viewFlag = []cli.Flag{
 		Name:     "statistic",
 		Usage:    "show statistic info",
 		Category: "VIEW",
-	},
-	&cli.BoolFlag{
-		Name:    "duplicate",
-		Aliases: []string{"dup"},
-		Usage:   "show duplicate files",
-		Action: func(context *cli.Context, b bool) error {
-			if b {
-				noOutputFunc = append(noOutputFunc, duplicateDetect.Enable())
-				hookAfter = append(hookAfter, func(p display.Printer, item ...*item.FileInfo) {
-					duplicateDetect.Fprint(p)
-					duplicateDetect.Reset()
-				})
-			}
-			return nil
-		},
 	},
 	&cli.StringSliceFlag{
 		Name:        "time-type",
