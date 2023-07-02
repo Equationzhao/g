@@ -262,15 +262,15 @@ func (n *Name) Enable(renderer *render.Renderer) filter.ContentOption {
 		if n.Quote != "" {
 			str = strings.Replace(str, name, n.Quote+name+n.Quote, 1)
 		}
-		if n.hyperLink {
-			str = makeLink(info.FullPath, str)
-		}
+
 		if n.relativeTo != "" {
 			relativePath, err := filepath.Rel(n.relativeTo, info.FullPath)
-			if err != nil {
-				return str, NameName
+			if err == nil {
+				str = strings.Replace(str, name, relativePath, 1)
 			}
-			str = strings.Replace(str, name, relativePath, 1)
+		}
+		if n.hyperLink {
+			str = makeLink(info.FullPath, str)
 		}
 
 		return str, NameName

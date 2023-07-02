@@ -456,7 +456,8 @@ func init() {
 					if total, ok := sizeEnabler.Total(); ok {
 						if !isPrettyPrinter {
 							i, _ = item.NewFileInfoWithOption()
-							s, _ := sizeEnabler.Size2String(total)
+							s, unit := sizeEnabler.Size2String(total)
+							s = r.Size(s, filtercontent.Convert2SizeString(unit))
 							i.Set(
 								"total", &display.ItemContent{No: 0, Content: display.StringContent(
 									fmt.Sprintf(
@@ -465,7 +466,8 @@ func init() {
 								)},
 							)
 						} else {
-							s, _ := sizeEnabler.Size2String(total)
+							s, unit := sizeEnabler.Size2String(total)
+							s = r.Size(s, filtercontent.Convert2SizeString(unit))
 							_, _ = display.RawPrint(fmt.Sprintf("  total %s\n", s))
 						}
 					}
@@ -540,13 +542,14 @@ func init() {
 					}
 				}
 
+				// after the first time, expand the length of each part
 				for _, it := range infos {
 					for _, part := range allPart {
-						content, _ := it.Get(part)
-						l := display.WidthLen(content.String())
-						if l < longestEachPart[part] {
-							// expand
-							if part != filtercontent.NameName {
+						if part != filtercontent.NameName {
+							content, _ := it.Get(part)
+							l := display.WidthLen(content.String())
+							if l < longestEachPart[part] {
+								// expand
 								content.SetSuffix(strings.Repeat(" ", longestEachPart[part]-l))
 								it.Set(part, content)
 							}
