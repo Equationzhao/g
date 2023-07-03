@@ -1,10 +1,11 @@
 package content
 
 import (
+	"strconv"
+
 	"github.com/Equationzhao/g/filter"
 	"github.com/Equationzhao/g/item"
 	"github.com/Equationzhao/g/render"
-	"strconv"
 )
 
 const Permissions = "Permissions"

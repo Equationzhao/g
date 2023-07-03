@@ -4,8 +4,9 @@ package theme
 
 import (
 	_ "embed"
-	"gopkg.in/ini.v1"
 	"strings"
+
+	"gopkg.in/ini.v1"
 )
 
 //go:embed custom_builtin

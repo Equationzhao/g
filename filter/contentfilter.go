@@ -2,12 +2,12 @@ package filter
 
 import (
 	"os"
-	"sort"
 	"strings"
 	"sync"
 
 	"github.com/Equationzhao/g/display"
 	"github.com/Equationzhao/g/item"
+	"github.com/Equationzhao/g/slices"
 )
 
 type ContentFilter struct {
@@ -90,12 +90,16 @@ func NewContentFilter(options ...ContentFilterOption) *ContentFilter {
 }
 
 func (cf *ContentFilter) GetDisplayItems(e *[]*item.FileInfo) {
-	sort.Slice(
-		*e, func(i, j int) bool {
+	slices.SortFunc(
+		*e, func(a, b *item.FileInfo) int {
 			if cf.sortFunc != nil {
-				return cf.sortFunc((*e)[i], (*e)[j])
+				if cf.sortFunc(a, b) {
+					return -1
+				} else {
+					return 1
+				}
 			}
-			return true
+			return 0
 		},
 	)
 

@@ -1,5 +1,6 @@
 ## create custom theme
 
+example:
 ```ini
 [info]
 -                        = white

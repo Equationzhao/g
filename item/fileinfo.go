@@ -4,8 +4,8 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
-	"sort"
 
+	"github.com/Equationzhao/g/slices"
 	"github.com/Equationzhao/tsmap"
 	"github.com/valyala/bytebufferpool"
 )
@@ -92,9 +92,9 @@ func (i *FileInfo) Keys() []string {
 func (i *FileInfo) KeysByOrder() []string {
 	kNo := i.Meta.Pairs()
 
-	sort.Slice(
-		kNo, func(i, j int) bool {
-			return kNo[i].Value().NO() < kNo[j].Value().NO()
+	slices.SortFunc(
+		kNo, func(i, j tsmap.Pair[string, Item]) int {
+			return i.Value().NO() - j.Value().NO()
 		},
 	)
 
@@ -127,9 +127,9 @@ func (i *FileInfo) Values() []Item {
 // ValuesByOrdered return all content (ordered by No, ascending)
 func (i *FileInfo) ValuesByOrdered() []Item {
 	ics := i.Meta.Values()
-	sort.Slice(
-		ics, func(i, j int) bool {
-			return ics[i].NO() < ics[j].NO()
+	slices.SortFunc(
+		ics, func(i, j Item) int {
+			return i.NO() - j.NO()
 		},
 	)
 

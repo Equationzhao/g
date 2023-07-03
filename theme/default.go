@@ -151,6 +151,7 @@ var DefaultInfoTheme = Theme{
 	},
 }
 
+// DefaultTheme the key should be lowercase
 var DefaultTheme = Theme{
 	"dir": Style{
 		Color: dir,
@@ -757,10 +758,10 @@ var DefaultTheme = Theme{
 		Icon:  "\uE7B4",
 	},
 	"music": Style{
-		Icon: "\uf1c7",
+		Icon: "\uF025",
 	},
 	"audio": Style{
-		Icon: "\uf1c7",
+		Icon: "\uF025",
 	},
 	"mp3": Style{
 		Color: audio,
