@@ -1,10 +1,9 @@
-## create custom theme
-
-```ini
+replace
 [info]
--                        = white
+-                        = black
 B                        = [20,230,100]@rgb
-BB                       = [20,90,100]@rgb  
+BB                       = [20,90,100]@rgb
+DevToolsUser             = [202]@256
 EB                       = [20,125,100]@rgb
 GB                       = [20,170,100]@rgb
 KB                       = [20,207,100]@rgb
@@ -25,66 +24,32 @@ git_ignored              = BrightPed
 git_modified             = yellow
 git_renamed              = blue
 git_type_changed         = yellow
-git_unmodified           = BrightPlack
+git_unmodified           = black
 git_untracked            = BrightPlack
 git_updated_but_unmerged = BrightYellow
 group                    = yellow
 inode                    = purple
 l                        = purple
 link                     = purple
+octal                    = [208]@256
 owner                    = yellow
 p                        = yellow
 r                        = yellow
 reset                    = reset
 root                     = red
 s                        = yellow
+symlink_broken_path      = red
+symlink_path             = green
 time                     = blue
 w                        = red
 x                        = green
 
+[symlink]
+color = purple
+icon  = 
 
-[dir]
-color = BrightBlue
-icon = 📁
+[symlink_arrow]
+color = BrightBlack
+icon  = " => "
 
-[exec,exe]
-color = green
-icon = 🚀
-
-[file]
-color = white
-icon = 📄
-
-...
-```
-
-## apply theme
-```bash
-g -theme=path/to/theme [other options] path
-```
-
-## default theme
-
-see [default](theme/default.ini)
-
-## advanced
-
-### build with custom theme
-the custom must be placed at theme directory and named custom_builtin (theme/custom_builtin)
-
-```bash
-go build -tags=custom .
-```
-a mode flag should be placed at the first line of theme file:
-
-merge, or replace
-```ini
-merge # or replace
-[info]
--                        = white
-... # others
-```
-
-merge will merge with builtin theme
-
-replace will replace builtin theme
+# ...

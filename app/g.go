@@ -543,7 +543,12 @@ func init() {
 				for _, it := range infos {
 					for _, part := range allPart {
 						content, _ := it.Get(part)
-						l := display.WidthLen(content.String())
+						l := 0
+						if part != filtercontent.NameName {
+							l = display.WidthNoHyperLinkLen(content.String())
+						} else {
+							l = display.WidthLen(content.String())
+						}
 						if l > longestEachPart[part] {
 							longestEachPart[part] = l
 						}
@@ -555,7 +560,11 @@ func init() {
 					for _, part := range allPart {
 						if part != filtercontent.NameName {
 							content, _ := it.Get(part)
-							l := display.WidthLen(content.String())
+							if part != filtercontent.NameName {
+								l = display.WidthNoHyperLinkLen(content.String())
+							} else {
+								l = display.WidthLen(content.String())
+							}
 							if l < longestEachPart[part] {
 								// expand
 								content.SetSuffix(strings.Repeat(" ", longestEachPart[part]-l))
@@ -595,9 +604,15 @@ func init() {
 											// expand the every item's content of this part
 											for _, it := range infos {
 												content, _ := it.Get(s)
+												toAddNum := 0
+												if s != filtercontent.NameName {
+													toAddNum = len(s) - display.WidthNoHyperLinkLen(content.String())
+												} else {
+													toAddNum = len(s) - display.WidthLen(content.String())
+												}
 												content.AddSuffix(
 													strings.Repeat(
-														" ", len(s)-display.WidthLen(content.String()),
+														" ", toAddNum,
 													),
 												)
 												it.Set(s, content)
@@ -793,14 +808,14 @@ func initVersionHelpFlags() {
 		},
 		Layout: style.Layout{
 			GoTemplate: `{{ Header .Meta.CLIName }}
-| {{ Key "Version"     }}        {{ .Version                     | Val   }}
-| {{ Key "Go Version"  }}        {{ .GoVersion  | trimPrefix "go"| Val   }}
-| {{ Key "Compiler"    }}        {{ .Compiler                    | Val   }}
-| {{ Key "Platform"    }}        {{ .Platform                    | Val   }}
+ | {{ Key "Version"     }}        {{ .Version                     | Val   }}
+ | {{ Key "Go Version"  }}        {{ .GoVersion  | trimPrefix "go"| Val   }}
+ | {{ Key "Compiler"    }}        {{ .Compiler                    | Val   }}
+ | {{ Key "Platform"    }}        {{ .Platform                    | Val   }}
    
-Copyright (C) 2023 Equationzhao. MIT License
-This is free software: you are free to change and redistribute it.
-There is NO WARRANTY, to the extent permitted by law.
+ | Copyright (C) 2023 Equationzhao. MIT License
+ | This is free software: you are free to change and redistribute it.
+ | There is NO WARRANTY, to the extent permitted by law.
 `,
 		},
 	}

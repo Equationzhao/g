@@ -20,6 +20,7 @@ require (
 	github.com/valyala/bytebufferpool v1.0.0
 	github.com/wk8/go-ordered-map/v2 v2.1.8
 	go.szostok.io/version v1.2.0
+	golang.org/x/exp v0.0.0-20230626212559-97b1e661b5df
 	gopkg.in/ini.v1 v1.67.0
 )
 
