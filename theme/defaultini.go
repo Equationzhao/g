@@ -3,10 +3,10 @@
 package theme
 
 import (
-	"cmp"
 	"path/filepath"
 	"sort"
 
+	"cmp"
 	"github.com/Equationzhao/g/slices"
 	"gopkg.in/ini.v1"
 )

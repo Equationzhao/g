@@ -6,8 +6,9 @@
 package slices
 
 import (
-	"cmp"
 	"unsafe"
+
+	"cmp"
 )
 
 // Equal reports whether two slices are equal: the same length and all

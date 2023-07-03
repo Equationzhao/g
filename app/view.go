@@ -5,9 +5,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/Equationzhao/g/filter"
-
 	"github.com/Equationzhao/g/display"
+	"github.com/Equationzhao/g/filter"
 	filtercontent "github.com/Equationzhao/g/filter/content"
 	"github.com/Equationzhao/g/timeparse"
 	"github.com/gabriel-vasile/mimetype"

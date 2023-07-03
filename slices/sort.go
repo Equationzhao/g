@@ -5,9 +5,9 @@
 package slices
 
 import (
-	"cmp"
 	"math/bits"
 
+	"cmp"
 	"github.com/Equationzhao/g/util"
 )
 
