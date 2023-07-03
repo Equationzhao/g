@@ -20,7 +20,6 @@ require (
 	github.com/valyala/bytebufferpool v1.0.0
 	github.com/wk8/go-ordered-map/v2 v2.1.8
 	go.szostok.io/version v1.2.0
-	golang.org/x/exp v0.0.0-20230626212559-97b1e661b5df
 	gopkg.in/ini.v1 v1.67.0
 )
 
@@ -58,6 +57,7 @@ require (
 	github.com/xo/terminfo v0.0.0-20220910002029-abceb7e1c41e // indirect
 	github.com/xrash/smetrics v0.0.0-20201216005158-039620a65673 // indirect
 	golang.org/x/crypto v0.10.0 // indirect
+	golang.org/x/exp v0.0.0-20230626212559-97b1e661b5df // indirect
 	golang.org/x/net v0.11.0 // indirect
 	golang.org/x/sys v0.9.0 // indirect
 	golang.org/x/xerrors v0.0.0-20220907171357-04be3eba64a2 // indirect

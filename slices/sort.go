@@ -7,8 +7,8 @@ package slices
 import (
 	"math/bits"
 
-	"cmp"
 	"github.com/Equationzhao/g/util"
+	"github.com/Equationzhao/g/util/cmp"
 )
 
 // Sort sorts a slice of any ordered type in ascending order.
