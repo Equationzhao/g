@@ -92,6 +92,8 @@ func str2color(str string) (string, error) {
 	switch str {
 	case "":
 		return "", nil
+	case "black", "Black":
+		return Black, nil
 	case "red", "Red":
 		return Red, nil
 	case "green", "Green":
