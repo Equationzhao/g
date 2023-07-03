@@ -121,18 +121,6 @@ func init() {
 
 			disableIndex := context.Bool("di")
 			wgUpdateIndex := sync.WaitGroup{}
-			{
-				// git-status-style
-				s := context.String("gss")
-				switch s {
-				case "symbol", "sym":
-					nameToDisplay.GitStyle = filtercontent.GitStyleSym
-				case "dot", ".":
-					nameToDisplay.GitStyle = filtercontent.GitStyleDot
-				default:
-					nameToDisplay.GitStyle = filtercontent.GitStyleDefault
-				}
-			}
 
 			// set quote
 			if context.Bool("Q") {
@@ -203,15 +191,9 @@ func init() {
 				fallthrough
 			case "auto":
 				if termlink.SupportsHyperlinks() {
-					if _, ok := p.(*display.JsonPrinter); !ok {
-						if _, ok := p.(*display.CSVPrinter); !ok {
-							if _, ok := p.(*display.MDPrinter); !ok {
-								if _, ok := p.(*display.HTMLPrinter); !ok {
-									nameToDisplay.SetHyperlink()
-									display.IncludeHyperlink = true
-								}
-							}
-						}
+					if _, ok := p.(display.PrettyPrinter); !ok {
+						nameToDisplay.SetHyperlink()
+						display.IncludeHyperlink = true
 					}
 				}
 			}

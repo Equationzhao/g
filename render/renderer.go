@@ -11,8 +11,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/Equationzhao/g/slices"
 	"github.com/Equationzhao/g/theme"
-	"github.com/Equationzhao/g/util"
 	"github.com/hako/durafmt"
 	"github.com/valyala/bytebufferpool"
 )
@@ -103,10 +103,10 @@ func (rd *Renderer) Owner(toRender string) string {
 		root = []string{"root", "0"}
 	}
 
-	if util.SliceContains(root, toRender) {
+	if slices.Contains(root, toRender) {
 		_, _ = bb.WriteString(rd.infoTheme["root"].Color)
 	} else {
-		if util.SliceContains(byName, toRender) {
+		if slices.Contains(byName, toRender) {
 			_, _ = bb.WriteString(rd.infoTheme[toRender].Color)
 		} else if runtime.GOOS == "windows" && rootSid.MatchString(toRender) {
 			_, _ = bb.WriteString(rd.infoTheme["root"].Color)
@@ -135,10 +135,10 @@ func (rd *Renderer) Group(toRender string) string {
 		root = []string{"root", "0"}
 	}
 
-	if util.SliceContains(root, toRender) {
+	if slices.Contains(root, toRender) {
 		_, _ = bb.WriteString(rd.infoTheme["root"].Color)
 	} else {
-		if util.SliceContains(byName, toRender) {
+		if slices.Contains(byName, toRender) {
 			_, _ = bb.WriteString(rd.infoTheme["byName"].Color)
 		} else if runtime.GOOS == "windows" && rootSid.MatchString(toRender) {
 			_, _ = bb.WriteString(rd.infoTheme["root"].Color)

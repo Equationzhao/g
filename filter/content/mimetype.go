@@ -6,6 +6,7 @@ import (
 
 	"github.com/Equationzhao/g/filter"
 	"github.com/Equationzhao/g/item"
+	"github.com/Equationzhao/g/util"
 	"github.com/gabriel-vasile/mimetype"
 )
 
@@ -34,7 +35,7 @@ func (e *MimeFileTypeEnabler) Enable() filter.ContentOption {
 		}
 		if info.IsDir() {
 			tn = "directory"
-		} else if info.Mode()&os.ModeSymlink != 0 {
+		} else if util.IsSymLink(info) {
 			tn = "symlink"
 		} else if info.Mode()&os.ModeNamedPipe != 0 {
 			tn = "named_pipe"

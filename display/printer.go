@@ -9,10 +9,10 @@ import (
 	"math"
 	"os"
 	"regexp"
-	"sort"
 	"strings"
 
 	"github.com/Equationzhao/g/item"
+	"github.com/Equationzhao/g/slices"
 	"github.com/Equationzhao/g/util"
 	"github.com/acarl005/stripansi"
 	"github.com/jedib0t/go-pretty/v6/table"
@@ -20,8 +20,6 @@ import (
 	"github.com/olekukonko/ts"
 	orderedmap "github.com/wk8/go-ordered-map/v2"
 )
-
-const dot = '\uF111'
 
 var Output io.Writer = os.Stdout
 
@@ -505,9 +503,9 @@ func (j *JsonPrinter) Print(items ...*item.FileInfo) {
 			}
 		}
 
-		sort.Slice(
-			order, func(i, j int) bool {
-				return order[i].no < order[j].no
+		slices.SortFunc(
+			order, func(a, b orderItem) int {
+				return a.no - b.no
 			},
 		)
 

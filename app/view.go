@@ -3,8 +3,9 @@ package app
 import (
 	"errors"
 	"fmt"
-	"github.com/Equationzhao/g/filter"
 	"strings"
+
+	"github.com/Equationzhao/g/filter"
 
 	"github.com/Equationzhao/g/display"
 	filtercontent "github.com/Equationzhao/g/filter/content"

@@ -16,11 +16,10 @@ import (
 
 type (
 	Name struct {
-		icon, classify, fileType, git, fullPath, noDeference, hyperLink bool
-		statistics                                                      *Statistics
-		relativeTo                                                      string
-		Quote                                                           string
-		GitStyle                                                        gitStyle
+		icon, classify, fileType, fullPath, noDeference, hyperLink bool
+		statistics                                                 *Statistics
+		relativeTo                                                 string
+		Quote                                                      string
 	}
 )
 
@@ -37,14 +36,6 @@ func (s *Statistics) Reset() {
 func (s *Statistics) String() string {
 	return fmt.Sprintf("%d file(s), %d dir(s), %d link(s)", s.file.Load(), s.dir.Load(), s.link.Load())
 }
-
-type gitStyle int
-
-const (
-	GitStyleDot gitStyle = iota
-	GitStyleSym
-	GitStyleDefault = GitStyleDot
-)
 
 func (n *Name) SetNoDeference() *Name {
 	n.noDeference = true
