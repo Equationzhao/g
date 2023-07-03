@@ -3,7 +3,7 @@ module github.com/Equationzhao/g
 go 1.20
 
 require (
-	github.com/Equationzhao/pathbeautify v0.0.6
+	github.com/Equationzhao/pathbeautify v0.0.7
 	github.com/Equationzhao/tsmap v0.0.6
 	github.com/acarl005/stripansi v0.0.0-20180116102854-5a71ef0e047d
 	github.com/gabriel-vasile/mimetype v1.4.2
@@ -41,7 +41,7 @@ require (
 	github.com/hashicorp/go-version v1.6.0 // indirect
 	github.com/hokaccha/go-prettyjson v0.0.0-20211117102719-0474bc63780f // indirect
 	github.com/huandu/xstrings v1.4.0 // indirect
-	github.com/imdario/mergo v0.3.16 // indirect
+	github.com/imdario/mergo v1.0.0 // indirect
 	github.com/lucasb-eyer/go-colorful v1.2.0 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
@@ -63,3 +63,5 @@ require (
 	golang.org/x/xerrors v0.0.0-20220907171357-04be3eba64a2 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
+
+replace github.com/imdario/mergo v1.0.0 => dario.cat/mergo v1.0.0
