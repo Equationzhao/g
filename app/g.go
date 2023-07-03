@@ -301,6 +301,13 @@ func init() {
 
 				var d []os.DirEntry
 				if isFile {
+					if gitignore {
+						*removeGitIgnore = filter.RemoveGitIgnore(path[i])
+					}
+
+					// remove non-display items
+					infos = itemFilter.Filter(infos...)
+
 					goto final
 				}
 
@@ -380,10 +387,6 @@ func init() {
 				if gitignore {
 					*removeGitIgnore = filter.RemoveGitIgnore(path[i])
 				}
-				if git {
-					gitEnabler.Path = path[i]
-					gitEnabler.InitCache(path[i])
-				}
 
 				// remove non-display items
 				infos = itemFilter.Filter(infos...)
@@ -432,6 +435,11 @@ func init() {
 				}
 
 			final:
+				if git {
+					gitEnabler.Path = path[i]
+					gitEnabler.InitCache(path[i])
+				}
+
 				contentFilter.GetDisplayItems(&infos)
 				if len(infos) == 0 {
 					continue
