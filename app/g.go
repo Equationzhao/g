@@ -203,8 +203,16 @@ func init() {
 				fallthrough
 			case "auto":
 				if termlink.SupportsHyperlinks() {
-					nameToDisplay.SetHyperlink()
-					display.IncludeHyperlink = true
+					if _, ok := p.(*display.JsonPrinter); !ok {
+						if _, ok := p.(*display.CSVPrinter); !ok {
+							if _, ok := p.(*display.MDPrinter); !ok {
+								if _, ok := p.(*display.HTMLPrinter); !ok {
+									nameToDisplay.SetHyperlink()
+									display.IncludeHyperlink = true
+								}
+							}
+						}
+					}
 				}
 			}
 

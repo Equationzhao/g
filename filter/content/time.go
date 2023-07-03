@@ -54,7 +54,7 @@ func EnableTime(format string, mode string, renderer *render.Renderer) filter.Co
 		var t time.Time
 		timeType := ""
 		switch mode {
-		case "mod":
+		case "mod", "modified", "modify":
 			t = osbased.ModTime(info)
 			timeType = timeModified
 		case "create":
