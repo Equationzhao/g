@@ -6,8 +6,8 @@ import (
 	"path/filepath"
 	"sort"
 
-	"cmp"
 	"github.com/Equationzhao/g/slices"
+	"github.com/Equationzhao/g/slices/cmp"
 	"gopkg.in/ini.v1"
 )
 

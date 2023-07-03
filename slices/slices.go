@@ -8,7 +8,7 @@ package slices
 import (
 	"unsafe"
 
-	"cmp"
+	"github.com/Equationzhao/g/slices/cmp"
 )
 
 // Equal reports whether two slices are equal: the same length and all
