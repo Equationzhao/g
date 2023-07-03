@@ -270,7 +270,7 @@ func (n *Name) Enable(renderer *render.Renderer) filter.ContentOption {
 			}
 		}
 		if n.hyperLink {
-			str = makeLink(info.FullPath, str)
+			str = makeLink("file://"+info.FullPath, str)
 		}
 
 		return str, NameName
