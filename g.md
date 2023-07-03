@@ -23,6 +23,7 @@ g
 [--colorless|--nc|--no-color|--nocolor]
 [--create|--cr|--created]
 [--depth|--level|-L]=[value]
+[--dereference]
 [--dir-first|--df|--group-directories-first]
 [--disable-index|--di|--no-update]
 [--duplicate|--dup]
@@ -37,6 +38,7 @@ g
 [--git-status|--gs|--git]
 [--header|--title]
 [--hide-git-ignore|--gi|--hgi|--git-ignore]
+[--hyperlink]=[value]
 [--ignore-glob|-I|--ignore|--ig]=[value]
 [--inode|-i]
 [--json|-j]
@@ -69,6 +71,7 @@ g
 [--show-mime-file-type-only|--mime-only]=[value]
 [--show-no-dir|--nd|--nodir|--no-dir|--file]
 [--show-no-ext|--sne|--noext]=[value]
+[--show-octal-perm|--octal-perm|--octal-permission|--octal-permissions]
 [--show-only-dir|--sd|--dir|--only-dir|-D]
 [--show-only-ext|--se|--ext]=[value]
 [--show-only-hidden|--soh|--hidden]
@@ -117,7 +120,7 @@ g [options] [path]
 
 # GLOBAL OPTIONS
 
-**-#**: print entry No. for each entry
+**-#**: print entry Number for each entry
 
 **--CSV, --csv**: output in csv format
 
@@ -149,6 +152,8 @@ g [options] [path]
 
 **--depth, --level, -L**="": limit recursive depth, negative -> infinity (default: infinity)
 
+**--dereference**: dereference symbolic links
+
 **--dir-first, --df, --group-directories-first**: List directories before other files
 
 **--disable-index, --di, --no-update**: disable updating index
@@ -177,6 +182,8 @@ g [options] [path]
 
 **--hide-git-ignore, --gi, --hgi, --git-ignore**: hide git ignored file/dir [if git is installed]
 
+**--hyperlink**="": Attach hyperlink to filenames [auto|always|never] (default: auto)
+
 **--ignore-glob, -I, --ignore, --ig**="": ignore Glob patterns
 
 **--inode, -i**: show inode[linux/darwin only]
@@ -203,7 +210,7 @@ g [options] [path]
 
 **--modify, --mod, --modified**: modified time
 
-**--no-dereference**: do not dereference symbolic links
+**--no-dereference**: do not follow symbolic links
 
 **--no-icon, --noicon, --ni**: disable icon(always override show-icon)
 
@@ -240,6 +247,8 @@ g [options] [path]
 **--show-no-dir, --nd, --nodir, --no-dir, --file**: do not show directory
 
 **--show-no-ext, --sne, --noext**="": show file which doesn't have target ext
+
+**--show-octal-perm, --octal-perm, --octal-permission, --octal-permissions**: list each file's permission in octal format
 
 **--show-only-dir, --sd, --dir, --only-dir, -D**: show directory only
 
