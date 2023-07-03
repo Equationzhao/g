@@ -146,6 +146,9 @@ var DefaultInfoTheme = Theme{
 	"DevToolsUser": Style{
 		Color: color256(202),
 	},
+	"octal": Style{
+		Color: color256(208),
+	},
 }
 
 var DefaultTheme = Theme{

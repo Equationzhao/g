@@ -3,10 +3,10 @@ package app
 import (
 	"errors"
 	"fmt"
+	"github.com/Equationzhao/g/filter"
 	"strings"
 
 	"github.com/Equationzhao/g/display"
-	"github.com/Equationzhao/g/filter"
 	filtercontent "github.com/Equationzhao/g/filter/content"
 	"github.com/Equationzhao/g/timeparse"
 	"github.com/gabriel-vasile/mimetype"
@@ -191,105 +191,6 @@ var viewFlag = []cli.Flag{
 		},
 	},
 	&cli.BoolFlag{
-		Name:               "o",
-		DisableDefaultText: true,
-		Usage:              "like -all/l, but do not list group information",
-		Action: func(context *cli.Context, b bool) error {
-			if b {
-				// remove filter.RemoveHidden
-				newFF := make([]*filter.ItemFilterFunc, 0, len(itemFilterFunc))
-				for _, typeFunc := range itemFilterFunc {
-					if typeFunc != &filter.RemoveHidden {
-						newFF = append(newFF, typeFunc)
-					}
-				}
-				itemFilterFunc = newFF
-				contentFunc = append(
-					contentFunc, filtercontent.EnableFileMode(r), sizeEnabler.EnableSize(sizeUint, r),
-					groupEnabler.EnableGroup(r),
-				)
-				for _, s := range timeType {
-					contentFunc = append(contentFunc, filtercontent.EnableTime(timeFormat, s, r))
-				}
-				if _, ok := p.(*display.Byline); !ok {
-					p = display.NewByline()
-				}
-			}
-			return nil
-		},
-		Category: "VIEW",
-	},
-	&cli.BoolFlag{
-		Name:               "g",
-		DisableDefaultText: true,
-		Usage:              "like -all/l, but do not list owner",
-		Action: func(context *cli.Context, b bool) error {
-			if b {
-				// remove filter.RemoveHidden
-				newFF := make([]*filter.ItemFilterFunc, 0, len(itemFilterFunc))
-				for _, typeFunc := range itemFilterFunc {
-					if typeFunc != &filter.RemoveHidden {
-						newFF = append(newFF, typeFunc)
-					}
-				}
-				itemFilterFunc = newFF
-				contentFunc = append(
-					contentFunc, filtercontent.EnableFileMode(r), sizeEnabler.EnableSize(sizeUint, r),
-					ownerEnabler.EnableOwner(r),
-				)
-				for _, s := range timeType {
-					contentFunc = append(contentFunc, filtercontent.EnableTime(timeFormat, s, r))
-				}
-				if _, ok := p.(*display.Byline); !ok {
-					p = display.NewByline()
-				}
-			}
-			return nil
-		},
-		Category: "VIEW",
-	},
-	&cli.BoolFlag{
-		Name:               "G",
-		DisableDefaultText: true,
-		Aliases:            []string{"no-group"},
-		Usage:              "in a long listing, don't print group names",
-		Category:           "VIEW",
-	},
-	&cli.BoolFlag{
-		Name:               "all",
-		Aliases:            []string{"la", "l", "long"},
-		Usage:              "show all info/use a long listing format",
-		DisableDefaultText: true,
-		Action: func(context *cli.Context, b bool) error {
-			if b {
-				// remove filter.RemoveHidden
-				newFF := make([]*filter.ItemFilterFunc, 0, len(itemFilterFunc))
-				for _, typeFunc := range itemFilterFunc {
-					if typeFunc != &filter.RemoveHidden {
-						newFF = append(newFF, typeFunc)
-					}
-				}
-				itemFilterFunc = newFF
-				sizeEnabler.SetEnableTotal()
-				contentFunc = append(
-					contentFunc, filtercontent.EnableFileMode(r), sizeEnabler.EnableSize(sizeUint, r),
-					ownerEnabler.EnableOwner(r),
-				)
-				if !context.Bool("G") {
-					contentFunc = append(contentFunc, groupEnabler.EnableGroup(r))
-				}
-				for _, s := range timeType {
-					contentFunc = append(contentFunc, filtercontent.EnableTime(timeFormat, s, r))
-				}
-				if _, ok := p.(*display.Byline); !ok {
-					p = display.NewByline()
-				}
-			}
-			return nil
-		},
-		Category: "VIEW",
-	},
-	&cli.BoolFlag{
 		Name:               "inode",
 		Aliases:            []string{"i"},
 		Usage:              "show inode[linux/darwin only]",
@@ -334,6 +235,22 @@ var viewFlag = []cli.Flag{
 			if b {
 				ownerEnabler.EnableNumeric()
 				groupEnabler.EnableNumeric()
+			}
+			return nil
+		},
+		Category: "VIEW",
+	},
+	&cli.BoolFlag{
+		Name:               "show-octal-perm",
+		Aliases:            []string{"octal-perm", "octal-permission", "octal-permissions"},
+		Usage:              "list each file's permission in octal format",
+		DisableDefaultText: true,
+		Action: func(context *cli.Context, b bool) error {
+			if b {
+				contentFunc = append(contentFunc, filtercontent.EnableFileOctalPermissions(r))
+				if _, ok := p.(*display.Byline); !ok {
+					p = display.NewByline()
+				}
 			}
 			return nil
 		},
@@ -742,5 +659,104 @@ var viewFlag = []cli.Flag{
 			}
 			return nil
 		},
+	},
+	&cli.BoolFlag{
+		Name:               "o",
+		DisableDefaultText: true,
+		Usage:              "like -all/l, but do not list group information",
+		Action: func(context *cli.Context, b bool) error {
+			if b {
+				// remove filter.RemoveHidden
+				newFF := make([]*filter.ItemFilterFunc, 0, len(itemFilterFunc))
+				for _, typeFunc := range itemFilterFunc {
+					if typeFunc != &filter.RemoveHidden {
+						newFF = append(newFF, typeFunc)
+					}
+				}
+				itemFilterFunc = newFF
+				contentFunc = append(
+					contentFunc, filtercontent.EnableFileMode(r), sizeEnabler.EnableSize(sizeUint, r),
+					groupEnabler.EnableGroup(r),
+				)
+				for _, s := range timeType {
+					contentFunc = append(contentFunc, filtercontent.EnableTime(timeFormat, s, r))
+				}
+				if _, ok := p.(*display.Byline); !ok {
+					p = display.NewByline()
+				}
+			}
+			return nil
+		},
+		Category: "VIEW",
+	},
+	&cli.BoolFlag{
+		Name:               "g",
+		DisableDefaultText: true,
+		Usage:              "like -all/l, but do not list owner",
+		Action: func(context *cli.Context, b bool) error {
+			if b {
+				// remove filter.RemoveHidden
+				newFF := make([]*filter.ItemFilterFunc, 0, len(itemFilterFunc))
+				for _, typeFunc := range itemFilterFunc {
+					if typeFunc != &filter.RemoveHidden {
+						newFF = append(newFF, typeFunc)
+					}
+				}
+				itemFilterFunc = newFF
+				contentFunc = append(
+					contentFunc, filtercontent.EnableFileMode(r), sizeEnabler.EnableSize(sizeUint, r),
+					ownerEnabler.EnableOwner(r),
+				)
+				for _, s := range timeType {
+					contentFunc = append(contentFunc, filtercontent.EnableTime(timeFormat, s, r))
+				}
+				if _, ok := p.(*display.Byline); !ok {
+					p = display.NewByline()
+				}
+			}
+			return nil
+		},
+		Category: "VIEW",
+	},
+	&cli.BoolFlag{
+		Name:               "G",
+		DisableDefaultText: true,
+		Aliases:            []string{"no-group"},
+		Usage:              "in a long listing, don't print group names",
+		Category:           "VIEW",
+	},
+	&cli.BoolFlag{
+		Name:               "all",
+		Aliases:            []string{"la", "l", "long"},
+		Usage:              "show all info/use a long listing format",
+		DisableDefaultText: true,
+		Action: func(context *cli.Context, b bool) error {
+			if b {
+				// remove filter.RemoveHidden
+				newFF := make([]*filter.ItemFilterFunc, 0, len(itemFilterFunc))
+				for _, typeFunc := range itemFilterFunc {
+					if typeFunc != &filter.RemoveHidden {
+						newFF = append(newFF, typeFunc)
+					}
+				}
+				itemFilterFunc = newFF
+				sizeEnabler.SetEnableTotal()
+				contentFunc = append(
+					contentFunc, filtercontent.EnableFileMode(r), sizeEnabler.EnableSize(sizeUint, r),
+					ownerEnabler.EnableOwner(r),
+				)
+				if !context.Bool("G") {
+					contentFunc = append(contentFunc, groupEnabler.EnableGroup(r))
+				}
+				for _, s := range timeType {
+					contentFunc = append(contentFunc, filtercontent.EnableTime(timeFormat, s, r))
+				}
+				if _, ok := p.(*display.Byline); !ok {
+					p = display.NewByline()
+				}
+			}
+			return nil
+		},
+		Category: "VIEW",
 	},
 }

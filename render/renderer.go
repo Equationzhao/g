@@ -35,6 +35,10 @@ func NewRenderer(theme, infoTheme theme.Theme) *Renderer {
 	return &Renderer{infoTheme: infoTheme, theme: theme}
 }
 
+func (rd *Renderer) OctalPerm(octal string) string {
+	return rd.infoByName(octal, "octal")
+}
+
 func (rd *Renderer) FileMode(toRender string) string {
 	// return file mode like -rwxrwxrwx/drwxrwxrwx but in color
 	bb := bytebufferpool.Get()
