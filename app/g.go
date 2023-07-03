@@ -218,7 +218,10 @@ func init() {
 				}
 
 				if transformEnabled {
-					path[i] = pathbeautify.Transform(path[i])
+					_, err := os.Stat(path[i])
+					if err != nil {
+						path[i] = pathbeautify.Transform(path[i])
+					}
 				}
 
 				infos := make([]*item.FileInfo, 0, 20)
