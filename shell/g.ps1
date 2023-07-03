@@ -7,7 +7,7 @@ function ls {
 }
 
 function ll {
-    g -1 --perm --icons --time --group --owner --git --size --title
+    g -1 --perm --icons --time --group --owner --size --title
 }
 
 function la {
@@ -15,7 +15,7 @@ function la {
 }
 
 function l {
-    g --perm --icons --time --group --owner --git --size --title --show-hidden
+    g --perm --icons --time --group --owner --size --title --show-hidden
 }
 
 # `echo $profile` in PowerShell to find your profile path
