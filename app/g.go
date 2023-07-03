@@ -16,6 +16,7 @@ import (
 	"github.com/Equationzhao/g/index"
 	"github.com/Equationzhao/g/item"
 	"github.com/Equationzhao/g/render"
+	"github.com/Equationzhao/g/shell"
 	"github.com/Equationzhao/g/sorter"
 	"github.com/Equationzhao/g/theme"
 	"github.com/Equationzhao/g/util"
@@ -713,6 +714,25 @@ func init() {
 					)
 				}
 				return nil
+			},
+		},
+		&cli.StringFlag{
+			Name:  "init",
+			Usage: `init the config file, default path is ~/.config/g/config.yaml`,
+			Action: func(context *cli.Context, s string) error {
+				switch s {
+				case "zsh":
+					_, _ = G.Writer.Write(shell.ZSHContent)
+				case "bash":
+					_, _ = G.Writer.Write(shell.BASHContent)
+				case "fish":
+					_, _ = G.Writer.Write(shell.FISHContent)
+				case "powershell", "pwsh":
+					_, _ = G.Writer.Write(shell.PSContent)
+				default:
+					return fmt.Errorf("unsupported shell: %s", s)
+				}
+				return Err4Exit{}
 			},
 		},
 	)
