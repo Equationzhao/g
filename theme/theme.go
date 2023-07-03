@@ -52,7 +52,7 @@ func color2str(color string) string {
 	case BrightWhite:
 		return "BrightWhite"
 	case BrightBlack:
-		return "BrightPlack"
+		return "BrightBlack"
 	case Reset:
 		return "reset"
 	case Underline:
