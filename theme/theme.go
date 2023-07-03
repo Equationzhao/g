@@ -239,19 +239,35 @@ func GetTheme(path string) error {
 	if err != nil {
 		return err
 	}
+	infoTheme, theme, err := getTheme(cfg)
+
+	for name, style := range infoTheme {
+		DefaultInfoTheme[name] = style
+	}
+	for name, style := range theme {
+		DefaultTheme[name] = style
+	}
+
+	SyncColorlessWithTheme()
+	return err
+}
+
+func getTheme(cfg *ini.File) (infoTheme, theme Theme, errSum error) {
 	cfg.BlockMode = false
-	var errSum error
 	sections := cfg.Sections()
+	infoThem, theme := make(Theme), make(Theme)
 	for _, section := range sections {
 		if section.Name() == "DEFAULT" || section.Name() == "info" {
 			keys := section.Keys()
 			for _, v := range keys {
-				o := DefaultInfoTheme[v.Name()]
-				o.Color, err = str2color(v.String())
+				Color, err := str2color(v.String())
 				if err != nil {
 					errSum = errors.Join(errSum, ErrBadColor{v.Name(), err})
+					continue
 				}
-				DefaultInfoTheme[v.Name()] = o
+				infoThem[v.Name()] = Style{
+					Color: Color,
+				}
 			}
 			continue
 		}
@@ -264,14 +280,13 @@ func GetTheme(path string) error {
 
 		icon := section.Key("icon").String()
 		for _, name := range names {
-			DefaultTheme[name] = Style{
+			theme[name] = Style{
 				Color: color,
 				Icon:  icon,
 			}
 		}
 	}
-	SyncColorlessWithTheme()
-	return nil
+	return infoThem, theme, errSum
 }
 
 func ConvertThemeColor() {

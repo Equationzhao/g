@@ -41,11 +41,13 @@ func init() {
 
 	for _, k := range default_ {
 		section := defaultThemeIni.Section(k.key)
-		_, err := section.NewKey("color", color2str(k.value.(Style).Color))
-		if err != nil {
-			println(err.Error())
+		if c := k.value.(Style).Color; c != "" {
+			_, err := section.NewKey("color", color2str(k.value.(Style).Color))
+			if err != nil {
+				println(err.Error())
+			}
 		}
-		_, err = section.NewKey("icon", k.value.(Style).Icon)
+		_, err := section.NewKey("icon", k.value.(Style).Icon)
 		if err != nil {
 			println(err.Error())
 		}

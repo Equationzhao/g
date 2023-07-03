@@ -552,7 +552,7 @@ var DefaultTheme = Theme{
 	},
 	"vue": Style{
 		Color: lang,
-		Icon:  "\ufd42",
+		Icon:  "\uE6A0",
 	},
 	"php": Style{
 		Color: lang,

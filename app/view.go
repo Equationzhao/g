@@ -181,7 +181,7 @@ var viewFlag = []cli.Flag{
 	&cli.BoolFlag{
 		Name:               "#",
 		DisableDefaultText: true,
-		Usage:              "print entry No. for each entry",
+		Usage:              "print entry Number for each entry",
 		Category:           "DISPLAY",
 		Action: func(context *cli.Context, b bool) error {
 			if b {

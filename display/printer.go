@@ -198,7 +198,7 @@ func calculateRowCol(strs *[]string, margin int) (maxLength int, lengths []int, 
 	lengths = make([]int, 0, len(*strs))
 	for _, str := range *strs {
 		length := WidthLen(str)
-		maxLength = max(maxLength, length)
+		maxLength = util.Max(maxLength, length)
 		lengths = append(lengths, length)
 	}
 
@@ -211,26 +211,34 @@ func calculateRowCol(strs *[]string, margin int) (maxLength int, lengths []int, 
 
 var IncludeHyperlink = false
 
-func parseLink(link string) (name string, ok bool) {
+func parseLink(link string) (name, other string, ok bool) {
 	re := regexp.MustCompile(`\033]8;;(.*?)\033\\(.*?)\033]8;;\033\\`)
 	matches := re.FindStringSubmatch(link)
 
 	if len(matches) == 3 {
-		name = matches[2]
+		// if matches, get the other content and the link
+		other = strings.Replace(link, matches[0], "", 1)
+		return matches[2], other, true
 	} else {
-		return "", false
+		return "", "", false
 	}
-
-	return name, true
 }
 
 func WidthLen(str string) int {
 	if IncludeHyperlink {
-		name, ok := parseLink(str)
+		name, other, ok := parseLink(str)
 		if ok {
-			str = name
+			str = other + name
 		}
 	}
+	colorless := stripansi.Strip(str)
+	// len() is insufficient here, as it counts emojis as 4 characters each
+	length := runewidth.StringWidth(colorless)
+
+	return length
+}
+
+func WidthNoHyperLinkLen(str string) int {
 	colorless := stripansi.Strip(str)
 	// len() is insufficient here, as it counts emojis as 4 characters each
 	length := runewidth.StringWidth(colorless)
@@ -293,13 +301,6 @@ func rowIndexToTableCoords(i, numCols int) (int, int) {
 
 func tableCoordsToColIndex(x, y, numRows int) int {
 	return y + numRows*x
-}
-
-func max(a int, b int) int {
-	if a > b {
-		return a
-	}
-	return b
 }
 
 type CommaPrint struct {
@@ -367,24 +368,12 @@ func (a *Across) printRowWithNoSpace(strs *[]string) {
 
 	maxLength := 0
 	for _, str := range *strs {
-		colorless := stripansi.Strip(str)
-		maxLength += runewidth.StringWidth(stripansi.Strip(str))
-		// if runtime.GOOS == "windows" || runtime.GOOS == "darwin" {
-		// 	if strings.ContainsRune(colorless, dot) {
-		// 		maxLength--
-		// 	}
-		// }
-
+		maxLength += WidthLen(str)
 		if maxLength <= width {
 			_, _ = a.WriteString(str)
 		} else {
 			_, _ = a.WriteString("\n" + str)
-			maxLength = runewidth.StringWidth(colorless)
-			// if runtime.GOOS == "windows" || runtime.GOOS == "darwin" {
-			// 	if strings.ContainsRune(colorless, dot) {
-			// 		maxLength--
-			// 	}
-			// }
+			maxLength = WidthLen(str)
 		}
 	}
 	_ = a.WriteByte('\n')
@@ -398,9 +387,8 @@ func (a *Across) printRow(strs *[]string) {
 
 	maxLength := 0
 	for i, str := range *strs {
-		colorless := stripansi.Strip(str)
-		strLen[i] = runewidth.StringWidth(colorless)
-		maxLength = max(maxLength, strLen[i])
+		strLen[i] = WidthLen(str)
+		maxLength = util.Max(maxLength, strLen[i])
 	}
 
 	cols := (width + 1) / (maxLength + 1)
