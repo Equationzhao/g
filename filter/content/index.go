@@ -1,9 +1,8 @@
 package content
 
 import (
-	"os"
-
 	"github.com/Equationzhao/g/filter"
+	"github.com/Equationzhao/g/item"
 )
 
 type IndexEnabler struct{}
@@ -13,7 +12,7 @@ func NewIndexEnabler() *IndexEnabler {
 }
 
 func (i *IndexEnabler) Enable() filter.ContentOption {
-	return func(info os.FileInfo) (string, string) {
+	return func(info *item.FileInfo) (string, string) {
 		return "", "#"
 	}
 }

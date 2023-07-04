@@ -19,9 +19,11 @@ g
 [--checksum-algorithm|--ca]=[value]
 [--checksum|--cs]
 [--classic]
-[--colorless|--nc|--no-color]
+[--color]=[value]
+[--colorless|--nc|--no-color|--nocolor]
 [--create|--cr|--created]
 [--depth|--level|-L]=[value]
+[--dereference]
 [--dir-first|--df|--group-directories-first]
 [--disable-index|--di|--no-update]
 [--duplicate|--dup]
@@ -33,22 +35,25 @@ g
 [--full-time]
 [--fuzzy|--fz|-f]
 [--gid]
-[--git-status-style|--gss|--git-style]=[value]
 [--git-status|--gs|--git]
 [--header|--title]
 [--hide-git-ignore|--gi|--hgi|--git-ignore]
+[--hyperlink]=[value]
 [--ignore-glob|-I|--ignore|--ig]=[value]
+[--init]=[value]
 [--inode|-i]
 [--json|-j]
 [--lh|--human-readable|--hr]
-[--limitN|-n|--limit]=[value]
+[--limitN|-n|--limit|--topN|--top]=[value]
 [--link|-H]
 [--list-index|--li]
 [--literal|-N]
 [--match-glob|-M|--glob|--match]=[value]
+[--mime-charset|--charset]
 [--mime-parent|--mime-p|--mime-parent-type|--mime-type-parent]
 [--mime-type|--mime|--mimetype]
 [--modify|--mod|--modified]
+[--no-dereference]
 [--no-icon|--noicon|--ni]
 [--no-path-transform|--np]
 [--no-total-size|--nts|--nototal-size]
@@ -67,6 +72,7 @@ g
 [--show-mime-file-type-only|--mime-only]=[value]
 [--show-no-dir|--nd|--nodir|--no-dir|--file]
 [--show-no-ext|--sne|--noext]=[value]
+[--show-octal-perm|--octal-perm|--octal-permission|--octal-permissions]
 [--show-only-dir|--sd|--dir|--only-dir|-D]
 [--show-only-ext|--se|--ext]=[value]
 [--show-only-hidden|--soh|--hidden]
@@ -84,12 +90,11 @@ g
 [--sort-reverse|--sr|--reverse|-r]
 [--sort|--SORT_FIELD]=[value]
 [--statistic]
-[--table-style|--tablestyle]=[value]
+[--table-style|--tablestyle|--tb-style]=[value]
 [--table|--tb]
 [--theme|--th]=[value]
 [--time-style]=[value]
 [--time-type|--tt]=[value]
-[--tree|-t|-T]
 [--uid]
 [--width]
 [--zero|-0]
@@ -116,7 +121,7 @@ g [options] [path]
 
 # GLOBAL OPTIONS
 
-**-#**: print entry No. for each entry
+**-#**: print entry Number for each entry
 
 **--CSV, --csv**: output in csv format
 
@@ -140,11 +145,15 @@ g [options] [path]
 
 **--classic**: Enable classic mode (no colours or icons)
 
-**--colorless, --nc, --no-color**: without color
+**--color**="": when to use terminal colours[always|auto|never][basic|256|24bit] (default: auto)
+
+**--colorless, --nc, --no-color, --nocolor**: without color
 
 **--create, --cr, --created**: created time
 
 **--depth, --level, -L**="": limit recursive depth, negative -> infinity (default: infinity)
+
+**--dereference**: dereference symbolic links
 
 **--dir-first, --df, --group-directories-first**: List directories before other files
 
@@ -168,15 +177,17 @@ g [options] [path]
 
 **--gid**: show gid instead of groupname [sid in windows]
 
-**--git-status, --gs, --git**: show git status: ? untracked, + added, ! deleted, ~ modified, | renamed, = copied, $ ignored [if git is installed]
-
-**--git-status-style, --gss, --git-style**="": git status style: colored-symbol: {? untracked, + added, - deleted, ~ modified, | renamed, = copied, ! ignored} colored-dot
+**--git-status, --gs, --git**: show git status [if git is installed]
 
 **--header, --title**: add a header row
 
 **--hide-git-ignore, --gi, --hgi, --git-ignore**: hide git ignored file/dir [if git is installed]
 
+**--hyperlink**="": Attach hyperlink to filenames [auto|always|never] (default: auto)
+
 **--ignore-glob, -I, --ignore, --ig**="": ignore Glob patterns
+
+**--init**="": init the config file, default path is ~/.config/g/config.yaml
 
 **--inode, -i**: show inode[linux/darwin only]
 
@@ -184,7 +195,7 @@ g [options] [path]
 
 **--lh, --human-readable, --hr**: show human readable size
 
-**--limitN, -n, --limit**="": limit n items(n <=0 means unlimited) (default: unlimited)
+**--limitN, -n, --limit, --topN, --top**="": limit n items(n <=0 means unlimited) (default: unlimited)
 
 **--link, -H**: list each file's number of hard links
 
@@ -194,11 +205,15 @@ g [options] [path]
 
 **--match-glob, -M, --glob, --match**="": match Glob patterns
 
+**--mime-charset, --charset**: show charset of text file
+
 **--mime-parent, --mime-p, --mime-parent-type, --mime-type-parent**: show mime parent type
 
 **--mime-type, --mime, --mimetype**: show mime file type
 
 **--modify, --mod, --modified**: modified time
+
+**--no-dereference**: do not follow symbolic links
 
 **--no-icon, --noicon, --ni**: disable icon(always override show-icon)
 
@@ -236,6 +251,8 @@ g [options] [path]
 
 **--show-no-ext, --sne, --noext**="": show file which doesn't have target ext
 
+**--show-octal-perm, --octal-perm, --octal-permission, --octal-permissions**: list each file's permission in octal format
+
 **--show-only-dir, --sd, --dir, --only-dir, -D**: show directory only
 
 **--show-only-ext, --se, --ext**="": show file which has target ext, eg: --show-only-ext=go,java
@@ -256,7 +273,7 @@ g [options] [path]
 
 **--size-unit, --su, --block-size**="": size unit, b, k, m, g, t, p, e, z, y, bb, nb, auto (default: auto)
 
-**--sort, --SORT_FIELD**="": sort by field, default: ascending and case insensitive, field beginning with Uppercase is case sensitive, available fields: nature(default),none(nosort),name,.name(sorts by name without a leading dot),size,time,owner,group,extension,inode. following `-descend` to sort descending
+**--sort, --SORT_FIELD**="": sort by field, default: ascending and case insensitive, field beginning with Uppercase is case sensitive, available fields: nature(default),none(nosort),name,.name(sorts by name without a leading dot),size,time,owner,group,extension,inode,width,mime. following '-descend' to sort descending
 
 **--sort-by-mimetype, --mimetypesort, --Mimetypesort, --sort-by-mime**: sort by mimetype
 
@@ -272,15 +289,13 @@ g [options] [path]
 
 **--table, --tb**: output in table format
 
-**--table-style, --tablestyle**="": set table style (ascii(default)/unicode)
+**--table-style, --tablestyle, --tb-style**="": set table style (ascii(default)/unicode)
 
 **--theme, --th**="": apply theme `path/to/theme`
 
-**--time-style**="": time/date format with -l, Valid timestamp styles are `default', `iso`, `long iso`, `full-iso`, `locale`, custom `+FORMAT` like date(1). (default: +%d.%b'%y %H:%M (like 02.Jan'06 15:04))
+**--time-style**="": time/date format with -l, Valid timestamp styles are default, iso, long iso, full-iso, locale, custom +FORMAT like date(1). (default: +%d.%b'%y %H:%M (like 02.Jan'06 15:04))
 
 **--time-type, --tt**="": time type, mod(default), create, access, all (default: mod)
-
-**--tree, -t, -T**: recursively list in tree
 
 **--uid**: show uid instead of username [sid in windows]
 

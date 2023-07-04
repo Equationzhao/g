@@ -7,23 +7,19 @@ import (
 	"strings"
 	"sync/atomic"
 
-	"github.com/Equationzhao/g/cached"
 	"github.com/Equationzhao/g/filter"
-	"github.com/Equationzhao/g/git"
+	"github.com/Equationzhao/g/item"
 	"github.com/Equationzhao/g/render"
+	"github.com/Equationzhao/g/util"
 	"github.com/valyala/bytebufferpool"
 )
 
 type (
 	Name struct {
-		Icon, Classify, FileType, git, fullPath bool
-		Renderer                                *render.Renderer
-		GitCache                                *cached.Map[git.GitRepoPath, *git.FileGits]
-		statistics                              *Statistics
-		relativeTo                              string
-		parent                                  string
-		Quote                                   string
-		GitStyle                                gitStyle
+		icon, classify, fileType, fullPath, noDeference, hyperLink bool
+		statistics                                                 *Statistics
+		relativeTo                                                 string
+		Quote                                                      string
 	}
 )
 
@@ -41,24 +37,38 @@ func (s *Statistics) String() string {
 	return fmt.Sprintf("%d file(s), %d dir(s), %d link(s)", s.file.Load(), s.dir.Load(), s.link.Load())
 }
 
-type gitStyle int
+func (n *Name) SetNoDeference() *Name {
+	n.noDeference = true
+	return n
+}
 
-const (
-	GitStyleDot gitStyle = iota
-	GitStyleSym
-	GitStyleDefault = GitStyleDot
-)
+func (n *Name) UnsetNoDeference() *Name {
+	n.noDeference = false
+	return n
+}
+
+func (n *Name) SetHyperlink() *Name {
+	n.hyperLink = true
+	return n
+}
+
+func (n *Name) UnsetHyperlink() *Name {
+	n.hyperLink = false
+	return n
+}
 
 func (n *Name) FullPath() bool {
 	return n.fullPath
 }
 
-func (n *Name) SetFullPath() {
+func (n *Name) SetFullPath() *Name {
 	n.fullPath = true
+	return n
 }
 
-func (n *Name) UnsetFullPath() {
+func (n *Name) UnsetFullPath() *Name {
 	n.fullPath = false
+	return n
 }
 
 func (n *Name) RelativeTo() string {
@@ -73,8 +83,9 @@ func (n *Name) Statistics() *Statistics {
 	return n.statistics
 }
 
-func (n *Name) SetStatistics(Statistics *Statistics) {
+func (n *Name) SetStatistics(Statistics *Statistics) *Name {
 	n.statistics = Statistics
+	return n
 }
 
 func (n *Name) SetQuote(quote string) *Name {
@@ -87,57 +98,36 @@ func (n *Name) UnsetQuote() *Name {
 	return n
 }
 
-func (n *Name) UnsetGit() *Name {
-	n.git = false
-	git.FreeCache()
-	return n
-}
-
 func (n *Name) UnsetIcon() *Name {
-	n.Icon = false
+	n.icon = false
 	return n
 }
 
 func (n *Name) UnsetClassify() *Name {
-	n.Classify = false
+	n.classify = false
 	return n
 }
 
 func (n *Name) UnsetFileType() *Name {
-	n.FileType = false
-	return n
-}
-
-func (n *Name) SetGit() *Name {
-	n.git = true
-	n.GitCache = git.GetCache()
+	n.fileType = false
 	return n
 }
 
 func (n *Name) SetIcon() *Name {
-	n.Icon = true
+	n.icon = true
 	return n
 }
 
 func (n *Name) SetClassify() *Name {
-	n.Classify = true
+	n.classify = true
 	return n
 }
 
-func (n *Name) SetParent(parent string) *Name {
-	n.parent = parent
-	return n
-}
-
-// SetFileType set file type, should set Classify first
-// if Classify is false, FileType will be ignored
+// SetFileType set file type
+// should set classify first
+// if classify is false, fileType will be ignored
 func (n *Name) SetFileType() *Name {
-	n.FileType = true
-	return n
-}
-
-func (n *Name) SetRenderer(renderer *render.Renderer) *Name {
-	n.Renderer = renderer
+	n.fileType = true
 	return n
 }
 
@@ -147,7 +137,13 @@ func NewNameEnable() *Name {
 
 const NameName = "Name"
 
-func (n *Name) Enable() filter.ContentOption {
+func makeLink(abs string, name string) string {
+	return fmt.Sprintf("\033]8;;%s\033\\%s\033]8;;\033\\", abs, name)
+}
+
+// Enable enable name filter
+// todo refactor
+func (n *Name) Enable(renderer *render.Renderer) filter.ContentOption {
 	/*
 		 -F      Display a slash (`/`) immediately after each pathname that is a
 				 directory, an asterisk (`*`) after each that is executable, an at
@@ -156,58 +152,54 @@ func (n *Name) Enable() filter.ContentOption {
 				 vertical bar (`|`) after each that is a FIFO.
 	*/
 
-	isOrIsParentOf := func(parent, child string) bool {
-		if parent == child {
-			return true
-		}
-		if strings.HasPrefix(child, parent+"/") { // should not use filepath.Separator
-			return true
-		}
-		return false
-	}
-
-	getFromCache := func(repoPath git.GitRepoPath) *git.FileGits {
-		value, _ := n.GitCache.GetOrInit(repoPath, git.DefaultInit(repoPath))
-		return value
-	}
-
-	return func(info os.FileInfo) (string, string) {
+	return func(info *item.FileInfo) (string, string) {
 		buffer := bytebufferpool.Get()
 		defer bytebufferpool.Put(buffer)
-		name := info.Name()
-		str := name
+		str := info.Name()
+		if n.FullPath() {
+			str = info.FullPath
+		}
+		name := str
 		mode := info.Mode()
 
 		char := ""
 
-		if n.Icon {
+		if n.icon {
 			if info.IsDir() {
 				if n.statistics != nil {
 					n.statistics.dir.Add(1)
 				}
-				str = n.Renderer.DirIcon(str)
+				str = renderer.DirIcon(str)
 				char = "/"
 			} else if mode&os.ModeSymlink != 0 {
 				if n.statistics != nil {
 					n.statistics.link.Add(1)
 				}
-				if n.Classify {
-					str = n.Renderer.SymlinkIconPlus(str, n.parent, "@")
+				if n.classify {
+					if n.noDeference {
+						str = renderer.SymlinkIconNoDereferencePlus(str, "@")
+					} else {
+						str = renderer.SymlinkIconPlus(str, info.FullPath, "@", !n.fullPath)
+					}
 				} else {
-					str = n.Renderer.SymlinkIcon(str, n.parent)
+					if n.noDeference {
+						str = renderer.SymlinkIconNoDereference(str)
+					} else {
+						str = renderer.SymlinkIcon(str, info.FullPath, !n.fullPath)
+					}
 				}
 			} else {
 				if n.statistics != nil {
 					n.statistics.file.Add(1)
 				}
 				if mode&os.ModeNamedPipe != 0 {
-					str = n.Renderer.PipeIcon(str)
+					str = renderer.PipeIcon(str)
 					char = "|"
 				} else if mode&os.ModeSocket != 0 {
-					str = n.Renderer.SocketIcon(str)
+					str = renderer.SocketIcon(str)
 					char = "="
 				} else {
-					str = n.Renderer.ByExtIcon(str)
+					str = renderer.ByExtIcon(str)
 				}
 			}
 		} else {
@@ -215,45 +207,43 @@ func (n *Name) Enable() filter.ContentOption {
 				if n.statistics != nil {
 					n.statistics.dir.Add(1)
 				}
-				str = n.Renderer.Dir(str)
+				str = renderer.Dir(str)
 				char = "/"
 			} else if mode&os.ModeSymlink != 0 {
 				if n.statistics != nil {
 					n.statistics.link.Add(1)
 				}
-				if n.Classify {
-					str = n.Renderer.SymlinkPlus(str, n.parent, "@")
+				if n.classify {
+					if n.noDeference {
+						str = renderer.SymlinkNoDereferencePlus(str, "@")
+					} else {
+						str = renderer.SymlinkPlus(str, info.FullPath, "@", !n.fullPath)
+					}
 				} else {
-					str = n.Renderer.Symlink(str, n.parent)
+					if n.noDeference {
+						str = renderer.SymlinkNoDereference(str)
+					} else {
+						str = renderer.Symlink(str, info.FullPath, !n.fullPath)
+					}
 				}
 			} else {
 				if n.statistics != nil {
 					n.statistics.file.Add(1)
 				}
 				if mode&os.ModeNamedPipe != 0 {
-					str = n.Renderer.Pipe(str)
+					str = renderer.Pipe(str)
 					char = "|"
 				} else if mode&os.ModeSocket != 0 {
-					str = n.Renderer.Socket(str)
+					str = renderer.Socket(str)
 					char = "="
 				} else {
-					str = n.Renderer.ByExt(str)
+					str = renderer.ByExt(str)
 				}
 			}
 		}
 
-		if n.git {
-			FilesStatus := *getFromCache(n.parent)
-			for _, status := range FilesStatus {
-				if isOrIsParentOf(name, status.Name) {
-					str = n.GitByName(str, status.Status.String(), n.GitStyle)
-					break
-				}
-			}
-		}
-
-		if n.Classify {
-			if char == "" && (!n.FileType) && (mode&0o111 != 0) && mode&os.ModeSymlink == 0 {
+		if n.classify {
+			if char == "" && (!n.fileType) && util.IsExecutableMode(mode) && mode&os.ModeSymlink == 0 {
 				str += "*"
 			} else {
 				str += char
@@ -265,71 +255,15 @@ func (n *Name) Enable() filter.ContentOption {
 		}
 
 		if n.relativeTo != "" {
-			relativePath, err := filepath.Rel(n.relativeTo, filepath.Join(n.parent, name))
-			if err != nil {
-				return str, NameName
+			relativePath, err := filepath.Rel(n.relativeTo, info.FullPath)
+			if err == nil {
+				str = strings.Replace(str, name, relativePath, 1)
 			}
-			str = strings.Replace(str, name, relativePath, 1)
-		} else if n.fullPath {
-			fullPath := filepath.Join(n.parent, name)
-			str = strings.Replace(str, name, fullPath, 1)
+		}
+		if n.hyperLink {
+			str = makeLink("file://"+info.FullPath, str)
 		}
 
 		return str, NameName
 	}
-}
-
-func (n *Name) GitByName(name string, status string, style gitStyle) string {
-	switch status {
-	case "~":
-		switch style {
-		case GitStyleDot:
-			return n.Renderer.GitModified(name)
-		case GitStyleSym:
-			return n.Renderer.GitModifiedSym(name)
-		}
-	case "?":
-		switch style {
-		case GitStyleDot:
-			return n.Renderer.GitUntracked(name)
-		case GitStyleSym:
-			return n.Renderer.GitUntrackedSym(name)
-		}
-	case "+":
-		switch style {
-		case GitStyleDot:
-			return n.Renderer.GitAdded(name)
-		case GitStyleSym:
-			return n.Renderer.GitAddedSym(name)
-		}
-	case "|":
-		switch style {
-		case GitStyleDot:
-			return n.Renderer.GitRenamed(name)
-		case GitStyleSym:
-			return n.Renderer.GitRenamedSym(name)
-		}
-	case "-":
-		switch style {
-		case GitStyleDot:
-			return n.Renderer.GitDeleted(name)
-		case GitStyleSym:
-			return n.Renderer.GitDeletedSym(name)
-		}
-	case "=":
-		switch style {
-		case GitStyleDot:
-			return n.Renderer.GitCopied(name)
-		case GitStyleSym:
-			return n.Renderer.GitCopiedSym(name)
-		}
-	case "!":
-		switch style {
-		case GitStyleDot:
-			return n.Renderer.GitIgnored(name)
-		case GitStyleSym:
-			return n.Renderer.GitIgnoredSym(name)
-		}
-	}
-	return ""
 }

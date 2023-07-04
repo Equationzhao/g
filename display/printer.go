@@ -8,10 +8,11 @@ import (
 	"io"
 	"math"
 	"os"
-	"runtime"
-	"sort"
+	"regexp"
 	"strings"
 
+	"github.com/Equationzhao/g/item"
+	"github.com/Equationzhao/g/slices"
 	"github.com/Equationzhao/g/util"
 	"github.com/acarl005/stripansi"
 	"github.com/jedib0t/go-pretty/v6/table"
@@ -19,8 +20,6 @@ import (
 	"github.com/olekukonko/ts"
 	orderedmap "github.com/wk8/go-ordered-map/v2"
 )
-
-const dot = '\uF111'
 
 var Output io.Writer = os.Stdout
 
@@ -31,13 +30,13 @@ func RawPrint(toPrint ...any) (n int, err error) {
 // print style control
 
 type hook struct {
-	BeforePrint   []func(Printer, ...Item)
-	AfterPrint    []func(Printer, ...Item)
+	BeforePrint   []func(Printer, ...*item.FileInfo)
+	AfterPrint    []func(Printer, ...*item.FileInfo)
 	disableBefore bool
 	disableAfter  bool
 }
 
-func fire(h []func(Printer, ...Item), p Printer, i ...Item) {
+func fire(h []func(Printer, ...*item.FileInfo), p Printer, i ...*item.FileInfo) {
 	for _, fn := range h {
 		if fn == nil {
 			continue
@@ -48,46 +47,46 @@ func fire(h []func(Printer, ...Item), p Printer, i ...Item) {
 
 func newHook() *hook {
 	return &hook{
-		BeforePrint: make([]func(Printer, ...Item), 0, 5),
-		AfterPrint:  make([]func(Printer, ...Item), 0, 5),
+		BeforePrint: make([]func(Printer, ...*item.FileInfo), 0, 5),
+		AfterPrint:  make([]func(Printer, ...*item.FileInfo), 0, 5),
 	}
 }
 
-func (h *hook) AddBeforePrint(f ...func(Printer, ...Item)) {
+func (h *hook) AddBeforePrint(f ...func(Printer, ...*item.FileInfo)) {
 	h.BeforePrint = append(h.BeforePrint, f...)
 }
 
-func (h *hook) AddAfterPrint(f ...func(Printer, ...Item)) {
+func (h *hook) AddAfterPrint(f ...func(Printer, ...*item.FileInfo)) {
 	h.AfterPrint = append(h.AfterPrint, f...)
 }
 
-func (h *hook) DisableHookBefore() {
+func (h *hook) DisablePreHook() {
 	h.disableBefore = true
 }
 
-func (h *hook) EnableHookBefore() {
+func (h *hook) EnablePreHook() {
 	h.disableBefore = false
 }
 
-func (h *hook) DisableHookAfter() {
+func (h *hook) DisablePostHook() {
 	h.disableAfter = true
 }
 
-func (h *hook) EnableHookAfter() {
+func (h *hook) EnablePostHook() {
 	h.disableAfter = false
 }
 
 type Hook interface {
-	AddBeforePrint(...func(Printer, ...Item))
-	AddAfterPrint(...func(Printer, ...Item))
-	DisableHookBefore()
-	EnableHookBefore()
-	DisableHookAfter()
-	EnableHookAfter()
+	AddBeforePrint(...func(Printer, ...*item.FileInfo))
+	AddAfterPrint(...func(Printer, ...*item.FileInfo))
+	DisablePreHook()
+	EnablePreHook()
+	DisablePostHook()
+	EnablePostHook()
 }
 
 type Printer interface {
-	Print(s ...Item)
+	Print(s ...*item.FileInfo)
 	Hook
 	io.Writer
 }
@@ -104,13 +103,13 @@ func NewByline() Printer {
 	}
 }
 
-func (b *Byline) Print(i ...Item) {
+func (b *Byline) Print(i ...*item.FileInfo) {
 	if !b.disableBefore {
 		fire(b.BeforePrint, b, i...)
 	}
 	defer b.Flush()
 	for _, v := range i {
-		_, _ = b.WriteString(v.OrderedContent())
+		_, _ = b.WriteString(v.OrderedContent(" "))
 		_ = b.WriteByte('\n')
 	}
 	if !b.disableAfter {
@@ -132,14 +131,14 @@ func NewFitTerminal() Printer {
 	}
 }
 
-func (f *FitTerminal) Print(i ...Item) {
+func (f *FitTerminal) Print(i ...*item.FileInfo) {
 	if !f.disableBefore {
 		fire(f.BeforePrint, f, i...)
 	}
 	defer f.Flush()
 	s := make([]string, 0, len(i))
 	for _, v := range i {
-		s = append(s, v.OrderedContent())
+		s = append(s, v.OrderedContent(" "))
 	}
 	f.printColumns(&s)
 
@@ -197,7 +196,7 @@ func calculateRowCol(strs *[]string, margin int) (maxLength int, lengths []int, 
 	lengths = make([]int, 0, len(*strs))
 	for _, str := range *strs {
 		length := WidthLen(str)
-		maxLength = max(maxLength, length)
+		maxLength = util.Max(maxLength, length)
 		lengths = append(lengths, length)
 	}
 
@@ -208,15 +207,39 @@ func calculateRowCol(strs *[]string, margin int) (maxLength int, lengths []int, 
 	return
 }
 
+var IncludeHyperlink = false
+
+func parseLink(link string) (name, other string, ok bool) {
+	re := regexp.MustCompile(`\033]8;;(.*?)\033\\(.*?)\033]8;;\033\\`)
+	matches := re.FindStringSubmatch(link)
+
+	if len(matches) == 3 {
+		// if matches, get the other content and the link
+		other = strings.Replace(link, matches[0], "", 1)
+		return matches[2], other, true
+	}
+	return "", "", false
+}
+
 func WidthLen(str string) int {
+	if IncludeHyperlink {
+		name, other, ok := parseLink(str)
+		if ok {
+			str = other + name
+		}
+	}
 	colorless := stripansi.Strip(str)
 	// len() is insufficient here, as it counts emojis as 4 characters each
 	length := runewidth.StringWidth(colorless)
-	if runtime.GOOS == "windows" || runtime.GOOS == "darwin" {
-		if strings.ContainsRune(colorless, dot) {
-			length--
-		}
-	}
+
+	return length
+}
+
+func WidthNoHyperLinkLen(str string) int {
+	colorless := stripansi.Strip(str)
+	// len() is insufficient here, as it counts emojis as 4 characters each
+	length := runewidth.StringWidth(colorless)
+
 	return length
 }
 
@@ -228,14 +251,16 @@ var (
 // getTermWidth returns the width of the terminal in characters
 // this is a modified version
 func getTermWidth() int {
-	if err := getTermWidthOnce.Do(func() error {
-		var err error
-		size, err = ts.GetSize()
-		if err != nil {
-			return err
-		}
-		return nil
-	}); err != nil {
+	if err := getTermWidthOnce.Do(
+		func() error {
+			var err error
+			size, err = ts.GetSize()
+			if err != nil {
+				return err
+			}
+			return nil
+		},
+	); err != nil {
 		return 0
 	}
 	return size.Col()
@@ -275,13 +300,6 @@ func tableCoordsToColIndex(x, y, numRows int) int {
 	return y + numRows*x
 }
 
-func max(a int, b int) int {
-	if a > b {
-		return a
-	}
-	return b
-}
-
 type CommaPrint struct {
 	*Across
 	*hook
@@ -295,7 +313,7 @@ func NewCommaPrint() Printer {
 	}
 }
 
-func (c *CommaPrint) Print(items ...Item) {
+func (c *CommaPrint) Print(items ...*item.FileInfo) {
 	if !c.disableBefore {
 		fire(c.BeforePrint, c, items...)
 	}
@@ -303,9 +321,9 @@ func (c *CommaPrint) Print(items ...Item) {
 	s := make([]string, 0, len(items))
 	for i, v := range items {
 		if i != len(items)-1 {
-			s = append(s, v.OrderedContent()+",")
+			s = append(s, v.OrderedContent(" ")+",")
 		} else {
-			s = append(s, v.OrderedContent())
+			s = append(s, v.OrderedContent(" "))
 		}
 	}
 	c.printRowWithNoSpace(&s)
@@ -326,14 +344,14 @@ func NewAcross() Printer {
 	}
 }
 
-func (a *Across) Print(items ...Item) {
+func (a *Across) Print(items ...*item.FileInfo) {
 	if !a.disableBefore {
 		fire(a.BeforePrint, a, items...)
 	}
 	defer a.Flush()
 	s := make([]string, 0, len(items))
 	for _, v := range items {
-		s = append(s, v.OrderedContent())
+		s = append(s, v.OrderedContent(" "))
 	}
 	a.printRow(&s)
 	if !a.disableAfter {
@@ -347,24 +365,12 @@ func (a *Across) printRowWithNoSpace(strs *[]string) {
 
 	maxLength := 0
 	for _, str := range *strs {
-		colorless := stripansi.Strip(str)
-		maxLength += runewidth.StringWidth(stripansi.Strip(str))
-		if runtime.GOOS == "windows" || runtime.GOOS == "darwin" {
-			if strings.ContainsRune(colorless, dot) {
-				maxLength--
-			}
-		}
-
+		maxLength += WidthLen(str)
 		if maxLength <= width {
 			_, _ = a.WriteString(str)
 		} else {
 			_, _ = a.WriteString("\n" + str)
-			maxLength = runewidth.StringWidth(colorless)
-			if runtime.GOOS == "windows" || runtime.GOOS == "darwin" {
-				if strings.ContainsRune(colorless, dot) {
-					maxLength--
-				}
-			}
+			maxLength = WidthLen(str)
 		}
 	}
 	_ = a.WriteByte('\n')
@@ -378,14 +384,8 @@ func (a *Across) printRow(strs *[]string) {
 
 	maxLength := 0
 	for i, str := range *strs {
-		colorless := stripansi.Strip(str)
-		strLen[i] = runewidth.StringWidth(colorless)
-		if runtime.GOOS == "windows" {
-			if strings.ContainsRune(colorless, dot) {
-				strLen[i]--
-			}
-		}
-		maxLength = max(maxLength, strLen[i])
+		strLen[i] = WidthLen(str)
+		maxLength = util.Max(maxLength, strLen[i])
 	}
 
 	cols := (width + 1) / (maxLength + 1)
@@ -433,14 +433,13 @@ func NewZero() Printer {
 	}
 }
 
-func (z *Zero) Print(items ...Item) {
+func (z *Zero) Print(items ...*item.FileInfo) {
 	if !z.disableBefore {
 		fire(z.BeforePrint, z, items...)
 	}
 	defer z.Flush()
 	for _, v := range items {
-		v.Delimiter = ""
-		_, _ = z.WriteString(v.OrderedContent())
+		_, _ = z.WriteString(v.OrderedContent(" "))
 	}
 	if !z.disableAfter {
 		fire(z.AfterPrint, z, items...)
@@ -468,7 +467,7 @@ func NewJsonPrinter() Printer {
 	}
 }
 
-func (j *JsonPrinter) Print(items ...Item) {
+func (j *JsonPrinter) Print(items ...*item.FileInfo) {
 	if !j.disableBefore {
 		fire(j.BeforePrint, j, items...)
 	}
@@ -476,7 +475,7 @@ func (j *JsonPrinter) Print(items ...Item) {
 
 	list := make([]*orderedmap.OrderedMap[string, string], 0, len(items))
 	for _, v := range items {
-		all := v.GetAll()
+		all := v.Meta.Pairs()
 
 		type orderItem struct {
 			name    string
@@ -487,23 +486,27 @@ func (j *JsonPrinter) Print(items ...Item) {
 		order := make([]orderItem, 0, len(all))
 
 		// sort by v.Content.No
-		for name, v := range all {
-			c := stripansi.Strip(v.Content.String())
-			if name == "name" {
-				order = append(order, orderItem{name: name, content: c, no: v.No})
+		for _, v := range all {
+			c := stripansi.Strip(v.Value().String())
+			if name := v.Key(); name == "Name" {
+				order = append(order, orderItem{name: name, content: c, no: v.Value().NO()})
 			} else if name == "underwent" || name == "statistic" {
-				order = append(order, orderItem{name: name, content: strings.TrimLeft(c, "\n "), no: v.No})
+				order = append(order, orderItem{name: name, content: strings.TrimLeft(c, "\n "), no: v.Value().NO()})
 			} else if name == "total" {
-				order = append(order, orderItem{name: name, content: strings.TrimPrefix(c, "  total "), no: v.No})
+				order = append(
+					order, orderItem{name: name, content: strings.TrimPrefix(c, "  total "), no: v.Value().NO()},
+				)
 			} else {
 				// remove all leading spaces
-				order = append(order, orderItem{name: name, content: strings.TrimLeft(c, " "), no: v.No})
+				order = append(order, orderItem{name: name, content: strings.TrimSpace(c), no: v.Value().NO()})
 			}
 		}
 
-		sort.Slice(order, func(i, j int) bool {
-			return order[i].no < order[j].no
-		})
+		slices.SortFunc(
+			order, func(a, b orderItem) int {
+				return a.no - b.no
+			},
+		)
 
 		s := orderedmap.New[string, string](
 			orderedmap.WithCapacity[string, string](len(order)),
@@ -567,7 +570,7 @@ func NewTablePrinter(opts ...func(writer table.Writer)) Printer {
 	return t
 }
 
-func (t *TablePrinter) PrintBase(fn func() string, s ...Item) {
+func (t *TablePrinter) PrintBase(fn func() string, s ...*item.FileInfo) {
 	if !t.disableBefore {
 		fire(t.BeforePrint, t, s...)
 	}
@@ -593,16 +596,16 @@ func (t *TablePrinter) PrintBase(fn func() string, s ...Item) {
 	}
 }
 
-func (t *TablePrinter) Print(s ...Item) {
+func (t *TablePrinter) Print(s ...*item.FileInfo) {
 	t.PrintBase(t.w.Render, s...)
 }
 
-func (t *TablePrinter) setTB(s ...Item) {
+func (t *TablePrinter) setTB(s ...*item.FileInfo) {
 	for _, v := range s {
-		all := v.GetAllOrdered()
+		all := v.ValuesByOrdered()
 		row := make(table.Row, 0, len(all))
 		for _, v := range all {
-			row = append(row, strings.TrimLeft(v.Content.String(), " "))
+			row = append(row, strings.TrimLeft(v.String(), " "))
 		}
 		t.w.AppendRow(row)
 	}
@@ -632,7 +635,7 @@ func NewMDPrinter() Printer {
 	return m
 }
 
-func (m *MDPrinter) Print(s ...Item) {
+func (m *MDPrinter) Print(s ...*item.FileInfo) {
 	m.PrintBase(m.w.RenderMarkdown, s...)
 }
 
@@ -646,7 +649,7 @@ func NewHTMLPrinter() Printer {
 	return h
 }
 
-func (p *HTMLPrinter) Print(s ...Item) {
+func (p *HTMLPrinter) Print(s ...*item.FileInfo) {
 	p.PrintBase(p.w.RenderHTML, s...)
 }
 
@@ -660,6 +663,6 @@ func NewCSVPrinter() Printer {
 	return c
 }
 
-func (c *CSVPrinter) Print(s ...Item) {
+func (c *CSVPrinter) Print(s ...*item.FileInfo) {
 	c.PrintBase(c.w.RenderCSV, s...)
 }

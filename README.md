@@ -18,16 +18,16 @@
 g is a ls alternative with features:
 
 1. display items with type-specific icons and colors that are easy to be customized
-2. display in various layouts ( grid/across/byline/tree/zero/comma/table/html/json/markdown )
+2. display in various layouts ( grid/across/byline/zero/comma/table/html/json/markdown )
 3. user-friendly options with many aliases
-4. distinguish file git-status with icons or char symbols
+4. check file git-status when listing entries
 5. highly customizable sort option
 6. cross-platform ( Linux/Windows/MacOS )
 7. option to fuzzy match the path like [`zoxide`](https://github.com/ajeetdsouza/zoxide) with [`fzf`](https://github.com/junegunn/fzf) algorithm
 
 ## Screenshots
 
-![image](./how-g-works.gif)
+![image](how-g-works.gif)
 
 ## install
 
@@ -36,7 +36,7 @@ g is a ls alternative with features:
 go version required >= 1.20
 
 ```bash
-go install -ldflags="-s -w -v"  github.com/Equationzhao/g@latest
+go install -ldflags="-s -w"  github.com/Equationzhao/g@latest
 ```
 
 or Clone this repo
@@ -190,6 +190,13 @@ g -no-color  path
 g -colorless path
 ```
 
+set color 
+```bash
+g --color=always path
+g --color=auto   path # default
+g --color=never  path 
+```
+
 show checksum (md5,sha1,sha224,sha256,sha384,sha512,crc32)
 
 ```bash
@@ -223,6 +230,40 @@ g -md | glow
 ![image](https://github.com/Equationzhao/g/assets/75521101/7ec1e0d7-03cd-4968-ba48-2ec5375086fa)
 
 ...
+
+## Shell scripts
+generate shell scripts
+```bash
+g --init bash/zsh/fish/pwsh
+```
+
+### bash
+```.bashrc
+# add the following command to .bashrc
+eval "$(g --init bash)"
+# then `source ~/.bashrc`
+```
+
+### zsh
+```zsh
+# add the following command to .zshrc
+eval "$(g --init zsh)"
+# then `source ~/.zshrc`
+```
+
+### fish
+```fish
+#  add to fish config:
+g --init fish | source
+#  then `source ~/.config/fish/config.fish`
+```
+
+### powershell
+```powershell
+# add the following line to your profile
+Invoke-Expression (& { (g --init powershell | Out-String) })
+```
+use command `echo $profile` to find your profile path
 
 ## More options
 

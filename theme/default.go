@@ -1,5 +1,24 @@
 package theme
 
+var (
+	dir   = BrightBlue
+	pic   = BrightPurple
+	video = color256(200)
+	audio = color256(199)
+	db    = color256(195)
+	lang  = color256(158)
+	text  = color256(153)
+	doc   = color256(150)
+	tar   = Red
+	pkg   = BrightYellow
+	bash  = BrightGreen
+	lock  = color256(227)
+	vim   = color256(41)
+	key   = color256(214)
+	conf  = White
+	iso   = color256(88)
+)
+
 var DefaultInfoTheme = Theme{
 	"d": Style{
 		Color: Blue,
@@ -37,9 +56,6 @@ var DefaultInfoTheme = Theme{
 	"time": Style{
 		Color: Blue,
 	},
-	"size": Style{
-		Color: Green,
-	},
 	"owner": Style{
 		Color: Yellow,
 	},
@@ -52,86 +68,181 @@ var DefaultInfoTheme = Theme{
 	"root": Style{
 		Color: Red,
 	},
-	"git_modified_dot": Style{
-		Color: Yellow,
-		Icon:  "\uf111",
-	},
-	"git_renamed_dot": Style{
-		Color: Blue,
-		Icon:  "\uf111",
-	},
-	"git_copied_dot": Style{
+	"link": Style{
 		Color: Purple,
-		Icon:  "\uf111",
 	},
-	"git_deleted_dot": Style{
-		Color: Red,
-		Icon:  "\uF111",
+	"bit": Style{
+		Color: rgb(20, 255, 100),
 	},
-	"git_added_dot": Style{
-		Color: Green,
-		Icon:  "\uF111",
+	"B": Style{
+		Color: rgb(20, 230, 100),
 	},
-	"git_untracked_dot": Style{
-		Color: Cyan,
-		Icon:  "\uF111",
+	"KB": Style{
+		Color: rgb(20, 207, 100),
 	},
-	"git_ignored_dot": Style{
+	"MB": Style{
+		Color: rgb(20, 188, 100),
+	},
+	"GB": Style{
+		Color: rgb(20, 170, 100),
+	},
+	"TB": Style{
+		Color: rgb(20, 153, 100),
+	},
+	"PB": Style{
+		Color: rgb(20, 138, 100),
+	},
+	"EB": Style{
+		Color: rgb(20, 125, 100),
+	},
+	"ZB": Style{
+		Color: rgb(20, 112, 100),
+	},
+	"YB": Style{
+		Color: rgb(20, 100, 100),
+	},
+	"BB": Style{
+		Color: rgb(20, 90, 100),
+	},
+	"NB": Style{
+		Color: rgb(20, 70, 100),
+	},
+	"git_unmodified": Style{
 		Color: Black,
-		Icon:  "\uF111",
 	},
-	"git_modified_sym": Style{
+	"git_modified": Style{
 		Color: Yellow,
-		Icon:  "~",
 	},
-	"git_renamed_sym": Style{
+	"git_renamed": Style{
 		Color: Blue,
-		Icon:  "|",
 	},
-	"git_copied_sym": Style{
+	"git_copied": Style{
 		Color: Purple,
-		Icon:  "=",
 	},
-	"git_deleted_sym": Style{
+	"git_deleted": Style{
 		Color: Red,
-		Icon:  "-",
 	},
-	"git_added_sym": Style{
+	"git_added": Style{
 		Color: Green,
-		Icon:  "+",
 	},
-	"git_untracked_sym": Style{
-		Color: Cyan,
-		Icon:  "?",
+	"git_untracked": Style{
+		Color: BrightBlack,
 	},
-	"git_ignored_sym": Style{
-		Color: Black,
-		Icon:  "!",
+	"git_ignored": Style{
+		Color: BrightRed,
+	},
+	"git_type_changed": Style{
+		Color: Yellow,
+	},
+	"git_updated_but_unmerged": Style{
+		Color: BrightYellow,
+	},
+	"symlink_path": Style{
+		Color: Green,
+	},
+	"symlink_broken_path": Style{
+		Color: Red,
+	},
+	"DevToolsUser": Style{
+		Color: color256(202),
+	},
+	"octal": Style{
+		Color: color256(208),
 	},
 }
 
+// DefaultTheme the key should be lowercase
 var DefaultTheme = Theme{
-	"dir": {
-		Color: Blue,
+	"dir": Style{
+		Color: dir,
 		Icon:  "\uF115",
 	},
-	"home": {
-		Color: Blue,
-		Icon:  "\ue617",
+	"home": Style{
+		Icon: "\ue617",
 	},
-	"desktop": {
-		Color: Blue,
-		Icon:  "\uf108",
+	"desktop": Style{
+		Icon: "\uf108",
 	},
-	"downloads": {
-		Color: Blue,
-		Icon:  "\uf498",
+	"downloads": Style{
+		Icon: "\uf498",
 	},
-	"exe": Style{
+	"trash": Style{
+		Icon: "\uf1f8",
+	},
+	"searches": Style{
+		Icon: "\uf422",
+	},
+	"microsoft": Style{
+		Icon: "\uF17A",
+	},
+	"google": Style{
+		Icon: "\uf1a0",
+	},
+	"onedrive": Style{
+		Icon: "\ue762",
+	},
+	"onedrivetemp": Style{
+		Icon: "\ue762",
+	},
+	"favorites": Style{
+		Icon: "\ue623",
+	},
+	"azure": Style{
+		Icon: "\uebd8",
+	},
+	"contacts": Style{
+		Icon: "\uf0c0",
+	},
+	"ds_store": Style{
+		Color: Black,
+		Icon:  "\uf179",
+	},
+	"deb": Style{
+		Color: pkg,
+		Icon:  "\uF306",
+	},
+	"apk": Style{
 		Color: Green,
+		Icon:  "\uF17B",
+	},
+	"pkgbuild": Style{
+		Color: pkg,
+		Icon:  "\uf303",
+	},
+	"app": Style{
+		Icon: "\ueb44",
+	},
+	"applications": Style{
+		Icon: "\ueb44",
+	},
+	"program files": Style{
+		Icon: "\ueb44",
+	},
+	"program files (x86)": Style{
+		Icon: "\ueb44",
+	},
+	"msi": Style{
+		Color: pkg,
 		Icon:  "\uF17A",
 	},
-	"EXE": Style{
+	"dpkg": Style{
+		Color: pkg,
+		Icon:  "\ue77d",
+	},
+	"android": Style{
+		Color: Cyan,
+		Icon:  "\uE70E",
+	},
+	"ssh": Style{
+		Icon: "\ueba9",
+	},
+	"boot": Style{
+		Icon: "\uf287",
+	},
+	"cache": Style{
+		Icon: "\uf49b",
+	},
+	"exe": Style{
 		Color: Green,
 		Icon:  "\uF17A",
 	},
@@ -143,11 +254,18 @@ var DefaultTheme = Theme{
 		Color: White,
 		Icon:  "\ueb39",
 	},
-	"repo": Style{
+	"known_hosts": Style{
 		Color: White,
-		Icon:  "\uea62",
+		Icon:  "\uEB39",
+	},
+	"repo": Style{
+		Icon: "\uea62",
 	},
 	"link": Style{
+		Color: Purple,
+		Icon:  "\ueb15",
+	},
+	"links": Style{
 		Color: Purple,
 		Icon:  "\ueb15",
 	},
@@ -156,468 +274,534 @@ var DefaultTheme = Theme{
 		Icon:  "\ueb15",
 	},
 	"go": Style{
-		Color: Cyan,
+		Color: lang,
 		Icon:  "\uE626",
 	},
 	"rs": Style{
-		Color: Cyan,
+		Color: lang,
+		Icon:  "\uE7A8",
+	},
+	"cargo": {
+		Color: lang,
+		Icon:  "\uE7A8",
+	},
+	"rustup": {
+		Color: lang,
 		Icon:  "\uE7A8",
 	},
 	"cargo.lock": {
-		Color: Cyan,
+		Color: lock,
 		Icon:  "\uE7A8",
 	},
 	"cargo.toml": {
-		Color: Cyan,
+		Color: lang,
 		Icon:  "\uE7A8",
 	},
 	"c": Style{
-		Color: Cyan,
+		Color: lang,
 		Icon:  "\uE61E",
 	},
 	"cpp": Style{
-		Color: Cyan,
+		Color: lang,
 		Icon:  "\uE61D",
 	},
 	"c++": Style{
-		Color: Cyan,
+		Color: lang,
 		Icon:  "\uE61D",
 	},
 	"cc": Style{
-		Color: Cyan,
+		Color: lang,
 		Icon:  "\uE61D",
 	},
 	"cxx": Style{
-		Color: Cyan,
+		Color: lang,
 		Icon:  "\uE61D",
 	},
 	"include": Style{
-		Color: Cyan,
-		Icon:  "\ue5fc",
+		Icon: "\ue5fc",
 	},
 	"h": Style{
-		Color: Cyan,
+		Color: lang,
 		Icon:  "\uE61F",
 	},
 	"hpp": Style{
-		Color: Cyan,
+		Color: lang,
 		Icon:  "\uE61F",
 	},
 	"h++": Style{
-		Color: Cyan,
+		Color: lang,
 		Icon:  "\uE61F",
 	},
 	"hh": Style{
-		Color: Cyan,
+		Color: lang,
 		Icon:  "\uE61F",
 	},
 	"hxx": Style{
-		Color: Cyan,
+		Color: lang,
 		Icon:  "\uE61F",
 	},
 	"cs": Style{
-		Color: Cyan,
-		Icon:  "\uF81A",
+		Color: lang,
+		Icon:  "\U000F031B",
+	},
+	"dotnet": Style{
+		Icon: "\ue72e",
 	},
 	"scala": Style{
-		Color: Cyan,
+		Color: lang,
 		Icon:  "\uE737",
 	},
 	"swift": Style{
-		Color: Cyan,
+		Color: lang,
 		Icon:  "\uE755",
 	},
 	"kt": Style{
-		Color: Cyan,
+		Color: lang,
 		Icon:  "\uE634",
 	},
 	"m": Style{
-		Color: Cyan,
+		Color: lang,
 		Icon:  "\uE61E",
 	},
-	"deb": Style{
-		Color: Cyan,
-		Icon:  "\uF306",
-	},
-	"apk": Style{
-		Color: Green,
-		Icon:  "\uF17B",
-	},
-	"PKGBUILD": Style{
-		Color: Green,
-		Icon:  "\uf303",
-	},
-	"app": Style{
-		Color: Green,
-		Icon:  "\ueb44",
-	},
-	"msi": Style{
-		Color: Green,
-		Icon:  "\ue70f",
-	},
-	"dpkg": Style{
-		Color: Cyan,
-		Icon:  "\uF17C",
-	},
-	"android": Style{
-		Color: Cyan,
-		Icon:  "\uE70E",
-	},
 	"src": Style{
-		Color: Cyan,
-		Icon:  "\ue796",
+		Icon: "\ue796",
 	},
 	"py": Style{
-		Color: Cyan,
+		Color: lang,
+		Icon:  "\uE606",
+	},
+	"ipynb": Style{
+		Color: lang,
 		Icon:  "\uE606",
 	},
 	"pyc": Style{
-		Color: Cyan,
+		Color: lang,
+		Icon:  "\uE606",
+	},
+	"whl": Style{
+		Color: lang,
 		Icon:  "\uE606",
 	},
 	"rb": Style{
-		Color: Cyan,
+		Color: lang,
 		Icon:  "\uE21E",
 	},
 	"js": Style{
-		Color: Cyan,
+		Color: lang,
 		Icon:  "\uE781",
 	},
 	"ts": Style{
-		Color: Cyan,
+		Color: lang,
 		Icon:  "\uE628",
 	},
 	"http": Style{
-		Color: Cyan,
+		Color: lang,
 		Icon:  "\ueb01",
 	},
 	"node_modules": Style{
-		Color: Cyan,
-		Icon:  "\ue5fa",
+		Icon: "\ue5fa",
 	},
 	"npm": Style{
-		Color: Cyan,
+		Color: lang,
 		Icon:  "\ue71e",
 	},
 	"jsx": Style{
-		Color: Cyan,
+		Color: lang,
 		Icon:  "\ue7ba",
 	},
 	"htm": Style{
-		Color: Cyan,
+		Color: lang,
 		Icon:  "\uF13B",
 	},
 	"html": Style{
-		Color: Cyan,
+		Color: lang,
 		Icon:  "\uF13B",
 	},
 	"css": Style{
-		Color: Cyan,
+		Color: lang,
 		Icon:  "\uE749",
 	},
 	"java": Style{
-		Color: Cyan,
+		Color: lang,
 		Icon:  "\uE738",
 	},
 	"jar": Style{
-		Color: Cyan,
+		Color: lang,
 		Icon:  "\uE738",
 	},
 	"json": Style{
-		Color: Cyan,
+		Color: conf,
+		Icon:  "\uE60B",
+	},
+	"json5": Style{
+		Color: conf,
+		Icon:  "\uE60B",
+	},
+	"hson": Style{
+		Color: conf,
 		Icon:  "\uE60B",
 	},
 	"xml": Style{
-		Color: Cyan,
+		Color: conf,
 		Icon:  "\ue796",
 	},
 	"cson": Style{
-		Color: Cyan,
+		Color: conf,
 		Icon:  "\uE601",
 	},
 	"font": Style{
-		Color: Cyan,
-		Icon:  "\uf031",
+		Icon: "\uf031",
+	},
+	"fonts": Style{
+		Icon: "\uf031",
 	},
 	"ttf": Style{
 		Color: Cyan,
 		Icon:  "\uf031",
 	},
-	"properties": Style{
+	"otf": Style{
 		Color: Cyan,
+		Icon:  "\uf031",
+	},
+	"woff": Style{
+		Color: Cyan,
+		Icon:  "\uf031",
+	},
+	"woff2": Style{
+		Color: Cyan,
+		Icon:  "\uf031",
+	},
+	"eot": Style{
+		Color: Cyan,
+		Icon:  "\uf031",
+	},
+	"properties": Style{
+		Color: conf,
 		Icon:  "\uE60B",
 	},
 	"git": Style{
-		Color: Cyan,
+		Color: dir,
 		Icon:  "\uF1D3",
 	},
 	"gitignore": {
 		Color: Black,
-		Icon:  "\uf1d3",
+		Icon:  "\ue65d",
 	},
 	"asm": Style{
-		Color: Cyan,
+		Color: lang,
 		Icon:  "\uFB19",
 	},
 	"groovy": Style{
-		Color: Cyan,
+		Color: lang,
 		Icon:  "\ue775",
 	},
 	"s": Style{
-		Color: Cyan,
-		Icon:  "\uFB19",
+		Color: lang,
+		Icon:  "\ue637",
 	},
 	"gv": Style{
 		Color: Cyan,
 		Icon:  "\uE225",
 	},
 	"hs": Style{
-		Color: Cyan,
+		Color: lang,
 		Icon:  "\ue777",
 	},
 	"d": Style{
-		Color: Cyan,
+		Color: lang,
 		Icon:  "\ue7af",
 	},
 	"dart": Style{
-		Color: Cyan,
+		Color: lang,
 		Icon:  "\uE798",
 	},
 	"erl": Style{
-		Color: Cyan,
+		Color: lang,
 		Icon:  "\ue7b1",
 	},
 	"hrl": Style{
-		Color: Cyan,
+		Color: lang,
 		Icon:  "\uE7B1",
 	},
 	"coffee": Style{
-		Color: Cyan,
+		Color: lang,
 		Icon:  "\uE751",
 	},
 	"iso": Style{
-		Color: Cyan,
-		Icon:  "\uF7C9",
+		Color: iso,
+		Icon:  "\uE271",
 	},
 	"dmg": Style{
-		Color: Cyan,
-		Icon:  "\uF7C9",
+		Color: iso,
+		Icon:  "\uE271",
+	},
+	"img": Style{
+		Color: iso,
+		Icon:  "\uE271",
+	},
+	"vhd": Style{
+		Color: iso,
+		Icon:  "\uE271",
 	},
 	"vhdx": Style{
-		Color: Cyan,
-		Icon:  "\uE61C",
+		Color: iso,
+		Icon:  "\uE271",
 	},
 	"lua": Style{
-		Color: Cyan,
+		Color: lang,
 		Icon:  "\uE620",
 	},
 	"vue": Style{
-		Color: Cyan,
-		Icon:  "\ufd42",
+		Color: lang,
+		Icon:  "\uE6A0",
+	},
+	"php": Style{
+		Color: lang,
+		Icon:  "\uE73D",
 	},
 	"makefile": Style{
-		Color: Cyan,
+		Color: lang,
 		Icon:  "\uE20F",
 	},
-	"Makefile": Style{
-		Color: Cyan,
+	"justfile": Style{
+		Color: lang,
+		Icon:  "\uE20F",
+	},
+	"cmake": Style{
+		Color: lang,
+		Icon:  "\uE20F",
+	},
+	"cmakeLists.txt": Style{
+		Color: lang,
 		Icon:  "\uE20F",
 	},
 	"less": Style{
-		Color: Cyan,
+		Color: lang,
 		Icon:  "\ue758",
 	},
 	"r": Style{
-		Color: Cyan,
+		Color: lang,
 		Icon:  "\uF25D",
 	},
 	"f": Style{
-		Color: Cyan,
-		Icon:  "\uF794",
+		Color: lang,
+		Icon:  "\uf121",
 	},
 	"history": Style{
-		Color: Cyan,
-		Icon:  "\uF1DA",
+		Icon: "\uF1DA",
 	},
-	"audio": Style{
-		Color: Cyan,
-		Icon:  "\uf1c7",
-	},
-	"php": Style{
-		Color: Cyan,
-		Icon:  "\uE73D",
+	"recovery": Style{
+		Icon: "\uF1DA",
 	},
 	"apple": Style{
-		Color: Cyan,
+		Color: Black,
 		Icon:  "\uF179",
 	},
+	"atom": Style{
+		Color: lang,
+		Icon:  "\ue764",
+	},
+	"docker": Style{
+		Color: Yellow,
+		Icon:  "\ue7b0",
+	},
 	"dockerfile": Style{
-		Color: Cyan,
-		Icon:  "\ue7b0",
-	},
-	"Dockerfile": Style{
-		Color: Cyan,
-		Icon:  "\ue7b0",
-	},
-	"Docker": Style{
-		Color: Cyan,
+		Color: Yellow,
 		Icon:  "\ue7b0",
 	},
 	"md": Style{
-		Color: Cyan,
+		Color: BrightYellow,
+		Icon:  "\uF48A",
+	},
+	"readme": Style{
+		Color: BrightYellow,
 		Icon:  "\uF48A",
 	},
 	"txt": Style{
-		Color: Cyan,
+		Color: text,
 		Icon:  "\uF15C",
 	},
-	"sh": Style{
-		Color: Cyan,
-		Icon:  "\uF489",
-	},
-	"bat": Style{
-		Color: Cyan,
-		Icon:  "\ue629",
-	},
-	"ps1": Style{
-		Color: Cyan,
-		Icon:  "\uF489",
+	"sdk": Style{
+		Icon: "\uF121",
 	},
 	"zig": Style{
-		Color: Cyan,
+		Color: lang,
 		Icon:  "\uF0E7",
 	},
 	"rss": Style{
-		Color: Cyan,
+		Color: lang,
 		Icon:  "\uF09E",
 	},
 	"ko": Style{
-		Color: Cyan,
+		Color: lang,
 		Icon:  "\uebc6",
 	},
 	"zip": Style{
-		Color: Cyan,
+		Color: tar,
+		Icon:  "",
+	},
+	"zst": Style{
+		Color: tar,
 		Icon:  "",
 	},
 	"sitx": Style{
-		Color: Cyan,
+		Color: tar,
 		Icon:  "",
 	},
 	"tar": Style{
-		Color: Cyan,
+		Color: tar,
 		Icon:  "",
 	},
 	"gz": Style{
-		Color: Cyan,
+		Color: tar,
 		Icon:  "",
 	},
 	"rar": Style{
-		Color: Cyan,
+		Color: tar,
 		Icon:  "",
 	},
 	"7z": Style{
-		Color: Cyan,
+		Color: tar,
 		Icon:  "",
 	},
+	"xz": Style{
+		Color: tar,
+		Icon:  "",
+	},
+	"pictures": Style{
+		Icon: "\uF1C5",
+	},
 	"jpg": Style{
-		Color: Purple,
+		Color: pic,
 		Icon:  "\uF1C5",
 	},
 	"jpeg": Style{
-		Color: Purple,
+		Color: pic,
 		Icon:  "\uF1C5",
 	},
 	"png": Style{
-		Color: Purple,
+		Color: pic,
 		Icon:  "\uF1C5",
 	},
 	"bmp": Style{
-		Color: Purple,
+		Color: pic,
 		Icon:  "\uF1C5",
 	},
 	"tif": Style{
-		Color: Purple,
+		Color: pic,
 		Icon:  "\uF1C5",
 	},
 	"tiff": Style{
-		Color: Purple,
+		Color: pic,
 		Icon:  "\uF1C5",
 	},
 	"gif": Style{
-		Color: Purple,
+		Color: pic,
 		Icon:  "\uF1C5",
 	},
+	"svg": Style{
+		Color: pic,
+		Icon:  "\uF1C5",
+	},
+	"webp": Style{
+		Color: pic,
+		Icon:  "\uF1C5",
+	},
+	"pcx": Style{
+		Color: pic,
+		Icon:  "\uF1C5",
+	},
+	"avif": Style{
+		Color: pic,
+		Icon:  "\uF1C5",
+	},
+	"psd": Style{
+		Color: pic,
+		Icon:  "\ue67f",
+	},
+	"videos": {
+		Icon: "",
+	},
+	"movies": {
+		Icon: "",
+	},
 	"mp4": Style{
-		Color: Cyan,
+		Color: video,
 		Icon:  "",
 	},
 	"mkv": Style{
-		Color: Cyan,
+		Color: video,
 		Icon:  "",
 	},
 	"avi": Style{
-		Color: Cyan,
+		Color: video,
+		Icon:  "",
+	},
+	"m4v": Style{
+		Color: video,
 		Icon:  "",
 	},
 	"flv": Style{
-		Color: Cyan,
+		Color: video,
 		Icon:  "",
 	},
 	"mov": Style{
-		Color: Cyan,
-		Icon:  "\uF03D",
+		Color: video,
+		Icon:  "",
+	},
+	"mpeg": Style{
+		Color: video,
+		Icon:  "",
 	},
 	"ai": Style{
 		Color: Cyan,
 		Icon:  "\uE7B4",
 	},
 	"music": Style{
-		Color: Cyan,
-		Icon:  "",
+		Icon: "\uF025",
+	},
+	"audio": Style{
+		Icon: "\uF025",
 	},
 	"mp3": Style{
-		Color: Cyan,
-		Icon:  "",
+		Color: audio,
+		Icon:  "\uf1c7",
 	},
 	"m4a": Style{
-		Color: Cyan,
-		Icon:  "",
+		Color: audio,
+		Icon:  "\uf1c7",
 	},
 	"mid": Style{
-		Color: Cyan,
-		Icon:  "",
+		Color: audio,
+		Icon:  "\uf1c7",
 	},
 	"midi": Style{
-		Color: Cyan,
-		Icon:  "",
-	},
-	"mpeg": Style{
-		Color: Cyan,
-		Icon:  "",
+		Color: audio,
+		Icon:  "\uf1c7",
 	},
 	"flac": Style{
-		Color: Cyan,
-		Icon:  "",
+		Color: audio,
+		Icon:  "\uf1c7",
 	},
 	"ape": Style{
-		Color: Cyan,
-		Icon:  "",
+		Color: audio,
+		Icon:  "\uf1c7",
 	},
 	"alac": Style{
-		Color: Cyan,
-		Icon:  "",
+		Color: audio,
+		Icon:  "\uf1c7",
 	},
 	"aac": Style{
-		Color: Cyan,
-		Icon:  "",
+		Color: audio,
+		Icon:  "\uf1c7",
 	},
 	"wav": Style{
-		Color: Cyan,
-		Icon:  "",
+		Color: audio,
+		Icon:  "\uf1c7",
 	},
 	"ogg": Style{
-		Color: Cyan,
-		Icon:  "",
+		Color: audio,
+		Icon:  "\uf1c7",
 	},
 	"pdf": Style{
 		Color: Cyan,
@@ -640,55 +824,55 @@ var DefaultTheme = Theme{
 		Icon:  "\uF12D",
 	},
 	"doc": Style{
-		Color: Cyan,
+		Color: doc,
 		Icon:  "\uf1c2",
 	},
 	"docx": Style{
-		Color: Cyan,
+		Color: doc,
 		Icon:  "\uf1c2",
 	},
 	"docm": Style{
-		Color: Cyan,
+		Color: doc,
 		Icon:  "\uf1c2",
 	},
 	"xls": Style{
-		Color: Cyan,
+		Color: doc,
 		Icon:  "\uf1c3",
 	},
 	"xlsx": Style{
-		Color: Cyan,
+		Color: doc,
 		Icon:  "\uf1c3",
 	},
 	"xlsm": Style{
-		Color: Cyan,
+		Color: doc,
 		Icon:  "\uf1c3",
 	},
 	"numbers": Style{
-		Color: Cyan,
+		Color: doc,
 		Icon:  "\uf1c3",
 	},
 	"csv": Style{
-		Color: Cyan,
+		Color: doc,
 		Icon:  "\ue64a",
 	},
 	"ppt": Style{
-		Color: Cyan,
+		Color: doc,
 		Icon:  "\uf1c4",
 	},
 	"pptm": Style{
-		Color: Cyan,
+		Color: doc,
 		Icon:  "\uf1c4",
 	},
 	"pptx": Style{
-		Color: Cyan,
+		Color: doc,
 		Icon:  "\uf1c4",
 	},
 	"dot": Style{
-		Color: Cyan,
+		Color: doc,
 		Icon:  "\uf1c2",
 	},
 	"dotx": Style{
-		Color: Cyan,
+		Color: doc,
 		Icon:  "\uf1c2",
 	},
 	"diff": Style{
@@ -696,95 +880,139 @@ var DefaultTheme = Theme{
 		Icon:  "\uF440",
 	},
 	"ini": Style{
-		Color: Cyan,
+		Color: conf,
 		Icon:  "\uE615",
 	},
 	"conf": Style{
-		Color: Cyan,
+		Color: conf,
 		Icon:  "\uE615",
 	},
 	"cfg": Style{
-		Color: Cyan,
+		Color: conf,
 		Icon:  "\uE615",
 	},
 	"config": Style{
-		Color: Cyan,
+		Color: conf,
 		Icon:  "\uE615",
 	},
 	"yml": Style{
-		Color: Cyan,
-		Icon:  "\uE615",
+		Color: conf,
+		Icon:  "\uF481",
 	},
 	"yaml": Style{
-		Color: Cyan,
+		Color: conf,
 		Icon:  "\uF481",
 	},
 	"tex": Style{
-		Color: Cyan,
+		Color: lang,
 		Icon:  "\uF034",
 	},
 	"typ": Style{
-		Color: Cyan,
+		Color: lang,
 		Icon:  "∫",
 	},
 	"toml": Style{
-		Color: Cyan,
-		Icon:  "\uF615",
-	},
-	"sys": Style{
-		Color: Cyan,
-		Icon:  "\uF17C",
+		Color: conf,
+		Icon:  "\uE615",
 	},
 	"db": Style{
-		Color: Cyan,
+		Color: db,
 		Icon:  "\uF1C0",
 	},
 	"accdb": Style{
-		Color: Cyan,
+		Color: db,
 		Icon:  "\uF1C0",
 	},
 	"sqlite": Style{
-		Color: Cyan,
+		Color: db,
 		Icon:  "\uE7C4",
 	},
 	"sqlite3": Style{
-		Color: Cyan,
+		Color: db,
 		Icon:  "\uE7C4",
 	},
 	"sql": Style{
-		Color: Cyan,
+		Color: db,
 		Icon:  "\uE706",
 	},
 	"db3": Style{
-		Color: Cyan,
+		Color: db,
 		Icon:  "\uF1C0",
 	},
+	"sh": Style{
+		Color: bash,
+		Icon:  "\uF489",
+	},
+	"bat": Style{
+		Color: bash,
+		Icon:  "\ue629",
+	},
+	"ps1": Style{
+		Color: bash,
+		Icon:  "\uF489",
+	},
+	"csh": Style{
+		Color: bash,
+		Icon:  "\uF489",
+	},
+	"fish": Style{
+		Color: bash,
+		Icon:  "\uF489",
+	},
+	"ksh": Style{
+		Color: bash,
+		Icon:  "\uF489",
+	},
 	"zsh": Style{
-		Color: Cyan,
+		Color: bash,
+		Icon:  "\uF489",
+	},
+	"zsh_history": Style{
+		Color: bash,
+		Icon:  "\uF489",
+	},
+	"zshrc": Style{
+		Color: bash,
 		Icon:  "\uF489",
 	},
 	"bash": Style{
-		Color: Cyan,
+		Color: bash,
+		Icon:  "\uF489",
+	},
+	"bashrc": Style{
+		Color: bash,
+		Icon:  "\uF489",
+	},
+	"bash_history": Style{
+		Color: bash,
+		Icon:  "\uF489",
+	},
+	"bash_profile": Style{
+		Color: bash,
 		Icon:  "\uF489",
 	},
 	"vim": Style{
-		Color: Cyan,
+		Color: vim,
+		Icon:  "\uE62B",
+	},
+	"viminfo": Style{
+		Color: vim,
 		Icon:  "\uE62B",
 	},
 	"vimrc": Style{
-		Color: Cyan,
+		Color: vim,
 		Icon:  "\uE62B",
 	},
 	"gvimrc": Style{
-		Color: Cyan,
+		Color: vim,
 		Icon:  "\uE62B",
 	},
 	"nvim": Style{
-		Color: Cyan,
+		Color: vim,
 		Icon:  "\uE62B",
 	},
 	"nvimrc": Style{
-		Color: Cyan,
+		Color: vim,
 		Icon:  "\uE62B",
 	},
 	"log": Style{
@@ -792,23 +1020,49 @@ var DefaultTheme = Theme{
 		Icon:  "\uF18D",
 	},
 	"lock": Style{
-		Color: Cyan,
+		Color: lock,
 		Icon:  "\uF023",
 	},
 	"github": Style{
-		Color: Cyan,
-		Icon:  "\uf470",
+		Icon: "\uF408",
 	},
 	"vscode": Style{
-		Color: Cyan,
-		Icon:  "\uE70C",
+		Icon: "\uE70C",
 	},
 	"code-workspace": Style{
-		Color: Cyan,
+		Color: lang,
 		Icon:  "\uE70C",
 	},
 	"key": Style{
-		Color: Cyan,
+		Color: key,
+		Icon:  "\uF084",
+	},
+	"pub": Style{
+		Color: key,
+		Icon:  "\uF084",
+	},
+	"id_rsa": Style{
+		Color: key,
+		Icon:  "\uF084",
+	},
+	"gpg": Style{
+		Color: key,
+		Icon:  "\uF084",
+	},
+	"cer": Style{
+		Color: key,
+		Icon:  "\uF084",
+	},
+	"crt": Style{
+		Color: key,
+		Icon:  "\uF084",
+	},
+	"pgp": Style{
+		Color: key,
+		Icon:  "\uF084",
+	},
+	"license": Style{
+		Color: key,
 		Icon:  "\uF084",
 	},
 	"passwd": Style{
@@ -820,20 +1074,19 @@ var DefaultTheme = Theme{
 		Icon:  "\uF0C0",
 	},
 	"lib": Style{
-		Color: Cyan,
-		Icon:  "\uF121",
+		Icon: "\uF121",
+	},
+	"library": Style{
+		Icon: "\uF121",
 	},
 	"bin": Style{
-		Color: Cyan,
-		Icon:  "\uE5FC",
+		Icon: "\uE5FC",
 	},
 	"share": Style{
-		Color: Cyan,
-		Icon:  "\uf064",
+		Icon: "\uf064",
 	},
 	"idea": Style{
-		Color: Cyan,
-		Icon:  "\uE7B5",
+		Icon: "\uE7B5",
 	},
 	"so": Style{
 		Color: Cyan,
@@ -855,5 +1108,11 @@ var DefaultTheme = Theme{
 		Color: Purple,
 		Icon:  "\ueb15",
 	},
-	"swp": Style{},
+	"symlink_arrow": Style{
+		Color: BrightWhite,
+		Icon:  " ~> ",
+	},
+	"users": Style{
+		Icon: "\uf0c0",
+	},
 }

@@ -3,76 +3,53 @@ package content
 import (
 	"os"
 	"strings"
-	"sync"
 
 	"github.com/Equationzhao/g/filter"
+	"github.com/Equationzhao/g/item"
+	"github.com/Equationzhao/g/util"
 	"github.com/gabriel-vasile/mimetype"
 )
 
 type MimeFileTypeEnabler struct {
-	*sync.WaitGroup
-	ParentOnly bool
+	ParentOnly, EnableCharset bool
 }
 
 func NewMimeFileTypeEnabler() *MimeFileTypeEnabler {
 	return &MimeFileTypeEnabler{
-		WaitGroup:  &sync.WaitGroup{},
-		ParentOnly: false,
+		ParentOnly:    false,
+		EnableCharset: false,
 	}
 }
 
-const MimeTypeName = "Mime-type"
+const (
+	MimeTypeName       = "Mime-type"
+	ParentMimeTypeName = "Parent-Mime-type"
+)
 
 func (e *MimeFileTypeEnabler) Enable() filter.ContentOption {
-	longestTypeName := 0
-	m := sync.RWMutex{}
-	done := func(tn string) {
-		defer e.Done()
-		m.RLock()
-		if longestTypeName >= len(tn) {
-			m.RUnlock()
-			return
-		}
-		m.RUnlock()
-		m.Lock()
-		if longestTypeName < len(tn) {
-			longestTypeName = len(tn)
-		}
-		m.Unlock()
-	}
-
-	wait := func(tn string) string {
-		e.Wait()
-		return filter.FillBlank(tn, longestTypeName)
-	}
-	return func(info os.FileInfo) (string, string) {
+	return func(info *item.FileInfo) (string, string) {
 		tn := ""
 		returnName := MimeTypeName
 		if e.ParentOnly {
-			returnName = "parent-" + returnName
+			returnName = ParentMimeTypeName
 		}
 		if info.IsDir() {
 			tn = "directory"
-		} else if info.Mode()&os.ModeSymlink != 0 {
+		} else if util.IsSymLink(info) {
 			tn = "symlink"
 		} else if info.Mode()&os.ModeNamedPipe != 0 {
 			tn = "named_pipe"
 		} else if info.Mode()&os.ModeSocket != 0 {
 			tn = "socket"
 		} else {
-			file, err := os.Open(info.Name())
+			file, err := os.Open(info.FullPath)
 			defer file.Close()
 			if err != nil {
-				// tn = err.Error()
-				tn = "failed_to_read"
-				done(tn)
-				return wait(tn), returnName
+				return "failed_to_read", returnName
 			}
 			mtype, err := mimetype.DetectReader(file)
 			if err != nil {
-				tn = err.Error()
-				done(tn)
-				return wait(tn), returnName
+				return err.Error(), returnName
 			}
 			tn = mtype.String()
 
@@ -80,13 +57,14 @@ func (e *MimeFileTypeEnabler) Enable() filter.ContentOption {
 				tn = strings.SplitN(tn, "/", 2)[0]
 			}
 
-			if strings.Contains(tn, ";") {
-				// remove charset
-				tn = strings.SplitN(tn, ";", 2)[0]
+			if !e.EnableCharset {
+				if strings.Contains(tn, ";") {
+					// remove charset
+					tn = strings.SplitN(tn, ";", 2)[0]
+				}
 			}
 
 		}
-		done(tn)
-		return wait(tn), returnName
+		return tn, returnName
 	}
 }

@@ -1,11 +1,19 @@
 package util
 
-// SliceContains return true if slice contains item
-func SliceContains[T comparable](slice []T, item T) bool {
-	for _, v := range slice {
-		if v == item {
-			return true
-		}
+import (
+	"github.com/Equationzhao/g/util/cmp"
+)
+
+func Max[T cmp.Ordered](a, b T) T {
+	if a > b {
+		return a
 	}
-	return false
+	return b
+}
+
+func Min[T cmp.Ordered](a, b T) T {
+	if a > b {
+		return b
+	}
+	return a
 }

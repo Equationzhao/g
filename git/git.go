@@ -7,8 +7,8 @@ import (
 )
 
 type FileGit struct {
-	Name   string
-	Status Status
+	Name string
+	X, Y Status
 }
 
 /*
@@ -44,57 +44,68 @@ U           U    unmerged, both modified
 !           !    ignored
 -------------------------------------------------
 */
-func (f *FileGit) setYFromXY(XY string) {
-	set := func(Y string) {
-		switch Y {
-		case "M":
-			f.Status = Modified
-		case "A":
-			f.Status = Added
-		case "D":
-			f.Status = Deleted
-		case "R":
-			f.Status = Renamed
-		case "C":
-			f.Status = Copied
-		case "?":
-			f.Status = Untracked
-		case "!":
-			f.Status = Ignored
+func (f *FileGit) set(XY string) {
+	set := func(s *Status, c byte) {
+		switch c {
+		case 'M':
+			*s = Modified
+		case 'A':
+			*s = Added
+		case 'D':
+			*s = Deleted
+		case 'R':
+			*s = Renamed
+		case 'C':
+			*s = Copied
+		case '?':
+			*s = Untracked
+		case '!':
+			*s = Ignored
+		case ' ':
+			*s = Unmodified
+		case 'T':
+			*s = TypeChanged
+		case 'U':
+			*s = UpdatedBuUnmerged
 		}
 	}
-
-	switch len(XY) {
-	case 1:
-		set(XY)
-	case 2:
-		Y := XY[0:1]
-		set(Y)
-	default:
-		return
-	}
+	set(&f.X, XY[0])
+	set(&f.Y, XY[1])
 }
 
 type FileGits = []FileGit
 
-type GitRepoPath = string
+type RepoPath = string
 
 // GetShortGitStatus read the git status of the repository located at path
-func GetShortGitStatus(repoPath GitRepoPath) (string, error) {
-	out, err := exec.Command("git", "-C", repoPath, "status", "-s", "--ignored", "--porcelain").Output()
+func GetShortGitStatus(repoPath RepoPath) (string, error) {
+	out, err := exec.Command("git", "status", "-s", "--ignored", "--porcelain", repoPath).Output()
 	return string(out), err
+}
+
+func getTopLevel(path RepoPath) (string, error) {
+	out, err := exec.Command("git", "rev-parse", "--show-toplevel", path).Output()
+	if err != nil {
+		return "", err
+	}
+	// 	 get the first line
+	lines := strings.Split(string(out), "\n")[0]
+	return lines, err
 }
 
 type Status int
 
 const (
-	Modified  Status = iota + 1 // M ~
-	Added                       // A +
-	Deleted                     // D -
-	Renamed                     // R |
-	Copied                      // C =
-	Untracked                   // ? ?
-	Ignored                     // ! !
+	Unmodified        Status = iota + 1 //
+	Modified                            // M
+	Added                               // A
+	Deleted                             // D
+	Renamed                             // R
+	Copied                              // C
+	Untracked                           // ?
+	Ignored                             // !
+	TypeChanged                         // T
+	UpdatedBuUnmerged                   // U
 )
 
 // ParseShort parses a git status output command
@@ -103,7 +114,6 @@ const (
 func ParseShort(r string) (res FileGits) {
 	s := bufio.NewScanner(strings.NewReader(r))
 
-	// Extract branch name
 	for s.Scan() {
 		// Skip any empty line
 		if len(s.Text()) < 1 {
@@ -114,12 +124,13 @@ func ParseShort(r string) (res FileGits) {
 
 	fg := FileGit{}
 	for {
-		if len(s.Text()) < 1 {
+		str := s.Text()
+		if len(str) < 1 {
 			continue
 		}
-		XyName := strings.Fields(s.Text())
-		fg.setYFromXY(XyName[0])
-		fg.Name = XyName[1]
+		status := str[0:2]
+		fg.set(status)
+		fg.Name = str[3:]
 		res = append(res, fg)
 		if !s.Scan() {
 			break

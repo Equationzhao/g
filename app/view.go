@@ -7,7 +7,7 @@ import (
 
 	"github.com/Equationzhao/g/display"
 	"github.com/Equationzhao/g/filter"
-	"github.com/Equationzhao/g/filter/content"
+	filtercontent "github.com/Equationzhao/g/filter/content"
 	"github.com/Equationzhao/g/timeparse"
 	"github.com/gabriel-vasile/mimetype"
 	"github.com/urfave/cli/v2"
@@ -16,9 +16,10 @@ import (
 var viewFlag = []cli.Flag{
 	// VIEW
 	&cli.BoolFlag{
-		Name:    "header",
-		Aliases: []string{"title"},
-		Usage:   "add a header row",
+		Name:               "header",
+		Aliases:            []string{"title"},
+		Usage:              "add a header row",
+		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
 			if b {
 				if _, ok := p.(*display.Byline); !ok {
@@ -30,8 +31,9 @@ var viewFlag = []cli.Flag{
 		Category: "VIEW",
 	},
 	&cli.BoolFlag{
-		Name:  "footer",
-		Usage: "add a footer row",
+		Name:               "footer",
+		Usage:              "add a footer row",
+		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
 			if b {
 				if _, ok := p.(*display.Byline); !ok {
@@ -43,24 +45,10 @@ var viewFlag = []cli.Flag{
 		Category: "VIEW",
 	},
 	&cli.BoolFlag{
-		Name:     "statistic",
-		Usage:    "show statistic info",
-		Category: "VIEW",
-	},
-	&cli.BoolFlag{
-		Name:    "duplicate",
-		Aliases: []string{"dup"},
-		Usage:   "show duplicate files",
-		Action: func(context *cli.Context, b bool) error {
-			if b {
-				noOutputFunc = append(noOutputFunc, duplicateDetect.Enable())
-				hookAfter = append(hookAfter, func(p display.Printer, item ...display.Item) {
-					duplicateDetect.Fprint(p)
-					duplicateDetect.Reset()
-				})
-			}
-			return nil
-		},
+		Name:               "statistic",
+		Usage:              "show statistic info",
+		DisableDefaultText: true,
+		Category:           "VIEW",
 	},
 	&cli.StringSliceFlag{
 		Name:        "time-type",
@@ -133,8 +121,8 @@ var viewFlag = []cli.Flag{
 			if strings.EqualFold(s, "auto") {
 				return nil
 			}
-			sizeUint = content.ConvertFromSizeString(s)
-			if sizeUint == content.Unknown {
+			sizeUint = filtercontent.ConvertFromSizeString(s)
+			if sizeUint == filtercontent.Unknown {
 				ReturnCode = 1
 				return fmt.Errorf("invalid size unit: %s", s)
 			}
@@ -193,104 +181,14 @@ var viewFlag = []cli.Flag{
 	&cli.BoolFlag{
 		Name:               "#",
 		DisableDefaultText: true,
-		Usage:              "print entry No. for each entry",
+		Usage:              "print entry Number for each entry",
 		Category:           "DISPLAY",
 		Action: func(context *cli.Context, b bool) error {
 			if b {
-				contentFunc = append(contentFunc, content.NewIndexEnabler().Enable())
+				contentFunc = append(contentFunc, filtercontent.NewIndexEnabler().Enable())
 			}
 			return nil
 		},
-	},
-	&cli.BoolFlag{
-		Name:               "o",
-		DisableDefaultText: true,
-		Usage:              "like -all/l, but do not list group information",
-		Action: func(context *cli.Context, b bool) error {
-			if b {
-				// remove filter.RemoveHidden
-				newFF := make([]*filter.ItemFilterFunc, 0, len(itemFilterFunc))
-				for _, typeFunc := range itemFilterFunc {
-					if typeFunc != &filter.RemoveHidden {
-						newFF = append(newFF, typeFunc)
-					}
-				}
-				itemFilterFunc = newFF
-				contentFunc = append(contentFunc, content.EnableFileMode(r), sizeEnabler.EnableSize(sizeUint), contentFilter.EnableGroup(r))
-				for _, s := range timeType {
-					contentFunc = append(contentFunc, content.EnableTime(timeFormat, s, r))
-				}
-				if _, ok := p.(*display.Byline); !ok {
-					p = display.NewByline()
-				}
-			}
-			return nil
-		},
-		Category: "VIEW",
-	},
-	&cli.BoolFlag{
-		Name:               "g",
-		DisableDefaultText: true,
-		Usage:              "like -all/l, but do not list owner",
-		Action: func(context *cli.Context, b bool) error {
-			if b {
-				// remove filter.RemoveHidden
-				newFF := make([]*filter.ItemFilterFunc, 0, len(itemFilterFunc))
-				for _, typeFunc := range itemFilterFunc {
-					if typeFunc != &filter.RemoveHidden {
-						newFF = append(newFF, typeFunc)
-					}
-				}
-				itemFilterFunc = newFF
-				contentFunc = append(contentFunc, content.EnableFileMode(r), sizeEnabler.EnableSize(sizeUint), contentFilter.EnableOwner(r))
-				for _, s := range timeType {
-					contentFunc = append(contentFunc, content.EnableTime(timeFormat, s, r))
-				}
-				if _, ok := p.(*display.Byline); !ok {
-					p = display.NewByline()
-				}
-			}
-			return nil
-		},
-		Category: "VIEW",
-	},
-	&cli.BoolFlag{
-		Name:               "G",
-		DisableDefaultText: true,
-		Aliases:            []string{"no-group"},
-		Usage:              "in a long listing, don't print group names",
-		Category:           "VIEW",
-	},
-	&cli.BoolFlag{
-		Name:               "all",
-		Aliases:            []string{"la", "l", "long"},
-		Usage:              "show all info/use a long listing format",
-		DisableDefaultText: true,
-		Action: func(context *cli.Context, b bool) error {
-			if b {
-				// remove filter.RemoveHidden
-				newFF := make([]*filter.ItemFilterFunc, 0, len(itemFilterFunc))
-				for _, typeFunc := range itemFilterFunc {
-					if typeFunc != &filter.RemoveHidden {
-						newFF = append(newFF, typeFunc)
-					}
-				}
-				itemFilterFunc = newFF
-				sizeEnabler.SetEnableTotal()
-				contentFunc = append(contentFunc, content.EnableFileMode(r), sizeEnabler.EnableSize(sizeUint), contentFilter.EnableOwner(r))
-				if !context.Bool("G") {
-					contentFunc = append(contentFunc, contentFilter.EnableGroup(r))
-				}
-				for _, s := range timeType {
-					contentFunc = append(contentFunc, content.EnableTime(timeFormat, s, r))
-				}
-				if _, ok := p.(*display.Byline); !ok {
-					p = display.NewByline()
-				}
-			}
-			return nil
-		},
-		Category: "VIEW",
 	},
 	&cli.BoolFlag{
 		Name:               "inode",
@@ -298,8 +196,7 @@ var viewFlag = []cli.Flag{
 		Usage:              "show inode[linux/darwin only]",
 		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
-			i := content.NewInodeEnabler()
-			wgs = append(wgs, i)
+			i := filtercontent.NewInodeEnabler()
 			contentFunc = append(contentFunc, i.Enable(r))
 			return nil
 		},
@@ -311,7 +208,7 @@ var viewFlag = []cli.Flag{
 		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
 			if b {
-				filter.Uid = true
+				ownerEnabler.EnableNumeric()
 			}
 			return nil
 		},
@@ -323,7 +220,7 @@ var viewFlag = []cli.Flag{
 		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
 			if b {
-				filter.Gid = true
+				groupEnabler.EnableNumeric()
 			}
 			return nil
 		},
@@ -336,30 +233,29 @@ var viewFlag = []cli.Flag{
 		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
 			if b {
-				filter.Gid = true
-				filter.Uid = true
+				ownerEnabler.EnableNumeric()
+				groupEnabler.EnableNumeric()
 			}
 			return nil
 		},
 		Category: "VIEW",
 	},
 	&cli.BoolFlag{
-		Name:               "relative-time",
-		Aliases:            []string{"rt"},
-		Usage:              "show relative time",
+		Name:               "show-octal-perm",
+		Aliases:            []string{"octal-perm", "octal-permission", "octal-permissions"},
+		Usage:              "list each file's permission in octal format",
 		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
 			if b {
-				rt := content.NewRelativeTimeEnabler()
-				rt.Mode = timeType[0]
-				contentFunc = append(contentFunc, rt.Enable(r))
-				wgs = append(wgs, rt)
+				contentFunc = append(contentFunc, filtercontent.EnableFileOctalPermissions(r))
+				if _, ok := p.(*display.Byline); !ok {
+					p = display.NewByline()
+				}
 			}
 			return nil
 		},
 		Category: "VIEW",
 	},
-
 	&cli.BoolFlag{
 		Name:               "show-perm",
 		Aliases:            []string{"sp", "permission", "perm"},
@@ -367,7 +263,7 @@ var viewFlag = []cli.Flag{
 		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
 			if b {
-				contentFunc = append(contentFunc, content.EnableFileMode(r))
+				contentFunc = append(contentFunc, filtercontent.EnableFileMode(r))
 				if _, ok := p.(*display.Byline); !ok {
 					p = display.NewByline()
 				}
@@ -383,7 +279,7 @@ var viewFlag = []cli.Flag{
 		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
 			if b {
-				contentFunc = append(contentFunc, sizeEnabler.EnableSize(sizeUint))
+				contentFunc = append(contentFunc, sizeEnabler.EnableSize(sizeUint, r))
 				if _, ok := p.(*display.Byline); !ok {
 					p = display.NewByline()
 				}
@@ -400,7 +296,7 @@ var viewFlag = []cli.Flag{
 		Action: func(context *cli.Context, b bool) error {
 			if b {
 				n := context.Int("depth")
-				sizeEnabler.SetRecursive(content.NewSizeRecursive(n))
+				sizeEnabler.SetRecursive(filtercontent.NewSizeRecursive(n))
 			}
 			return nil
 		},
@@ -413,7 +309,7 @@ var viewFlag = []cli.Flag{
 		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
 			if b {
-				contentFunc = append(contentFunc, blockEnabler.Enable())
+				contentFunc = append(contentFunc, blockEnabler.Enable(r))
 				if _, ok := p.(*display.Byline); !ok {
 					p = display.NewByline()
 				}
@@ -429,9 +325,12 @@ var viewFlag = []cli.Flag{
 		Usage:              "show human readable size",
 		Action: func(context *cli.Context, b bool) error {
 			if b {
-				contentFunc = append(contentFunc, content.EnableFileMode(r), sizeEnabler.EnableSize(sizeUint), contentFilter.EnableOwner(r), contentFilter.EnableGroup(r))
+				contentFunc = append(
+					contentFunc, filtercontent.EnableFileMode(r), sizeEnabler.EnableSize(sizeUint, r),
+					ownerEnabler.EnableOwner(r), groupEnabler.EnableGroup(r),
+				)
 				for _, s := range timeType {
-					contentFunc = append(contentFunc, content.EnableTime(timeFormat, s, r))
+					contentFunc = append(contentFunc, filtercontent.EnableTime(timeFormat, s, r))
 				}
 				if _, ok := p.(*display.Byline); !ok {
 					p = display.NewByline()
@@ -448,7 +347,7 @@ var viewFlag = []cli.Flag{
 		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
 			if b {
-				contentFunc = append(contentFunc, contentFilter.EnableOwner(r))
+				contentFunc = append(contentFunc, ownerEnabler.EnableOwner(r))
 				if _, ok := p.(*display.Byline); !ok {
 					p = display.NewByline()
 				}
@@ -464,7 +363,7 @@ var viewFlag = []cli.Flag{
 		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
 			if b {
-				contentFunc = append(contentFunc, contentFilter.EnableGroup(r))
+				contentFunc = append(contentFunc, groupEnabler.EnableGroup(r))
 				if _, ok := p.(*display.Byline); !ok {
 					p = display.NewByline()
 				}
@@ -481,10 +380,27 @@ var viewFlag = []cli.Flag{
 		Action: func(context *cli.Context, b bool) error {
 			if b {
 				for _, s := range timeType {
-					contentFunc = append(contentFunc, content.EnableTime(timeFormat, s, r))
+					contentFunc = append(contentFunc, filtercontent.EnableTime(timeFormat, s, r))
 				}
 				if _, ok := p.(*display.Byline); !ok {
 					p = display.NewByline()
+				}
+			}
+			return nil
+		},
+		Category: "VIEW",
+	},
+	&cli.BoolFlag{
+		Name:               "relative-time",
+		Aliases:            []string{"rt"},
+		Usage:              "show relative time",
+		DisableDefaultText: true,
+		Action: func(context *cli.Context, b bool) error {
+			if b {
+				for _, s := range timeType {
+					rt := filtercontent.NewRelativeTimeEnabler()
+					rt.Mode = s
+					contentFunc = append(contentFunc, rt.Enable(r))
 				}
 			}
 			return nil
@@ -553,6 +469,13 @@ var viewFlag = []cli.Flag{
 		Category:    "VIEW",
 	},
 	&cli.BoolFlag{
+		Name:               "mime-charset",
+		Usage:              "show charset of text file",
+		Aliases:            []string{"charset"},
+		DisableDefaultText: true,
+		Category:           "VIEW",
+	},
+	&cli.BoolFlag{
 		Name:               "mime-type",
 		Usage:              "show mime file type",
 		Aliases:            []string{"mime", "mimetype"},
@@ -560,62 +483,67 @@ var viewFlag = []cli.Flag{
 		Category:           "VIEW",
 		Action: func(context *cli.Context, b bool) error {
 			if b {
-				exact := content.NewMimeFileTypeEnabler()
-
-				err := limitOnce.Do(func() error {
-					size := context.String("exact-detect-size")
-					var bytes uint64 = 1024 * 1024
-					if size == "0" || strings.EqualFold(size, "infinity") || strings.EqualFold(size, "nolimit") {
-						bytes = 0
-					} else if size != "" {
-						sizeUint, err := content.ParseSize(size)
-						if err != nil {
-							return err
+				exact := filtercontent.NewMimeFileTypeEnabler()
+				if context.Bool("charset") {
+					exact.EnableCharset = true
+				}
+				err := limitOnce.Do(
+					func() error {
+						size := context.String("exact-detect-size")
+						var bytes uint64 = 1024 * 1024
+						if size == "0" || strings.EqualFold(size, "infinity") || strings.EqualFold(size, "nolimit") {
+							bytes = 0
+						} else if size != "" {
+							sizeUint, err := filtercontent.ParseSize(size)
+							if err != nil {
+								return err
+							}
+							bytes = sizeUint.Bytes
 						}
-						bytes = sizeUint.Bytes
-					}
-					mimetype.SetLimit(uint32(bytes))
-					return nil
-				})
+						mimetype.SetLimit(uint32(bytes))
+						return nil
+					},
+				)
 				if err != nil {
 					return err
 				}
 				contentFunc = append(contentFunc, exact.Enable())
-				wgs = append(wgs, exact)
 			}
 			return nil
 		},
 	},
 	&cli.BoolFlag{
-		Name:     "mime-parent",
-		Usage:    "show mime parent type",
-		Aliases:  []string{"mime-p", "mime-parent-type", "mime-type-parent"},
-		Category: "VIEW",
+		Name:               "mime-parent",
+		Usage:              "show mime parent type",
+		Aliases:            []string{"mime-p", "mime-parent-type", "mime-type-parent"},
+		Category:           "VIEW",
+		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
 			if b {
-				exact := content.NewMimeFileTypeEnabler()
+				exact := filtercontent.NewMimeFileTypeEnabler()
 				exact.ParentOnly = true
 
-				err := limitOnce.Do(func() error {
-					size := context.String("exact-detect-size")
-					var bytes uint64 = 1024 * 1024
-					if size == "0" || strings.EqualFold(size, "infinity") || strings.EqualFold(size, "nolimit") {
-						bytes = 0
-					} else if size != "" {
-						sizeUint, err := content.ParseSize(size)
-						if err != nil {
-							return err
+				err := limitOnce.Do(
+					func() error {
+						size := context.String("exact-detect-size")
+						var bytes uint64 = 1024 * 1024
+						if size == "0" || strings.EqualFold(size, "infinity") || strings.EqualFold(size, "nolimit") {
+							bytes = 0
+						} else if size != "" {
+							sizeUint, err := filtercontent.ParseSize(size)
+							if err != nil {
+								return err
+							}
+							bytes = sizeUint.Bytes
 						}
-						bytes = sizeUint.Bytes
-					}
-					mimetype.SetLimit(uint32(bytes))
-					return nil
-				})
+						mimetype.SetLimit(uint32(bytes))
+						return nil
+					},
+				)
 				if err != nil {
 					return err
 				}
 				contentFunc = append(contentFunc, exact.Enable())
-				wgs = append(wgs, exact)
 			}
 			return nil
 		},
@@ -638,28 +566,28 @@ var viewFlag = []cli.Flag{
 			if ss == nil {
 				ss = []string{"sha1"}
 			}
-			sums := make([]filter.SumType, 0, len(ss))
+			sums := make([]filtercontent.SumType, 0, len(ss))
 			for _, s := range ss {
 				switch s {
 				case "md5":
-					sums = append(sums, filter.SumTypeMd5)
+					sums = append(sums, filtercontent.SumTypeMd5)
 				case "sha1":
-					sums = append(sums, filter.SumTypeSha1)
+					sums = append(sums, filtercontent.SumTypeSha1)
 				case "sha224":
-					sums = append(sums, filter.SumTypeSha224)
+					sums = append(sums, filtercontent.SumTypeSha224)
 				case "sha256":
-					sums = append(sums, filter.SumTypeSha256)
+					sums = append(sums, filtercontent.SumTypeSha256)
 				case "sha384":
-					sums = append(sums, filter.SumTypeSha384)
+					sums = append(sums, filtercontent.SumTypeSha384)
 				case "sha512":
-					sums = append(sums, filter.SumTypeSha512)
+					sums = append(sums, filtercontent.SumTypeSha512)
 				case "crc32":
-					sums = append(sums, filter.SumTypeCRC32)
+					sums = append(sums, filtercontent.SumTypeCRC32)
 				}
 			}
 
 			if b {
-				contentFunc = append(contentFunc, contentFilter.EnableSum(sums...))
+				contentFunc = append(contentFunc, filtercontent.SumEnabler{}.EnableSum(sums...))
 				if _, ok := p.(*display.Byline); !ok {
 					p = display.NewByline()
 				}
@@ -669,44 +597,163 @@ var viewFlag = []cli.Flag{
 	},
 	&cli.BoolFlag{
 		Name:               "git-status",
-		Usage:              "show git status: ? untracked, + added, ! deleted, ~ modified, | renamed, = copied, $ ignored [if git is installed]",
+		Usage:              "show git status [if git is installed]",
 		Aliases:            []string{"gs", "git"},
 		DisableDefaultText: true,
 		Category:           "VIEW",
 	},
-	&cli.StringFlag{
-		Name:     "git-status-style",
-		Usage:    "git status style: colored-symbol: {? untracked, + added, - deleted, ~ modified, | renamed, = copied, ! ignored} colored-dot",
-		Aliases:  []string{"gss", "git-style"},
-		Category: "VIEW",
-	},
-
 	&cli.BoolFlag{
-		Name:     "quote-name",
-		Aliases:  []string{"Q"},
-		Usage:    "enclose entry names in double quotes(overridden by --literal)",
-		Category: "VIEW",
-	},
-	// &cli.StringFlag{
-	// 	Name:    "quoting-style",
-	// 	Aliases: []string{"Qs"},
-	// 	Usage:   "use quoting style: literal, shell, shell-always, c, escape, locale, clocale",
-	// },
-	&cli.BoolFlag{
-		Name:     "literal",
-		Aliases:  []string{"N"},
-		Usage:    "print entry names without quoting",
-		Category: "VIEW",
+		Name:               "quote-name",
+		Aliases:            []string{"Q"},
+		Usage:              "enclose entry names in double quotes(overridden by --literal)",
+		DisableDefaultText: true,
+		Category:           "VIEW",
 	},
 	&cli.BoolFlag{
-		Name:    "link",
-		Aliases: []string{"H"},
-		Usage:   "list each file's number of hard links",
+		Name:               "literal",
+		Aliases:            []string{"N"},
+		Usage:              "print entry names without quoting",
+		DisableDefaultText: true,
+		Category:           "VIEW",
+	},
+	&cli.BoolFlag{
+		Name:               "link",
+		Aliases:            []string{"H"},
+		Usage:              "list each file's number of hard links",
+		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
 			if b {
-				link := content.NewLinkEnabler()
-				contentFunc = append(contentFunc, link.Enable())
-				wgs = append(wgs, link)
+				link := filtercontent.NewLinkEnabler()
+				contentFunc = append(contentFunc, link.Enable(r))
+			}
+			return nil
+		},
+		Category: "VIEW",
+	},
+	&cli.BoolFlag{
+		Name:               "no-dereference",
+		Usage:              "do not follow symbolic links",
+		DisableDefaultText: true,
+		Category:           "VIEW",
+	},
+	&cli.BoolFlag{
+		Name:               "dereference",
+		Usage:              "dereference symbolic links",
+		DisableDefaultText: true,
+		Category:           "VIEW",
+	},
+	&cli.StringFlag{
+		Name:        "hyperlink",
+		Usage:       "Attach hyperlink to filenames [auto|always|never]",
+		Category:    "VIEW",
+		DefaultText: "auto",
+		Action: func(context *cli.Context, s string) error {
+			if strings.EqualFold(s, "auto") {
+				_ = context.Set("hyperlink", "auto")
+			} else if strings.EqualFold(s, "always") {
+				_ = context.Set("hyperlink", "always")
+			} else if strings.EqualFold(s, "never") {
+				_ = context.Set("hyperlink", "never")
+			} else {
+				return fmt.Errorf("invalid hyperlink value: %s", s)
+			}
+			return nil
+		},
+	},
+	&cli.BoolFlag{
+		Name:               "o",
+		DisableDefaultText: true,
+		Usage:              "like -all/l, but do not list group information",
+		Action: func(context *cli.Context, b bool) error {
+			if b {
+				// remove filter.RemoveHidden
+				newFF := make([]*filter.ItemFilterFunc, 0, len(itemFilterFunc))
+				for _, typeFunc := range itemFilterFunc {
+					if typeFunc != &filter.RemoveHidden {
+						newFF = append(newFF, typeFunc)
+					}
+				}
+				itemFilterFunc = newFF
+				contentFunc = append(
+					contentFunc, filtercontent.EnableFileMode(r), sizeEnabler.EnableSize(sizeUint, r),
+					groupEnabler.EnableGroup(r),
+				)
+				for _, s := range timeType {
+					contentFunc = append(contentFunc, filtercontent.EnableTime(timeFormat, s, r))
+				}
+				if _, ok := p.(*display.Byline); !ok {
+					p = display.NewByline()
+				}
+			}
+			return nil
+		},
+		Category: "VIEW",
+	},
+	&cli.BoolFlag{
+		Name:               "g",
+		DisableDefaultText: true,
+		Usage:              "like -all/l, but do not list owner",
+		Action: func(context *cli.Context, b bool) error {
+			if b {
+				// remove filter.RemoveHidden
+				newFF := make([]*filter.ItemFilterFunc, 0, len(itemFilterFunc))
+				for _, typeFunc := range itemFilterFunc {
+					if typeFunc != &filter.RemoveHidden {
+						newFF = append(newFF, typeFunc)
+					}
+				}
+				itemFilterFunc = newFF
+				contentFunc = append(
+					contentFunc, filtercontent.EnableFileMode(r), sizeEnabler.EnableSize(sizeUint, r),
+					ownerEnabler.EnableOwner(r),
+				)
+				for _, s := range timeType {
+					contentFunc = append(contentFunc, filtercontent.EnableTime(timeFormat, s, r))
+				}
+				if _, ok := p.(*display.Byline); !ok {
+					p = display.NewByline()
+				}
+			}
+			return nil
+		},
+		Category: "VIEW",
+	},
+	&cli.BoolFlag{
+		Name:               "G",
+		DisableDefaultText: true,
+		Aliases:            []string{"no-group"},
+		Usage:              "in a long listing, don't print group names",
+		Category:           "VIEW",
+	},
+	&cli.BoolFlag{
+		Name:               "all",
+		Aliases:            []string{"la", "l", "long"},
+		Usage:              "show all info/use a long listing format",
+		DisableDefaultText: true,
+		Action: func(context *cli.Context, b bool) error {
+			if b {
+				// remove filter.RemoveHidden
+				newFF := make([]*filter.ItemFilterFunc, 0, len(itemFilterFunc))
+				for _, typeFunc := range itemFilterFunc {
+					if typeFunc != &filter.RemoveHidden {
+						newFF = append(newFF, typeFunc)
+					}
+				}
+				itemFilterFunc = newFF
+				sizeEnabler.SetEnableTotal()
+				contentFunc = append(
+					contentFunc, filtercontent.EnableFileMode(r), sizeEnabler.EnableSize(sizeUint, r),
+					ownerEnabler.EnableOwner(r),
+				)
+				if !context.Bool("G") {
+					contentFunc = append(contentFunc, groupEnabler.EnableGroup(r))
+				}
+				for _, s := range timeType {
+					contentFunc = append(contentFunc, filtercontent.EnableTime(timeFormat, s, r))
+				}
+				if _, ok := p.(*display.Byline); !ok {
+					p = display.NewByline()
+				}
 			}
 			return nil
 		},

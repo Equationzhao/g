@@ -2,13 +2,12 @@ package content
 
 import (
 	"fmt"
-	"os"
 	"strconv"
 	"strings"
-	"sync"
 	"sync/atomic"
 
 	"github.com/Equationzhao/g/filter"
+	"github.com/Equationzhao/g/item"
 	"github.com/Equationzhao/g/osbased"
 	"github.com/Equationzhao/g/render"
 	"github.com/Equationzhao/g/util"
@@ -149,8 +148,6 @@ type SizeEnabler struct {
 	enableTotal bool
 	sizeUint    SizeUnit
 	recursive   *SizeRecursive
-	renderer    *render.Renderer
-	*sync.WaitGroup
 }
 
 func (s *SizeEnabler) Recursive() *SizeRecursive {
@@ -159,10 +156,6 @@ func (s *SizeEnabler) Recursive() *SizeRecursive {
 
 func (s *SizeEnabler) SetRecursive(sr *SizeRecursive) {
 	s.recursive = sr
-}
-
-func (s *SizeEnabler) SetRenderer(renderer *render.Renderer) {
-	s.renderer = renderer
 }
 
 type SizeRecursive struct {
@@ -178,9 +171,7 @@ func NewSizeEnabler() *SizeEnabler {
 		total:       atomic.Int64{},
 		enableTotal: false,
 		sizeUint:    Auto,
-		renderer:    nil,
 		recursive:   nil,
-		WaitGroup:   new(sync.WaitGroup),
 	}
 }
 
@@ -209,8 +200,9 @@ func (s *SizeEnabler) Reset() {
 	}
 }
 
-func (s *SizeEnabler) Size2String(b int64, blank int) string {
+func (s *SizeEnabler) Size2String(b int64) (string, SizeUnit) {
 	var res string
+	actualUnit := s.sizeUint
 	v := float64(b)
 	switch s.sizeUint {
 	case Bit:
@@ -243,11 +235,12 @@ func (s *SizeEnabler) Size2String(b int64, blank int) string {
 			if v < 1024 {
 				res = strconv.FormatFloat(v, 'f', 1, 64)
 				if res == "0.0" {
-					res = "-"
-				} else {
-					res += Convert2SizeString(i)
+					// make align
+					return "      - ", actualUnit
 				}
-				return s.renderer.Size(filter.FillBlank(res, blank))
+				res += " " + Convert2SizeString(i)
+				actualUnit = i
+				return filter.FillBlank(res, 8), actualUnit
 			}
 			v /= 1024
 		}
@@ -259,54 +252,14 @@ func (s *SizeEnabler) Size2String(b int64, blank int) string {
 	if res == "0" {
 		res = "-"
 	} else {
-		res += Convert2SizeString(s.sizeUint)
+		res += " " + Convert2SizeString(s.sizeUint)
 	}
-	return s.renderer.Size(filter.FillBlank(res, blank))
+	return res, actualUnit
 }
 
-func (s *SizeEnabler) EnableSize(size SizeUnit) filter.ContentOption {
+func (s *SizeEnabler) EnableSize(size SizeUnit, renderer *render.Renderer) filter.ContentOption {
 	s.sizeUint = size
-
-	if size != Auto {
-		longestSize := 0
-		m := sync.RWMutex{}
-		done := func(size string) {
-			defer s.Done()
-			m.RLock()
-			if longestSize >= len(size) {
-				m.RUnlock()
-				return
-			}
-			m.RUnlock()
-			m.Lock()
-			if longestSize < len(size) {
-				longestSize = len(size)
-			}
-			m.Unlock()
-		}
-
-		wait := func(size string) string {
-			s.Wait()
-			return filter.FillBlank(size, longestSize)
-		}
-
-		return func(info os.FileInfo) (string, string) {
-			var v int64
-			if s.recursive != nil {
-				v = util.RecursivelySizeOf(info, s.recursive.depth)
-			} else {
-				v = info.Size()
-			}
-			if s.enableTotal {
-				s.total.Add(v)
-			}
-			size := s.Size2String(v, 0)
-			done(size)
-			return wait(size), SizeName
-		}
-	}
-
-	return func(info os.FileInfo) (string, string) {
+	return func(info *item.FileInfo) (string, string) {
 		var v int64
 		if s.recursive != nil {
 			v = util.RecursivelySizeOf(info, s.recursive.depth)
@@ -316,52 +269,21 @@ func (s *SizeEnabler) EnableSize(size SizeUnit) filter.ContentOption {
 		if s.enableTotal {
 			s.total.Add(v)
 		}
-		return s.Size2String(v, 7), SizeName
+		res, unit := s.Size2String(v)
+		return renderer.Size(res, Convert2SizeString(unit)), SizeName
 	}
 }
 
-type BlockSizeEnabler struct {
-	renderer *render.Renderer
-	*sync.WaitGroup
-}
+type BlockSizeEnabler struct{}
 
 func NewBlockSizeEnabler() *BlockSizeEnabler {
-	return &BlockSizeEnabler{
-		renderer:  nil,
-		WaitGroup: new(sync.WaitGroup),
-	}
-}
-
-func (b *BlockSizeEnabler) SetRenderer(r *render.Renderer) {
-	b.renderer = r
+	return &BlockSizeEnabler{}
 }
 
 const BlockSizeName = "Blocks"
 
-func (b *BlockSizeEnabler) Enable() filter.ContentOption {
-	longestSize := 0
-	m := sync.RWMutex{}
-	done := func(size string) {
-		defer b.Done()
-		m.RLock()
-		if longestSize >= len(size) {
-			m.RUnlock()
-			return
-		}
-		m.RUnlock()
-		m.Lock()
-		if longestSize < len(size) {
-			longestSize = len(size)
-		}
-		m.Unlock()
-	}
-
-	wait := func(size string) string {
-		b.Wait()
-		return filter.FillBlank(b.renderer.Size(size), longestSize)
-	}
-
-	return func(info os.FileInfo) (string, string) {
+func (b *BlockSizeEnabler) Enable(renderer *render.Renderer) filter.ContentOption {
+	return func(info *item.FileInfo) (string, string) {
 		res := ""
 		bs := osbased.BlockSize(info)
 		if bs == 0 {
@@ -369,7 +291,6 @@ func (b *BlockSizeEnabler) Enable() filter.ContentOption {
 		} else {
 			res = strconv.FormatInt(bs, 10)
 		}
-		done(res)
-		return wait(res), BlockSizeName
+		return renderer.BlockSize(res), BlockSizeName
 	}
 }
