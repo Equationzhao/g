@@ -10,8 +10,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/Equationzhao/g/slices"
-
 	"github.com/Equationzhao/g/display"
 	"github.com/Equationzhao/g/filter"
 	filtercontent "github.com/Equationzhao/g/filter/content"
@@ -19,6 +17,7 @@ import (
 	"github.com/Equationzhao/g/item"
 	"github.com/Equationzhao/g/render"
 	"github.com/Equationzhao/g/shell"
+	"github.com/Equationzhao/g/slices"
 	"github.com/Equationzhao/g/sorter"
 	"github.com/Equationzhao/g/theme"
 	"github.com/Equationzhao/g/util"

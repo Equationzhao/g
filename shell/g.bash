@@ -11,5 +11,6 @@ if [ "$(command -v g)" ]; then
     alias la='g --show-hidden'
 fi
 
-# add to .zshrc eval "$(g --init bash)"
-# `source ~/.bashrc`
+# add the following command to .bashrc
+# eval "$(g --init bash)"
+# then `source ~/.bashrc`

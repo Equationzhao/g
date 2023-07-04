@@ -11,5 +11,6 @@ if command -v g >/dev/null 2>&1
     alias la 'g --show-hidden'
 end
 
-#  add to config: g --init fish | source
+#  add to fish config:
+#  g --init fish | source
 # `source ~/.config/fish/config.fish`
