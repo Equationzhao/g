@@ -131,10 +131,11 @@ var viewFlag = []cli.Flag{
 		Category: "VIEW",
 	},
 	&cli.StringFlag{
-		Name:        "time-style",
-		Usage:       "time/date format with -l, Valid timestamp styles are default, iso, long iso, full-iso, locale, custom +FORMAT like date(1).",
-		EnvVars:     []string{"TIME_STYLE"},
-		DefaultText: "+%d.%b'%y %H:%M (like 02.Jan'06 15:04)",
+		Name: "time-style",
+		Usage: `time/date format with -l, 
+	Valid timestamp styles are default, iso, long iso, full-iso, locale, custom +FORMAT like date(1). 
+	(default: +%d.%b'%y %H:%M ,like 02.Jan'06 15:04)`,
+		EnvVars: []string{"TIME_STYLE"},
 		Action: func(context *cli.Context, s string) error {
 			/*
 				The TIME_STYLE argument can be full-iso, long-iso, iso, locale, or  +FORMAT.

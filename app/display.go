@@ -268,7 +268,8 @@ var displayFlag = []cli.Flag{
 	&cli.StringFlag{
 		Name:        "format",
 		DefaultText: "C",
-		Usage:       "across  -x,  commas  -m, horizontal -x, long -l, single-column -1, verbose -l, vertical -C, table -tb, HTML -html, Markdown -md, CSV -csv, json -j",
+		Usage: `across  -x,  commas  -m, horizontal -x, long -l, single-column -1,
+	verbose -l, vertical -C, table -tb, HTML -html, Markdown -md, CSV -csv, json -j`,
 		Action: func(context *cli.Context, s string) error {
 			switch s {
 			case "across", "x", "horizontal":
