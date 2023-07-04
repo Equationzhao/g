@@ -3,13 +3,14 @@ package app
 import (
 	"errors"
 	"fmt"
-	"github.com/Equationzhao/g/slices"
 	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/Equationzhao/g/slices"
 
 	"github.com/Equationzhao/g/display"
 	"github.com/Equationzhao/g/filter"
@@ -213,11 +214,11 @@ func init() {
 			}
 
 			flagSharp := context.Bool("#")
-			theme.ConvertThemeColor()
-
 			longestEachPart := make(map[string]int)
 			startDir, _ := os.Getwd()
 			dereference := context.Bool("dereference")
+
+			theme.ConvertThemeColor()
 
 			for i := 0; i < len(path); i++ {
 				start := time.Now()
