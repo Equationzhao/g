@@ -3,6 +3,7 @@ package app
 import (
 	"errors"
 	"fmt"
+	"github.com/Equationzhao/g/slices"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -48,7 +49,7 @@ var (
 	ownerEnabler    = filtercontent.NewOwnerEnabler()
 	groupEnabler    = filtercontent.NewGroupEnabler()
 	gitEnabler      = filtercontent.NewGitEnabler()
-	depthLimitMap   = make(map[string]int)
+	depthLimitMap   map[string]int
 	limitOnce       = util.Once{}
 	hookOnce        = util.Once{}
 	duplicateDetect = filtercontent.NewDuplicateDetect()
@@ -176,6 +177,9 @@ func init() {
 			// flag: if A is set
 			flagA := context.Bool("A")
 			flagR := context.Bool("R")
+			if flagR {
+				depthLimitMap = make(map[string]int)
+			}
 			header := context.Bool("header")
 			footer := context.Bool("footer")
 			if context.Bool("statistic") {
@@ -423,18 +427,18 @@ func init() {
 						dep = depth
 					}
 					if dep >= 2 || dep <= -1 {
-						newPathLeft := make([]string, 0, len(path)-i)
+						var j int
 						for _, info := range infos {
 							if info.IsDir() {
 								if info.Name() == "." || info.Name() == ".." {
 									continue
 								}
 								newPath, _ := filepath.Rel(startDir, filepath.Join(path[i], info.Name()))
-								newPathLeft = append(newPathLeft, newPath)
+								path = slices.Insert(path, i+1+j, newPath)
+								j++
 								depthLimitMap[newPath] = dep - 1
 							}
 						}
-						path = append(path[:i+1], append(newPathLeft, path[i+1:]...)...)
 					}
 				}
 
@@ -446,220 +450,222 @@ func init() {
 
 				contentFilter.GetDisplayItems(&infos)
 				if len(infos) == 0 {
-					continue
+					goto clean
 				}
-
-				// add total && statistics
 				{
-					var i *item.FileInfo
-					// if -l/show-total-size is set, add total size
-					_, isPrettyPrinter := p.(display.PrettyPrinter)
+					// add total && statistics
+					{
+						var i *item.FileInfo
+						// if -l/show-total-size is set, add total size
+						_, isPrettyPrinter := p.(display.PrettyPrinter)
 
-					if total, ok := sizeEnabler.Total(); ok {
-						if !isPrettyPrinter {
-							i, _ = item.NewFileInfoWithOption()
-							s, unit := sizeEnabler.Size2String(total)
-							s = r.Size(s, filtercontent.Convert2SizeString(unit))
-							i.Set(
-								"total", &display.ItemContent{No: 0, Content: display.StringContent(
-									fmt.Sprintf(
-										"  total %s", s,
-									),
-								)},
-							)
-						} else {
-							s, unit := sizeEnabler.Size2String(total)
-							s = r.Size(s, filtercontent.Convert2SizeString(unit))
-							_, _ = display.RawPrint(fmt.Sprintf("  total %s\n", s))
-						}
-					}
-					if s := nameToDisplay.Statistics(); s != nil {
-						if !isPrettyPrinter {
-							tFormat := "\n  underwent %s"
-							if i == nil {
+						if total, ok := sizeEnabler.Total(); ok {
+							if !isPrettyPrinter {
 								i, _ = item.NewFileInfoWithOption()
-								tFormat = "  underwent %s"
+								s, unit := sizeEnabler.Size2String(total)
+								s = r.Size(s, filtercontent.Convert2SizeString(unit))
+								i.Set(
+									"total", &display.ItemContent{No: 0, Content: display.StringContent(
+										fmt.Sprintf(
+											"  total %s", s,
+										),
+									)},
+								)
+							} else {
+								s, unit := sizeEnabler.Size2String(total)
+								s = r.Size(s, filtercontent.Convert2SizeString(unit))
+								_, _ = display.RawPrint(fmt.Sprintf("  total %s\n", s))
 							}
-							i.Set(
-								"underwent", &display.ItemContent{No: 1, Content: display.StringContent(
+						}
+						if s := nameToDisplay.Statistics(); s != nil {
+							if !isPrettyPrinter {
+								tFormat := "\n  underwent %s"
+								if i == nil {
+									i, _ = item.NewFileInfoWithOption()
+									tFormat = "  underwent %s"
+								}
+								i.Set(
+									"underwent", &display.ItemContent{No: 1, Content: display.StringContent(
+										fmt.Sprintf(
+											tFormat, r.Time(durafmt.Parse(time.Since(start)).LimitToUnit("ms").String()),
+										),
+									)},
+								)
+								i.Set(
+									"statistic", &display.ItemContent{No: 2, Content: display.StringContent(
+										fmt.Sprintf(
+											"\n  statistic: %s", s,
+										),
+									)},
+								)
+							} else {
+								_, _ = display.RawPrint(
 									fmt.Sprintf(
-										tFormat, r.Time(durafmt.Parse(time.Since(start)).LimitToUnit("ms").String()),
+										"  underwent %s",
+										r.Time(durafmt.Parse(time.Since(start)).LimitToUnit("ms").String()),
 									),
-								)},
-							)
-							i.Set(
-								"statistic", &display.ItemContent{No: 2, Content: display.StringContent(
-									fmt.Sprintf(
-										"\n  statistic: %s", s,
-									),
-								)},
-							)
-						} else {
-							_, _ = display.RawPrint(
-								fmt.Sprintf(
-									"  underwent %s",
-									r.Time(durafmt.Parse(time.Since(start)).LimitToUnit("ms").String()),
-								),
-							)
-							_, _ = display.RawPrint(fmt.Sprintf("\n  statistic: %s\n", s))
+								)
+								_, _ = display.RawPrint(fmt.Sprintf("\n  statistic: %s\n", s))
+							}
+							s.Reset()
 						}
-						s.Reset()
-					}
-					if i != nil {
-						p.DisablePreHook()
-						p.Print(i)
-						p.EnablePreHook()
-					}
-				}
-
-				// if is table printer, set title
-				prettyPrinter, isTablePrinter := p.(display.PrettyPrinter)
-				if isTablePrinter {
-					prettyPrinter.SetTitle(path[i])
-				}
-				l := len(strconv.Itoa(len(infos)))
-				for i, info := range infos {
-					// if there is #, add No
-					if flagSharp {
-						no := &display.ItemContent{
-							No:      -1,
-							Content: display.StringContent(strconv.Itoa(i)),
-						}
-						no.SetSuffix(strings.Repeat(" ", l-len(strconv.Itoa(i))))
-						info.Set("#", no)
-					}
-				}
-
-				// do scan
-				// get max length for each Meta[key].Value
-				allPart := infos[0].KeysByOrder()
-
-				for _, it := range infos {
-					for _, part := range allPart {
-						content, _ := it.Get(part)
-						l := 0
-						if part != filtercontent.NameName {
-							l = display.WidthNoHyperLinkLen(content.String())
-						} else {
-							l = display.WidthLen(content.String())
-						}
-						if l > longestEachPart[part] {
-							longestEachPart[part] = l
+						if i != nil {
+							p.DisablePreHook()
+							p.Print(i)
+							p.EnablePreHook()
 						}
 					}
-				}
 
-				// after the first time, expand the length of each part
-				for _, it := range infos {
-					for _, part := range allPart {
-						if part != filtercontent.NameName {
+					// if is table printer, set title
+					prettyPrinter, isTablePrinter := p.(display.PrettyPrinter)
+					if isTablePrinter {
+						prettyPrinter.SetTitle(path[i])
+					}
+					l := len(strconv.Itoa(len(infos)))
+					for i, info := range infos {
+						// if there is #, add No
+						if flagSharp {
+							no := &display.ItemContent{
+								No:      -1,
+								Content: display.StringContent(strconv.Itoa(i)),
+							}
+							no.SetSuffix(strings.Repeat(" ", l-len(strconv.Itoa(i))))
+							info.Set("#", no)
+						}
+					}
+
+					// do scan
+					// get max length for each Meta[key].Value
+					allPart := infos[0].KeysByOrder()
+
+					for _, it := range infos {
+						for _, part := range allPart {
 							content, _ := it.Get(part)
+							l := 0
 							if part != filtercontent.NameName {
 								l = display.WidthNoHyperLinkLen(content.String())
 							} else {
 								l = display.WidthLen(content.String())
 							}
-							if l < longestEachPart[part] {
-								// expand
-								content.SetSuffix(strings.Repeat(" ", longestEachPart[part]-l))
-								it.Set(part, content)
+							if l > longestEachPart[part] {
+								longestEachPart[part] = l
 							}
 						}
 					}
-				}
 
-				_ = hookOnce.Do(
-					func() error {
-						if header || footer {
-							headerFooter := func(isBefore bool) func(p display.Printer, items ...*item.FileInfo) {
-								return func(p display.Printer, item ...*item.FileInfo) {
-									// add header
-									if len(item) == 0 {
-										return
-									}
+					// after the first time, expand the length of each part
+					for _, it := range infos {
+						for _, part := range allPart {
+							if part != filtercontent.NameName {
+								content, _ := it.Get(part)
+								if part != filtercontent.NameName {
+									l = display.WidthNoHyperLinkLen(content.String())
+								} else {
+									l = display.WidthLen(content.String())
+								}
+								if l < longestEachPart[part] {
+									// expand
+									content.SetSuffix(strings.Repeat(" ", longestEachPart[part]-l))
+									it.Set(part, content)
+								}
+							}
+						}
+					}
 
-									// add longest - len(header) * space
-									// print header
-									headerFooterStrBuf := bytebufferpool.Get()
-									defer bytebufferpool.Put(headerFooterStrBuf)
-									prettyPrinter, isPrettyPrinter := p.(display.PrettyPrinter)
-
-									expand := func(s string, no, space int) {
-										_, _ = headerFooterStrBuf.WriteString(theme.Underline)
-										_, _ = headerFooterStrBuf.WriteString(s)
-										_, _ = headerFooterStrBuf.WriteString(theme.Reset)
-										if no != len(allPart)-1 {
-											_, _ = headerFooterStrBuf.WriteString(strings.Repeat(" ", space))
+					_ = hookOnce.Do(
+						func() error {
+							if header || footer {
+								headerFooter := func(isBefore bool) func(p display.Printer, items ...*item.FileInfo) {
+									return func(p display.Printer, item ...*item.FileInfo) {
+										// add header
+										if len(item) == 0 {
+											return
 										}
-									}
 
-									for i, s := range allPart {
-										if len(s) > longestEachPart[s] {
-											// expand the every item's content of this part
-											for _, it := range infos {
-												content, _ := it.Get(s)
-												toAddNum := 0
-												if s != filtercontent.NameName {
-													toAddNum = len(s) - display.WidthNoHyperLinkLen(content.String())
-												} else {
-													toAddNum = len(s) - display.WidthLen(content.String())
+										// add longest - len(header) * space
+										// print header
+										headerFooterStrBuf := bytebufferpool.Get()
+										defer bytebufferpool.Put(headerFooterStrBuf)
+										prettyPrinter, isPrettyPrinter := p.(display.PrettyPrinter)
+
+										expand := func(s string, no, space int) {
+											_, _ = headerFooterStrBuf.WriteString(theme.Underline)
+											_, _ = headerFooterStrBuf.WriteString(s)
+											_, _ = headerFooterStrBuf.WriteString(theme.Reset)
+											if no != len(allPart)-1 {
+												_, _ = headerFooterStrBuf.WriteString(strings.Repeat(" ", space))
+											}
+										}
+
+										for i, s := range allPart {
+											if len(s) > longestEachPart[s] {
+												// expand the every item's content of this part
+												for _, it := range infos {
+													content, _ := it.Get(s)
+													toAddNum := 0
+													if s != filtercontent.NameName {
+														toAddNum = len(s) - display.WidthNoHyperLinkLen(content.String())
+													} else {
+														toAddNum = len(s) - display.WidthLen(content.String())
+													}
+													content.AddSuffix(
+														strings.Repeat(
+															" ", toAddNum,
+														),
+													)
+													it.Set(s, content)
+													longestEachPart[s] = len(s)
 												}
-												content.AddSuffix(
-													strings.Repeat(
-														" ", toAddNum,
-													),
-												)
-												it.Set(s, content)
-												longestEachPart[s] = len(s)
+												expand(s, i, 1)
+											} else {
+												expand(s, i, longestEachPart[s]-len(s)+1)
 											}
-											expand(s, i, 1)
-										} else {
-											expand(s, i, longestEachPart[s]-len(s)+1)
-										}
-										if isPrettyPrinter && isBefore {
-											if header {
-												prettyPrinter.AddHeader(s)
-											}
-											if footer {
-												prettyPrinter.AddFooter(s)
+											if isPrettyPrinter && isBefore {
+												if header {
+													prettyPrinter.AddHeader(s)
+												}
+												if footer {
+													prettyPrinter.AddFooter(s)
+												}
 											}
 										}
-									}
-									res := headerFooterStrBuf.String()
-									if !isPrettyPrinter {
-										if header && isBefore {
-											_, _ = fmt.Fprintln(p, res)
-										}
-										if footer && !isBefore {
-											_, _ = fmt.Fprintln(p, res)
+										res := headerFooterStrBuf.String()
+										if !isPrettyPrinter {
+											if header && isBefore {
+												_, _ = fmt.Fprintln(p, res)
+											}
+											if footer && !isBefore {
+												_, _ = fmt.Fprintln(p, res)
+											}
 										}
 									}
 								}
-							}
-							if header {
-								// pre scan
-								p.AddBeforePrint(headerFooter(true))
-							}
-							if footer {
-								if !header {
+								if header {
 									// pre scan
 									p.AddBeforePrint(headerFooter(true))
 								}
-								p.AddAfterPrint(headerFooter(false))
+								if footer {
+									if !header {
+										// pre scan
+										p.AddBeforePrint(headerFooter(true))
+									}
+									p.AddAfterPrint(headerFooter(false))
+								}
 							}
-						}
-						p.AddAfterPrint(hookPost...)
-						return nil
-					},
-				)
+							p.AddAfterPrint(hookPost...)
+							return nil
+						},
+					)
 
-				p.Print(infos...)
+					p.Print(infos...)
+				}
 
-				// switch back to start dir
+			clean:
 				if i != len(path)-1 {
 					//goland:noinspection GoPrintFunctions
 					fmt.Println("\n") //nolint:govet
-					err = os.Chdir(startDir)
+					// switch back to start dir
+					_ = os.Chdir(startDir)
 					if err != nil {
 						seriousErr = true
 					}
@@ -737,6 +743,7 @@ func init() {
 				}
 				return Err4Exit{}
 			},
+			Category: "SHELL",
 		},
 	)
 
