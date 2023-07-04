@@ -237,9 +237,8 @@ func (s *SizeEnabler) Size2String(b int64) (string, SizeUnit) {
 				if res == "0.0" {
 					// make align
 					return "      - ", actualUnit
-				} else {
-					res += " " + Convert2SizeString(i)
 				}
+				res += " " + Convert2SizeString(i)
 				actualUnit = i
 				return filter.FillBlank(res, 8), actualUnit
 			}
