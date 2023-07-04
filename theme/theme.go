@@ -75,10 +75,10 @@ func color2str(color string) string {
 		)
 		strReader = strings.NewReader(color)
 		_, err = fmt.Fscanf(strReader, RGBFormat, &r, &g, &b)
-		if err == nil {
-			return fmt.Sprintf("[%d,%d,%d]@rgb", r, g, b)
+		if err != nil {
+			return ""
 		}
-		return ""
+		return fmt.Sprintf("[%d,%d,%d]@rgb", r, g, b)
 	}
 }
 
@@ -152,9 +152,9 @@ func str2color(str string) (string, error) {
 			if len(rgb) != 3 {
 				return "", errors.New("too many or too few rgb values")
 			}
-			r, err1 := strconv.Atoi(rgb[0])
-			g, err2 := strconv.Atoi(rgb[1])
-			b, err3 := strconv.Atoi(rgb[2])
+			r, err1 := strconv.ParseUint(rgb[0], 10, 8)
+			g, err2 := strconv.ParseUint(rgb[1], 10, 8)
+			b, err3 := strconv.ParseUint(rgb[2], 10, 8)
 			if err1 != nil || err2 != nil || err3 != nil {
 				return "", errors.New("rgb values must be numbers")
 			}

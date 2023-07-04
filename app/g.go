@@ -199,9 +199,7 @@ func init() {
 				if termlink.SupportsHyperlinks() {
 					switch p.(type) {
 					case display.PrettyPrinter:
-						break
 					case *display.JsonPrinter:
-						break
 					default:
 						nameToDisplay.SetHyperlink()
 						display.IncludeHyperlink = true
@@ -493,7 +491,8 @@ func init() {
 								i.Set(
 									"underwent", &display.ItemContent{No: 1, Content: display.StringContent(
 										fmt.Sprintf(
-											tFormat, r.Time(durafmt.Parse(time.Since(start)).LimitToUnit("ms").String()),
+											tFormat,
+											r.Time(durafmt.Parse(time.Since(start)).LimitToUnit("ms").String()),
 										),
 									)},
 								)

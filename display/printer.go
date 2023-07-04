@@ -217,9 +217,8 @@ func parseLink(link string) (name, other string, ok bool) {
 		// if matches, get the other content and the link
 		other = strings.Replace(link, matches[0], "", 1)
 		return matches[2], other, true
-	} else {
-		return "", "", false
 	}
+	return "", "", false
 }
 
 func WidthLen(str string) int {

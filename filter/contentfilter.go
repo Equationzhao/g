@@ -95,9 +95,8 @@ func (cf *ContentFilter) GetDisplayItems(e *[]*item.FileInfo) {
 			if cf.sortFunc != nil {
 				if cf.sortFunc(a, b) {
 					return -1
-				} else {
-					return 1
 				}
+				return 1
 			}
 			return 0
 		},
