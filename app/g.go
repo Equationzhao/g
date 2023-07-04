@@ -196,7 +196,12 @@ func init() {
 				fallthrough
 			case "auto":
 				if termlink.SupportsHyperlinks() {
-					if _, ok := p.(display.PrettyPrinter); !ok {
+					switch p.(type) {
+					case display.PrettyPrinter:
+						break
+					case *display.JsonPrinter:
+						break
+					default:
 						nameToDisplay.SetHyperlink()
 						display.IncludeHyperlink = true
 					}
