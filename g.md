@@ -40,6 +40,7 @@ g
 [--hide-git-ignore|--gi|--hgi|--git-ignore]
 [--hyperlink]=[value]
 [--ignore-glob|-I|--ignore|--ig]=[value]
+[--init]=[value]
 [--inode|-i]
 [--json|-j]
 [--lh|--human-readable|--hr]
@@ -185,6 +186,8 @@ g [options] [path]
 **--hyperlink**="": Attach hyperlink to filenames [auto|always|never] (default: auto)
 
 **--ignore-glob, -I, --ignore, --ig**="": ignore Glob patterns
+
+**--init**="": init the config file, default path is ~/.config/g/config.yaml
 
 **--inode, -i**: show inode[linux/darwin only]
 
