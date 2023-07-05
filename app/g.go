@@ -727,7 +727,7 @@ func init() {
 				case "nushell", "nu":
 					_, _ = G.Writer.Write(shell.NUContent)
 				default:
-					return fmt.Errorf("unsupported shell: %s", s)
+					return fmt.Errorf("unsupported shell: %s \n %s[zsh|bash|fish|powershell|nushell]", s, theme.Success)
 				}
 				return Err4Exit{}
 			},

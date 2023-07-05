@@ -572,6 +572,8 @@ var viewFlag = []cli.Flag{
 					sums = append(sums, filtercontent.SumTypeSha512)
 				case "crc32":
 					sums = append(sums, filtercontent.SumTypeCRC32)
+				default:
+					return fmt.Errorf("invalid checksum algorithm: %s", s)
 				}
 			}
 
