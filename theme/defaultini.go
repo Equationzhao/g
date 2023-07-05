@@ -4,7 +4,6 @@ package theme
 
 import (
 	"path/filepath"
-	"sort"
 
 	"github.com/Equationzhao/g/slices"
 	"github.com/Equationzhao/g/util/cmp"
@@ -25,11 +24,6 @@ func init() {
 	for k, v := range DefaultInfoTheme {
 		infoArray = append(infoArray, kv{k, color2str(v.Color)})
 	}
-	sort.Slice(
-		infoArray, func(i, j int) bool {
-			return infoArray[i].key < infoArray[j].key
-		},
-	)
 	slices.SortFunc(
 		infoArray, func(i, j kv) int {
 			return cmp.Compare(i.key, j.key)
@@ -44,9 +38,9 @@ func init() {
 		default_ = append(default_, kv{k, v})
 	}
 
-	sort.Slice(
-		default_, func(i, j int) bool {
-			return default_[i].key < default_[j].key
+	slices.SortFunc(
+		default_, func(i, j kv) int {
+			return cmp.Compare(i.key, j.key)
 		},
 	)
 

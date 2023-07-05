@@ -36,7 +36,7 @@ func (g *GitEnabler) Enable(renderer *render.Renderer) filter.ContentOption {
 		if parent == child {
 			return true
 		}
-		if strings.HasPrefix(child, parent) {
+		if strings.HasPrefix(child, parent+string(filepath.Separator)) {
 			return true
 		}
 		return false
@@ -55,6 +55,8 @@ func (g *GitEnabler) Enable(renderer *render.Renderer) filter.ContentOption {
 			}
 			for _, status := range *gits {
 				if status.X == git.Ignored || status.Y == git.Ignored {
+					// if status is ignored,
+					// and the file is or is a child of the ignored file
 					if isOrIsParentOf(status.Name, rel) {
 						return gitByName(status.X, renderer) + gitByName(status.Y, renderer), GitStatus
 					}

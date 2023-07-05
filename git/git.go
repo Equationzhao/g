@@ -9,6 +9,8 @@ import (
 	"github.com/Equationzhao/pathbeautify"
 )
 
+// FileGit is an entry name with git status
+// the name will not end with file separator
 type FileGit struct {
 	Name string
 	X, Y Status
@@ -80,7 +82,7 @@ type Status int
 
 const (
 	Unknown           Status = iota
-	Unmodified               //
+	Unmodified               // -
 	Modified                 // M
 	Added                    // A
 	Deleted                  // D
@@ -147,9 +149,9 @@ func (s Status) String() string {
 	case UpdatedBuUnmerged:
 		return "U"
 	case Unknown:
-		return " "
+		return "^"
 	}
-	return " "
+	return "^"
 }
 
 func Byte2Status(c byte) Status {
@@ -168,13 +170,13 @@ func Byte2Status(c byte) Status {
 		return Untracked
 	case '!':
 		return Ignored
-	case '-':
+	case '-', ' ':
 		return Unmodified
 	case 'T':
 		return TypeChanged
 	case 'U':
 		return UpdatedBuUnmerged
-	case ' ':
+	case '^':
 		return Unknown
 	}
 	return Unknown

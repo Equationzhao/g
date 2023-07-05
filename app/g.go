@@ -673,7 +673,7 @@ func init() {
 		&cli.BoolFlag{
 			Name:     "check-new-version",
 			Usage:    "check if there's new release",
-			Category: "\b\b\bMETA",
+			Category: "\b\b\b   META", // add \b to ensure the category is the first one to show
 			Action: func(context *cli.Context, b bool) error {
 				if b {
 					upgrade.WithUpdateCheckTimeout(5 * time.Second)
@@ -730,6 +730,10 @@ func init() {
 			},
 			Category: "SHELL",
 		},
+		&cli.BoolFlag{
+			Name:  "no-config",
+			Usage: "do not load config file",
+		},
 	)
 
 	G.Flags = append(G.Flags, viewFlag...)
@@ -779,6 +783,9 @@ VERSION:
 
 DESCRIPTION:
    {{template "descriptionTemplate" .}}{{end}}
+
+CONFIG:
+   Configuration: $UserConfigDir/g/g.yaml
 {{- if len .Authors}}
 
 AUTHOR{{template "authorsTemplate" .}}{{end}}{{if .VisibleCommands}}
@@ -838,7 +845,7 @@ func initVersionHelpFlags() {
 		Aliases:            []string{"v"},
 		Usage:              "print the version",
 		DisableDefaultText: true,
-		Category:           "\b\b\bMETA",
+		Category:           "\b\b\b   META",
 	}
 
 	cli.HelpFlag = &cli.BoolFlag{
@@ -846,7 +853,7 @@ func initVersionHelpFlags() {
 		Aliases:            []string{"h", "?"},
 		Usage:              "show help",
 		DisableDefaultText: true,
-		Category:           "\b\b\bMETA",
+		Category:           "\b\b\b   META",
 	}
 }
 
