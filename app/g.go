@@ -79,6 +79,7 @@ func init() {
 		HideHelpCommand:    true,
 		Suggest:            true,
 		OnUsageError: func(cCtx *cli.Context, err error, isSubcommand bool) error {
+			ReturnCode = 1
 			str := err.Error()
 			const prefix = "flag provided but not defined: "
 			if strings.HasPrefix(str, prefix) {
@@ -723,6 +724,8 @@ func init() {
 					_, _ = G.Writer.Write(shell.FISHContent)
 				case "powershell", "pwsh":
 					_, _ = G.Writer.Write(shell.PSContent)
+				case "nushell", "nu":
+					_, _ = G.Writer.Write(shell.NUContent)
 				default:
 					return fmt.Errorf("unsupported shell: %s", s)
 				}
@@ -872,7 +875,6 @@ func checkErr(err error, start string) {
 		toPrint = err.Error()
 	}
 	_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(toPrint))
-	return
 }
 
 // suggestFlag returns the suggested flag name
