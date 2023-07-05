@@ -39,7 +39,7 @@ func main() {
 				if ReturnCode == 0 {
 					ReturnCode = 1
 				}
-				_, _ = fmt.Fprint(os.Stderr, MakeErrorStr(err.Error()))
+				_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(err.Error()))
 			}
 		}
 	}

@@ -48,19 +48,21 @@ const (
 	timeAccessed = "Accessed"
 )
 
+// EnableTime enables time
+// accepts ['mod', 'modified', 'create', 'access']
 func EnableTime(format string, mode string, renderer *render.Renderer) filter.ContentOption {
 	return func(info *item.FileInfo) (string, string) {
 		// get mod time/ create time/ access time
 		var t time.Time
 		timeType := ""
 		switch mode {
-		case "mod", "modified", "modify":
+		case "mod", "modified":
 			t = osbased.ModTime(info)
 			timeType = timeModified
-		case "create":
+		case "create", "cr":
 			t = osbased.CreateTime(info)
 			timeType = timeCreated
-		case "access":
+		case "access", "ac":
 			t = osbased.AccessTime(info)
 			timeType = timeAccessed
 		default:

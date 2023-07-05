@@ -9,16 +9,16 @@ import (
 
 var filteringFlag = []cli.Flag{
 	&cli.UintFlag{
-		Name:        "limitN",
-		Aliases:     []string{"n", "limit", "topN", "top"},
+		Name:        "n",
+		Aliases:     []string{"limitN", "limit", "topN", "top"},
 		Usage:       "limit n items(n <=0 means unlimited)",
 		Value:       0,
 		DefaultText: "unlimited",
 		Category:    "FILTERING",
 	},
 	&cli.StringSliceFlag{
-		Name:    "ignore-glob",
-		Aliases: []string{"I", "ignore", "ig"},
+		Name:    "I",
+		Aliases: []string{"ignore"},
 		Usage:   "ignore Glob patterns",
 		Action: func(context *cli.Context, s []string) error {
 			if len(s) > 0 {
@@ -33,8 +33,8 @@ var filteringFlag = []cli.Flag{
 		Category: "FILTERING",
 	},
 	&cli.StringSliceFlag{
-		Name:    "match-glob",
-		Aliases: []string{"M", "glob", "match"},
+		Name:    "M",
+		Aliases: []string{"match"},
 		Usage:   "match Glob patterns",
 		Action: func(context *cli.Context, s []string) error {
 			if len(s) > 0 {
@@ -50,7 +50,7 @@ var filteringFlag = []cli.Flag{
 	},
 	&cli.BoolFlag{
 		Name:               "show-only-hidden",
-		Aliases:            []string{"soh", "hidden"},
+		Aliases:            []string{"hidden"},
 		DisableDefaultText: true,
 		Usage:              "show only hidden files(overridden by --show-hidden/-sh/-a/-A)",
 		Action: func(context *cli.Context, b bool) error {
@@ -68,8 +68,8 @@ var filteringFlag = []cli.Flag{
 		Category: "FILTERING",
 	},
 	&cli.BoolFlag{
-		Name:               "show-hidden",
-		Aliases:            []string{"sh", "a"},
+		Name:               "a",
+		Aliases:            []string{"sh", "show-hidden"},
 		DisableDefaultText: true,
 		Usage:              "show hidden files",
 		Action: func(context *cli.Context, b bool) error {
@@ -88,9 +88,8 @@ var filteringFlag = []cli.Flag{
 		Category: "FILTERING",
 	},
 	&cli.StringSliceFlag{
-		Name:    "show-only-ext",
-		Aliases: []string{"se", "ext"},
-		Usage:   "show file which has target ext, eg: --show-only-ext=go,java",
+		Name:  "ext",
+		Usage: "show file which has target ext, eg: --show-only-ext=go,java",
 		Action: func(context *cli.Context, s []string) error {
 			if len(s) > 0 {
 				f := filter.ExtOnly(s...)
@@ -101,8 +100,8 @@ var filteringFlag = []cli.Flag{
 		Category: "FILTERING",
 	},
 	&cli.StringSliceFlag{
-		Name:    "show-no-ext",
-		Aliases: []string{"sne", "noext"},
+		Name:    "no-ext",
+		Aliases: []string{"noext"},
 		Usage:   "show file which doesn't have target ext",
 		Action: func(context *cli.Context, s []string) error {
 			if len(s) > 0 {
@@ -114,8 +113,8 @@ var filteringFlag = []cli.Flag{
 		Category: "FILTERING",
 	},
 	&cli.BoolFlag{
-		Name:               "show-no-dir",
-		Aliases:            []string{"nd", "nodir", "no-dir", "file"},
+		Name:               "no-dir",
+		Aliases:            []string{"nodir", "file"},
 		DisableDefaultText: true,
 		Usage:              "do not show directory",
 		Action: func(context *cli.Context, b bool) error {
@@ -127,8 +126,8 @@ var filteringFlag = []cli.Flag{
 		Category: "FILTERING",
 	},
 	&cli.BoolFlag{
-		Name:               "show-only-dir",
-		Aliases:            []string{"sd", "dir", "only-dir", "D"},
+		Name:               "D",
+		Aliases:            []string{"dir", "only-dir"},
 		DisableDefaultText: true,
 		Usage:              "show directory only",
 		Action: func(context *cli.Context, b bool) error {
@@ -173,15 +172,14 @@ var filteringFlag = []cli.Flag{
 		Category: "FILTERING",
 	},
 	&cli.StringSliceFlag{
-		Name:     "show-mime-file-type-only",
+		Name:     "only-mime",
 		Usage:    "only show file with given mime type",
-		Aliases:  []string{"mime-only"},
 		Category: "FILTERING",
 		Action: func(context *cli.Context, i []string) error {
 			if len(i) > 0 {
 				err := limitOnce.Do(
 					func() error {
-						size := context.String("exact-detect-size")
+						size := context.String("detect-size")
 						var bytes uint64 = 1024 * 1024
 						if size == "0" || size == "infinity" {
 							bytes = 0
@@ -206,8 +204,8 @@ var filteringFlag = []cli.Flag{
 		},
 	},
 	&cli.BoolFlag{
-		Name:               "hide-git-ignore",
-		Aliases:            []string{"gi", "hgi", "git-ignore"},
+		Name:               "git-ignore",
+		Aliases:            []string{"hide-git-ignore"},
 		Usage:              "hide git ignored file/dir [if git is installed]",
 		DisableDefaultText: true,
 		Category:           "FILTERING",

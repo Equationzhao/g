@@ -10,6 +10,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/xrash/smetrics"
+
 	"github.com/Equationzhao/g/display"
 	"github.com/Equationzhao/g/filter"
 	filtercontent "github.com/Equationzhao/g/filter/content"
@@ -56,13 +58,12 @@ var (
 	hookPost        = make([]func(display.Printer, ...*item.FileInfo), 0)
 )
 
-var Version = "0.9.0"
+var Version = "0.10.0"
 
 var G *cli.App
 
 func init() {
 	itemFilterFunc = append(itemFilterFunc, &filter.RemoveHidden)
-
 	G = &cli.App{
 		Name:      "g",
 		Usage:     "a powerful ls",
@@ -76,8 +77,17 @@ func init() {
 		},
 		SliceFlagSeparator: ",",
 		HideHelpCommand:    true,
+		Suggest:            true,
 		OnUsageError: func(cCtx *cli.Context, err error, isSubcommand bool) error {
-			_, _ = fmt.Println(MakeErrorStr(err.Error()))
+			str := err.Error()
+			const prefix = "flag provided but not defined: "
+			if strings.HasPrefix(str, prefix) {
+				suggest := suggestFlag(cCtx.App.Flags, strings.TrimLeft(strings.TrimPrefix(str, prefix), "-"))
+				if suggest != "" {
+					str = fmt.Sprintf("%s, Did you mean %s?", str, suggest)
+				}
+			}
+			_, _ = fmt.Println(MakeErrorStr(str))
 			return nil
 		},
 		Flags: make([]cli.Flag, 0, len(viewFlag)+len(filteringFlag)+len(sortingFlags)+len(displayFlag)+len(indexFlags)),
@@ -90,7 +100,7 @@ func init() {
 			path := context.Args().Slice()
 
 			nameToDisplay := filtercontent.NewNameEnable()
-			if !context.Bool("no-icon") && (context.Bool("show-icon") || context.Bool("all")) {
+			if !context.Bool("no-icon") && (context.Bool("icon") || context.Bool("all")) {
 				nameToDisplay.SetIcon()
 			}
 			if context.Bool("F") {
@@ -230,6 +240,7 @@ func init() {
 						path[i] = pathbeautify.Transform(path[i])
 					}
 				}
+				originPath := path[i]
 
 				infos := make([]*item.FileInfo, 0, 20)
 
@@ -238,7 +249,8 @@ func init() {
 				// get the abs path
 				absPath, err := filepath.Abs(path[i])
 				if err != nil {
-					_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(fmt.Sprintf("Not a valid path: %s", absPath)))
+					_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(fmt.Sprintf("failed to get abs path: %s", absPath)))
+					continue
 				} else {
 					path[i] = absPath
 				}
@@ -255,24 +267,17 @@ func init() {
 							} else {
 								path[i] = newPath
 								stat, err = os.Stat(path[i])
+								fmt.Printf("%s:\n", path[i])
 								if err != nil {
-									checkErr(err)
+									checkErr(err, "")
 									seriousErr = true
 									continue
 								}
-								fmt.Println(path[i])
 							}
 						} else {
 							// output error
-							if pathErr := new(os.PathError); errors.As(err, &pathErr) {
-								_, _ = fmt.Fprintln(
-									os.Stderr, MakeErrorStr(fmt.Sprintf("%s: %s", pathErr.Err, pathErr.Path)),
-								)
-								seriousErr = true
-								continue
-							}
-							_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(err.Error()))
 							seriousErr = true
+							checkErr(err, originPath)
 							continue
 						}
 					}
@@ -281,7 +286,7 @@ func init() {
 							// when -d is set, treat dir as file
 							info, err := item.NewFileInfoWithOption(item.WithFileInfo(stat), item.WithPath(path[i]))
 							if err != nil {
-								checkErr(err)
+								checkErr(err, originPath)
 								seriousErr = true
 								continue
 							}
@@ -291,7 +296,7 @@ func init() {
 					} else {
 						info, err := item.NewFileInfoWithOption(item.WithFileInfo(stat), item.WithPath(path[i]))
 						if err != nil {
-							checkErr(err)
+							checkErr(err, originPath)
 							seriousErr = true
 							continue
 						}
@@ -324,13 +329,8 @@ func init() {
 
 				d, err = os.ReadDir(path[i])
 				if err != nil {
-					if pathErr := new(os.PathError); errors.As(err, &pathErr) {
-						_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(fmt.Sprintf("%s: %s", pathErr.Err, pathErr.Path)))
-						seriousErr = true
-					} else {
-						_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(err.Error()))
-						seriousErr = true
-					}
+					seriousErr = true
+					checkErr(err, originPath)
 					continue
 				}
 
@@ -339,33 +339,20 @@ func init() {
 					err := os.Chdir(path[i])
 					if err != nil {
 						_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(err.Error()))
+						seriousErr = true
 					} else {
 						FileInfoCurrent, err := item.NewFileInfo(".")
 						if err != nil {
-							if pathErr := new(os.PathError); errors.As(err, &pathErr) {
-								_, _ = fmt.Fprintln(
-									os.Stderr, MakeErrorStr(fmt.Sprintf("%s: %s", pathErr.Err, pathErr.Path)),
-								)
-								seriousErr = true
-							} else {
-								_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(err.Error()))
-								seriousErr = true
-							}
+							seriousErr = true
+							checkErr(err, ".")
 						} else {
 							infos = append(infos, FileInfoCurrent)
 						}
 
 						FileInfoParent, err := item.NewFileInfo("..")
 						if err != nil {
-							if pathErr := new(os.PathError); errors.As(err, &pathErr) {
-								_, _ = fmt.Fprintln(
-									os.Stderr, MakeErrorStr(fmt.Sprintf("%s: %s", pathErr.Err, pathErr.Path)),
-								)
-								minorErr = true
-							} else {
-								_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(err.Error()))
-								minorErr = true
-							}
+							minorErr = true
+							checkErr(err, "..")
 						} else {
 							infos = append(infos, FileInfoParent)
 						}
@@ -375,19 +362,12 @@ func init() {
 				for _, v := range d {
 					info, err := v.Info()
 					if err != nil {
-						if pathErr := new(os.PathError); errors.As(err, &pathErr) {
-							_, _ = fmt.Fprintln(
-								os.Stderr, MakeErrorStr(fmt.Sprintf("%s: %s", pathErr.Err, pathErr.Path)),
-							)
-							minorErr = true
-						} else {
-							minorErr = true
-							_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(err.Error()))
-						}
+						minorErr = true
+						checkErr(err, "")
 					} else {
 						info, err := item.NewFileInfoWithOption(item.WithFileInfo(info), item.WithPath(v.Name()))
 						if err != nil {
-							checkErr(err)
+							checkErr(err, "")
 							seriousErr = true
 							continue
 						}
@@ -693,7 +673,7 @@ func init() {
 		&cli.BoolFlag{
 			Name:     "check-new-version",
 			Usage:    "check if there's new release",
-			Category: "software info",
+			Category: "\b\b\bMETA",
 			Action: func(context *cli.Context, b bool) error {
 				if b {
 					upgrade.WithUpdateCheckTimeout(5 * time.Second)
@@ -709,7 +689,8 @@ func init() {
 			Name:               "no-path-transform",
 			Aliases:            []string{"np"},
 			DisableDefaultText: true,
-			Usage:              "By default, .../a/b/c will be transformed to ../../a/b/c, and ~ will be replaced by homedir, using this flag to disable this feature",
+			Usage: `By default, .../a/b/c will be transformed to ../../a/b/c, and ~ will be replaced by homedir, 
+	using this flag to disable this feature`,
 		},
 		&cli.BoolFlag{
 			Name:               "duplicate",
@@ -857,7 +838,7 @@ func initVersionHelpFlags() {
 		Aliases:            []string{"v"},
 		Usage:              "print the version",
 		DisableDefaultText: true,
-		Category:           "software info",
+		Category:           "\b\b\bMETA",
 	}
 
 	cli.HelpFlag = &cli.BoolFlag{
@@ -865,18 +846,54 @@ func initVersionHelpFlags() {
 		Aliases:            []string{"h", "?"},
 		Usage:              "show help",
 		DisableDefaultText: true,
-		Category:           "software info",
+		Category:           "\b\b\bMETA",
 	}
 }
 
 func MakeErrorStr(msg string) string {
-	return fmt.Sprintf("%s × %s %s\n", theme.Error, msg, theme.Reset)
+	return fmt.Sprintf("%s × %s %s", theme.Error, msg, theme.Reset)
 }
 
-func checkErr(err error) {
+func checkErr(err error, start string) {
+	var toPrint string
 	if pathErr := new(os.PathError); errors.As(err, &pathErr) {
-		_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(fmt.Sprintf("%s: %s", pathErr.Err, pathErr.Path)))
-		return
+		if start != "" {
+			pathErr.Path = start
+		}
+		toPrint = fmt.Sprintf("%s: %s (os error %d)", pathErr.Err, pathErr.Path, pathErr.Err)
+	} else {
+		toPrint = err.Error()
 	}
-	_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(err.Error()))
+	_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(toPrint))
+	return
+}
+
+// suggestFlag returns the suggested flag name
+// modified from cli.suggestFlag
+func suggestFlag(flags []cli.Flag, provided string) string {
+	const (
+		boostThreshold = 0.7
+		prefixSize     = 4
+	)
+	distance := 0.0
+	suggestion := ""
+
+	for _, flag := range flags {
+		flagNames := flag.Names()
+		for _, name := range flagNames {
+			newDistance := smetrics.JaroWinkler(name, provided, boostThreshold, prefixSize)
+			if newDistance > distance {
+				distance = newDistance
+				suggestion = name
+			}
+		}
+	}
+
+	if len(suggestion) == 1 {
+		suggestion = "-" + suggestion
+	} else if len(suggestion) > 1 {
+		suggestion = "--" + suggestion
+	}
+
+	return suggestion
 }

@@ -49,15 +49,15 @@ var displayFlag = []cli.Flag{
 	},
 	&cli.IntFlag{
 		Name:        "depth",
-		Aliases:     []string{"level", "L"},
+		Aliases:     []string{"level"},
 		Usage:       "limit recursive depth, negative -> infinity",
 		DefaultText: "infinity",
 		Value:       -1,
 		Category:    "DISPLAY",
 	},
 	&cli.BoolFlag{
-		Name:               "recurse",
-		Aliases:            []string{"R"},
+		Name:               "R",
+		Aliases:            []string{"recurse"},
 		Usage:              "recurse into directories",
 		DisableDefaultText: true,
 		Category:           "DISPLAY",
@@ -72,7 +72,7 @@ var displayFlag = []cli.Flag{
 	},
 	&cli.BoolFlag{
 		Name:               "byline",
-		Aliases:            []string{"bl", "1", "oneline", "single-column"},
+		Aliases:            []string{"1", "oneline", "single-column"},
 		Usage:              "print by line",
 		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
@@ -151,8 +151,8 @@ var displayFlag = []cli.Flag{
 		Category: "DISPLAY",
 	},
 	&cli.BoolFlag{
-		Name:               "json",
-		Aliases:            []string{"j"},
+		Name:               "j",
+		Aliases:            []string{"json"},
 		Usage:              "output in json format",
 		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
@@ -171,8 +171,8 @@ var displayFlag = []cli.Flag{
 		Category: "DISPLAY",
 	},
 	&cli.StringFlag{
-		Name:    "table-style",
-		Aliases: []string{"tablestyle", "tb-style"},
+		Name:    "tb-style",
+		Aliases: []string{"table-style"},
 		Usage:   "set table style (ascii(default)/unicode)",
 		Action: func(context *cli.Context, s string) error {
 			switch s {
@@ -188,8 +188,8 @@ var displayFlag = []cli.Flag{
 		Category: "DISPLAY",
 	},
 	&cli.BoolFlag{
-		Name:               "table",
-		Aliases:            []string{"tb"},
+		Name:               "tb",
+		Aliases:            []string{"table"},
 		Usage:              "output in table format",
 		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
@@ -203,8 +203,8 @@ var displayFlag = []cli.Flag{
 		Category: "DISPLAY",
 	},
 	&cli.BoolFlag{
-		Name:               "HTML",
-		Aliases:            []string{"html"},
+		Name:               "html",
+		Aliases:            []string{"HTML"},
 		Usage:              "output in HTML-table format",
 		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
@@ -222,8 +222,8 @@ var displayFlag = []cli.Flag{
 		Category: "DISPLAY",
 	},
 	&cli.BoolFlag{
-		Name:               "Markdown",
-		Aliases:            []string{"md", "MD", "markdown"},
+		Name:               "md",
+		Aliases:            []string{"markdown", "Markdown"},
 		Usage:              "output in markdown-table format",
 		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
@@ -352,7 +352,7 @@ var displayFlag = []cli.Flag{
 	},
 	&cli.BoolFlag{
 		Name:               "colorless",
-		Aliases:            []string{"nc", "no-color", "nocolor"},
+		Aliases:            []string{"no-color", "nocolor"},
 		Usage:              "without color",
 		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
@@ -412,8 +412,8 @@ var displayFlag = []cli.Flag{
 		Category:           "DISPLAY",
 	},
 	&cli.BoolFlag{
-		Name:               "file-type",
-		Aliases:            []string{"ft"},
+		Name:               "ft",
+		Aliases:            []string{"file-type"},
 		DisableDefaultText: true,
 		Usage:              "likewise, except do not append '*'",
 		Category:           "DISPLAY",

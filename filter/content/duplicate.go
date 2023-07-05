@@ -113,17 +113,26 @@ func fileHash(fileInfo *item.FileInfo, isThorough bool) (string, error) {
 	var prefix string
 	var bytes []byte
 	var fileReadErr error
-	if isThorough {
-		bytes, fileReadErr = os.ReadFile(fileInfo.FullPath)
-	} else if fileInfo.Size() <= thresholdFileSize {
-		prefix = "f"
-		bytes, fileReadErr = os.ReadFile(fileInfo.FullPath)
+	if isThorough || fileInfo.Size() <= thresholdFileSize {
+		if content, ok := fileInfo.Cache["content"]; ok {
+			bytes = content
+		} else {
+			bytes, fileReadErr = os.ReadFile(fileInfo.FullPath)
+			if fileReadErr != nil {
+				return "", fmt.Errorf("couldn't read file: %w", fileReadErr)
+			} else {
+				fileInfo.Cache["content"] = bytes
+			}
+		}
+		if fileInfo.Size() <= thresholdFileSize {
+			prefix = "f"
+		}
 	} else {
 		prefix = "s"
 		bytes, fileReadErr = readCrucialBytes(fileInfo.FullPath, fileInfo.Size())
-	}
-	if fileReadErr != nil {
-		return "", fmt.Errorf("couldn't calculate hash: %w", fileReadErr)
+		if fileReadErr != nil {
+			return "", fmt.Errorf("couldn't calculate hash: %w", fileReadErr)
+		}
 	}
 	var h hash.Hash
 	if isThorough {

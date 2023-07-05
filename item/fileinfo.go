@@ -14,6 +14,7 @@ type FileInfo struct {
 	os.FileInfo
 	FullPath string
 	Meta     *tsmap.Map[string, Item]
+	Cache    map[string][]byte
 }
 
 type Option = func(info *FileInfo) error
@@ -55,7 +56,10 @@ func NewFileInfoWithOption(opts ...Option) (*FileInfo, error) {
 		}
 	}
 	if f.Meta == nil {
-		f.Meta = tsmap.NewTSMap[string, Item](200)
+		f.Meta = tsmap.NewTSMap[string, Item](20)
+	}
+	if f.Cache == nil {
+		f.Cache = make(map[string][]byte)
 	}
 	return f, errSum
 }
@@ -75,6 +79,7 @@ func NewFileInfo(name string) (*FileInfo, error) {
 		FileInfo: info,
 		FullPath: abs,
 		Meta:     tsmap.NewTSMap[string, Item](20),
+		Cache:    make(map[string][]byte),
 	}, nil
 }
 
