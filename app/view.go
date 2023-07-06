@@ -447,18 +447,6 @@ var viewFlag = []cli.Flag{
 			return nil
 		},
 	},
-	&cli.BoolFlag{
-		Name:               "no-total-size",
-		Usage:              "disable total size(always override show-total-size)",
-		DisableDefaultText: true,
-		Category:           "VIEW",
-		Action: func(context *cli.Context, b bool) error {
-			if b {
-				sizeEnabler.DisableTotal()
-			}
-			return nil
-		},
-	},
 	&cli.StringFlag{
 		Name: "detect-size",
 		Usage: `set exact size for mimetype detection 
@@ -730,7 +718,6 @@ var viewFlag = []cli.Flag{
 					}
 				}
 				itemFilterFunc = newFF
-				sizeEnabler.SetEnableTotal()
 				contentFunc = append(
 					contentFunc, filtercontent.EnableFileMode(r), sizeEnabler.EnableSize(sizeUint, r),
 					ownerEnabler.EnableOwner(r),
@@ -748,6 +735,18 @@ var viewFlag = []cli.Flag{
 			return nil
 		},
 		Category: "VIEW",
+	},
+	&cli.BoolFlag{
+		Name:               "no-total-size",
+		Usage:              "disable total size(always override show-total-size)",
+		DisableDefaultText: true,
+		Category:           "VIEW",
+		Action: func(context *cli.Context, b bool) error {
+			if b {
+				sizeEnabler.DisableTotal()
+			}
+			return nil
+		},
 	},
 }
 

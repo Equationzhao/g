@@ -2,7 +2,6 @@ package display
 
 import (
 	"bufio"
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -449,21 +448,14 @@ func (z *Zero) Print(items ...*item.FileInfo) {
 type JsonPrinter struct {
 	*bufio.Writer
 	*hook
-}
-
-func (j *JsonPrinter) pretty(data []byte) (string, error) {
-	b := &bytes.Buffer{}
-	err := json.Indent(b, data, "", "	")
-	if err != nil {
-		return "", err
-	}
-	return b.String(), nil
+	Extra []any
 }
 
 func NewJsonPrinter() Printer {
 	return &JsonPrinter{
 		Writer: bufio.NewWriter(Output),
 		hook:   newHook(),
+		Extra:  make([]any, 0),
 	}
 }
 
@@ -487,18 +479,11 @@ func (j *JsonPrinter) Print(items ...*item.FileInfo) {
 
 		// sort by v.Content.No
 		for _, v := range all {
-			c := stripansi.Strip(v.Value().String())
 			if name := v.Key(); name == "Name" {
-				order = append(order, orderItem{name: name, content: c, no: v.Value().NO()})
-			} else if name == "underwent" || name == "statistic" {
-				order = append(order, orderItem{name: name, content: strings.TrimLeft(c, "\n "), no: v.Value().NO()})
-			} else if name == "total" {
-				order = append(
-					order, orderItem{name: name, content: strings.TrimPrefix(c, "  total "), no: v.Value().NO()},
-				)
+				order = append(order, orderItem{name: name, content: v.Value().String(), no: v.Value().NO()})
 			} else {
 				// remove all leading spaces
-				order = append(order, orderItem{name: name, content: strings.TrimSpace(c), no: v.Value().NO()})
+				order = append(order, orderItem{name: name, content: strings.TrimSpace(v.Value().String()), no: v.Value().NO()})
 			}
 		}
 
@@ -518,7 +503,16 @@ func (j *JsonPrinter) Print(items ...*item.FileInfo) {
 			s.Set(v.name, v.content)
 		}
 	}
-	pretty, err := json.MarshalIndent(list, "", "	")
+
+	wrap := &struct {
+		Extra   []any
+		Content []*orderedmap.OrderedMap[string, string]
+	}{
+		Extra:   j.Extra,
+		Content: list,
+	}
+
+	pretty, err := json.MarshalIndent(wrap, "", "	")
 	if err != nil {
 		_, _ = j.WriteString(err.Error() + "\n")
 		return

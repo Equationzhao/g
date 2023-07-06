@@ -446,65 +446,43 @@ func init() {
 				{
 					// add total && statistics
 					{
-						var i *item.FileInfo
+
 						// if -l/show-total-size is set, add total size
-						_, isPrettyPrinter := p.(display.PrettyPrinter)
+						jp, isJsonPrinter := p.(*display.JsonPrinter)
 
 						if total, ok := sizeEnabler.Total(); ok {
-							if !isPrettyPrinter {
-								i, _ = item.NewFileInfoWithOption()
-								s, unit := sizeEnabler.Size2String(total)
-								s = r.Size(s, filtercontent.Convert2SizeString(unit))
-								i.Set(
-									"total", &display.ItemContent{No: 0, Content: display.StringContent(
-										fmt.Sprintf(
-											"  total %s", s,
-										),
-									)},
-								)
+							s, unit := sizeEnabler.Size2String(total)
+							s = r.Size(s, filtercontent.Convert2SizeString(unit))
+
+							if isJsonPrinter {
+								jp.Extra = append(jp.Extra, struct {
+									Total string `json:"total"`
+								}{
+									Total: s,
+								})
 							} else {
-								s, unit := sizeEnabler.Size2String(total)
-								s = r.Size(s, filtercontent.Convert2SizeString(unit))
 								_, _ = display.RawPrint(fmt.Sprintf("  total %s\n", s))
 							}
 						}
 						if s := nameToDisplay.Statistics(); s != nil {
-							if !isPrettyPrinter {
-								tFormat := "\n  underwent %s"
-								if i == nil {
-									i, _ = item.NewFileInfoWithOption()
-									tFormat = "  underwent %s"
-								}
-								i.Set(
-									"underwent", &display.ItemContent{No: 1, Content: display.StringContent(
-										fmt.Sprintf(
-											tFormat,
-											r.Time(durafmt.Parse(time.Since(start)).LimitToUnit("ms").String()),
-										),
-									)},
-								)
-								i.Set(
-									"statistic", &display.ItemContent{No: 2, Content: display.StringContent(
-										fmt.Sprintf(
-											"\n  statistic: %s", s,
-										),
-									)},
-								)
+							t := r.Time(durafmt.Parse(time.Since(start)).LimitToUnit("ms").String())
+							if isJsonPrinter {
+								jp.Extra = append(jp.Extra, struct {
+									Time      string                    `json:"underwent"`
+									Statistic *filtercontent.Statistics `json:"statistic"`
+								}{
+									Time:      t,
+									Statistic: s,
+								})
 							} else {
 								_, _ = display.RawPrint(
 									fmt.Sprintf(
-										"  underwent %s",
-										r.Time(durafmt.Parse(time.Since(start)).LimitToUnit("ms").String()),
+										"  underwent %s", t,
 									),
 								)
 								_, _ = display.RawPrint(fmt.Sprintf("\n  statistic: %s\n", s))
 							}
 							s.Reset()
-						}
-						if i != nil {
-							p.DisablePreHook()
-							p.Print(i)
-							p.EnablePreHook()
 						}
 					}
 

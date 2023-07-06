@@ -164,7 +164,6 @@ var displayFlag = []cli.Flag{
 
 			_ = context.Set("header", "0")
 			_ = context.Set("classic", "1")
-			sizeEnabler.DisableTotal()
 
 			return nil
 		},
@@ -234,7 +233,6 @@ var displayFlag = []cli.Flag{
 					r.SetInfoTheme(theme.Colorless)
 					theme.ColorLevel = theme.None
 
-					// _ = context.Set("no-icon", "1")
 					err := context.Set("header", "1")
 					if err != nil {
 						return err
@@ -323,7 +321,6 @@ var displayFlag = []cli.Flag{
 					if err != nil {
 						return err
 					}
-					// _ = context.Set("no-icon", "1")
 				}
 			case "CSV", "csv":
 				if _, ok := p.(*display.CSVPrinter); !ok {
