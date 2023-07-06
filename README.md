@@ -270,7 +270,7 @@ use command `echo $profile` to find your profile path
 # then add the following to your $nu.config-path
 source ~/.g.nu
 
-# if you want to replace g with nushell's g command
+# if you want to replace nushell's g command with g
 # add the following definition and alias to your $nu.config-path
 #
 # def nug [arg?] {
