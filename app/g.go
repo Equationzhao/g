@@ -12,6 +12,7 @@ import (
 
 	"github.com/xrash/smetrics"
 
+	"github.com/Equationzhao/g/config"
 	"github.com/Equationzhao/g/display"
 	"github.com/Equationzhao/g/filter"
 	filtercontent "github.com/Equationzhao/g/filter/content"
@@ -319,7 +320,7 @@ func init() {
 				var d []os.DirEntry
 				if isFile {
 					if gitignore {
-						*removeGitIgnore = filter.RemoveGitIgnore(path[i])
+						*removeGitIgnore = filter.RemoveGitIgnore(filepath.Dir(path[i]))
 					}
 
 					// remove non-display items
@@ -366,7 +367,9 @@ func init() {
 						minorErr = true
 						checkErr(err, "")
 					} else {
-						info, err := item.NewFileInfoWithOption(item.WithFileInfo(info), item.WithPath(v.Name()))
+						info, err := item.NewFileInfoWithOption(
+							item.WithFileInfo(info), item.WithAbsPath(filepath.Join(path[i], v.Name())),
+						)
 						if err != nil {
 							checkErr(err, "")
 							seriousErr = true
@@ -428,8 +431,12 @@ func init() {
 
 			final:
 				if git {
-					gitEnabler.Path = path[i]
-					gitEnabler.InitCache(path[i])
+					repo := path[i]
+					if isFile {
+						repo = filepath.Dir(path[i])
+					}
+					gitEnabler.Path = repo
+					gitEnabler.InitCache(repo)
 				}
 
 				contentFilter.GetDisplayItems(&infos)
@@ -775,20 +782,25 @@ func (c Err4Exit) Error() string {
 }
 
 func initHelpTemp() {
-	cli.AppHelpTemplate = `NAME:
-   {{template "helpNameTemplate" .}}
+	configDir, err := config.GetUserConfigDir()
+	if err != nil {
+		configDir = filepath.Join("$UserConfigDir", "g")
+	}
+	cli.AppHelpTemplate = fmt.Sprintf(
+		`NAME:
+	{{template "helpNameTemplate" .}}
 
 USAGE:
-   {{if .UsageText}}{{wrap .UsageText 3}}{{else}}{{.HelpName}} {{if .VisibleFlags}}[global options]{{end}}{{if .Commands}} command [command options]{{end}} {{if .ArgsUsage}}{{.ArgsUsage}}{{else}}[arguments...]{{end}}{{end}}{{if .Version}}{{if not .HideVersion}}
+	{{if .UsageText}}{{wrap .UsageText 3}}{{else}}{{.HelpName}} {{if .VisibleFlags}}[global options]{{end}}{{if .Commands}} command [command options]{{end}} {{if .ArgsUsage}}{{.ArgsUsage}}{{else}}[arguments...]{{end}}{{end}}{{if .Version}}{{if not .HideVersion}}
 
 VERSION:
-   {{.Version}}{{end}}{{end}}{{if .Description}}
+	{{.Version}}{{end}}{{end}}{{if .Description}}
 
 DESCRIPTION:
-   {{template "descriptionTemplate" .}}{{end}}
+	{{template "descriptionTemplate" .}}{{end}}
 
 CONFIG:
-   Configuration: $UserConfigDir/g/g.yaml
+	Configuration: %s
 {{- if len .Authors}}
 
 AUTHOR{{template "authorsTemplate" .}}{{end}}{{if .VisibleCommands}}
@@ -798,13 +810,14 @@ COMMANDS:{{template "visibleCommandCategoryTemplate" .}}{{end}}{{if .VisibleFlag
 GLOBAL OPTIONS:{{template "visibleFlagCategoryTemplate" .}}{{else if .VisibleFlags}}
 
 GLOBAL OPTIONS:{{template "visibleFlagTemplate" .}}{{end}}
-`
+`, filepath.Join(configDir, "g.yaml"),
+	)
 }
 
 func initVersionHelpFlags() {
 	info := versionInfo.Get()
 	info.Version = Version
-	config := &style.Config{
+	s := &style.Config{
 		Formatting: style.Formatting{
 			Header: style.Header{
 				Prefix: "💡 ",
@@ -835,7 +848,7 @@ func initVersionHelpFlags() {
 		},
 	}
 
-	c := vp.New(vp.WithPrettyStyle(config))
+	c := vp.New(vp.WithPrettyStyle(s))
 	cli.VersionPrinter = func(cCtx *cli.Context) {
 		info.Meta = versionInfo.Meta{
 			CLIName: cCtx.App.Name + " - " + cCtx.App.Usage,

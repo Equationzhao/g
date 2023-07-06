@@ -33,7 +33,7 @@ func WithFileInfo(info os.FileInfo) Option {
 	}
 }
 
-// WithPath will get abs path of given string
+// WithPath will get the abs path of given string
 // and set the full path of FileInfo
 func WithPath(path string) Option {
 	return func(f *FileInfo) error {
@@ -42,6 +42,13 @@ func WithPath(path string) Option {
 			return err
 		}
 		f.FullPath = abs
+		return nil
+	}
+}
+
+func WithAbsPath(path string) Option {
+	return func(f *FileInfo) error {
+		f.FullPath = path
 		return nil
 	}
 }

@@ -53,10 +53,9 @@ var viewFlag = []cli.Flag{
 		Category:           "VIEW",
 	},
 	&cli.StringSliceFlag{
-		Name:        "time-type",
-		Usage:       "time type, mod(default), create, access, all",
-		EnvVars:     []string{"TIME_TYPE"},
-		DefaultText: "mod",
+		Name:    "time-type",
+		Usage:   "time type, mod(default), create, access, all",
+		EnvVars: []string{"TIME_TYPE"},
 		Action: func(context *cli.Context, ss []string) error {
 			timeType = make([]string, 0, len(ss))
 			accepts := []string{"mod", "modified", "create", "cr", "access", "ac"}
@@ -114,11 +113,11 @@ var viewFlag = []cli.Flag{
 		Category: "VIEW",
 	},
 	&cli.StringFlag{
-		Name:        "size-unit",
-		Aliases:     []string{"su", "block-size"},
-		Usage:       "size unit, b, k, m, g, t, p, e, z, y, bb, nb, auto",
-		EnvVars:     []string{"SIZE_UNIT"},
-		DefaultText: "auto",
+		Name:    "size-unit",
+		Aliases: []string{"su", "block-size"},
+		Usage: `size unit:
+			bit, b, k, m, g, t, p,
+			e, z, y, bb, nb, auto`,
 		Action: func(context *cli.Context, s string) error {
 			if strings.EqualFold(s, "auto") {
 				return nil
@@ -461,8 +460,9 @@ var viewFlag = []cli.Flag{
 		},
 	},
 	&cli.StringFlag{
-		Name:        "detect-size",
-		Usage:       "set exact size for mimetype detection eg:1M/nolimit/infinity",
+		Name: "detect-size",
+		Usage: `set exact size for mimetype detection 
+			eg:1M/nolimit/infinity`,
 		Value:       "1M",
 		DefaultText: "1M",
 		Category:    "VIEW",
@@ -544,9 +544,8 @@ var viewFlag = []cli.Flag{
 		Category:    "VIEW",
 	},
 	&cli.BoolFlag{
-		Name: "checksum",
-		Usage: `show checksum of file with algorithm: 
-	md5, sha1(default), sha224, sha256, sha384, sha512, crc32`,
+		Name:               "checksum",
+		Usage:              `show checksum of file with algorithm, see --checksum-algorithm`,
 		Aliases:            []string{"cs"},
 		DisableDefaultText: true,
 		Category:           "VIEW",

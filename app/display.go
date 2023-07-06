@@ -23,7 +23,7 @@ var displayFlag = []cli.Flag{
 	&cli.StringFlag{
 		Name:        "color",
 		DefaultText: "auto",
-		Usage:       "when to use terminal colours[always|auto|never][basic|256|24bit]",
+		Usage:       "when to use terminal colors [always|auto|never][basic|256|24bit]",
 		Action: func(context *cli.Context, s string) error {
 			switch s {
 			case "always", "force":
@@ -173,7 +173,7 @@ var displayFlag = []cli.Flag{
 	&cli.StringFlag{
 		Name:    "tb-style",
 		Aliases: []string{"table-style"},
-		Usage:   "set table style (ascii(default)/unicode)",
+		Usage:   "set table style [ascii(default)/unicode]",
 		Action: func(context *cli.Context, s string) error {
 			switch s {
 			case "ascii", "ASCII", "Ascii":

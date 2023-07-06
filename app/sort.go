@@ -153,7 +153,7 @@ var sortingFlags = []cli.Flag{
 	},
 	&cli.BoolFlag{
 		Name:               "sort-reverse",
-		Aliases:            []string{"sr", "reverse", "r"},
+		Aliases:            []string{"reverse", "r"},
 		Usage:              "reverse the order of the sort",
 		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
@@ -181,7 +181,7 @@ var sortingFlags = []cli.Flag{
 	},
 	&cli.BoolFlag{
 		Name:               "S",
-		Aliases:            []string{"sort-size", "sort-by-size", "sizesort"},
+		Aliases:            []string{"sort-by-size", "sizesort"},
 		Usage:              "sort by file size, largest first(descending)",
 		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
@@ -207,7 +207,7 @@ var sortingFlags = []cli.Flag{
 	},
 	&cli.BoolFlag{
 		Name:               "X",
-		Aliases:            []string{"extensionsort"},
+		Aliases:            []string{"sort-by-ext"},
 		Usage:              "sort alphabetically by entry extension",
 		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {

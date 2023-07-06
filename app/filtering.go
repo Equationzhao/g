@@ -11,7 +11,7 @@ var filteringFlag = []cli.Flag{
 	&cli.UintFlag{
 		Name:        "n",
 		Aliases:     []string{"limitN", "limit", "topN", "top"},
-		Usage:       "limit n items(n <=0 means unlimited)",
+		Usage:       "Limit display to a max of n items (n <=0 means unlimited)",
 		Value:       0,
 		DefaultText: "unlimited",
 		Category:    "FILTERING",
@@ -52,7 +52,7 @@ var filteringFlag = []cli.Flag{
 		Name:               "show-only-hidden",
 		Aliases:            []string{"hidden"},
 		DisableDefaultText: true,
-		Usage:              "show only hidden files(overridden by --show-hidden/-sh/-a/-A)",
+		Usage:              "show only hidden files(overridden by --show-hidden/-a/-A)",
 		Action: func(context *cli.Context, b bool) error {
 			if b {
 				newFF := make([]*filter.ItemFilterFunc, 0, len(itemFilterFunc))

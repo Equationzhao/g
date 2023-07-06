@@ -62,14 +62,18 @@ type FileGits = []FileGit
 
 type RepoPath = string
 
-// GetShortGitStatus read the git status of the repository located at path
+// GetShortGitStatus read the git status of the repository located at the path
 func GetShortGitStatus(repoPath RepoPath) (string, error) {
-	out, err := exec.Command("git", "status", "-s", "--ignored", "--porcelain", repoPath).Output()
+	c := exec.Command("git", "status", "-s", "--ignored", "--porcelain", repoPath)
+	c.Dir = repoPath
+	out, err := c.Output()
 	return string(out), err
 }
 
 func getTopLevel(path RepoPath) (string, error) {
-	out, err := exec.Command("git", "rev-parse", "--show-toplevel", path).Output()
+	c := exec.Command("git", "rev-parse", "--show-toplevel", path)
+	c.Dir = path
+	out, err := c.Output()
 	if err != nil {
 		return "", err
 	}
