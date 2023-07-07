@@ -10,8 +10,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/xrash/smetrics"
-
 	"github.com/Equationzhao/g/config"
 	"github.com/Equationzhao/g/display"
 	"github.com/Equationzhao/g/filter"
@@ -29,6 +27,7 @@ import (
 	"github.com/savioxavier/termlink"
 	"github.com/urfave/cli/v2"
 	"github.com/valyala/bytebufferpool"
+	"github.com/xrash/smetrics"
 	versionInfo "go.szostok.io/version"
 	vp "go.szostok.io/version/printer"
 	"go.szostok.io/version/style"

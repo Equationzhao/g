@@ -5,11 +5,10 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/Equationzhao/g/slices"
-
 	"github.com/Equationzhao/g/display"
 	"github.com/Equationzhao/g/filter"
 	filtercontent "github.com/Equationzhao/g/filter/content"
+	"github.com/Equationzhao/g/slices"
 	"github.com/Equationzhao/g/timeparse"
 	"github.com/gabriel-vasile/mimetype"
 	"github.com/urfave/cli/v2"

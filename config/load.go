@@ -9,8 +9,10 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-const NoConfig = "-no-config"
-const DefaultConfigFile = "g.yaml"
+const (
+	NoConfig          = "-no-config"
+	DefaultConfigFile = "g.yaml"
+)
 
 func GetUserConfigDir() (string, error) {
 	err := InitConfigDir.Do(func() error {
@@ -31,8 +33,10 @@ func GetUserConfigDir() (string, error) {
 	return ConfigDir, nil
 }
 
-var InitConfigDir util.Once
-var ConfigDir = ""
+var (
+	InitConfigDir util.Once
+	ConfigDir     = ""
+)
 
 // READ config
 // g.yaml
@@ -49,7 +53,6 @@ type ErrReadConfig struct {
 }
 
 func Load() (*Config, error) {
-
 	Dir, err := GetUserConfigDir()
 	if err != nil {
 		return nil, err
