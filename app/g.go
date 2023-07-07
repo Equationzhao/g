@@ -700,7 +700,7 @@ func init() {
 		},
 		&cli.StringFlag{
 			Name:  "init",
-			Usage: `init the config file, default path is ~/.config/g/config.yaml`,
+			Usage: `show the init script for shell, support zsh, bash, fish, powershell, nushell`,
 			Action: func(context *cli.Context, s string) error {
 				switch s {
 				case "zsh":
