@@ -58,8 +58,7 @@ var (
 	hookPost        = make([]func(display.Printer, ...*item.FileInfo), 0)
 )
 
-
-var Version = "0.10.0"
+var Version = "0.10.1"
 
 var G *cli.App
 

@@ -259,8 +259,8 @@ var viewFlag = []cli.Flag{
 		Category: "VIEW",
 	},
 	&cli.BoolFlag{
-		Name:               "show-perm",
-		Aliases:            []string{"sp", "permission", "perm"},
+		Name:               "perm",
+		Aliases:            []string{"permission"},
 		Usage:              "show permission",
 		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
@@ -275,8 +275,7 @@ var viewFlag = []cli.Flag{
 		Category: "VIEW",
 	},
 	&cli.BoolFlag{
-		Name:               "show-size",
-		Aliases:            []string{"ss", "size"},
+		Name:               "size",
 		Usage:              "show file/dir size",
 		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
@@ -291,9 +290,8 @@ var viewFlag = []cli.Flag{
 		Category: "VIEW",
 	},
 	&cli.BoolFlag{
-		Name:               "show-recursive-size",
-		Aliases:            []string{"recursive-size"},
-		Usage:              "show recursive size of dir, only work with --show-size",
+		Name:               "recursive-size",
+		Usage:              "show recursive size of dir, only work with --size",
 		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
 			if b {
@@ -409,7 +407,7 @@ var viewFlag = []cli.Flag{
 	},
 	&cli.BoolFlag{
 		Name:               "no-icon",
-		Usage:              "disable icon(always override show-icon)",
+		Usage:              "disable icon(always override --icon)",
 		Aliases:            []string{"noicon", "ni"},
 		DisableDefaultText: true,
 		Category:           "VIEW",
@@ -417,7 +415,7 @@ var viewFlag = []cli.Flag{
 	&cli.BoolFlag{
 		Name:               "icon",
 		Usage:              "show icon",
-		Aliases:            []string{"si", "icons"},
+		Aliases:            []string{"icons"},
 		DisableDefaultText: true,
 		Category:           "VIEW",
 	},
