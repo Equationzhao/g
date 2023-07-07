@@ -1,10 +1,22 @@
 #!/bin/bash
 
 if [ "$(command -v g)" ]; then
-    unalias -m 'll'
-    unalias -m 'l'
-    unalias -m 'la'
-    unalias -m 'ls'
+    if [ "$(command -v ls)" ]; then
+      unalias ls
+    fi
+
+    if [ "$(command -v ll)" ]; then
+      unalias ll
+    fi
+
+    if [ "$(command -v l)" ]; then
+      unalias l
+    fi
+
+    if [ "$(command -v la)" ]; then
+      unalias la
+    fi
+
     alias ls='g'
     alias ll='g --perm --icons --time --group --owner --size --title'
     alias l='g --perm --icons --time --group --owner --size --title --show-hidden'

@@ -75,16 +75,22 @@ func color2str(color string) string {
 		)
 		strReader = strings.NewReader(color)
 		_, err = fmt.Fscanf(strReader, RGBFormat, &r, &g, &b)
-		if err != nil {
-			return ""
+		if err == nil {
+			return fmt.Sprintf("[%d,%d,%d]@rgb", r, g, b)
 		}
-		return fmt.Sprintf("[%d,%d,%d]@rgb", r, g, b)
+
+		color = strings.ReplaceAll(color, " ", "")
+		if strings.HasPrefix(color, Underline) {
+			return color2str(Underline) + " + " + color2str(color[len(Underline):])
+		}
+		return ""
 	}
 }
 
 // str2color convert string to color
 // support: red, green, yellow, blue, purple, cyan, white, black, and their bright version
 // Underline
+// any color with underline, should be in the format of "Underline + [color]"
 // [value]@256
 // [values]@rgb
 // [values]@hex (will be turned to rgb)
@@ -130,7 +136,7 @@ func str2color(str string) (string, error) {
 		return Underline, nil
 	default:
 		// remove spaces
-		str = strings.TrimSpace(str)
+		str = strings.ReplaceAll(str, " ", "")
 
 		// 256 color
 		if strings.HasSuffix(str, "@256") {
@@ -174,6 +180,15 @@ func str2color(str string) (string, error) {
 				return "", errors.New("rgb values must be numbers")
 			}
 			return colorStr, nil
+		}
+
+		// underline
+		if strings.HasPrefix(str, "underline+") {
+			color, err := str2color(str[len("underline+"):])
+			if err != nil {
+				return "", err
+			}
+			return Underline + color, nil
 		}
 
 		return Reset, nil
