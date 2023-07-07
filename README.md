@@ -72,45 +72,38 @@ g path(s)
 with icon
 
 ```bash
-g -si    path
 g -icons path
 ```
 
 with mod(default) time
 
 ```bash
-g -st        path
-g -show-time path
 g -time      path
 ```
 
 with access/create/mod time
 
 ```bash
-g -st -time-type=access path
-g -st -ac/cr/mod path
+g -time -time-type=access path
+g -time -ac/cr/mod path
 ```
 
 with fileperm
 
 ```bash
-g -sp         path
 g -permission path
 ```
 
 with owner/group
 
 ```bash
-g -so    path
 g -owner path
-g -sg    path
 g -group path
 ```
 
 with size
 
 ```bash
-g -ss   path
 g -size path
 ```
 
@@ -124,7 +117,6 @@ g -a  path
 show dir only
 
 ```bash
-g -sd  path
 g -dir path
 ```
 
@@ -132,7 +124,6 @@ list by line
 
 ```bash
 g -1             path
-g -bl            path
 g -oneline       path
 g -single-column path
 ```
@@ -141,13 +132,8 @@ show file only with target ext
 
 ```bash
 g -ext=<target ext(s)> path
-```
-
-list in tree
-
-```bash
-g -t    path
-g -tree path
+# eg:
+# g -ext=go,md
 ```
 
 recurse into directories
@@ -160,7 +146,6 @@ g -recurse path
 limit depth in tree/recurse (default: no limit)
 
 ```bash
-g -t -depth=<level> path
 g -R -depth=<level> path
 ```
 
@@ -185,19 +170,18 @@ g -disable-index path
 disable color
 
 ```bash
-g -nc        path
 g -no-color  path
 g -colorless path
 ```
 
 set color 
 ```bash
-g --color=always path
-g --color=auto   path # default
-g --color=never  path 
-g --color=16/basic      path # 16-color
-g --color=256/8bit      path # 256-color
-g --color=16m/24bit/true-color  path # 24-bit
+g -color=always path
+g -color=auto   path # default
+g -color=never  path 
+g -color=16/basic      path # 16-color
+g -color=256/8bit      path # 256-color
+g -color=16m/24bit/true-color  path # 24-bit
 ```
 
 show checksum (md5,sha1,sha224,sha256,sha384,sha512,crc32)
@@ -220,7 +204,7 @@ g -tb
 ```
 
 output in markdown, and render with [glow](github.com/charmbracelet/glow) 
-(icons and colors are not supported in markdown )
+(colors are not supported in markdown )
 
 ```bash
 g -md | glow 
@@ -232,11 +216,11 @@ g -md | glow
 ## Shell scripts
 generate shell scripts
 ```bash
-g --init bash/zsh/fish/pwsh
+g -init bash/zsh/fish/pwsh
 ```
 
 ### bash
-```.bashrc
+```.bash
 # add the following command to .bashrc
 eval "$(g --init bash)"
 # then `source ~/.bashrc`
