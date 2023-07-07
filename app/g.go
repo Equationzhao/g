@@ -58,7 +58,7 @@ var (
 	hookPost        = make([]func(display.Printer, ...*item.FileInfo), 0)
 )
 
-var Version = "0.10.1"
+var Version = "0.10.2"
 
 var G *cli.App
 
@@ -418,10 +418,11 @@ func init() {
 								if info.Name() == "." || info.Name() == ".." {
 									continue
 								}
-								newPath, _ := filepath.Rel(startDir, filepath.Join(path[i], info.Name()))
+								abs := filepath.Join(path[i], info.Name())
+								newPath, _ := filepath.Rel(startDir, abs)
 								path = slices.Insert(path, i+1+j, newPath)
 								j++
-								depthLimitMap[newPath] = dep - 1
+								depthLimitMap[abs] = dep - 1
 							}
 						}
 					}
