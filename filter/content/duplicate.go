@@ -59,9 +59,11 @@ func (d *DuplicateDetect) Enable() filter.NoOutputOption {
 		if err != nil {
 			return
 		}
-		actual, _ := d.hashTb.GetOrInit(afterHash, func() filenameList {
-			return util.NewSlice[string](10)
-		})
+		actual, _ := d.hashTb.GetOrInit(
+			afterHash, func() filenameList {
+				return util.NewSlice[string](10)
+			},
+		)
 		actual.AppendTo(info.Name())
 	}
 }
@@ -120,9 +122,9 @@ func fileHash(fileInfo *item.FileInfo, isThorough bool) (string, error) {
 			bytes, fileReadErr = os.ReadFile(fileInfo.FullPath)
 			if fileReadErr != nil {
 				return "", fmt.Errorf("couldn't read file: %w", fileReadErr)
-			} else {
-				fileInfo.Cache["content"] = bytes
 			}
+			fileInfo.Cache["content"] = bytes
+
 		}
 		if fileInfo.Size() <= thresholdFileSize {
 			prefix = "f"

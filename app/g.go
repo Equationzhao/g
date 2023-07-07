@@ -252,9 +252,8 @@ func init() {
 				if err != nil {
 					_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(fmt.Sprintf("failed to get abs path: %s", absPath)))
 					continue
-				} else {
-					path[i] = absPath
 				}
+				path[i] = absPath
 
 				if path[i] != "." {
 					stat, err := os.Stat(path[i])
@@ -454,11 +453,13 @@ func init() {
 							s = r.Size(s, filtercontent.Convert2SizeString(unit))
 
 							if isJsonPrinter {
-								jp.Extra = append(jp.Extra, struct {
-									Total string `json:"total"`
-								}{
-									Total: s,
-								})
+								jp.Extra = append(
+									jp.Extra, struct {
+										Total string `json:"total"`
+									}{
+										Total: s,
+									},
+								)
 							} else {
 								_, _ = display.RawPrint(fmt.Sprintf("  total %s\n", s))
 							}
@@ -466,13 +467,15 @@ func init() {
 						if s := nameToDisplay.Statistics(); s != nil {
 							t := r.Time(durafmt.Parse(time.Since(start)).LimitToUnit("ms").String())
 							if isJsonPrinter {
-								jp.Extra = append(jp.Extra, struct {
-									Time      string                    `json:"underwent"`
-									Statistic *filtercontent.Statistics `json:"statistic"`
-								}{
-									Time:      t,
-									Statistic: s,
-								})
+								jp.Extra = append(
+									jp.Extra, struct {
+										Time      string                    `json:"underwent"`
+										Statistic *filtercontent.Statistics `json:"statistic"`
+									}{
+										Time:      t,
+										Statistic: s,
+									},
+								)
 							} else {
 								_, _ = display.RawPrint(
 									fmt.Sprintf(
