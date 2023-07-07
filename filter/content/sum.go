@@ -1,6 +1,7 @@
 package content
 
 import (
+	"bytes"
 	"crypto/md5"
 	"crypto/sha1"
 	"crypto/sha256"
@@ -67,11 +68,22 @@ func (s SumEnabler) EnableSum(sumTypes ...SumType) filter.ContentOption {
 			return filter.FillBlank("", length), sumName
 		}
 
-		file, err := os.Open(info.Name())
-		if err != nil {
-			return filter.FillBlank("", length), sumName
+		var content []byte
+		if content_, ok := info.Cache["content"]; ok {
+			content = content_
+		} else {
+			file, err := os.Open(info.Name())
+			if err != nil {
+				return filter.FillBlank("", length), sumName
+			}
+			content, err = io.ReadAll(file)
+			if err != nil {
+				return filter.FillBlank("", length), sumName
+			}
+			info.Cache["content"] = content
+			defer file.Close()
 		}
-		defer file.Close()
+
 		hashes := make([]hash.Hash, 0, len(sumTypes))
 		writers := make([]io.Writer, 0, len(sumTypes))
 		for _, t := range sumTypes {
@@ -96,7 +108,7 @@ func (s SumEnabler) EnableSum(sumTypes ...SumType) filter.ContentOption {
 			hashes = append(hashes, hashed)
 		}
 		multiWriter := io.MultiWriter(writers...)
-		if _, err := io.Copy(multiWriter, file); err != nil {
+		if _, err := io.Copy(multiWriter, bytes.NewReader(content)); err != nil {
 			return filter.FillBlank("", length), sumName
 		}
 		sums := make([]string, 0, len(hashes))

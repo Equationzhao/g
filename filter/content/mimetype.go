@@ -11,13 +11,12 @@ import (
 )
 
 type MimeFileTypeEnabler struct {
-	ParentOnly, EnableCharset bool
+	ParentOnly bool
 }
 
 func NewMimeFileTypeEnabler() *MimeFileTypeEnabler {
 	return &MimeFileTypeEnabler{
-		ParentOnly:    false,
-		EnableCharset: false,
+		ParentOnly: false,
 	}
 }
 
@@ -57,11 +56,12 @@ func (e *MimeFileTypeEnabler) Enable() filter.ContentOption {
 				tn = strings.SplitN(tn, "/", 2)[0]
 			}
 
-			if !e.EnableCharset {
-				if strings.Contains(tn, ";") {
-					// remove charset
-					tn = strings.SplitN(tn, ";", 2)[0]
-				}
+			if strings.Contains(tn, ";") {
+				// remove charset
+				s := strings.SplitN(tn, ";", 2)
+				tn = s[0]
+				charset := strings.SplitN(s[1], "=", 2)[1]
+				info.Cache[charsetIdentifier] = []byte(charset)
 			}
 
 		}

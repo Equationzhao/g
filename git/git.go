@@ -4,14 +4,20 @@ import (
 	"bufio"
 	"os/exec"
 	"strings"
+
+	"github.com/Equationzhao/g/util"
+	"github.com/Equationzhao/pathbeautify"
 )
 
+// FileGit is an entry name with git status
+// the name will not end with file separator
 type FileGit struct {
 	Name string
 	X, Y Status
 }
 
 /*
+Set sets the status of the file based on the XY string
 X          Y     Meaning
 -------------------------------------------------
 
@@ -44,30 +50,9 @@ U           U    unmerged, both modified
 !           !    ignored
 -------------------------------------------------
 */
-func (f *FileGit) set(XY string) {
+func (f *FileGit) Set(XY string) {
 	set := func(s *Status, c byte) {
-		switch c {
-		case 'M':
-			*s = Modified
-		case 'A':
-			*s = Added
-		case 'D':
-			*s = Deleted
-		case 'R':
-			*s = Renamed
-		case 'C':
-			*s = Copied
-		case '?':
-			*s = Untracked
-		case '!':
-			*s = Ignored
-		case ' ':
-			*s = Unmodified
-		case 'T':
-			*s = TypeChanged
-		case 'U':
-			*s = UpdatedBuUnmerged
-		}
+		*s = Byte2Status(c)
 	}
 	set(&f.X, XY[0])
 	set(&f.Y, XY[1])
@@ -77,14 +62,18 @@ type FileGits = []FileGit
 
 type RepoPath = string
 
-// GetShortGitStatus read the git status of the repository located at path
+// GetShortGitStatus read the git status of the repository located at the path
 func GetShortGitStatus(repoPath RepoPath) (string, error) {
-	out, err := exec.Command("git", "status", "-s", "--ignored", "--porcelain", repoPath).Output()
+	c := exec.Command("git", "status", "-s", "--ignored", "--porcelain", repoPath)
+	c.Dir = repoPath
+	out, err := c.Output()
 	return string(out), err
 }
 
 func getTopLevel(path RepoPath) (string, error) {
-	out, err := exec.Command("git", "rev-parse", "--show-toplevel", path).Output()
+	c := exec.Command("git", "rev-parse", "--show-toplevel", path)
+	c.Dir = path
+	out, err := c.Output()
 	if err != nil {
 		return "", err
 	}
@@ -96,16 +85,17 @@ func getTopLevel(path RepoPath) (string, error) {
 type Status int
 
 const (
-	Unmodified        Status = iota + 1 //
-	Modified                            // M
-	Added                               // A
-	Deleted                             // D
-	Renamed                             // R
-	Copied                              // C
-	Untracked                           // ?
-	Ignored                             // !
-	TypeChanged                         // T
-	UpdatedBuUnmerged                   // U
+	Unknown           Status = iota
+	Unmodified               // -
+	Modified                 // M
+	Added                    // A
+	Deleted                  // D
+	Renamed                  // R
+	Copied                   // C
+	Untracked                // ?
+	Ignored                  // !
+	TypeChanged              // T
+	UpdatedBuUnmerged        // U
 )
 
 // ParseShort parses a git status output command
@@ -129,8 +119,8 @@ func ParseShort(r string) (res FileGits) {
 			continue
 		}
 		status := str[0:2]
-		fg.set(status)
-		fg.Name = str[3:]
+		fg.Set(status)
+		fg.Name = util.RemoveSep(pathbeautify.CleanSeparator(str[3:]))
 		res = append(res, fg)
 		if !s.Scan() {
 			break
@@ -143,19 +133,55 @@ func ParseShort(r string) (res FileGits) {
 func (s Status) String() string {
 	switch s {
 	case Modified:
-		return "~"
+		return "M"
 	case Added:
-		return "+"
+		return "A"
 	case Deleted:
-		return "-"
+		return "D"
 	case Renamed:
-		return "|"
+		return "R"
 	case Copied:
-		return "="
+		return "C"
 	case Untracked:
 		return "?"
 	case Ignored:
 		return "!"
+	case Unmodified:
+		return "-"
+	case TypeChanged:
+		return "T"
+	case UpdatedBuUnmerged:
+		return "U"
+	case Unknown:
+		return "^"
 	}
-	return ""
+	return "^"
+}
+
+func Byte2Status(c byte) Status {
+	switch c {
+	case 'M':
+		return Modified
+	case 'A':
+		return Added
+	case 'D':
+		return Deleted
+	case 'R':
+		return Renamed
+	case 'C':
+		return Copied
+	case '?':
+		return Untracked
+	case '!':
+		return Ignored
+	case '-', ' ':
+		return Unmodified
+	case 'T':
+		return TypeChanged
+	case 'U':
+		return UpdatedBuUnmerged
+	case '^':
+		return Unknown
+	}
+	return Unknown
 }

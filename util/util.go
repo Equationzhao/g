@@ -1,6 +1,9 @@
 package util
 
 import (
+	"path/filepath"
+	"strings"
+
 	"github.com/Equationzhao/g/util/cmp"
 )
 
@@ -16,4 +19,8 @@ func Min[T cmp.Ordered](a, b T) T {
 		return b
 	}
 	return a
+}
+
+func RemoveSep(s string) string {
+	return strings.TrimRight(s, string(filepath.Separator))
 }

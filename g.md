@@ -9,106 +9,107 @@ g
 ```
 [-#]
 [--CSV|--csv]
-[--HTML|--html]
-[--Markdown|--md|--MD|--markdown]
 [--access|--ac|--accessed]
 [--all|--la|-l|--long]
 [--block|--blocks]
-[--byline|--bl|-1|--oneline|--single-column]
+[--byline|-1|--oneline|--single-column]
+[--charset]
 [--check-new-version]
 [--checksum-algorithm|--ca]=[value]
 [--checksum|--cs]
 [--classic]
 [--color]=[value]
-[--colorless|--nc|--no-color|--nocolor]
+[--colorless|--no-color|--nocolor]
 [--create|--cr|--created]
-[--depth|--level|-L]=[value]
+[--depth|--level]=[value]
 [--dereference]
-[--dir-first|--df|--group-directories-first]
+[--detect-size]=[value]
+[--df|--dir-first|--group-directories-first]
 [--disable-index|--di|--no-update]
 [--duplicate|--dup]
-[--exact-detect-size|--eds|--detect-size|--ds]=[value]
-[--file-type|--ft]
+[--ext]=[value]
 [--footer]
 [--format]=[value]
-[--full-path|--fp|--fullpath]
+[--fp|--full-path|--fullpath]
+[--ft|--file-type]
 [--full-time]
 [--fuzzy|--fz|-f]
 [--gid]
-[--git-status|--gs|--git]
+[--git-ignore|--hide-git-ignore]
+[--git|--git-status]
+[--group]
 [--header|--title]
-[--hide-git-ignore|--gi|--hgi|--git-ignore]
+[--html|--HTML]
 [--hyperlink]=[value]
-[--ignore-glob|-I|--ignore|--ig]=[value]
+[--icon|--si|--icons]
 [--init]=[value]
 [--inode|-i]
-[--json|-j]
-[--lh|--human-readable|--hr]
-[--limitN|-n|--limit|--topN|--top]=[value]
-[--link|-H]
+[--lh|--human-readable]
 [--list-index|--li]
-[--literal|-N]
-[--match-glob|-M|--glob|--match]=[value]
-[--mime-charset|--charset]
-[--mime-parent|--mime-p|--mime-parent-type|--mime-type-parent]
-[--mime-type|--mime|--mimetype]
+[--md|--markdown|--Markdown]
+[--mime-parent|--mime-parent-type|--mimetype-parent]
+[--mime|--mime-type|--mimetype]
 [--modify|--mod|--modified]
+[--no-config]
 [--no-dereference]
+[--no-dir|--nodir|--file]
+[--no-ext|--noext]=[value]
 [--no-icon|--noicon|--ni]
 [--no-path-transform|--np]
-[--no-total-size|--nts|--nototal-size]
+[--no-total-size]
 [--numeric|--numeric-uid-gid]
-[--quote-name|-Q]
+[--octal-perm|--octal-permission]
+[--only-mime]=[value]
+[--owner|--author]
 [--rebuild-index|--ri|--remove-all]
-[--recurse|-R]
-[--relative-time|--rt]
 [--relative-to]=[value]
 [--remove-current-path|--rcp|--rc|--rmc]
 [--remove-index|--rm]=[value]
 [--remove-invalid-path|--rip]
-[--show-group|--sg|--group]
-[--show-hidden|--sh|-a]
-[--show-icon|--si|--icons|--icon]
-[--show-mime-file-type-only|--mime-only]=[value]
-[--show-no-dir|--nd|--nodir|--no-dir|--file]
-[--show-no-ext|--sne|--noext]=[value]
-[--show-octal-perm|--octal-perm|--octal-permission|--octal-permissions]
-[--show-only-dir|--sd|--dir|--only-dir|-D]
-[--show-only-ext|--se|--ext]=[value]
-[--show-only-hidden|--soh|--hidden]
-[--show-owner|--so|--author|--owner]
+[--rt|--relative-time]
+[--show-only-hidden|--hidden]
 [--show-perm|--sp|--permission|--perm]
-[--show-recursive-size|--srs|--recursive-size]
+[--show-recursive-size|--recursive-size]
 [--show-size|--ss|--size]
-[--show-time|--st|--time]
-[--show-total-size|--ts|--total-size]
 [--size-unit|--su|--block-size]=[value]
-[--sort-by-mimetype-descend|--mimetypesort-descend|--Mimetypesort-descend]
-[--sort-by-mimetype-parent-descend|--mimetypesort-parent-descend|--Mimetypesort-parent-descend|--sort-by-mime-parent-descend]
-[--sort-by-mimetype-parent|--mimetypesort-parent|--Mimetypesort-parent|--sort-by-mime-parent]
-[--sort-by-mimetype|--mimetypesort|--Mimetypesort|--sort-by-mime]
-[--sort-reverse|--sr|--reverse|-r]
+[--sort-by-mime-descend]
+[--sort-by-mime-parent-descend]
+[--sort-by-mime-parent]
+[--sort-by-mime]
+[--sort-reverse|--reverse|-r]
 [--sort|--SORT_FIELD]=[value]
 [--statistic]
-[--table-style|--tablestyle|--tb-style]=[value]
-[--table|--tb]
+[--tb-style|--table-style]=[value]
+[--tb|--table]
 [--theme|--th]=[value]
 [--time-style]=[value]
-[--time-type|--tt]=[value]
+[--time-type]=[value]
+[--time]
+[--total-size]
 [--uid]
 [--width]
 [--zero|-0]
 [-A|--almost-all]
 [-B|--ignore-backups]
 [-C|--vertical]
+[-D|--dir|--only-dir]
 [-F|--classify]
 [-G|--no-group]
-[-S|--sort-size|--sort-by-size|--sizesort]
+[-H|--link]
+[-I|--ignore]=[value]
+[-M|--match]=[value]
+[-N|--literal]
+[-Q|--quote-name]
+[-R|--recurse]
+[-S|--sort-by-size|--sizesort]
 [-U|--nosort|--no-sort]
-[-X|--extensionsort|--Extentionsort]
+[-X|--sort-by-ext]
+[-a|--sh|--show-hidden]
 [-d|--directory|--list-dirs]
 [-g]
+[-j|--json]
 [-m|--comma]
+[-n|--limitN|--limit|--topN|--top]=[value]
 [-o]
 [-x|--col|--across|--horizontal]
 ```
@@ -125,51 +126,54 @@ g [options] [path]
 
 **--CSV, --csv**: output in csv format
 
-**--HTML, --html**: output in HTML-table format
-
-**--Markdown, --md, --MD, --markdown**: output in markdown-table format
-
 **--access, --ac, --accessed**: accessed time
 
 **--all, --la, -l, --long**: show all info/use a long listing format
 
 **--block, --blocks**: show block size
 
-**--byline, --bl, -1, --oneline, --single-column**: print by line
+**--byline, -1, --oneline, --single-column**: print by line
+
+**--charset**: show charset of text file in mime type field
 
 **--check-new-version**: check if there's new release
 
-**--checksum, --cs**: show checksum of file with algorithm: md5, sha1(default), sha224, sha256, sha384, sha512, crc32
+**--checksum, --cs**: show checksum of file with algorithm, see --checksum-algorithm
 
-**--checksum-algorithm, --ca**="": show checksum of file with algorithm: md5, sha1, sha224, sha256, sha384, sha512, crc32 (default: "sha1")
+**--checksum-algorithm, --ca**="": show checksum of file with algorithm: 
+	md5, sha1, sha224, sha256, sha384, sha512, crc32 (default: sha1)
 
 **--classic**: Enable classic mode (no colours or icons)
 
-**--color**="": when to use terminal colours[always|auto|never][basic|256|24bit] (default: auto)
+**--color**="": when to use terminal colors [always|auto|never][basic|256|24bit] (default: auto)
 
-**--colorless, --nc, --no-color, --nocolor**: without color
+**--colorless, --no-color, --nocolor**: without color
 
 **--create, --cr, --created**: created time
 
-**--depth, --level, -L**="": limit recursive depth, negative -> infinity (default: infinity)
+**--depth, --level**="": limit recursive depth, negative -> infinity (default: infinity)
 
 **--dereference**: dereference symbolic links
 
-**--dir-first, --df, --group-directories-first**: List directories before other files
+**--detect-size**="": set exact size for mimetype detection 
+			eg:1M/nolimit/infinity (default: 1M)
+
+**--df, --dir-first, --group-directories-first**: List directories before other files
 
 **--disable-index, --di, --no-update**: disable updating index
 
 **--duplicate, --dup**: show duplicate files
 
-**--exact-detect-size, --eds, --detect-size, --ds**="": set exact size for mimetype detection eg:1M/nolimit/infinity (default: 1M)
-
-**--file-type, --ft**: likewise, except do not append '*'
+**--ext**="": show file which has target ext, eg: --show-only-ext=go,java
 
 **--footer**: add a footer row
 
-**--format**="": across  -x,  commas  -m, horizontal -x, long -l, single-column -1, verbose -l, vertical -C, table -tb, HTML -html, Markdown -md, CSV -csv, json -j (default: C)
+**--format**="": across  -x,  commas  -m, horizontal -x, long -l, single-column -1,
+	verbose -l, vertical -C, table -tb, HTML -html, Markdown -md, CSV -csv, json -j (default: C)
 
-**--full-path, --fp, --fullpath**: show full path
+**--fp, --full-path, --fullpath**: show full path
+
+**--ft, --file-type**: likewise, except do not append '*'
 
 **--full-time**: like -all/l --time-style=full-iso
 
@@ -177,59 +181,60 @@ g [options] [path]
 
 **--gid**: show gid instead of groupname [sid in windows]
 
-**--git-status, --gs, --git**: show git status [if git is installed]
+**--git, --git-status**: show git status [if git is installed]
+
+**--git-ignore, --hide-git-ignore**: hide git ignored file/dir [if git is installed]
+
+**--group**: show group
 
 **--header, --title**: add a header row
 
-**--hide-git-ignore, --gi, --hgi, --git-ignore**: hide git ignored file/dir [if git is installed]
+**--html, --HTML**: output in HTML-table format
 
 **--hyperlink**="": Attach hyperlink to filenames [auto|always|never] (default: auto)
 
-**--ignore-glob, -I, --ignore, --ig**="": ignore Glob patterns
+**--icon, --si, --icons**: show icon
 
 **--init**="": init the config file, default path is ~/.config/g/config.yaml
 
 **--inode, -i**: show inode[linux/darwin only]
 
-**--json, -j**: output in json format
-
-**--lh, --human-readable, --hr**: show human readable size
-
-**--limitN, -n, --limit, --topN, --top**="": limit n items(n <=0 means unlimited) (default: unlimited)
-
-**--link, -H**: list each file's number of hard links
+**--lh, --human-readable**: show human readable size
 
 **--list-index, --li**: list index
 
-**--literal, -N**: print entry names without quoting
+**--md, --markdown, --Markdown**: output in markdown-table format
 
-**--match-glob, -M, --glob, --match**="": match Glob patterns
+**--mime, --mime-type, --mimetype**: show mime file type
 
-**--mime-charset, --charset**: show charset of text file
-
-**--mime-parent, --mime-p, --mime-parent-type, --mime-type-parent**: show mime parent type
-
-**--mime-type, --mime, --mimetype**: show mime file type
+**--mime-parent, --mime-parent-type, --mimetype-parent**: show mime parent type
 
 **--modify, --mod, --modified**: modified time
 
+**--no-config**: do not load config file
+
 **--no-dereference**: do not follow symbolic links
+
+**--no-dir, --nodir, --file**: do not show directory
+
+**--no-ext, --noext**="": show file which doesn't have target ext
 
 **--no-icon, --noicon, --ni**: disable icon(always override show-icon)
 
-**--no-path-transform, --np**: By default, .../a/b/c will be transformed to ../../a/b/c, and ~ will be replaced by homedir, using this flag to disable this feature
+**--no-path-transform, --np**: By default, .../a/b/c will be transformed to ../../a/b/c, and ~ will be replaced by homedir, 
+	using this flag to disable this feature
 
-**--no-total-size, --nts, --nototal-size**: disable total size(always override show-total-size)
+**--no-total-size**: disable total size(always override show-total-size)
 
 **--numeric, --numeric-uid-gid**:  List numeric user and group IDs instead of name [sid in windows]
 
-**--quote-name, -Q**: enclose entry names in double quotes(overridden by --literal)
+**--octal-perm, --octal-permission**: list each file's permission in octal format
+
+**--only-mime**="": only show file with given mime type
+
+**--owner, --author**: show owner
 
 **--rebuild-index, --ri, --remove-all**: rebuild index
-
-**--recurse, -R**: recurse into directories
-
-**--relative-time, --rt**: show relative time
 
 **--relative-to**="": show relative path to the given path (default: current directory)
 
@@ -239,63 +244,57 @@ g [options] [path]
 
 **--remove-invalid-path, --rip**: remove invalid paths from index
 
-**--show-group, --sg, --group**: show group
+**--rt, --relative-time**: show relative time
 
-**--show-hidden, --sh, -a**: show hidden files
-
-**--show-icon, --si, --icons, --icon**: show icon
-
-**--show-mime-file-type-only, --mime-only**="": only show file with given mime type
-
-**--show-no-dir, --nd, --nodir, --no-dir, --file**: do not show directory
-
-**--show-no-ext, --sne, --noext**="": show file which doesn't have target ext
-
-**--show-octal-perm, --octal-perm, --octal-permission, --octal-permissions**: list each file's permission in octal format
-
-**--show-only-dir, --sd, --dir, --only-dir, -D**: show directory only
-
-**--show-only-ext, --se, --ext**="": show file which has target ext, eg: --show-only-ext=go,java
-
-**--show-only-hidden, --soh, --hidden**: show only hidden files(overridden by --show-hidden/-sh/-a/-A)
-
-**--show-owner, --so, --author, --owner**: show owner
+**--show-only-hidden, --hidden**: show only hidden files(overridden by --show-hidden/-a/-A)
 
 **--show-perm, --sp, --permission, --perm**: show permission
 
-**--show-recursive-size, --srs, --recursive-size**: show recursive size of dir, only work with --show-size
+**--show-recursive-size, --recursive-size**: show recursive size of dir, only work with --show-size
 
 **--show-size, --ss, --size**: show file/dir size
 
-**--show-time, --st, --time**: show time
+**--size-unit, --su, --block-size**="": size unit:
+			bit, b, k, m, g, t, p,
+			e, z, y, bb, nb, auto
 
-**--show-total-size, --ts, --total-size**: show total size
+**--sort, --SORT_FIELD**="": sort by field, default: 
+	ascending and case insensitive, 
+	field beginning with Uppercase is case sensitive,	
+	available fields: 	
+	nature(default),none(nosort),
+	name,.name(sorts by name without a leading dot),	
+	size,time,owner,group,extension,inode,width,mime. 	
+	following '-descend' to sort descending
 
-**--size-unit, --su, --block-size**="": size unit, b, k, m, g, t, p, e, z, y, bb, nb, auto (default: auto)
+**--sort-by-mime**: sort by mimetype
 
-**--sort, --SORT_FIELD**="": sort by field, default: ascending and case insensitive, field beginning with Uppercase is case sensitive, available fields: nature(default),none(nosort),name,.name(sorts by name without a leading dot),size,time,owner,group,extension,inode,width,mime. following '-descend' to sort descending
+**--sort-by-mime-descend**: sort by mimetype, descending
 
-**--sort-by-mimetype, --mimetypesort, --Mimetypesort, --sort-by-mime**: sort by mimetype
+**--sort-by-mime-parent**: sort by mimetype parent
 
-**--sort-by-mimetype-descend, --mimetypesort-descend, --Mimetypesort-descend**: sort by mimetype, descending
+**--sort-by-mime-parent-descend**: sort by mimetype parent
 
-**--sort-by-mimetype-parent, --mimetypesort-parent, --Mimetypesort-parent, --sort-by-mime-parent**: sort by mimetype parent
-
-**--sort-by-mimetype-parent-descend, --mimetypesort-parent-descend, --Mimetypesort-parent-descend, --sort-by-mime-parent-descend**: sort by mimetype parent
-
-**--sort-reverse, --sr, --reverse, -r**: reverse the order of the sort
+**--sort-reverse, --reverse, -r**: reverse the order of the sort
 
 **--statistic**: show statistic info
 
-**--table, --tb**: output in table format
+**--tb, --table**: output in table format
 
-**--table-style, --tablestyle, --tb-style**="": set table style (ascii(default)/unicode)
+**--tb-style, --table-style**="": set table style [ascii(default)/unicode]
 
 **--theme, --th**="": apply theme `path/to/theme`
 
-**--time-style**="": time/date format with -l, Valid timestamp styles are default, iso, long iso, full-iso, locale, custom +FORMAT like date(1). (default: +%d.%b'%y %H:%M (like 02.Jan'06 15:04))
+**--time**: show time
 
-**--time-type, --tt**="": time type, mod(default), create, access, all (default: mod)
+**--time-style**="": time/date format with -l, 
+	Valid timestamp styles are default, iso, long iso, full-iso, locale, 
+	custom +FORMAT like date(1). 
+	(default: +%d.%b'%y %H:%M ,like 02.Jan'06 15:04)
+
+**--time-type**="": time type, mod(default), create, access, all
+
+**--total-size**: show total size
 
 **--uid**: show uid instead of username [sid in windows]
 
@@ -309,21 +308,41 @@ g [options] [path]
 
 **-C, --vertical**: list entries by columns (default)
 
+**-D, --dir, --only-dir**: show directory only
+
 **-F, --classify**: append indicator (one of */=>@|) to entries
 
 **-G, --no-group**: in a long listing, don't print group names
 
-**-S, --sort-size, --sort-by-size, --sizesort**: sort by file size, largest first(descending)
+**-H, --link**: list each file's number of hard links
+
+**-I, --ignore**="": ignore Glob patterns
+
+**-M, --match**="": match Glob patterns
+
+**-N, --literal**: print entry names without quoting
+
+**-Q, --quote-name**: enclose entry names in double quotes(overridden by --literal)
+
+**-R, --recurse**: recurse into directories
+
+**-S, --sort-by-size, --sizesort**: sort by file size, largest first(descending)
 
 **-U, --nosort, --no-sort**: do not sort; list entries in directory order. 
 
-**-X, --extensionsort, --Extentionsort**: sort alphabetically by entry extension
+**-X, --sort-by-ext**: sort alphabetically by entry extension
+
+**-a, --sh, --show-hidden**: show hidden files
 
 **-d, --directory, --list-dirs**: list directories themselves, not their contents
 
 **-g**: like -all/l, but do not list owner
 
+**-j, --json**: output in json format
+
 **-m, --comma**: fill width with a comma separated list of entries
+
+**-n, --limitN, --limit, --topN, --top**="": Limit display to a max of n items (n <=0 means unlimited) (default: unlimited)
 
 **-o**: like -all/l, but do not list group information
 

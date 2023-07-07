@@ -14,7 +14,14 @@ var sortingFlags = []cli.Flag{
 	&cli.StringSliceFlag{
 		Name:    "sort",
 		Aliases: []string{"SORT_FIELD"},
-		Usage:   "sort by field, default: ascending and case insensitive, field beginning with Uppercase is case sensitive, available fields: nature(default),none(nosort),name,.name(sorts by name without a leading dot),size,time,owner,group,extension,inode,width,mime. following '-descend' to sort descending",
+		Usage: `sort by field, default: 
+	ascending and case insensitive, 
+	field beginning with Uppercase is case sensitive,	
+	available fields: 	
+	nature(default),none(nosort),
+	name,.name(sorts by name without a leading dot),	
+	size,time,owner,group,extension,inode,width,mime. 	
+	following '-descend' to sort descending`,
 		Action: func(context *cli.Context, slice []string) error {
 			sorter.WithSize(len(slice))(sort)
 			for _, s := range slice {
@@ -85,7 +92,7 @@ var sortingFlags = []cli.Flag{
 				case "mime", "mimetype", "Mime", "Mimetype":
 					err := limitOnce.Do(
 						func() error {
-							size := context.String("exact-detect-size")
+							size := context.String("detect-size")
 							var bytes uint64 = 1024 * 1024
 							if size == "0" || strings.EqualFold(size, "infinity") || strings.EqualFold(
 								size, "nolimit",
@@ -109,7 +116,7 @@ var sortingFlags = []cli.Flag{
 				case "mime-descend", "mimetype-descend", "Mime-descend", "Mimetype-descend":
 					err := limitOnce.Do(
 						func() error {
-							size := context.String("exact-detect-size")
+							size := context.String("detect-size")
 							var bytes uint64 = 1024 * 1024
 							if size == "0" || strings.EqualFold(size, "infinity") || strings.EqualFold(
 								size, "nolimit",
@@ -146,7 +153,7 @@ var sortingFlags = []cli.Flag{
 	},
 	&cli.BoolFlag{
 		Name:               "sort-reverse",
-		Aliases:            []string{"sr", "reverse", "r"},
+		Aliases:            []string{"reverse", "r"},
 		Usage:              "reverse the order of the sort",
 		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
@@ -158,8 +165,8 @@ var sortingFlags = []cli.Flag{
 		Category: "SORTING",
 	},
 	&cli.BoolFlag{
-		Name:               "dir-first",
-		Aliases:            []string{"df", "group-directories-first"},
+		Name:               "df",
+		Aliases:            []string{"dir-first", "group-directories-first"},
 		Usage:              "List directories before other files",
 		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
@@ -174,7 +181,7 @@ var sortingFlags = []cli.Flag{
 	},
 	&cli.BoolFlag{
 		Name:               "S",
-		Aliases:            []string{"sort-size", "sort-by-size", "sizesort"},
+		Aliases:            []string{"sort-by-size", "sizesort"},
 		Usage:              "sort by file size, largest first(descending)",
 		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
@@ -200,7 +207,7 @@ var sortingFlags = []cli.Flag{
 	},
 	&cli.BoolFlag{
 		Name:               "X",
-		Aliases:            []string{"extensionsort", "Extentionsort"},
+		Aliases:            []string{"sort-by-ext"},
 		Usage:              "sort alphabetically by entry extension",
 		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
@@ -230,14 +237,13 @@ var sortingFlags = []cli.Flag{
 	// 	Category: "SORTING",
 	// },
 	&cli.BoolFlag{
-		Name:               "sort-by-mimetype",
-		Aliases:            []string{"mimetypesort", "Mimetypesort", "sort-by-mime"},
+		Name:               "sort-by-mime",
 		Usage:              "sort by mimetype",
 		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
 			err := limitOnce.Do(
 				func() error {
-					size := context.String("exact-detect-size")
+					size := context.String("detect-size")
 					var bytes uint64 = 1024 * 1024
 					if size == "0" || strings.EqualFold(size, "infinity") || strings.EqualFold(size, "nolimit") {
 						bytes = 0
@@ -262,15 +268,14 @@ var sortingFlags = []cli.Flag{
 		Category: "SORTING",
 	},
 	&cli.BoolFlag{
-		Name:               "sort-by-mimetype-descend",
-		Aliases:            []string{"mimetypesort-descend", "Mimetypesort-descend"},
+		Name:               "sort-by-mime-descend",
 		Usage:              "sort by mimetype, descending",
 		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
 			if b {
 				err := limitOnce.Do(
 					func() error {
-						size := context.String("exact-detect-size")
+						size := context.String("detect-size")
 						var bytes uint64 = 1024 * 1024
 						if size == "0" || strings.EqualFold(size, "infinity") || strings.EqualFold(size, "nolimit") {
 							bytes = 0
@@ -296,15 +301,14 @@ var sortingFlags = []cli.Flag{
 		Category: "SORTING",
 	},
 	&cli.BoolFlag{
-		Name:               "sort-by-mimetype-parent",
-		Aliases:            []string{"mimetypesort-parent", "Mimetypesort-parent", "sort-by-mime-parent"},
+		Name:               "sort-by-mime-parent",
 		Usage:              "sort by mimetype parent",
 		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
 			if b {
 				err := limitOnce.Do(
 					func() error {
-						size := context.String("exact-detect-size")
+						size := context.String("detect-size")
 						var bytes uint64 = 1024 * 1024
 						if size == "0" || strings.EqualFold(size, "infinity") || strings.EqualFold(size, "nolimit") {
 							bytes = 0
@@ -330,15 +334,14 @@ var sortingFlags = []cli.Flag{
 		Category: "SORTING",
 	},
 	&cli.BoolFlag{
-		Name:               "sort-by-mimetype-parent-descend",
-		Aliases:            []string{"mimetypesort-parent-descend", "Mimetypesort-parent-descend", "sort-by-mime-parent-descend"},
+		Name:               "sort-by-mime-parent-descend",
 		Usage:              "sort by mimetype parent",
 		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
 			if b {
 				err := limitOnce.Do(
 					func() error {
-						size := context.String("exact-detect-size")
+						size := context.String("detect-size")
 						var bytes uint64 = 1024 * 1024
 						if size == "0" || strings.EqualFold(size, "infinity") || strings.EqualFold(size, "nolimit") {
 							bytes = 0

@@ -9,6 +9,8 @@ import (
 	"runtime/debug"
 
 	. "github.com/Equationzhao/g/app"
+	"github.com/Equationzhao/g/config"
+	"github.com/Equationzhao/g/slices"
 )
 
 func main() {
@@ -33,13 +35,22 @@ func main() {
 		_, _ = manGz.Write([]byte(s))
 		_ = manGz.Flush()
 	} else {
+		// load config
+		if !slices.Contains(os.Args, "-no-config") {
+			defaultArgs, err := config.Load()
+			if err == nil {
+				os.Args = slices.Insert(os.Args, 1, defaultArgs.Args...)
+			} else if _, ok := err.(config.ErrReadConfig); ok {
+				_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(err.Error()))
+			}
+		}
 		err := G.Run(os.Args)
 		if err != nil {
 			if !errors.Is(err, Err4Exit{}) {
 				if ReturnCode == 0 {
 					ReturnCode = 1
 				}
-				_, _ = fmt.Fprint(os.Stderr, MakeErrorStr(err.Error()))
+				_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(err.Error()))
 			}
 		}
 	}

@@ -8,7 +8,6 @@ import (
 	"github.com/Equationzhao/g/git"
 	"github.com/Equationzhao/g/item"
 	"github.com/Equationzhao/g/render"
-	"github.com/Equationzhao/pathbeautify"
 )
 
 type GitEnabler struct {
@@ -37,7 +36,7 @@ func (g *GitEnabler) Enable(renderer *render.Renderer) filter.ContentOption {
 		if parent == child {
 			return true
 		}
-		if strings.HasPrefix(child, parent) {
+		if strings.HasPrefix(child, parent+string(filepath.Separator)) {
 			return true
 		}
 		return false
@@ -56,11 +55,13 @@ func (g *GitEnabler) Enable(renderer *render.Renderer) filter.ContentOption {
 			}
 			for _, status := range *gits {
 				if status.X == git.Ignored || status.Y == git.Ignored {
-					if isOrIsParentOf(pathbeautify.CleanSeparator(status.Name), rel) {
+					// if status is ignored,
+					// and the file is or is a child of the ignored file
+					if isOrIsParentOf(status.Name, rel) {
 						return gitByName(status.X, renderer) + gitByName(status.Y, renderer), GitStatus
 					}
 				} else {
-					if isOrIsParentOf(rel, pathbeautify.CleanSeparator(status.Name)) {
+					if isOrIsParentOf(rel, status.Name) {
 						return gitByName(status.X, renderer) + gitByName(status.Y, renderer), GitStatus
 					}
 				}

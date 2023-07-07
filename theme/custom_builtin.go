@@ -4,6 +4,7 @@ package theme
 
 import (
 	_ "embed"
+	"runtime"
 	"strings"
 
 	"gopkg.in/ini.v1"
@@ -14,8 +15,12 @@ var customThemeIni string
 
 func init() {
 	// read the first line of customThemeIni
+	sep := "\n"
+	if runtime.GOOS == "windows" {
+		sep = "\r\n"
+	}
 
-	temp := strings.SplitN(customThemeIni, "\n", 2) // replace or merge
+	temp := strings.SplitN(customThemeIni, sep, 2) // replace or merge
 	Command := temp[0]
 	themeContent := []byte(temp[1])
 

@@ -1,6 +1,7 @@
 package content
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -25,6 +26,17 @@ type (
 
 type Statistics struct {
 	file, dir, link atomic.Uint64
+}
+
+func (s *Statistics) MarshalJSON() ([]byte, error) {
+	Export := struct {
+		File, Dir, Link uint64
+	}{
+		File: s.file.Load(),
+		Dir:  s.dir.Load(),
+		Link: s.link.Load(),
+	}
+	return json.Marshal(Export)
 }
 
 func (s *Statistics) Reset() {

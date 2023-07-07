@@ -7,7 +7,6 @@ import (
 
 	"github.com/Equationzhao/g/git"
 	"github.com/Equationzhao/g/item"
-	"github.com/Equationzhao/pathbeautify"
 	"github.com/gabriel-vasile/mimetype"
 	"github.com/gobwas/glob"
 )
@@ -168,9 +167,11 @@ func RemoveGitIgnore(repoPath git.RepoPath) ItemFilterFunc {
 			return keep
 		}
 		for _, fileGit := range *actual {
-			if isOrIsParentOf(pathbeautify.CleanSeparator(fileGit.Name), rel) {
-				ok = remove
-				break
+			if fileGit.X == git.Ignored || fileGit.Y == git.Ignored {
+				if isOrIsParentOf(fileGit.Name, rel) {
+					ok = remove
+					break
+				}
 			}
 		}
 		return

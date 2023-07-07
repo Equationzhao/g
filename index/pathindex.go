@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/Equationzhao/g/config"
 	gutil "github.com/Equationzhao/g/util"
 	"github.com/junegunn/fzf/src/algo"
 	"github.com/junegunn/fzf/src/util"
@@ -32,11 +33,11 @@ func SetReadOnly() {
 func getDB() (*leveldb.DB, error) {
 	err := initOnce.Do(func() error {
 		var err error
-		indexPath, err = os.UserConfigDir()
+		indexPath, err = config.GetUserConfigDir()
 		if err != nil {
 			return err
 		}
-		indexPath = filepath.Join(indexPath, "g", "index")
+		indexPath = filepath.Join(indexPath, "index")
 		err = os.MkdirAll(indexPath, os.ModePerm)
 		if err != nil {
 			return err

@@ -23,7 +23,7 @@ var displayFlag = []cli.Flag{
 	&cli.StringFlag{
 		Name:        "color",
 		DefaultText: "auto",
-		Usage:       "when to use terminal colours[always|auto|never][basic|256|24bit]",
+		Usage:       "when to use terminal colors [always|auto|never][basic|256|24bit]",
 		Action: func(context *cli.Context, s string) error {
 			switch s {
 			case "always", "force":
@@ -49,15 +49,15 @@ var displayFlag = []cli.Flag{
 	},
 	&cli.IntFlag{
 		Name:        "depth",
-		Aliases:     []string{"level", "L"},
+		Aliases:     []string{"level"},
 		Usage:       "limit recursive depth, negative -> infinity",
 		DefaultText: "infinity",
 		Value:       -1,
 		Category:    "DISPLAY",
 	},
 	&cli.BoolFlag{
-		Name:               "recurse",
-		Aliases:            []string{"R"},
+		Name:               "R",
+		Aliases:            []string{"recurse"},
 		Usage:              "recurse into directories",
 		DisableDefaultText: true,
 		Category:           "DISPLAY",
@@ -72,7 +72,7 @@ var displayFlag = []cli.Flag{
 	},
 	&cli.BoolFlag{
 		Name:               "byline",
-		Aliases:            []string{"bl", "1", "oneline", "single-column"},
+		Aliases:            []string{"1", "oneline", "single-column"},
 		Usage:              "print by line",
 		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
@@ -151,8 +151,8 @@ var displayFlag = []cli.Flag{
 		Category: "DISPLAY",
 	},
 	&cli.BoolFlag{
-		Name:               "json",
-		Aliases:            []string{"j"},
+		Name:               "j",
+		Aliases:            []string{"json"},
 		Usage:              "output in json format",
 		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
@@ -164,16 +164,15 @@ var displayFlag = []cli.Flag{
 
 			_ = context.Set("header", "0")
 			_ = context.Set("classic", "1")
-			sizeEnabler.DisableTotal()
 
 			return nil
 		},
 		Category: "DISPLAY",
 	},
 	&cli.StringFlag{
-		Name:    "table-style",
-		Aliases: []string{"tablestyle", "tb-style"},
-		Usage:   "set table style (ascii(default)/unicode)",
+		Name:    "tb-style",
+		Aliases: []string{"table-style"},
+		Usage:   "set table style [ascii(default)/unicode]",
 		Action: func(context *cli.Context, s string) error {
 			switch s {
 			case "ascii", "ASCII", "Ascii":
@@ -188,8 +187,8 @@ var displayFlag = []cli.Flag{
 		Category: "DISPLAY",
 	},
 	&cli.BoolFlag{
-		Name:               "table",
-		Aliases:            []string{"tb"},
+		Name:               "tb",
+		Aliases:            []string{"table"},
 		Usage:              "output in table format",
 		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
@@ -203,8 +202,8 @@ var displayFlag = []cli.Flag{
 		Category: "DISPLAY",
 	},
 	&cli.BoolFlag{
-		Name:               "HTML",
-		Aliases:            []string{"html"},
+		Name:               "html",
+		Aliases:            []string{"HTML"},
 		Usage:              "output in HTML-table format",
 		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
@@ -222,8 +221,8 @@ var displayFlag = []cli.Flag{
 		Category: "DISPLAY",
 	},
 	&cli.BoolFlag{
-		Name:               "Markdown",
-		Aliases:            []string{"md", "MD", "markdown"},
+		Name:               "md",
+		Aliases:            []string{"markdown", "Markdown"},
 		Usage:              "output in markdown-table format",
 		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
@@ -234,7 +233,6 @@ var displayFlag = []cli.Flag{
 					r.SetInfoTheme(theme.Colorless)
 					theme.ColorLevel = theme.None
 
-					// _ = context.Set("no-icon", "1")
 					err := context.Set("header", "1")
 					if err != nil {
 						return err
@@ -268,7 +266,8 @@ var displayFlag = []cli.Flag{
 	&cli.StringFlag{
 		Name:        "format",
 		DefaultText: "C",
-		Usage:       "across  -x,  commas  -m, horizontal -x, long -l, single-column -1, verbose -l, vertical -C, table -tb, HTML -html, Markdown -md, CSV -csv, json -j",
+		Usage: `across  -x,  commas  -m, horizontal -x, long -l, single-column -1,
+	verbose -l, vertical -C, table -tb, HTML -html, Markdown -md, CSV -csv, json -j`,
 		Action: func(context *cli.Context, s string) error {
 			switch s {
 			case "across", "x", "horizontal":
@@ -322,7 +321,6 @@ var displayFlag = []cli.Flag{
 					if err != nil {
 						return err
 					}
-					// _ = context.Set("no-icon", "1")
 				}
 			case "CSV", "csv":
 				if _, ok := p.(*display.CSVPrinter); !ok {
@@ -351,7 +349,7 @@ var displayFlag = []cli.Flag{
 	},
 	&cli.BoolFlag{
 		Name:               "colorless",
-		Aliases:            []string{"nc", "no-color", "nocolor"},
+		Aliases:            []string{"no-color", "nocolor"},
 		Usage:              "without color",
 		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
@@ -411,8 +409,8 @@ var displayFlag = []cli.Flag{
 		Category:           "DISPLAY",
 	},
 	&cli.BoolFlag{
-		Name:               "file-type",
-		Aliases:            []string{"ft"},
+		Name:               "ft",
+		Aliases:            []string{"file-type"},
 		DisableDefaultText: true,
 		Usage:              "likewise, except do not append '*'",
 		Category:           "DISPLAY",

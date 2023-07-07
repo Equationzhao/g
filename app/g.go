@@ -10,6 +10,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/Equationzhao/g/config"
 	"github.com/Equationzhao/g/display"
 	"github.com/Equationzhao/g/filter"
 	filtercontent "github.com/Equationzhao/g/filter/content"
@@ -26,6 +27,7 @@ import (
 	"github.com/savioxavier/termlink"
 	"github.com/urfave/cli/v2"
 	"github.com/valyala/bytebufferpool"
+	"github.com/xrash/smetrics"
 	versionInfo "go.szostok.io/version"
 	vp "go.szostok.io/version/printer"
 	"go.szostok.io/version/style"
@@ -56,13 +58,13 @@ var (
 	hookPost        = make([]func(display.Printer, ...*item.FileInfo), 0)
 )
 
-var Version = "0.9.1"
+
+var Version = "0.10.0"
 
 var G *cli.App
 
 func init() {
 	itemFilterFunc = append(itemFilterFunc, &filter.RemoveHidden)
-
 	G = &cli.App{
 		Name:      "g",
 		Usage:     "a powerful ls",
@@ -76,8 +78,18 @@ func init() {
 		},
 		SliceFlagSeparator: ",",
 		HideHelpCommand:    true,
+		Suggest:            true,
 		OnUsageError: func(cCtx *cli.Context, err error, isSubcommand bool) error {
-			_, _ = fmt.Println(MakeErrorStr(err.Error()))
+			ReturnCode = 1
+			str := err.Error()
+			const prefix = "flag provided but not defined: "
+			if strings.HasPrefix(str, prefix) {
+				suggest := suggestFlag(cCtx.App.Flags, strings.TrimLeft(strings.TrimPrefix(str, prefix), "-"))
+				if suggest != "" {
+					str = fmt.Sprintf("%s, Did you mean %s?", str, suggest)
+				}
+			}
+			_, _ = fmt.Println(MakeErrorStr(str))
 			return nil
 		},
 		Flags: make([]cli.Flag, 0, len(viewFlag)+len(filteringFlag)+len(sortingFlags)+len(displayFlag)+len(indexFlags)),
@@ -90,7 +102,7 @@ func init() {
 			path := context.Args().Slice()
 
 			nameToDisplay := filtercontent.NewNameEnable()
-			if !context.Bool("no-icon") && (context.Bool("show-icon") || context.Bool("all")) {
+			if !context.Bool("no-icon") && (context.Bool("icon") || context.Bool("all")) {
 				nameToDisplay.SetIcon()
 			}
 			if context.Bool("F") {
@@ -230,6 +242,7 @@ func init() {
 						path[i] = pathbeautify.Transform(path[i])
 					}
 				}
+				originPath := path[i]
 
 				infos := make([]*item.FileInfo, 0, 20)
 
@@ -238,10 +251,10 @@ func init() {
 				// get the abs path
 				absPath, err := filepath.Abs(path[i])
 				if err != nil {
-					_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(fmt.Sprintf("Not a valid path: %s", absPath)))
-				} else {
-					path[i] = absPath
+					_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(fmt.Sprintf("failed to get abs path: %s", absPath)))
+					continue
 				}
+				path[i] = absPath
 
 				if path[i] != "." {
 					stat, err := os.Stat(path[i])
@@ -255,24 +268,17 @@ func init() {
 							} else {
 								path[i] = newPath
 								stat, err = os.Stat(path[i])
+								fmt.Printf("%s:\n", path[i])
 								if err != nil {
-									checkErr(err)
+									checkErr(err, "")
 									seriousErr = true
 									continue
 								}
-								fmt.Println(path[i])
 							}
 						} else {
 							// output error
-							if pathErr := new(os.PathError); errors.As(err, &pathErr) {
-								_, _ = fmt.Fprintln(
-									os.Stderr, MakeErrorStr(fmt.Sprintf("%s: %s", pathErr.Err, pathErr.Path)),
-								)
-								seriousErr = true
-								continue
-							}
-							_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(err.Error()))
 							seriousErr = true
+							checkErr(err, originPath)
 							continue
 						}
 					}
@@ -281,7 +287,7 @@ func init() {
 							// when -d is set, treat dir as file
 							info, err := item.NewFileInfoWithOption(item.WithFileInfo(stat), item.WithPath(path[i]))
 							if err != nil {
-								checkErr(err)
+								checkErr(err, originPath)
 								seriousErr = true
 								continue
 							}
@@ -291,7 +297,7 @@ func init() {
 					} else {
 						info, err := item.NewFileInfoWithOption(item.WithFileInfo(stat), item.WithPath(path[i]))
 						if err != nil {
-							checkErr(err)
+							checkErr(err, originPath)
 							seriousErr = true
 							continue
 						}
@@ -313,7 +319,7 @@ func init() {
 				var d []os.DirEntry
 				if isFile {
 					if gitignore {
-						*removeGitIgnore = filter.RemoveGitIgnore(path[i])
+						*removeGitIgnore = filter.RemoveGitIgnore(filepath.Dir(path[i]))
 					}
 
 					// remove non-display items
@@ -324,13 +330,8 @@ func init() {
 
 				d, err = os.ReadDir(path[i])
 				if err != nil {
-					if pathErr := new(os.PathError); errors.As(err, &pathErr) {
-						_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(fmt.Sprintf("%s: %s", pathErr.Err, pathErr.Path)))
-						seriousErr = true
-					} else {
-						_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(err.Error()))
-						seriousErr = true
-					}
+					seriousErr = true
+					checkErr(err, originPath)
 					continue
 				}
 
@@ -339,33 +340,20 @@ func init() {
 					err := os.Chdir(path[i])
 					if err != nil {
 						_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(err.Error()))
+						seriousErr = true
 					} else {
 						FileInfoCurrent, err := item.NewFileInfo(".")
 						if err != nil {
-							if pathErr := new(os.PathError); errors.As(err, &pathErr) {
-								_, _ = fmt.Fprintln(
-									os.Stderr, MakeErrorStr(fmt.Sprintf("%s: %s", pathErr.Err, pathErr.Path)),
-								)
-								seriousErr = true
-							} else {
-								_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(err.Error()))
-								seriousErr = true
-							}
+							seriousErr = true
+							checkErr(err, ".")
 						} else {
 							infos = append(infos, FileInfoCurrent)
 						}
 
 						FileInfoParent, err := item.NewFileInfo("..")
 						if err != nil {
-							if pathErr := new(os.PathError); errors.As(err, &pathErr) {
-								_, _ = fmt.Fprintln(
-									os.Stderr, MakeErrorStr(fmt.Sprintf("%s: %s", pathErr.Err, pathErr.Path)),
-								)
-								minorErr = true
-							} else {
-								_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(err.Error()))
-								minorErr = true
-							}
+							minorErr = true
+							checkErr(err, "..")
 						} else {
 							infos = append(infos, FileInfoParent)
 						}
@@ -375,19 +363,14 @@ func init() {
 				for _, v := range d {
 					info, err := v.Info()
 					if err != nil {
-						if pathErr := new(os.PathError); errors.As(err, &pathErr) {
-							_, _ = fmt.Fprintln(
-								os.Stderr, MakeErrorStr(fmt.Sprintf("%s: %s", pathErr.Err, pathErr.Path)),
-							)
-							minorErr = true
-						} else {
-							minorErr = true
-							_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(err.Error()))
-						}
+						minorErr = true
+						checkErr(err, "")
 					} else {
-						info, err := item.NewFileInfoWithOption(item.WithFileInfo(info), item.WithPath(v.Name()))
+						info, err := item.NewFileInfoWithOption(
+							item.WithFileInfo(info), item.WithAbsPath(filepath.Join(path[i], v.Name())),
+						)
 						if err != nil {
-							checkErr(err)
+							checkErr(err, "")
 							seriousErr = true
 							continue
 						}
@@ -447,8 +430,12 @@ func init() {
 
 			final:
 				if git {
-					gitEnabler.Path = path[i]
-					gitEnabler.InitCache(path[i])
+					repo := path[i]
+					if isFile {
+						repo = filepath.Dir(path[i])
+					}
+					gitEnabler.Path = repo
+					gitEnabler.InitCache(repo)
 				}
 
 				contentFilter.GetDisplayItems(&infos)
@@ -458,65 +445,47 @@ func init() {
 				{
 					// add total && statistics
 					{
-						var i *item.FileInfo
+
 						// if -l/show-total-size is set, add total size
-						_, isPrettyPrinter := p.(display.PrettyPrinter)
+						jp, isJsonPrinter := p.(*display.JsonPrinter)
 
 						if total, ok := sizeEnabler.Total(); ok {
-							if !isPrettyPrinter {
-								i, _ = item.NewFileInfoWithOption()
-								s, unit := sizeEnabler.Size2String(total)
-								s = r.Size(s, filtercontent.Convert2SizeString(unit))
-								i.Set(
-									"total", &display.ItemContent{No: 0, Content: display.StringContent(
-										fmt.Sprintf(
-											"  total %s", s,
-										),
-									)},
+							s, unit := sizeEnabler.Size2String(total)
+							s = r.Size(s, filtercontent.Convert2SizeString(unit))
+
+							if isJsonPrinter {
+								jp.Extra = append(
+									jp.Extra, struct {
+										Total string `json:"total"`
+									}{
+										Total: s,
+									},
 								)
 							} else {
-								s, unit := sizeEnabler.Size2String(total)
-								s = r.Size(s, filtercontent.Convert2SizeString(unit))
 								_, _ = display.RawPrint(fmt.Sprintf("  total %s\n", s))
 							}
 						}
 						if s := nameToDisplay.Statistics(); s != nil {
-							if !isPrettyPrinter {
-								tFormat := "\n  underwent %s"
-								if i == nil {
-									i, _ = item.NewFileInfoWithOption()
-									tFormat = "  underwent %s"
-								}
-								i.Set(
-									"underwent", &display.ItemContent{No: 1, Content: display.StringContent(
-										fmt.Sprintf(
-											tFormat,
-											r.Time(durafmt.Parse(time.Since(start)).LimitToUnit("ms").String()),
-										),
-									)},
-								)
-								i.Set(
-									"statistic", &display.ItemContent{No: 2, Content: display.StringContent(
-										fmt.Sprintf(
-											"\n  statistic: %s", s,
-										),
-									)},
+							t := r.Time(durafmt.Parse(time.Since(start)).LimitToUnit("ms").String())
+							if isJsonPrinter {
+								jp.Extra = append(
+									jp.Extra, struct {
+										Time      string                    `json:"underwent"`
+										Statistic *filtercontent.Statistics `json:"statistic"`
+									}{
+										Time:      t,
+										Statistic: s,
+									},
 								)
 							} else {
 								_, _ = display.RawPrint(
 									fmt.Sprintf(
-										"  underwent %s",
-										r.Time(durafmt.Parse(time.Since(start)).LimitToUnit("ms").String()),
+										"  underwent %s", t,
 									),
 								)
 								_, _ = display.RawPrint(fmt.Sprintf("\n  statistic: %s\n", s))
 							}
 							s.Reset()
-						}
-						if i != nil {
-							p.DisablePreHook()
-							p.Print(i)
-							p.EnablePreHook()
 						}
 					}
 
@@ -693,7 +662,7 @@ func init() {
 		&cli.BoolFlag{
 			Name:     "check-new-version",
 			Usage:    "check if there's new release",
-			Category: "software info",
+			Category: "\b\b\b   META", // add \b to ensure the category is the first one to show
 			Action: func(context *cli.Context, b bool) error {
 				if b {
 					upgrade.WithUpdateCheckTimeout(5 * time.Second)
@@ -709,7 +678,8 @@ func init() {
 			Name:               "no-path-transform",
 			Aliases:            []string{"np"},
 			DisableDefaultText: true,
-			Usage:              "By default, .../a/b/c will be transformed to ../../a/b/c, and ~ will be replaced by homedir, using this flag to disable this feature",
+			Usage: `By default, .../a/b/c will be transformed to ../../a/b/c, and ~ will be replaced by homedir, 
+	using this flag to disable this feature`,
 		},
 		&cli.BoolFlag{
 			Name:               "duplicate",
@@ -742,12 +712,18 @@ func init() {
 					_, _ = G.Writer.Write(shell.FISHContent)
 				case "powershell", "pwsh":
 					_, _ = G.Writer.Write(shell.PSContent)
+				case "nushell", "nu":
+					_, _ = G.Writer.Write(shell.NUContent)
 				default:
-					return fmt.Errorf("unsupported shell: %s", s)
+					return fmt.Errorf("unsupported shell: %s \n %s[zsh|bash|fish|powershell|nushell]", s, theme.Success)
 				}
 				return Err4Exit{}
 			},
 			Category: "SHELL",
+		},
+		&cli.BoolFlag{
+			Name:  "no-config",
+			Usage: "do not load config file",
 		},
 	)
 
@@ -787,17 +763,25 @@ func (c Err4Exit) Error() string {
 }
 
 func initHelpTemp() {
-	cli.AppHelpTemplate = `NAME:
-   {{template "helpNameTemplate" .}}
+	configDir, err := config.GetUserConfigDir()
+	if err != nil {
+		configDir = filepath.Join("$UserConfigDir", "g")
+	}
+	cli.AppHelpTemplate = fmt.Sprintf(
+		`NAME:
+	{{template "helpNameTemplate" .}}
 
 USAGE:
-   {{if .UsageText}}{{wrap .UsageText 3}}{{else}}{{.HelpName}} {{if .VisibleFlags}}[global options]{{end}}{{if .Commands}} command [command options]{{end}} {{if .ArgsUsage}}{{.ArgsUsage}}{{else}}[arguments...]{{end}}{{end}}{{if .Version}}{{if not .HideVersion}}
+	{{if .UsageText}}{{wrap .UsageText 3}}{{else}}{{.HelpName}} {{if .VisibleFlags}}[global options]{{end}}{{if .Commands}} command [command options]{{end}} {{if .ArgsUsage}}{{.ArgsUsage}}{{else}}[arguments...]{{end}}{{end}}{{if .Version}}{{if not .HideVersion}}
 
 VERSION:
-   {{.Version}}{{end}}{{end}}{{if .Description}}
+	{{.Version}}{{end}}{{end}}{{if .Description}}
 
 DESCRIPTION:
-   {{template "descriptionTemplate" .}}{{end}}
+	{{template "descriptionTemplate" .}}{{end}}
+
+CONFIG:
+	Configuration: %s
 {{- if len .Authors}}
 
 AUTHOR{{template "authorsTemplate" .}}{{end}}{{if .VisibleCommands}}
@@ -807,13 +791,14 @@ COMMANDS:{{template "visibleCommandCategoryTemplate" .}}{{end}}{{if .VisibleFlag
 GLOBAL OPTIONS:{{template "visibleFlagCategoryTemplate" .}}{{else if .VisibleFlags}}
 
 GLOBAL OPTIONS:{{template "visibleFlagTemplate" .}}{{end}}
-`
+`, filepath.Join(configDir, "g.yaml"),
+	)
 }
 
 func initVersionHelpFlags() {
 	info := versionInfo.Get()
 	info.Version = Version
-	config := &style.Config{
+	s := &style.Config{
 		Formatting: style.Formatting{
 			Header: style.Header{
 				Prefix: "💡 ",
@@ -844,7 +829,7 @@ func initVersionHelpFlags() {
 		},
 	}
 
-	c := vp.New(vp.WithPrettyStyle(config))
+	c := vp.New(vp.WithPrettyStyle(s))
 	cli.VersionPrinter = func(cCtx *cli.Context) {
 		info.Meta = versionInfo.Meta{
 			CLIName: cCtx.App.Name + " - " + cCtx.App.Usage,
@@ -857,7 +842,7 @@ func initVersionHelpFlags() {
 		Aliases:            []string{"v"},
 		Usage:              "print the version",
 		DisableDefaultText: true,
-		Category:           "software info",
+		Category:           "\b\b\b   META",
 	}
 
 	cli.HelpFlag = &cli.BoolFlag{
@@ -865,18 +850,53 @@ func initVersionHelpFlags() {
 		Aliases:            []string{"h", "?"},
 		Usage:              "show help",
 		DisableDefaultText: true,
-		Category:           "software info",
+		Category:           "\b\b\b   META",
 	}
 }
 
 func MakeErrorStr(msg string) string {
-	return fmt.Sprintf("%s × %s %s\n", theme.Error, msg, theme.Reset)
+	return fmt.Sprintf("%s × %s %s", theme.Error, msg, theme.Reset)
 }
 
-func checkErr(err error) {
+func checkErr(err error, start string) {
+	var toPrint string
 	if pathErr := new(os.PathError); errors.As(err, &pathErr) {
-		_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(fmt.Sprintf("%s: %s", pathErr.Err, pathErr.Path)))
-		return
+		if start != "" {
+			pathErr.Path = start
+		}
+		toPrint = fmt.Sprintf("%s: %s (os error %d)", pathErr.Err, pathErr.Path, pathErr.Err)
+	} else {
+		toPrint = err.Error()
 	}
-	_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(err.Error()))
+	_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(toPrint))
+}
+
+// suggestFlag returns the suggested flag name
+// modified from cli.suggestFlag
+func suggestFlag(flags []cli.Flag, provided string) string {
+	const (
+		boostThreshold = 0.7
+		prefixSize     = 4
+	)
+	distance := 0.0
+	suggestion := ""
+
+	for _, flag := range flags {
+		flagNames := flag.Names()
+		for _, name := range flagNames {
+			newDistance := smetrics.JaroWinkler(name, provided, boostThreshold, prefixSize)
+			if newDistance > distance {
+				distance = newDistance
+				suggestion = name
+			}
+		}
+	}
+
+	if len(suggestion) == 1 {
+		suggestion = "-" + suggestion
+	} else if len(suggestion) > 1 {
+		suggestion = "--" + suggestion
+	}
+
+	return suggestion
 }

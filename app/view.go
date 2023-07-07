@@ -8,6 +8,7 @@ import (
 	"github.com/Equationzhao/g/display"
 	"github.com/Equationzhao/g/filter"
 	filtercontent "github.com/Equationzhao/g/filter/content"
+	"github.com/Equationzhao/g/slices"
 	"github.com/Equationzhao/g/timeparse"
 	"github.com/gabriel-vasile/mimetype"
 	"github.com/urfave/cli/v2"
@@ -51,15 +52,14 @@ var viewFlag = []cli.Flag{
 		Category:           "VIEW",
 	},
 	&cli.StringSliceFlag{
-		Name:        "time-type",
-		Aliases:     []string{"tt"},
-		Usage:       "time type, mod(default), create, access, all",
-		EnvVars:     []string{"TIME_TYPE"},
-		DefaultText: "mod",
+		Name:    "time-type",
+		Usage:   "time type, mod(default), create, access, all",
+		EnvVars: []string{"TIME_TYPE"},
 		Action: func(context *cli.Context, ss []string) error {
 			timeType = make([]string, 0, len(ss))
+			accepts := []string{"mod", "modified", "create", "cr", "access", "ac"}
 			for _, s := range ss {
-				if s == "mod" || s == "create" || s == "access" {
+				if slices.Contains(accepts, strings.ToLower(s)) {
 					timeType = append(timeType, s)
 				} else if s == "all" {
 					timeType = []string{"mod", "create", "access"}
@@ -112,11 +112,11 @@ var viewFlag = []cli.Flag{
 		Category: "VIEW",
 	},
 	&cli.StringFlag{
-		Name:        "size-unit",
-		Aliases:     []string{"su", "block-size"},
-		Usage:       "size unit, b, k, m, g, t, p, e, z, y, bb, nb, auto",
-		EnvVars:     []string{"SIZE_UNIT"},
-		DefaultText: "auto",
+		Name:    "size-unit",
+		Aliases: []string{"su", "block-size"},
+		Usage: `size unit:
+			bit, b, k, m, g, t, p,
+			e, z, y, bb, nb, auto`,
 		Action: func(context *cli.Context, s string) error {
 			if strings.EqualFold(s, "auto") {
 				return nil
@@ -131,10 +131,12 @@ var viewFlag = []cli.Flag{
 		Category: "VIEW",
 	},
 	&cli.StringFlag{
-		Name:        "time-style",
-		Usage:       "time/date format with -l, Valid timestamp styles are default, iso, long iso, full-iso, locale, custom +FORMAT like date(1).",
-		EnvVars:     []string{"TIME_STYLE"},
-		DefaultText: "+%d.%b'%y %H:%M (like 02.Jan'06 15:04)",
+		Name: "time-style",
+		Usage: `time/date format with -l, 
+	Valid timestamp styles are default, iso, long iso, full-iso, locale, 
+	custom +FORMAT like date(1). 
+	(default: +%d.%b'%y %H:%M ,like 02.Jan'06 15:04)`,
+		EnvVars: []string{"TIME_STYLE"},
 		Action: func(context *cli.Context, s string) error {
 			/*
 				The TIME_STYLE argument can be full-iso, long-iso, iso, locale, or  +FORMAT.
@@ -241,8 +243,8 @@ var viewFlag = []cli.Flag{
 		Category: "VIEW",
 	},
 	&cli.BoolFlag{
-		Name:               "show-octal-perm",
-		Aliases:            []string{"octal-perm", "octal-permission", "octal-permissions"},
+		Name:               "octal-perm",
+		Aliases:            []string{"octal-permission"},
 		Usage:              "list each file's permission in octal format",
 		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
@@ -290,7 +292,7 @@ var viewFlag = []cli.Flag{
 	},
 	&cli.BoolFlag{
 		Name:               "show-recursive-size",
-		Aliases:            []string{"srs", "recursive-size"},
+		Aliases:            []string{"recursive-size"},
 		Usage:              "show recursive size of dir, only work with --show-size",
 		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
@@ -320,7 +322,7 @@ var viewFlag = []cli.Flag{
 	},
 	&cli.BoolFlag{
 		Name:               "lh",
-		Aliases:            []string{"human-readable", "hr"},
+		Aliases:            []string{"human-readable"},
 		DisableDefaultText: true,
 		Usage:              "show human readable size",
 		Action: func(context *cli.Context, b bool) error {
@@ -341,8 +343,8 @@ var viewFlag = []cli.Flag{
 		Category: "VIEW",
 	},
 	&cli.BoolFlag{
-		Name:               "show-owner",
-		Aliases:            []string{"so", "author", "owner"},
+		Name:               "owner",
+		Aliases:            []string{"author"},
 		Usage:              "show owner",
 		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
@@ -357,8 +359,7 @@ var viewFlag = []cli.Flag{
 		Category: "VIEW",
 	},
 	&cli.BoolFlag{
-		Name:               "show-group",
-		Aliases:            []string{"sg", "group"},
+		Name:               "group",
 		Usage:              "show group",
 		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
@@ -373,8 +374,7 @@ var viewFlag = []cli.Flag{
 		Category: "VIEW",
 	},
 	&cli.BoolFlag{
-		Name:               "show-time",
-		Aliases:            []string{"st", "time"},
+		Name:               "time",
 		Usage:              "show time",
 		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
@@ -391,8 +391,8 @@ var viewFlag = []cli.Flag{
 		Category: "VIEW",
 	},
 	&cli.BoolFlag{
-		Name:               "relative-time",
-		Aliases:            []string{"rt"},
+		Name:               "rt",
+		Aliases:            []string{"relative-time"},
 		Usage:              "show relative time",
 		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
@@ -415,16 +415,16 @@ var viewFlag = []cli.Flag{
 		Category:           "VIEW",
 	},
 	&cli.BoolFlag{
-		Name:               "show-icon",
+		Name:               "icon",
 		Usage:              "show icon",
-		Aliases:            []string{"si", "icons", "icon"},
+		Aliases:            []string{"si", "icons"},
 		DisableDefaultText: true,
 		Category:           "VIEW",
 	},
 	&cli.BoolFlag{
-		Name:               "full-path",
+		Name:               "fp",
 		Usage:              "show full path",
-		Aliases:            []string{"fp", "fullpath"},
+		Aliases:            []string{"full-path", "fullpath"},
 		DisableDefaultText: true,
 		Category:           "VIEW",
 	},
@@ -435,9 +435,8 @@ var viewFlag = []cli.Flag{
 		Category:    "VIEW",
 	},
 	&cli.BoolFlag{
-		Name:               "show-total-size",
+		Name:               "total-size",
 		Usage:              "show total size",
-		Aliases:            []string{"ts", "total-size"},
 		DisableDefaultText: true,
 		Category:           "VIEW",
 		Action: func(context *cli.Context, b bool) error {
@@ -447,61 +446,26 @@ var viewFlag = []cli.Flag{
 			return nil
 		},
 	},
-	&cli.BoolFlag{
-		Name:               "no-total-size",
-		Usage:              "disable total size(always override show-total-size)",
-		Aliases:            []string{"nts", "nototal-size"},
-		DisableDefaultText: true,
-		Category:           "VIEW",
-		Action: func(context *cli.Context, b bool) error {
-			if b {
-				sizeEnabler.DisableTotal()
-			}
-			return nil
-		},
-	},
 	&cli.StringFlag{
-		Name:        "exact-detect-size",
-		Usage:       "set exact size for mimetype detection eg:1M/nolimit/infinity",
-		Aliases:     []string{"eds", "detect-size", "ds"},
+		Name: "detect-size",
+		Usage: `set exact size for mimetype detection 
+			eg:1M/nolimit/infinity`,
 		Value:       "1M",
 		DefaultText: "1M",
 		Category:    "VIEW",
 	},
 	&cli.BoolFlag{
-		Name:               "mime-charset",
-		Usage:              "show charset of text file",
-		Aliases:            []string{"charset"},
-		DisableDefaultText: true,
-		Category:           "VIEW",
-	},
-	&cli.BoolFlag{
-		Name:               "mime-type",
+		Name:               "mime",
 		Usage:              "show mime file type",
-		Aliases:            []string{"mime", "mimetype"},
+		Aliases:            []string{"mime-type", "mimetype"},
 		DisableDefaultText: true,
 		Category:           "VIEW",
 		Action: func(context *cli.Context, b bool) error {
 			if b {
 				exact := filtercontent.NewMimeFileTypeEnabler()
-				if context.Bool("charset") {
-					exact.EnableCharset = true
-				}
 				err := limitOnce.Do(
 					func() error {
-						size := context.String("exact-detect-size")
-						var bytes uint64 = 1024 * 1024
-						if size == "0" || strings.EqualFold(size, "infinity") || strings.EqualFold(size, "nolimit") {
-							bytes = 0
-						} else if size != "" {
-							sizeUint, err := filtercontent.ParseSize(size)
-							if err != nil {
-								return err
-							}
-							bytes = sizeUint.Bytes
-						}
-						mimetype.SetLimit(uint32(bytes))
-						return nil
+						return setLimit(context)
 					},
 				)
 				if err != nil {
@@ -515,7 +479,7 @@ var viewFlag = []cli.Flag{
 	&cli.BoolFlag{
 		Name:               "mime-parent",
 		Usage:              "show mime parent type",
-		Aliases:            []string{"mime-p", "mime-parent-type", "mime-type-parent"},
+		Aliases:            []string{"mime-parent-type", "mimetype-parent"},
 		Category:           "VIEW",
 		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
@@ -525,19 +489,7 @@ var viewFlag = []cli.Flag{
 
 				err := limitOnce.Do(
 					func() error {
-						size := context.String("exact-detect-size")
-						var bytes uint64 = 1024 * 1024
-						if size == "0" || strings.EqualFold(size, "infinity") || strings.EqualFold(size, "nolimit") {
-							bytes = 0
-						} else if size != "" {
-							sizeUint, err := filtercontent.ParseSize(size)
-							if err != nil {
-								return err
-							}
-							bytes = sizeUint.Bytes
-						}
-						mimetype.SetLimit(uint32(bytes))
-						return nil
+						return setLimit(context)
 					},
 				)
 				if err != nil {
@@ -548,16 +500,39 @@ var viewFlag = []cli.Flag{
 			return nil
 		},
 	},
+	&cli.BoolFlag{
+		Name:               "charset",
+		Usage:              "show charset of text file in mime type field",
+		DisableDefaultText: true,
+		Category:           "VIEW",
+		Action: func(context *cli.Context, b bool) error {
+			if b {
+				charset := filtercontent.NewCharsetEnabler()
+				err := limitOnce.Do(
+					func() error {
+						return setLimit(context)
+					},
+				)
+				if err != nil {
+					return err
+				}
+				contentFunc = append(contentFunc, charset.Enable())
+			}
+			return nil
+		},
+	},
 	&cli.StringSliceFlag{
-		Name:     "checksum-algorithm",
-		Usage:    "show checksum of file with algorithm: md5, sha1, sha224, sha256, sha384, sha512, crc32",
-		Aliases:  []string{"ca"},
-		Value:    cli.NewStringSlice("sha1"),
-		Category: "VIEW",
+		Name: "checksum-algorithm",
+		Usage: `show checksum of file with algorithm: 
+	md5, sha1, sha224, sha256, sha384, sha512, crc32`,
+		Aliases:     []string{"ca"},
+		DefaultText: "sha1",
+		Value:       cli.NewStringSlice("sha1"),
+		Category:    "VIEW",
 	},
 	&cli.BoolFlag{
 		Name:               "checksum",
-		Usage:              "show checksum of file with algorithm: md5, sha1(default), sha224, sha256, sha384, sha512, crc32",
+		Usage:              `show checksum of file with algorithm, see --checksum-algorithm`,
 		Aliases:            []string{"cs"},
 		DisableDefaultText: true,
 		Category:           "VIEW",
@@ -583,6 +558,8 @@ var viewFlag = []cli.Flag{
 					sums = append(sums, filtercontent.SumTypeSha512)
 				case "crc32":
 					sums = append(sums, filtercontent.SumTypeCRC32)
+				default:
+					return fmt.Errorf("invalid checksum algorithm: %s", s)
 				}
 			}
 
@@ -596,29 +573,29 @@ var viewFlag = []cli.Flag{
 		},
 	},
 	&cli.BoolFlag{
-		Name:               "git-status",
+		Name:               "git",
 		Usage:              "show git status [if git is installed]",
-		Aliases:            []string{"gs", "git"},
+		Aliases:            []string{"git-status"},
 		DisableDefaultText: true,
 		Category:           "VIEW",
 	},
 	&cli.BoolFlag{
-		Name:               "quote-name",
-		Aliases:            []string{"Q"},
+		Name:               "Q",
+		Aliases:            []string{"quote-name"},
 		Usage:              "enclose entry names in double quotes(overridden by --literal)",
 		DisableDefaultText: true,
 		Category:           "VIEW",
 	},
 	&cli.BoolFlag{
-		Name:               "literal",
-		Aliases:            []string{"N"},
+		Name:               "N",
+		Aliases:            []string{"literal"},
 		Usage:              "print entry names without quoting",
 		DisableDefaultText: true,
 		Category:           "VIEW",
 	},
 	&cli.BoolFlag{
-		Name:               "link",
-		Aliases:            []string{"H"},
+		Name:               "H",
+		Aliases:            []string{"link"},
 		Usage:              "list each file's number of hard links",
 		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
@@ -740,7 +717,6 @@ var viewFlag = []cli.Flag{
 					}
 				}
 				itemFilterFunc = newFF
-				sizeEnabler.SetEnableTotal()
 				contentFunc = append(
 					contentFunc, filtercontent.EnableFileMode(r), sizeEnabler.EnableSize(sizeUint, r),
 					ownerEnabler.EnableOwner(r),
@@ -759,4 +735,32 @@ var viewFlag = []cli.Flag{
 		},
 		Category: "VIEW",
 	},
+	&cli.BoolFlag{
+		Name:               "no-total-size",
+		Usage:              "disable total size(always override show-total-size)",
+		DisableDefaultText: true,
+		Category:           "VIEW",
+		Action: func(context *cli.Context, b bool) error {
+			if b {
+				sizeEnabler.DisableTotal()
+			}
+			return nil
+		},
+	},
+}
+
+func setLimit(context *cli.Context) error {
+	size := context.String("detect-size")
+	var bytes uint64 = 1024 * 1024
+	if size == "0" || strings.EqualFold(size, "infinity") || strings.EqualFold(size, "nolimit") {
+		bytes = 0
+	} else if size != "" {
+		sizeUint, err := filtercontent.ParseSize(size)
+		if err != nil {
+			return err
+		}
+		bytes = sizeUint.Bytes
+	}
+	mimetype.SetLimit(uint32(bytes))
+	return nil
 }

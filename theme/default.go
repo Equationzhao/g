@@ -209,6 +209,10 @@ var DefaultTheme = Theme{
 		Color: pkg,
 		Icon:  "\uf303",
 	},
+	"srcinfo": Style{
+		Color: pkg,
+		Icon:  "\uf303",
+	},
 	"app": Style{
 		Icon: "\ueb44",
 	},
@@ -610,11 +614,11 @@ var DefaultTheme = Theme{
 		Icon:  "\ue7b0",
 	},
 	"md": Style{
-		Color: BrightYellow,
+		Color: Underline + BrightYellow,
 		Icon:  "\uF48A",
 	},
 	"readme": Style{
-		Color: BrightYellow,
+		Color: Underline + BrightYellow,
 		Icon:  "\uF48A",
 	},
 	"txt": Style{
@@ -939,6 +943,9 @@ var DefaultTheme = Theme{
 		Color: db,
 		Icon:  "\uF1C0",
 	},
+	"shell": Style{
+		Icon: "\uF489",
+	},
 	"sh": Style{
 		Color: bash,
 		Icon:  "\uF489",
@@ -949,7 +956,7 @@ var DefaultTheme = Theme{
 	},
 	"ps1": Style{
 		Color: bash,
-		Icon:  "\uF489",
+		Icon:  "\ue683",
 	},
 	"csh": Style{
 		Color: bash,
@@ -988,6 +995,10 @@ var DefaultTheme = Theme{
 		Icon:  "\uF489",
 	},
 	"bash_profile": Style{
+		Color: bash,
+		Icon:  "\uF489",
+	},
+	"nu": Style{
 		Color: bash,
 		Icon:  "\uF489",
 	},

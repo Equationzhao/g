@@ -195,6 +195,9 @@ set color
 g --color=always path
 g --color=auto   path # default
 g --color=never  path 
+g --color=16/basic      path # 16-color
+g --color=256/8bit      path # 256-color
+g --color=16m/24bit/true-color  path # 24-bit
 ```
 
 show checksum (md5,sha1,sha224,sha256,sha384,sha512,crc32)
@@ -203,18 +206,12 @@ show checksum (md5,sha1,sha224,sha256,sha384,sha512,crc32)
 g -cs -ca=sha256 path
 ```
 
-show git status with icon
+show git status
 
 ```bash
 g -gs         path
 g -git        path
 g -git-status path
-```
-
-show git status with char symbol
-
-```bash
-g -git -git-style=sym path
 ```
 
 output in table
@@ -224,6 +221,7 @@ g -tb
 
 output in markdown, and render with [glow](github.com/charmbracelet/glow) 
 (icons and colors are not supported in markdown )
+
 ```bash
 g -md | glow 
 ```
@@ -265,15 +263,35 @@ Invoke-Expression (& { (g --init powershell | Out-String) })
 ```
 use command `echo $profile` to find your profile path
 
+### nushell
+```nu
+# add the following to your $nu.env-path
+^g --init nushell | save -f ~/.g.nu
+# then add the following to your $nu.config-path
+source ~/.g.nu
+
+# if you want to replace nushell's g command with g
+# add the following definition and alias to your $nu.config-path
+#
+# def nug [arg?] {
+#     if ($arg == null) {
+#         g $arg
+#     } else {
+#         g
+#     }
+# }
+# alias g = ^g
+```
+
 ## More options
 
 [g.md](g.md)
 
-## custom theme
+## Custom theme
 
 [theme](THEME.md)
 
-## logo
+## Logo
 
 created by bing
 

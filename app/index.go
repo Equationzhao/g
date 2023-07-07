@@ -41,7 +41,6 @@ var indexFlags = []cli.Flag{
 		Usage:              "fuzzy search",
 		DisableDefaultText: true,
 		Category:           "INDEX",
-		EnvVars:            []string{"G_FZF"},
 	},
 	&cli.StringSliceFlag{
 		Name:     "remove-index",

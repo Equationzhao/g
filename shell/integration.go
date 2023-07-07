@@ -13,3 +13,6 @@ var ZSHContent []byte
 
 //go:embed g.fish
 var FISHContent []byte
+
+//go:embed g.nu
+var NUContent []byte
