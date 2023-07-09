@@ -389,23 +389,6 @@ var viewFlag = []cli.Flag{
 		Category: "VIEW",
 	},
 	&cli.BoolFlag{
-		Name:               "rt",
-		Aliases:            []string{"relative-time"},
-		Usage:              "show relative time",
-		DisableDefaultText: true,
-		Action: func(context *cli.Context, b bool) error {
-			if b {
-				for _, s := range timeType {
-					rt := filtercontent.NewRelativeTimeEnabler()
-					rt.Mode = s
-					contentFunc = append(contentFunc, rt.Enable(r))
-				}
-			}
-			return nil
-		},
-		Category: "VIEW",
-	},
-	&cli.BoolFlag{
 		Name:               "no-icon",
 		Usage:              "disable icon(always override --icon)",
 		Aliases:            []string{"noicon", "ni"},
@@ -744,6 +727,24 @@ var viewFlag = []cli.Flag{
 			}
 			return nil
 		},
+	},
+
+	&cli.BoolFlag{
+		Name:               "rt",
+		Aliases:            []string{"relative-time"},
+		Usage:              "show relative time",
+		DisableDefaultText: true,
+		Action: func(context *cli.Context, b bool) error {
+			if b {
+				for _, s := range timeType {
+					rt := filtercontent.NewRelativeTimeEnabler()
+					rt.Mode = s
+					contentFunc = append(contentFunc, rt.Enable(r))
+				}
+			}
+			return nil
+		},
+		Category: "VIEW",
 	},
 }
 

@@ -2,6 +2,7 @@ package app
 
 import (
 	"fmt"
+	"github.com/Equationzhao/g/slices"
 	"strings"
 
 	"github.com/Equationzhao/g/filter/content"
@@ -18,17 +19,22 @@ var sortingFlags = []cli.Flag{
 	ascending and case insensitive, 
 	field beginning with Uppercase is case sensitive,	
 	available fields: 	
-	nature(default),none(nosort),
-	name,.name(sorts by name without a leading dot),	
-	size,time,owner,group,extension,inode,width,mime. 	
-	following '-descend' to sort descending`,
+	   nature(default),none(nosort),
+	   name,.name(sorts by name without a leading dot),	
+	   size,time,owner,group,extension,inode,width,mime. 	
+	   following '-descend' to sort descending`,
 		Action: func(context *cli.Context, slice []string) error {
+			if slices.ContainsFunc(slice, func(s string) bool {
+				nosort := []string{"none", "None", "nosort", "U"}
+				return slices.Contains(nosort, s)
+			}) {
+				sort.Reset()
+				return nil
+			}
 			sorter.WithSize(len(slice))(sort)
 			for _, s := range slice {
 				switch s {
 				case "nature":
-				case "none", "None", "nosort", "U":
-					sort.AddOption(sorter.ByNone)
 				case "name-descend":
 					sort.AddOption(sorter.ByNameDescend)
 				case "name":
@@ -46,13 +52,13 @@ var sortingFlags = []cli.Flag{
 				case ".Name-descend":
 					sort.AddOption(sorter.ByNameWithoutALeadingDotCaseSensitiveDescend)
 				case "size-descend", "S", "sizesort":
-					if context.Bool("srs") {
+					if context.Bool("recursive-size") {
 						sort.AddOption(sorter.ByRecursiveSizeDescend(context.Int("depth")))
 					} else {
 						sort.AddOption(sorter.BySizeDescend)
 					}
 				case "size":
-					if context.Bool("srs") {
+					if context.Bool("recursive-size") {
 						sort.AddOption(sorter.ByRecursiveSizeAscend(context.Int("depth")))
 					} else {
 						sort.AddOption(sorter.BySizeAscend)
@@ -190,17 +196,6 @@ var sortingFlags = []cli.Flag{
 			} else {
 				sort.AddOption(sorter.BySizeDescend)
 			}
-			return nil
-		},
-		Category: "SORTING",
-	},
-	&cli.BoolFlag{
-		Name:               "U",
-		Aliases:            []string{"nosort", "no-sort"},
-		Usage:              "do not sort; list entries in directory order. ",
-		DisableDefaultText: true,
-		Action: func(context *cli.Context, b bool) error {
-			sort.AddOption(sorter.ByNone)
 			return nil
 		},
 		Category: "SORTING",
@@ -362,6 +357,17 @@ var sortingFlags = []cli.Flag{
 
 				sort.AddOption(sorter.ByMimeTypeParentDescend)
 			}
+			return nil
+		},
+		Category: "SORTING",
+	},
+	&cli.BoolFlag{
+		Name:               "U",
+		Aliases:            []string{"nosort", "no-sort"},
+		Usage:              "do not sort; list entries in directory order. ",
+		DisableDefaultText: true,
+		Action: func(context *cli.Context, b bool) error {
+			sort.Reset()
 			return nil
 		},
 		Category: "SORTING",

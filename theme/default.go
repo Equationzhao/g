@@ -20,6 +20,9 @@ var (
 )
 
 var DefaultInfoTheme = Theme{
+	"D": Style{
+		Color: Cyan,
+	},
 	"d": Style{
 		Color: Blue,
 	},
@@ -141,7 +144,7 @@ var DefaultInfoTheme = Theme{
 		Color: Green,
 	},
 	"symlink_broken_path": Style{
-		Color: Red,
+		Color: Underline + Red,
 	},
 	"DevToolsUser": Style{
 		Color: color256(202),
@@ -1127,3 +1130,14 @@ var DefaultTheme = Theme{
 		Icon: "\uf0c0",
 	},
 }
+
+// todo
+// permission: match file permission
+// size   : match file size unit
+// user	  : match user name
+// group  : match group name
+// symlink: match symlink
+// git    : match git status
+// name   : match file name
+// special: match file type: symlink, dir, executable
+// ext    : match file extension

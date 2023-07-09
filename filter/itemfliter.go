@@ -188,6 +188,8 @@ func isOrIsSonOf(a, b string) bool {
 	return false
 }
 
+const MimeTypeName = "Mime-type"
+
 func MimeTypeOnly(fileTypes ...string) ItemFilterFunc {
 	return func(e *item.FileInfo) bool {
 		if e.IsDir() {
@@ -208,6 +210,7 @@ func MimeTypeOnly(fileTypes ...string) ItemFilterFunc {
 				s = strings.SplitN(s, ";", 2)[0]
 			}
 			if isOrIsSonOf(s, fileTypes[i]) {
+				e.Cache[MimeTypeName] = []byte(s)
 				return keep
 			}
 		}

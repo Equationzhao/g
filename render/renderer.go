@@ -57,8 +57,12 @@ func (rd *Renderer) FileMode(toRender string) string {
 			_, _ = bb.WriteString(rd.infoTheme["w"].Color)
 		case 'x', 's', 't':
 			_, _ = bb.WriteString(rd.infoTheme["x"].Color)
+		case 'c':
+			_, _ = bb.WriteString(rd.infoTheme["c"].Color)
 		case 'S', 'T':
 			_, _ = bb.WriteString(rd.infoTheme["s"].Color)
+		case 'D':
+			_, _ = bb.WriteString(rd.infoTheme["D"].Color)
 		}
 		_, _ = bb.WriteString(string(c))
 	}
@@ -164,8 +168,8 @@ func (rd *Renderer) calculateRTimeColor(dura time.Duration) string {
 		week = day * 7
 	)
 
-	const gUint = 10
-	var r, b float64 = 215, 255
+	const gUint = 35
+	var r, b float64 = 165, 255
 
 	switch theme.ColorLevel {
 	case theme.TrueColor:
