@@ -1,12 +1,13 @@
 package content
 
 import (
+	"os"
+	"strings"
+
 	"github.com/Equationzhao/g/filter"
 	"github.com/Equationzhao/g/item"
 	"github.com/Equationzhao/g/util"
 	"github.com/gabriel-vasile/mimetype"
-	"os"
-	"strings"
 )
 
 type MimeFileTypeEnabler struct {

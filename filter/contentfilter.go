@@ -89,7 +89,6 @@ func NewContentFilter(options ...ContentFilterOption) *ContentFilter {
 }
 
 func (cf *ContentFilter) GetDisplayItems(e *[]*item.FileInfo) {
-
 	if cf.sortFunc != nil {
 		slices.SortFunc(
 			*e, cf.sortFunc,

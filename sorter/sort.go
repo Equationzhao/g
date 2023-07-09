@@ -1,11 +1,12 @@
 package sorter
 
 import (
-	"github.com/Equationzhao/g/util/cmp"
 	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
+
+	"github.com/Equationzhao/g/util/cmp"
 
 	"github.com/Equationzhao/g/filter"
 	"github.com/Equationzhao/g/filter/content"

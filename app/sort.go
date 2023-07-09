@@ -2,8 +2,9 @@ package app
 
 import (
 	"fmt"
-	"github.com/Equationzhao/g/slices"
 	"strings"
+
+	"github.com/Equationzhao/g/slices"
 
 	"github.com/Equationzhao/g/filter/content"
 	"github.com/Equationzhao/g/sorter"
