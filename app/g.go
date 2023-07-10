@@ -227,7 +227,12 @@ func init() {
 			dereference := context.Bool("dereference")
 
 			theme.ConvertThemeColor()
-
+			tree := context.Bool("tree")
+			if tree {
+				if _, ok := p.(*display.TreePrinter); !ok {
+					p = display.NewTreePrinter()
+				}
+			}
 			for i := 0; i < len(path); i++ {
 				start := time.Now()
 
@@ -325,64 +330,92 @@ func init() {
 					infos = itemFilter.Filter(infos...)
 
 					goto final
-				}
+				} else {
 
-				d, err = os.ReadDir(path[i])
-				if err != nil {
-					seriousErr = true
-					checkErr(err, originPath)
-					continue
-				}
-
-				// if -A(almost-all) is not set, add the "."/".." info
-				if !flagA {
-					err := os.Chdir(path[i])
+					d, err = os.ReadDir(path[i])
 					if err != nil {
-						_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(err.Error()))
 						seriousErr = true
+						checkErr(err, originPath)
+						continue
+					}
+
+					if tree { // visit the dir recursively
+						// todo filtering
+						infoSlices := make([]*util.Slice[*item.FileInfo], len(d))
+						errSlices := make([]*util.Slice[error], len(d))
+						wgs := make([]sync.WaitGroup, len(d))
+						for j, entry := range d {
+							wgs[j].Add(1)
+							go func(entry os.DirEntry, j int) {
+								infoSlices[j] = util.NewSlice[*item.FileInfo](10)
+								errSlices[j] = util.NewSlice[error](10)
+								dive(entry, []byte(path[i]), 0, depth, infoSlices[j], errSlices[j], &wgs[j])
+							}(entry, j)
+						}
+						for i := range wgs {
+							wgs[i].Wait()
+						}
+						for _, slice := range infoSlices {
+							infos = append(infos, *slice.GetRaw()...)
+						}
+						for _, slice := range errSlices {
+							for _, err := range *slice.GetRaw() {
+								if err != nil {
+									minorErr = true
+									checkErr(err, originPath)
+								}
+							}
+						}
 					} else {
-						FileInfoCurrent, err := item.NewFileInfo(".")
-						if err != nil {
-							seriousErr = true
-							checkErr(err, ".")
-						} else {
-							infos = append(infos, FileInfoCurrent)
+						if !flagA { // if -A(almost-all) is not set, add the "."/".." info
+							err := os.Chdir(path[i])
+							if err != nil {
+								_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(err.Error()))
+								seriousErr = true
+							} else {
+								FileInfoCurrent, err := item.NewFileInfo(".")
+								if err != nil {
+									seriousErr = true
+									checkErr(err, ".")
+								} else {
+									infos = append(infos, FileInfoCurrent)
+								}
+
+								FileInfoParent, err := item.NewFileInfo("..")
+								if err != nil {
+									minorErr = true
+									checkErr(err, "..")
+								} else {
+									infos = append(infos, FileInfoParent)
+								}
+							}
 						}
 
-						FileInfoParent, err := item.NewFileInfo("..")
-						if err != nil {
-							minorErr = true
-							checkErr(err, "..")
-						} else {
-							infos = append(infos, FileInfoParent)
+						for _, v := range d {
+							info, err := v.Info()
+							if err != nil {
+								minorErr = true
+								checkErr(err, "")
+							} else {
+								info, err := item.NewFileInfoWithOption(
+									item.WithFileInfo(info), item.WithAbsPath(filepath.Join(path[i], v.Name())),
+								)
+								if err != nil {
+									checkErr(err, "")
+									seriousErr = true
+									continue
+								}
+								infos = append(infos, info)
+							}
+						}
+						if gitignore {
+							*removeGitIgnore = filter.RemoveGitIgnore(path[i])
 						}
 					}
-				}
 
-				for _, v := range d {
-					info, err := v.Info()
-					if err != nil {
-						minorErr = true
-						checkErr(err, "")
-					} else {
-						info, err := item.NewFileInfoWithOption(
-							item.WithFileInfo(info), item.WithAbsPath(filepath.Join(path[i], v.Name())),
-						)
-						if err != nil {
-							checkErr(err, "")
-							seriousErr = true
-							continue
-						}
-						infos = append(infos, info)
-					}
+					// remove non-display items
+					infos = itemFilter.Filter(infos...)
 				}
-
-				if gitignore {
-					*removeGitIgnore = filter.RemoveGitIgnore(path[i])
-				}
-
-				// remove non-display items
-				infos = itemFilter.Filter(infos...)
 
 				// dereference
 				if dereference {
@@ -403,7 +436,7 @@ func init() {
 				}
 
 				// if -R is set, add sub dir, insert into path[i+1]
-				if flagR {
+				if flagR && !tree {
 
 					// set depth
 					dep, ok := depthLimitMap[path[i]]
@@ -736,6 +769,33 @@ func init() {
 	initHelpTemp()
 
 	initVersionHelpFlags()
+}
+
+func dive(entry os.DirEntry, parent []byte, depth, limit int, infos *util.Slice[*item.FileInfo], errSlice *util.Slice[error], wg *sync.WaitGroup) {
+	defer wg.Done()
+	if limit > 0 && depth > limit {
+		return
+	}
+	abs := filepath.Join(string(parent), entry.Name())
+	f, err := entry.Info()
+	if err != nil {
+		errSlice.AppendTo(err)
+		return
+	}
+	info, _ := item.NewFileInfoWithOption(item.WithAbsPath(abs), item.WithFileInfo(f))
+	info.Cache["parent"] = parent
+	info.Cache["level"] = []byte(strconv.Itoa(depth))
+	infos.AppendTo(info)
+	if entry.IsDir() {
+		dir, err := os.ReadDir(abs)
+		if err != nil {
+			errSlice.AppendTo(err)
+		}
+		wg.Add(len(dir))
+		for _, entry := range dir {
+			go dive(entry, []byte(abs), depth+1, limit, infos, errSlice, wg)
+		}
+	}
 }
 
 func fuzzyUpdate(path string) error {

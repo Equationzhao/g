@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"encoding/json"
 	"fmt"
+	"github.com/Equationzhao/g/display/tree"
 	"io"
 	"math"
 	"os"
@@ -659,4 +660,34 @@ func NewCSVPrinter() Printer {
 
 func (c *CSVPrinter) Print(s ...*item.FileInfo) {
 	c.PrintBase(c.w.RenderCSV, s...)
+}
+
+type TreePrinter struct {
+	*bufio.Writer
+	*hook
+}
+
+func NewTreePrinter() *TreePrinter {
+	return &TreePrinter{
+		Writer: bufio.NewWriter(Output),
+		hook:   newHook(),
+	}
+}
+
+func (t *TreePrinter) Print(s ...*item.FileInfo) {
+	if !t.hook.disableBefore {
+		fire(t.BeforePrint, t, s...)
+	}
+	defer t.Flush()
+
+	// split by full path
+	// the item sharing the same dir will be grouped together
+	// and the order is the same as the input
+
+	buildTree := tree.NewTree(tree.WithCap(len(s)))
+	buildTree.Root.Name = "."
+
+	if !t.hook.disableAfter {
+		fire(t.AfterPrint, t, s...)
+	}
 }

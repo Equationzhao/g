@@ -12,14 +12,13 @@ import (
 var displayFlag = []cli.Flag{
 	// DISPLAY
 
-	// todo
-	// &cli.BoolFlag{
-	// 	Name:               "tree",
-	// 	Aliases:            []string{"t", "T"},
-	// 	Usage:              "recursively list in tree",
-	// 	DisableDefaultText: true,
-	// 	Category:           "DISPLAY",
-	// },
+	&cli.BoolFlag{
+		Name:               "T",
+		Aliases:            []string{"tree"},
+		Usage:              "recursively list in tree",
+		DisableDefaultText: true,
+		Category:           "DISPLAY",
+	},
 	&cli.StringFlag{
 		Name:        "color",
 		DefaultText: "auto",
