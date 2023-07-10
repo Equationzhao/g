@@ -4,12 +4,13 @@ import (
 	"bufio"
 	"encoding/json"
 	"fmt"
-	"github.com/Equationzhao/g/display/tree"
 	"io"
 	"math"
 	"os"
 	"regexp"
 	"strings"
+
+	"github.com/Equationzhao/g/display/tree"
 
 	"github.com/Equationzhao/g/item"
 	"github.com/Equationzhao/g/slices"
@@ -484,7 +485,9 @@ func (j *JsonPrinter) Print(items ...*item.FileInfo) {
 				order = append(order, orderItem{name: name, content: v.Value().String(), no: v.Value().NO()})
 			} else {
 				// remove all leading spaces
-				order = append(order, orderItem{name: name, content: strings.TrimSpace(v.Value().String()), no: v.Value().NO()})
+				order = append(
+					order, orderItem{name: name, content: strings.TrimSpace(v.Value().String()), no: v.Value().NO()},
+				)
 			}
 		}
 

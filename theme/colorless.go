@@ -1,25 +1,28 @@
 package theme
 
-var (
-	ColorlessInfo = Theme{}
-	Colorless     = Theme{}
-)
-
-func init() {
-	SyncColorlessWithTheme()
+func RemoveAllColor() {
+	resetColor(DefaultAll.InfoTheme)
+	resetColor(DefaultAll.Permission)
+	resetColor(DefaultAll.Size)
+	resetColor(DefaultAll.User)
+	resetColor(DefaultAll.Group)
+	resetColor(DefaultAll.Symlink)
+	resetColor(DefaultAll.Git)
+	resetColor(DefaultAll.Name)
+	resetColor(DefaultAll.Special)
+	resetColor(DefaultAll.Ext)
+	DefaultAll.InfoTheme["reset"] = Style{
+		Color: Reset,
+	}
 }
 
-func SyncColorlessWithTheme() {
-	for k := range DefaultInfoTheme {
-		ColorlessInfo[k] = Style{
-			Icon:  DefaultInfoTheme[k].Icon,
-			Color: "",
-		}
-	}
-	for k := range DefaultTheme {
-		Colorless[k] = Style{
-			Icon:  DefaultTheme[k].Icon,
-			Color: "",
+func resetColor(m Theme) {
+	for k := range m {
+		m[k] = Style{
+			Icon:      InfoTheme[k].Icon,
+			Color:     "",
+			Underline: false,
+			Bold:      false,
 		}
 	}
 }

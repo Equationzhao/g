@@ -3,7 +3,7 @@
 package theme
 
 func init() {
-	DefaultTheme["System"] = Style{
+	DefaultAll.Name["System"] = Style{
 		Icon:  "\uF179",
 		Color: dir,
 	}

@@ -25,4 +25,4 @@ fi
 
 # add the following command to .bashrc
 # eval "$(g --init bash)"
-# then `source ~/.bashrc`
+# then 'source ~/.bashrc'

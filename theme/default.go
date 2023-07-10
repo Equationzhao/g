@@ -19,7 +19,30 @@ var (
 	iso   = color256(88)
 )
 
-var DefaultInfoTheme = Theme{
+// permission: match file permission
+// size: match file size unit
+// user: match username
+// group: match group name
+// symlink: match symlink
+// git: match git status
+// name: match file name
+// special: match file type: symlink, dir, executable
+// ext: match file extension
+
+type All struct {
+	InfoTheme  Theme `json:"info,omitempty"`
+	Permission Theme `json:"permission,omitempty"`
+	Size       Theme `json:"size,omitempty"`
+	User       Theme `json:"user,omitempty"`
+	Group      Theme `json:"group,omitempty"`
+	Symlink    Theme `json:"symlink,omitempty"`
+	Git        Theme `json:"git,omitempty"`
+	Name       Theme `json:"name,omitempty"`
+	Special    Theme `json:"special,omitempty"`
+	Ext        Theme `json:"ext,omitempty"`
+}
+
+var InfoTheme = Theme{
 	"inode": Style{
 		Color: Purple,
 	},
@@ -29,16 +52,12 @@ var DefaultInfoTheme = Theme{
 	"reset": Style{
 		Color: Reset,
 	},
-	"root": Style{
-		Color: Red,
-	},
-	"link": Style{
-		Color: Purple,
+	"-": {
+		Color: White,
 	},
 }
 
-// DefaultTheme the key should be lowercase
-var DefaultTheme = Theme{
+var Ext = Theme{
 	"deb": Style{
 		Color: pkg,
 		Icon:  "\uF306",
@@ -58,33 +77,13 @@ var DefaultTheme = Theme{
 		Color: pkg,
 		Icon:  "\ue77d",
 	},
-	"ssh": Style{
-		Icon: "\ueba9",
-	},
-	"boot": Style{
-		Icon: "\uf287",
-	},
-	"cache": Style{
-		Icon: "\uf49b",
-	},
 	"exe": Style{
 		Color: Green,
 		Icon:  "\uF17A",
 	},
-	"file": Style{
-		Color: White,
-		Icon:  "\uF016",
-	},
 	"rdp": Style{
 		Color: White,
 		Icon:  "\ueb39",
-	},
-	"known_hosts": Style{
-		Color: White,
-		Icon:  "\uEB39",
-	},
-	"repo": Style{
-		Icon: "\uea62",
 	},
 	"link": Style{
 		Color: Purple,
@@ -111,14 +110,6 @@ var DefaultTheme = Theme{
 		Icon:  "\uE7A8",
 	},
 	"rustup": {
-		Color: lang,
-		Icon:  "\uE7A8",
-	},
-	"cargo.lock": {
-		Color: lock,
-		Icon:  "\uE7A8",
-	},
-	"cargo.toml": {
 		Color: lang,
 		Icon:  "\uE7A8",
 	},
@@ -383,8 +374,9 @@ var DefaultTheme = Theme{
 		Icon:  "\ue7b0",
 	},
 	"md": Style{
-		Color: Underline + BrightYellow,
-		Icon:  "\uF48A",
+		Color:     BrightYellow,
+		Icon:      "\uF48A",
+		Underline: true,
 	},
 	"txt": Style{
 		Color: text,
@@ -638,6 +630,10 @@ var DefaultTheme = Theme{
 		Color: conf,
 		Icon:  "\uE615",
 	},
+	"config": Style{
+		Color: conf,
+		Icon:  "\uE615",
+	},
 	"cfg": Style{
 		Color: conf,
 		Icon:  "\uE615",
@@ -824,17 +820,6 @@ var DefaultTheme = Theme{
 	},
 }
 
-// todo
-// permission: match file permission
-// size   : match file size unit
-// user	  : match user name
-// group  : match group name
-// symlink: match symlink
-// git    : match git status
-// name   : match file name
-// special: match file type: symlink, dir, executable
-// ext    : match file extension
-
 var Special = map[string]Style{
 	"dir": {
 		Color: dir,
@@ -848,72 +833,109 @@ var Special = map[string]Style{
 		Color: Cyan,
 		Icon:  "\uF1E6",
 	},
+	"exe": {
+		Color: Green,
+		Icon:  "\uF17A",
+	},
+	"link": {
+		Color: Purple,
+	},
+	"file": {
+		Color: White,
+		Icon:  "\uF016",
+	},
 }
 
 var Name = map[string]Style{
 	"home": {
-		Icon: "\ue617",
+		Icon:  "\ue617",
+		Color: White,
 	},
 	"desktop": {
-		Icon: "\uf108",
+		Icon:  "\uf108",
+		Color: White,
+	},
+	"documents": {
+		Icon:  "\uf0f6",
+		Color: White,
+	},
+	"links": {
+		Icon:  "\uf0f6",
+		Color: White,
 	},
 	"downloads": {
-		Icon: "\uf498",
+		Icon:  "\uf498",
+		Color: White,
 	},
 	"trash": {
-		Icon: "\uf1f8",
+		Icon:  "\uf1f8",
+		Color: BrightBlack,
 	},
 	"searches": {
-		Icon: "\uf422",
+		Icon:  "\uf422",
+		Color: White,
 	},
 	"microsoft": {
-		Icon: "\uF17A",
+		Icon:  "\uF17A",
+		Color: White,
 	},
 	"google": {
-		Icon: "\uf1a0",
+		Icon:  "\uf1a0",
+		Color: White,
 	},
 	"onedrive": {
-		Icon: "\ue762",
+		Icon:  "\ue762",
+		Color: Blue,
 	},
 	"onedrivetemp": {
-		Icon: "\ue762",
+		Icon:  "\ue762",
+		Color: Blue,
 	},
 	"favorites": {
-		Icon: "\ue623",
+		Icon:  "\ue623",
+		Color: Red,
 	},
-	"azure": {
-		Icon: "\uebd8",
+	".azure": {
+		Icon:  "\uebd8",
+		Color: White,
 	},
 	"contacts": {
-		Icon: "\uf0c0",
+		Icon:  "\uf0c0",
+		Color: White,
 	},
 	"users": {
-		Icon: "\uf0c0",
+		Icon:  "\uf0c0",
+		Color: White,
 	},
 	"lib": {
-		Icon: "\uF121",
+		Icon:  "\uF121",
+		Color: White,
 	},
 	"library": {
-		Icon: "\uF121",
+		Icon:  "\uF121",
+		Color: White,
 	},
 	"bin": {
-		Icon: "\uE5FC",
+		Icon:  "\uE5FC",
+		Color: Green,
 	},
 	"share": {
-		Icon: "\uf064",
+		Icon:  "\uf064",
+		Color: White,
 	},
 	"license": {
-		Color: key,
 		Icon:  "\uF084",
+		Color: key,
 	},
 	"shell": {
-		Icon: "\uF489",
+		Icon:  "\uF489",
+		Color: bash,
 	},
 	"config": {
-		Color: conf,
 		Icon:  "\uE615",
+		Color: conf,
 	},
-	"ds_store": {
+	".ds_store": {
 		Color: Black,
 		Icon:  "\uf179",
 	},
@@ -926,45 +948,55 @@ var Name = map[string]Style{
 		Icon:  "\uf303",
 	},
 	"applications": {
-		Icon: "\ueb44",
+		Icon:  "\ueb44",
+		Color: Green,
 	},
 	"android": {
-		Color: Cyan,
 		Icon:  "\uE70E",
+		Color: White,
 	},
 	".idea": {
-		Icon: "\uE7B5",
+		Icon:  "\uE7B5",
+		Color: White,
 	},
 	".github": {
-		Icon: "\uF408",
+		Icon:  "\uF408",
+		Color: White,
 	},
 	".vscode": {
-		Icon: "\uE70C",
+		Icon:  "\uE70C",
+		Color: White,
 	},
 	"include": {
-		Icon: "\ue5fc",
+		Icon:  "\ue5fc",
+		Color: White,
 	},
-	"dotnet": {
-		Icon: "\ue72e",
+	".dotnet": {
+		Icon:  "\ue72e",
+		Color: White,
 	},
 	"src": {
-		Icon: "\ue796",
+		Icon:  "\ue796",
+		Color: White,
 	},
 	"node_modules": {
-		Icon: "\ue5fa",
+		Icon:  "\ue5fa",
+		Color: White,
 	},
 	"font": {
-		Icon: "\uf031",
+		Icon:  "\uf031",
+		Color: White,
 	},
 	"fonts": {
-		Icon: "\uf031",
+		Icon:  "\uf031",
+		Color: White,
 	},
 	".git": {
-		Color: dir,
+		Color: White,
 		Icon:  "\uF1D3",
 	},
 	".gitignore": {
-		Color: Black,
+		Color: BrightBlack,
 		Icon:  "\ue65d",
 	},
 	"cmakeLists.txt": {
@@ -980,10 +1012,16 @@ var Name = map[string]Style{
 		Icon:  "\uE20F",
 	},
 	"history": {
-		Icon: "\uF1DA",
+		Icon:  "\uF1DA",
+		Color: BrightBlack,
+	},
+	".history": {
+		Icon:  "\uF1DA",
+		Color: BrightBlack,
 	},
 	"recovery": {
-		Icon: "\uF1DA",
+		Icon:  "\uF1DA",
+		Color: BrightBlack,
 	},
 	"apple": {
 		Color: Black,
@@ -994,34 +1032,69 @@ var Name = map[string]Style{
 		Icon:  "\ue7b0",
 	},
 	"readme": {
-		Color: Underline + BrightYellow,
-		Icon:  "\uF48A",
+		Color:     BrightYellow,
+		Icon:      "\uF48A",
+		Underline: true,
 	},
 	"readme.md": {
-		Color: Underline + BrightYellow,
+		Color: BrightYellow,
 		Icon:  "\uF48A",
 	},
 	"sdk": {
-		Icon: "\uF121",
+		Icon:  "\uF121",
+		Color: White,
 	},
 	"pictures": {
-		Icon: "\uF1C5",
+		Icon:  "\uF1C5",
+		Color: White,
 	},
 	"videos": {
-		Icon: "",
+		Icon:  "",
+		Color: White,
 	},
 	"movies": {
-		Icon: "",
+		Icon:  "",
+		Color: White,
 	},
 	"music": {
-		Icon: "\uF025",
+		Icon:  "\uF025",
+		Color: White,
 	},
 	"audio": {
-		Icon: "\uF025",
+		Icon:  "\uF025",
+		Color: White,
+	},
+	"cargo.lock": {
+		Color: lock,
+		Icon:  "\uE7A8",
+	},
+	"cargo.toml": {
+		Color: lang,
+		Icon:  "\uE7A8",
+	},
+	"known_hosts": {
+		Color: White,
+		Icon:  "\uEB39",
+	},
+	"repo": {
+		Color: White,
+		Icon:  "\uea62",
+	},
+	".ssh": {
+		Icon:  "\ueba9",
+		Color: White,
+	},
+	"boot": {
+		Icon:  "\uf287",
+		Color: White,
+	},
+	"cache": {
+		Icon:  "\uf49b",
+		Color: White,
 	},
 }
 
-var Permisson = map[string]Style{
+var Permission = map[string]Style{
 	"D": {
 		Color: Cyan,
 	},
@@ -1061,6 +1134,12 @@ var Permisson = map[string]Style{
 }
 
 var Size = map[string]Style{
+	"-": {
+		Color: White,
+	},
+	"block": {
+		Color: rgb(20, 255, 100),
+	},
 	"bit": {
 		Color: rgb(20, 255, 100),
 	},
@@ -1101,7 +1180,7 @@ var Size = map[string]Style{
 
 var Git = map[string]Style{
 	"git_unmodified": {
-		Color: Black,
+		Color: BrightBlack,
 	},
 	"git_modified": {
 		Color: Yellow,
@@ -1136,11 +1215,17 @@ var Owner = map[string]Style{
 	"owner": {
 		Color: Yellow,
 	},
+	"root": {
+		Color: Red,
+	},
 }
 
 var Group = map[string]Style{
 	"group": {
 		Color: Yellow,
+	},
+	"root": {
+		Color: Red,
 	},
 }
 
@@ -1149,7 +1234,8 @@ var Symlink = map[string]Style{
 		Color: Green,
 	},
 	"symlink_broken_path": {
-		Color: Underline + Red,
+		Color:     Red,
+		Underline: true,
 	},
 	"symlink": {
 		Color: Purple,
@@ -1159,4 +1245,26 @@ var Symlink = map[string]Style{
 		Color: BrightWhite,
 		Icon:  " ~> ",
 	},
+}
+
+var (
+	DefaultAll All
+	_init      bool
+)
+
+func init() {
+	if !_init {
+		DefaultAll = All{
+			InfoTheme:  InfoTheme,
+			Permission: Permission,
+			Size:       Size,
+			User:       Owner,
+			Group:      Group,
+			Symlink:    Symlink,
+			Git:        Git,
+			Name:       Name,
+			Special:    Special,
+			Ext:        Ext,
+		}
+	}
 }

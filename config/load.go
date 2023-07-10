@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/Equationzhao/g/util"
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
 )
 
 const (
@@ -15,18 +15,20 @@ const (
 )
 
 func GetUserConfigDir() (string, error) {
-	err := InitConfigDir.Do(func() error {
-		home, err := os.UserConfigDir()
-		if err != nil {
-			return err
-		}
-		ConfigDir = filepath.Join(home, "g")
-		err = os.MkdirAll(ConfigDir, os.ModePerm)
-		if err != nil {
-			return err
-		}
-		return nil
-	})
+	err := InitConfigDir.Do(
+		func() error {
+			home, err := os.UserConfigDir()
+			if err != nil {
+				return err
+			}
+			ConfigDir = filepath.Join(home, "g")
+			err = os.MkdirAll(ConfigDir, os.ModePerm)
+			if err != nil {
+				return err
+			}
+			return nil
+		},
+	)
 	if err != nil {
 		return "", err
 	}

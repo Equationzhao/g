@@ -38,7 +38,7 @@ var (
 	itemFilterFunc  = make([]*filter.ItemFilterFunc, 0)
 	contentFunc     = make([]filter.ContentOption, 0)
 	noOutputFunc    = make([]filter.NoOutputOption, 0)
-	r               = render.NewRenderer(theme.DefaultTheme, theme.DefaultInfoTheme)
+	r               = render.NewRenderer(&theme.DefaultAll)
 	p               = display.NewFitTerminal()
 	timeFormat      = "02.Jan'06 15:04"
 	ReturnCode      = 0
@@ -332,41 +332,51 @@ func init() {
 					goto final
 				} else {
 
-					d, err = os.ReadDir(path[i])
-					if err != nil {
-						seriousErr = true
-						checkErr(err, originPath)
-						continue
-					}
-
 					if tree { // visit the dir recursively
-						// todo filtering
-						infoSlices := make([]*util.Slice[*item.FileInfo], len(d))
-						errSlices := make([]*util.Slice[error], len(d))
-						wgs := make([]sync.WaitGroup, len(d))
-						for j, entry := range d {
-							wgs[j].Add(1)
-							go func(entry os.DirEntry, j int) {
-								infoSlices[j] = util.NewSlice[*item.FileInfo](10)
-								errSlices[j] = util.NewSlice[error](10)
-								dive(entry, []byte(path[i]), 0, depth, infoSlices[j], errSlices[j], &wgs[j])
-							}(entry, j)
-						}
-						for i := range wgs {
-							wgs[i].Wait()
-						}
-						for _, slice := range infoSlices {
-							infos = append(infos, *slice.GetRaw()...)
-						}
-						for _, slice := range errSlices {
-							for _, err := range *slice.GetRaw() {
-								if err != nil {
-									minorErr = true
-									checkErr(err, originPath)
+						infos[0].Cache["level"] = []byte("0")
+						if depth >= 1 || depth < 0 {
+							d, err = os.ReadDir(path[i])
+							if err != nil {
+								seriousErr = true
+								checkErr(err, originPath)
+								continue
+							}
+
+							// todo filtering
+							infoSlices := make([]*util.Slice[*item.FileInfo], len(d))
+							errSlices := make([]*util.Slice[error], len(d))
+							wgs := make([]sync.WaitGroup, len(d))
+							for j, entry := range d {
+								wgs[j].Add(1)
+								go func(entry os.DirEntry, j int) {
+									infoSlices[j] = util.NewSlice[*item.FileInfo](10)
+									errSlices[j] = util.NewSlice[error](10)
+									dive(entry, []byte(path[i]), 1, depth, infoSlices[j], errSlices[j], &wgs[j])
+								}(entry, j)
+							}
+							for i := range wgs {
+								wgs[i].Wait()
+							}
+							for _, slice := range infoSlices {
+								infos = append(infos, *slice.GetRaw()...)
+							}
+							for _, slice := range errSlices {
+								for _, err := range *slice.GetRaw() {
+									if err != nil {
+										minorErr = true
+										checkErr(err, originPath)
+									}
 								}
 							}
 						}
 					} else {
+						d, err = os.ReadDir(path[i])
+						if err != nil {
+							seriousErr = true
+							checkErr(err, originPath)
+							continue
+						}
+
 						if !flagA { // if -A(almost-all) is not set, add the "."/".." info
 							err := os.Chdir(path[i])
 							if err != nil {
@@ -771,7 +781,10 @@ func init() {
 	initVersionHelpFlags()
 }
 
-func dive(entry os.DirEntry, parent []byte, depth, limit int, infos *util.Slice[*item.FileInfo], errSlice *util.Slice[error], wg *sync.WaitGroup) {
+func dive(
+	entry os.DirEntry, parent []byte, depth, limit int, infos *util.Slice[*item.FileInfo], errSlice *util.Slice[error],
+	wg *sync.WaitGroup,
+) {
 	defer wg.Done()
 	if limit > 0 && depth > limit {
 		return
