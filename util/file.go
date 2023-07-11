@@ -9,6 +9,10 @@ func IsSymLink(file os.FileInfo) bool {
 	return file.Mode()&os.ModeSymlink != 0
 }
 
+func IsSymLinkMode(mode os.FileMode) bool {
+	return mode&os.ModeSymlink != 0
+}
+
 func IsExecutable(file os.FileInfo) bool {
 	return file.Mode()&0o111 != 0
 }

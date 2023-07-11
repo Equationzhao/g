@@ -6,13 +6,12 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/Equationzhao/g/util/cmp"
-
 	"github.com/Equationzhao/g/filter"
 	"github.com/Equationzhao/g/filter/content"
 	"github.com/Equationzhao/g/item"
 	"github.com/Equationzhao/g/osbased"
 	"github.com/Equationzhao/g/util"
+	"github.com/Equationzhao/g/util/cmp"
 	mt "github.com/gabriel-vasile/mimetype"
 )
 

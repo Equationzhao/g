@@ -271,8 +271,13 @@ func (n *Name) Enable(renderer *render.Renderer) filter.ContentOption {
 			}
 		}
 
+		exe := util.IsExecutableMode(mode) && !util.IsSymLinkMode(mode) && !info.IsDir() && mode&os.ModeNamedPipe == 0 && mode&os.ModeSocket == 0
+		if exe {
+			str = strings.Replace(str, name, renderer.Executable(name), 1)
+		}
+
 		if n.classify {
-			if char == "" && (!n.fileType) && util.IsExecutableMode(mode) && mode&os.ModeSymlink == 0 {
+			if char == "" && (!n.fileType) && exe {
 				str += "*"
 			} else {
 				str += char

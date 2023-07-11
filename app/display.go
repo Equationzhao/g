@@ -258,7 +258,7 @@ var displayFlag = []cli.Flag{
 		Name:        "format",
 		DefaultText: "C",
 		Usage: `across  -x,  commas  -m, horizontal -x, long -l, single-column -1,
-	verbose -l, vertical -C, table -tb, HTML -html, Markdown -md, CSV -csv, json -j`,
+	verbose -l, vertical -C, table -tb, HTML -html, Markdown -md, CSV -csv, json -j, tree -T`,
 		Action: func(context *cli.Context, s string) error {
 			switch s {
 			case "across", "x", "horizontal":
@@ -318,6 +318,10 @@ var displayFlag = []cli.Flag{
 					p = display.NewJsonPrinter()
 					_ = context.Set("no-color", "1")
 					_ = context.Set("no-icon", "1")
+				}
+			case "tree", "T":
+				if _, ok := p.(*display.TreePrinter); !ok {
+					p = display.NewTreePrinter()
 				}
 			default:
 				return fmt.Errorf("unkown format option:%s", s)

@@ -262,21 +262,12 @@ func getTheme(themeJson []byte) (theme All, errSum error, fatal error) {
 			m[key] = style
 		}
 	}
-	check(theme.InfoTheme)
-	check(theme.Permission)
-	check(theme.Size)
-	check(theme.User)
-	check(theme.Group)
-	check(theme.Symlink)
-	check(theme.Git)
-	check(theme.Name)
-	check(theme.Special)
-	check(theme.Ext)
+	theme.Apply(check)
 	return theme, errSum, nil
 }
 
 func ConvertThemeColor() {
-	convert := func(m map[string]Style) {
+	convert := func(m Theme) {
 		for key := range m {
 			color, err := ConvertColorIfGreaterThanExpect(ColorLevel, m[key].Color)
 			if err != nil {
@@ -290,14 +281,5 @@ func ConvertThemeColor() {
 			}
 		}
 	}
-	convert(DefaultAll.InfoTheme)
-	convert(DefaultAll.Permission)
-	convert(DefaultAll.Size)
-	convert(DefaultAll.User)
-	convert(DefaultAll.Group)
-	convert(DefaultAll.Symlink)
-	convert(DefaultAll.Git)
-	convert(DefaultAll.Name)
-	convert(DefaultAll.Special)
-	convert(DefaultAll.Ext)
+	DefaultAll.Apply(convert)
 }

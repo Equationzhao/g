@@ -16,4 +16,7 @@ func init() {
 	DefaultAll.Name["program files (x86)"] = Style{
 		Icon: "\ueb44",
 	}
+	DefaultAll.Name["windows"] = Style{
+		Icon: "\uE70F",
+	}
 }

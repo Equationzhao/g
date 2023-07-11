@@ -11,7 +11,6 @@ import (
 	"strings"
 
 	"github.com/Equationzhao/g/display/tree"
-
 	"github.com/Equationzhao/g/item"
 	"github.com/Equationzhao/g/slices"
 	"github.com/Equationzhao/g/util"

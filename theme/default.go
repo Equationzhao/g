@@ -42,6 +42,19 @@ type All struct {
 	Ext        Theme `json:"ext,omitempty"`
 }
 
+func (a *All) Apply(f func(theme Theme)) {
+	f(a.InfoTheme)
+	f(a.Permission)
+	f(a.Size)
+	f(a.User)
+	f(a.Group)
+	f(a.Symlink)
+	f(a.Git)
+	f(a.Name)
+	f(a.Special)
+	f(a.Ext)
+}
+
 var InfoTheme = Theme{
 	"inode": Style{
 		Color: Purple,
@@ -374,9 +387,8 @@ var Ext = Theme{
 		Icon:  "\ue7b0",
 	},
 	"md": Style{
-		Color:     BrightYellow,
-		Icon:      "\uF48A",
-		Underline: true,
+		Color: BrightYellow,
+		Icon:  "\uF48A",
 	},
 	"txt": Style{
 		Color: text,
@@ -895,6 +907,14 @@ var Name = map[string]Style{
 		Icon:  "\ue623",
 		Color: Red,
 	},
+	"saved games": {
+		Icon:  "\uf11b",
+		Color: Red,
+	},
+	".wakatime": {
+		Icon:  "\ue641",
+		Color: White,
+	},
 	".azure": {
 		Icon:  "\uebd8",
 		Color: White,
@@ -936,8 +956,12 @@ var Name = map[string]Style{
 		Color: conf,
 	},
 	".ds_store": {
-		Color: Black,
+		Color: BrightBlack,
 		Icon:  "\uf179",
+	},
+	".gitconfig": {
+		Color: conf,
+		Icon:  "\uf1d3",
 	},
 	"pkgbuild": {
 		Color: pkg,
@@ -1024,7 +1048,7 @@ var Name = map[string]Style{
 		Color: BrightBlack,
 	},
 	"apple": {
-		Color: Black,
+		Color: BrightBlack,
 		Icon:  "\uF179",
 	},
 	"dockerfile": {
@@ -1037,8 +1061,9 @@ var Name = map[string]Style{
 		Underline: true,
 	},
 	"readme.md": {
-		Color: BrightYellow,
-		Icon:  "\uF48A",
+		Color:     BrightYellow,
+		Icon:      "\uF48A",
+		Underline: true,
 	},
 	"sdk": {
 		Icon:  "\uF121",
@@ -1243,7 +1268,7 @@ var Symlink = map[string]Style{
 	},
 	"symlink_arrow": {
 		Color: BrightWhite,
-		Icon:  " ~> ",
+		Icon:  " => ",
 	},
 }
 

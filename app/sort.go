@@ -4,9 +4,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/Equationzhao/g/slices"
-
 	"github.com/Equationzhao/g/filter/content"
+	"github.com/Equationzhao/g/slices"
 	"github.com/Equationzhao/g/sorter"
 	"github.com/gabriel-vasile/mimetype"
 	"github.com/urfave/cli/v2"

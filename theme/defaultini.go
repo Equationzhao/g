@@ -14,16 +14,7 @@ func init() {
 			(theme)[k] = style.ToReadable()
 		}
 	}
-	convert(DefaultAll.InfoTheme)
-	convert(DefaultAll.Permission)
-	convert(DefaultAll.Size)
-	convert(DefaultAll.User)
-	convert(DefaultAll.Group)
-	convert(DefaultAll.Symlink)
-	convert(DefaultAll.Git)
-	convert(DefaultAll.Name)
-	convert(DefaultAll.Special)
-	convert(DefaultAll.Ext)
+	DefaultAll.Apply(convert)
 	marshal, err := json.MarshalIndent(DefaultAll, "", "    ")
 	if err != nil {
 		panic(err)

@@ -1,16 +1,7 @@
 package theme
 
 func RemoveAllColor() {
-	resetColor(DefaultAll.InfoTheme)
-	resetColor(DefaultAll.Permission)
-	resetColor(DefaultAll.Size)
-	resetColor(DefaultAll.User)
-	resetColor(DefaultAll.Group)
-	resetColor(DefaultAll.Symlink)
-	resetColor(DefaultAll.Git)
-	resetColor(DefaultAll.Name)
-	resetColor(DefaultAll.Special)
-	resetColor(DefaultAll.Ext)
+	DefaultAll.Apply(resetColor)
 	DefaultAll.InfoTheme["reset"] = Style{
 		Color: Reset,
 	}
