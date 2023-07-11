@@ -49,7 +49,7 @@ var displayFlag = []cli.Flag{
 	&cli.IntFlag{
 		Name:        "depth",
 		Aliases:     []string{"level"},
-		Usage:       "limit recursive depth, negative -> infinity",
+		Usage:       "limit recursive/tree depth, negative -> infinity",
 		DefaultText: "infinity",
 		Value:       -1,
 		Category:    "DISPLAY",

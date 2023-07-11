@@ -40,11 +40,15 @@ func ByNameCaseSensitiveAscend(a, b *item.FileInfo) int {
 }
 
 func ByNameWithoutALeadingDotDescend(a, b *item.FileInfo) int {
-	return cmp.Compare(strings.ToLower(strings.TrimPrefix(b.Name(), ".")), strings.ToLower(strings.TrimPrefix(a.Name(), ".")))
+	return cmp.Compare(
+		strings.ToLower(strings.TrimPrefix(b.Name(), ".")), strings.ToLower(strings.TrimPrefix(a.Name(), ".")),
+	)
 }
 
 func ByNameWithoutALeadingDotAscend(a, b *item.FileInfo) int {
-	return cmp.Compare(strings.ToLower(strings.TrimPrefix(a.Name(), ".")), strings.ToLower(strings.TrimPrefix(b.Name(), ".")))
+	return cmp.Compare(
+		strings.ToLower(strings.TrimPrefix(a.Name(), ".")), strings.ToLower(strings.TrimPrefix(b.Name(), ".")),
+	)
 }
 
 func ByNameWithoutALeadingDotCaseSensitiveDescend(a, b *item.FileInfo) int {
@@ -207,36 +211,46 @@ const MimeTypeName = filter.MimeTypeName
 
 func getMimeName(a *item.FileInfo, b *item.FileInfo) (string, string) {
 	mimeAstr, mimeBstr := "", ""
-	mimeA, err := mt.DetectFile(a.Name())
-	if err != nil {
-		if a.IsDir() {
-			mimeAstr = "directory"
-		} else if a.Mode()&os.ModeSymlink != 0 {
-			mimeAstr = "symlink"
-		} else if a.Mode()&os.ModeNamedPipe != 0 {
-			mimeAstr = "named_pipe"
-		} else if a.Mode()&os.ModeSocket != 0 {
-			mimeAstr = "socket"
-		}
+	if c, ok := a.Cache[MimeTypeName]; ok {
+		mimeAstr = string(c)
 	} else {
-		mimeAstr = mimeA.String()
-	}
-	mimeB, err := mt.DetectFile(b.Name())
-	if err != nil {
-		if b.IsDir() {
-			mimeBstr = "directory"
-		} else if b.Mode()&os.ModeSymlink != 0 {
-			mimeBstr = "symlink"
-		} else if b.Mode()&os.ModeNamedPipe != 0 {
-			mimeBstr = "named_pipe"
-		} else if b.Mode()&os.ModeSocket != 0 {
-			mimeBstr = "socket"
+		mimeA, err := mt.DetectFile(a.FullPath)
+		if err != nil {
+			if a.IsDir() {
+				mimeAstr = "directory"
+			} else if a.Mode()&os.ModeSymlink != 0 {
+				mimeAstr = "symlink"
+			} else if a.Mode()&os.ModeNamedPipe != 0 {
+				mimeAstr = "named_pipe"
+			} else if a.Mode()&os.ModeSocket != 0 {
+				mimeAstr = "socket"
+			}
+		} else {
+			mimeAstr = mimeA.String()
 		}
-	} else {
-		mimeBstr = mimeB.String()
+		a.Cache[MimeTypeName] = []byte(mimeAstr)
 	}
-	a.Cache[MimeTypeName] = []byte(mimeAstr)
-	b.Cache[MimeTypeName] = []byte(mimeBstr)
+
+	if c, ok := b.Cache[MimeTypeName]; ok {
+		mimeBstr = string(c)
+	} else {
+		mimeB, err := mt.DetectFile(b.FullPath)
+		if err != nil {
+			if b.IsDir() {
+				mimeBstr = "directory"
+			} else if b.Mode()&os.ModeSymlink != 0 {
+				mimeBstr = "symlink"
+			} else if b.Mode()&os.ModeNamedPipe != 0 {
+				mimeBstr = "named_pipe"
+			} else if b.Mode()&os.ModeSocket != 0 {
+				mimeBstr = "socket"
+			}
+		} else {
+			mimeBstr = mimeB.String()
+		}
+		b.Cache[MimeTypeName] = []byte(mimeBstr)
+	}
+
 	return mimeAstr, mimeBstr
 }
 

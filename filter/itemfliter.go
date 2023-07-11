@@ -28,6 +28,17 @@ func NewItemFilter(tfs ...*ItemFilterFunc) *ItemFilter {
 	return &ItemFilter{tfs: tfs}
 }
 
+func (tf *ItemFilter) Match(e *item.FileInfo) bool {
+	ok := keep
+	for _, funcPtr := range tf.tfs {
+		if !(*funcPtr)(e) {
+			ok = remove
+			break
+		}
+	}
+	return ok
+}
+
 func (tf *ItemFilter) Filter(e ...*item.FileInfo) (res []*item.FileInfo) {
 	for _, entry := range e {
 		ok := keep

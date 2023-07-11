@@ -1,6 +1,6 @@
 package tree
 
-import "github.com/Equationzhao/g/util"
+import "github.com/Equationzhao/g/item"
 
 /*
 build tree like this:
@@ -27,17 +27,42 @@ drwxr-xr-x@    - mr.black 10 7 03:38 │  ├── content
 */
 
 type Node struct {
-	Parent               *Node
-	Child                *util.Slice[*Node]
-	Level                int
-	Prefix, Name, Suffix string
+	Parent     *Node
+	Child      []*Node
+	Connectors []string
+	Level      int
+	Meta       *item.FileInfo
+}
+
+func (n *Node) Apply2Child(f func(node *Node)) {
+	if n.Child == nil {
+		return
+	}
+	for _, child := range n.Child {
+		f(child)
+		child.Apply2Child(f)
+	}
 }
 
 func (n *Node) AddChild(child *Node) *Node {
-	n.Child.AppendTo(child)
+	n.Child = append(n.Child, child)
 	child.Parent = n
 	child.Level = n.Level + 1
 	return n
+}
+
+func (n *Node) Apply2ChildSlice(connectors func(nodes []*Node)) {
+	if n.Child == nil {
+		return
+	}
+	connectors(n.Child)
+	for _, child := range n.Child {
+		child.Apply2ChildSlice(connectors)
+	}
+}
+
+func (n *Node) ApplyThis(p func(node *Node)) {
+	p(n)
 }
 
 type Tree struct {
@@ -48,22 +73,23 @@ type Option = func(tree *Tree)
 
 func WithCap(cap int) Option {
 	return func(tree *Tree) {
-		tree.Root.Child = util.NewSlice[*Node](cap)
+		tree.Root.Child = make([]*Node, 0, cap)
 	}
 }
 
 func NewTree(ops ...Option) *Tree {
 	t := &Tree{
 		Root: &Node{
-			Parent: nil,
-			Level:  0,
+			Parent:     nil,
+			Level:      0,
+			Connectors: nil,
 		},
 	}
 	for _, op := range ops {
 		op(t)
 	}
 	if t.Root.Child == nil {
-		t.Root.Child = util.NewSlice[*Node](10)
+		t.Root.Child = make([]*Node, 0, 10)
 	}
 	return t
 }

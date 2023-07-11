@@ -8,6 +8,7 @@ import (
 	"math"
 	"os"
 	"regexp"
+	"strconv"
 	"strings"
 
 	"github.com/Equationzhao/g/display/tree"
@@ -18,6 +19,7 @@ import (
 	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/mattn/go-runewidth"
 	"github.com/olekukonko/ts"
+	"github.com/valyala/bytebufferpool"
 	orderedmap "github.com/wk8/go-ordered-map/v2"
 )
 
@@ -508,8 +510,8 @@ func (j *JsonPrinter) Print(items ...*item.FileInfo) {
 	}
 
 	wrap := &struct {
-		Extra   []any
-		Content []*orderedmap.OrderedMap[string, string]
+		Extra   []any                                    `json:"Extra,omitempty"`
+		Content []*orderedmap.OrderedMap[string, string] `json:"Content,omitempty"`
 	}{
 		Extra:   j.Extra,
 		Content: list,
@@ -667,6 +669,7 @@ func (c *CSVPrinter) Print(s ...*item.FileInfo) {
 type TreePrinter struct {
 	*bufio.Writer
 	*hook
+	NO bool
 }
 
 func NewTreePrinter() *TreePrinter {
@@ -685,10 +688,105 @@ func (t *TreePrinter) Print(s ...*item.FileInfo) {
 	// split by full path
 	// the item sharing the same dir will be grouped together
 	// and the order is the same as the input
+	total := len(s)
 
-	buildTree := tree.NewTree(tree.WithCap(len(s)))
-	buildTree.Root.Name = "."
+	buildTree := tree.NewTree(tree.WithCap(total))
+	level := make(map[string][]*item.FileInfo)
+	for _, v := range s {
+		level[string(v.Cache["level"])] = append(level[string(v.Cache["level"])], v)
+	}
 
+	prefixAndName := func(info *item.FileInfo) (prefix string, name string) {
+		v := info.ValuesByOrdered()
+		pb := bytebufferpool.Get()
+		defer bytebufferpool.Put(pb)
+		name = ""
+		vv := v[:len(v)-1]
+		for _, s := range vv {
+			_, _ = pb.WriteString(s.String())
+			_ = pb.WriteByte(' ')
+		}
+		prefix = pb.String()
+		name = v[len(v)-1].String()
+		return
+	}
+
+	// root
+	l := len(level)
+	nodeMap := make(map[string]*tree.Node, l)
+
+	root := level["0"][0]
+	buildTree.Root.Meta = root
+	nodeMap[root.FullPath] = buildTree.Root
+
+	for i := 1; i < l; i++ {
+		for _, v := range level[strconv.Itoa(i)] {
+			node := nodeMap[string(v.Cache["parent"])]
+			c := &tree.Node{
+				Parent:     node,
+				Child:      make([]*tree.Node, 0, 10),
+				Level:      i,
+				Meta:       v,
+				Connectors: make([]string, i),
+			}
+			nodeMap[v.FullPath] = c
+			node.AddChild(c)
+		}
+	}
+
+	const Child = "├── "
+	const LastChild = "╰── "
+	const Mid = "│   "
+	const Empty = "    "
+	// print
+	// the number of the prefixes is the level of the node
+	// the length of prefix is 4
+
+	applyConnectors := func(nodes []*tree.Node) {
+		l := len(nodes)
+		for i, n := range nodes {
+			if i != l-1 {
+				n.Connectors[n.Level-1] = Child
+				n.Apply2Child(
+					func(node *tree.Node) {
+						node.Connectors[n.Level-1] = Mid
+					},
+				)
+			} else {
+				n.Connectors[n.Level-1] = LastChild
+			}
+		}
+	}
+
+	buildTree.Root.Apply2ChildSlice(applyConnectors)
+
+	counter := 0
+	totalLen := len(strconv.Itoa(total))
+	// print
+	p := func(node *tree.Node) {
+		if t.NO {
+			no := &ItemContent{
+				No:      -1,
+				Content: StringContent(strconv.Itoa(counter)),
+			}
+			no.SetSuffix(strings.Repeat(" ", totalLen-len(strconv.Itoa(counter))))
+			counter++
+			node.Meta.Set("#", no)
+		}
+		prefix, name := prefixAndName(node.Meta)
+		_, _ = t.WriteString(prefix)
+		for _, c := range node.Connectors {
+			if c == "" {
+				_, _ = t.WriteString(Empty)
+			} else {
+				_, _ = t.WriteString(c)
+			}
+		}
+		_, _ = t.WriteString(name)
+		_ = t.WriteByte('\n')
+	}
+	buildTree.Root.ApplyThis(p)
+	buildTree.Root.Apply2Child(p)
 	if !t.hook.disableAfter {
 		fire(t.AfterPrint, t, s...)
 	}

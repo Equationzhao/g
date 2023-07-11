@@ -36,7 +36,14 @@ func main() {
 		_ = manGz.Flush()
 	} else {
 		// load config
-		if !slices.Contains(os.Args, "-no-config") {
+		if !slices.ContainsFunc(
+			os.Args, func(s string) bool {
+				if s == "-no-config" || s == "--no-config" {
+					return true
+				}
+				return false
+			},
+		) {
 			defaultArgs, err := config.Load()
 			if err == nil {
 				os.Args = slices.Insert(os.Args, 1, defaultArgs.Args...)

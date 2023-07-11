@@ -7,6 +7,7 @@ import (
 	"github.com/Equationzhao/g/display"
 	"github.com/Equationzhao/g/item"
 	"github.com/Equationzhao/g/slices"
+	"github.com/panjf2000/ants/v2"
 )
 
 type ContentFilter struct {
@@ -104,19 +105,25 @@ func (cf *ContentFilter) GetDisplayItems(e *[]*item.FileInfo) {
 	wg := sync.WaitGroup{}
 	wg.Add(len(*e))
 
-	for i, entry := range *e {
-		go func(entry *item.FileInfo, i int) {
-			for j, option := range cf.options {
-				stringContent, funcName := option(entry)
-				content := display.ItemContent{Content: display.StringContent(stringContent), No: j}
-				entry.Set(funcName, &content)
-			}
+	for _, entry := range *e {
+		entry := entry
+		err := ants.Submit(
+			func() {
+				for j, option := range cf.options {
+					stringContent, funcName := option(entry)
+					content := display.ItemContent{Content: display.StringContent(stringContent), No: j}
+					entry.Set(funcName, &content)
+				}
 
-			for _, option := range cf.noOutputOptions {
-				option(entry)
-			}
-			wg.Done()
-		}(entry, i)
+				for _, option := range cf.noOutputOptions {
+					option(entry)
+				}
+				wg.Done()
+			},
+		)
+		if err != nil {
+			panic(err)
+		}
 	}
 	wg.Wait()
 }
