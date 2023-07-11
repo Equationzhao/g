@@ -331,92 +331,91 @@ func init() {
 					infos = itemFilter.Filter(infos...)
 
 					goto final
-				} else {
+				}
 
-					if tree { // visit the dir recursively
-						info, err := item.NewFileInfo(path[i])
-						if err != nil {
-							seriousErr = true
-							checkErr(err, originPath)
-							continue
-						}
-						infos = append(
-							infos, info,
+				if tree { // visit the dir recursively
+					info, err := item.NewFileInfo(path[i])
+					if err != nil {
+						seriousErr = true
+						checkErr(err, originPath)
+						continue
+					}
+					infos = append(
+						infos, info,
+					)
+					infos[0].Cache["level"] = []byte("0")
+					if depth >= 1 || depth < 0 {
+						wg := sync.WaitGroup{}
+
+						infoSlice := util.NewSlice[*item.FileInfo](10)
+						errSlice := util.NewSlice[error](10)
+						wg.Add(1)
+						dive(
+							path[i], 1, depth, infoSlice, errSlice, &wg,
+							itemFilter,
 						)
-						infos[0].Cache["level"] = []byte("0")
-						if depth >= 1 || depth < 0 {
-							wg := sync.WaitGroup{}
-
-							infoSlice := util.NewSlice[*item.FileInfo](10)
-							errSlice := util.NewSlice[error](10)
-							wg.Add(1)
-							dive(
-								path[i], 1, depth, infoSlice, errSlice, &wg,
-								itemFilter,
-							)
-							wg.Wait()
-							infos = append(infos, *infoSlice.GetRaw()...)
-							for _, err := range *errSlice.GetRaw() {
-								if err != nil {
-									minorErr = true
-									checkErr(err, "")
-								}
-							}
-						}
-					} else {
-						var d []os.DirEntry
-						d, err = os.ReadDir(path[i])
-						if err != nil {
-							seriousErr = true
-							checkErr(err, originPath)
-							continue
-						}
-
-						if !flagA && !tree { // if -A(almost-all) is not set, add the "."/".." info
-							err := os.Chdir(path[i])
-							if err != nil {
-								_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(err.Error()))
-								seriousErr = true
-							} else {
-								FileInfoCurrent, err := item.NewFileInfo(".")
-								if err != nil {
-									seriousErr = true
-									checkErr(err, ".")
-								} else {
-									infos = append(infos, FileInfoCurrent)
-								}
-
-								FileInfoParent, err := item.NewFileInfo("..")
-								if err != nil {
-									minorErr = true
-									checkErr(err, "..")
-								} else {
-									infos = append(infos, FileInfoParent)
-								}
-							}
-						}
-
-						for _, v := range d {
-							info, err := v.Info()
+						wg.Wait()
+						infos = append(infos, *infoSlice.GetRaw()...)
+						for _, err := range *errSlice.GetRaw() {
 							if err != nil {
 								minorErr = true
 								checkErr(err, "")
-							} else {
-								info, err := item.NewFileInfoWithOption(
-									item.WithFileInfo(info), item.WithAbsPath(filepath.Join(path[i], v.Name())),
-								)
-								if err != nil {
-									checkErr(err, "")
-									seriousErr = true
-									continue
-								}
-								infos = append(infos, info)
 							}
 						}
-
-						// remove non-display items
-						infos = itemFilter.Filter(infos...)
 					}
+				} else {
+					var d []os.DirEntry
+					d, err = os.ReadDir(path[i])
+					if err != nil {
+						seriousErr = true
+						checkErr(err, originPath)
+						continue
+					}
+
+					if !flagA && !tree { // if -A(almost-all) is not set, add the "."/".." info
+						err := os.Chdir(path[i])
+						if err != nil {
+							_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(err.Error()))
+							seriousErr = true
+						} else {
+							FileInfoCurrent, err := item.NewFileInfo(".")
+							if err != nil {
+								seriousErr = true
+								checkErr(err, ".")
+							} else {
+								infos = append(infos, FileInfoCurrent)
+							}
+
+							FileInfoParent, err := item.NewFileInfo("..")
+							if err != nil {
+								minorErr = true
+								checkErr(err, "..")
+							} else {
+								infos = append(infos, FileInfoParent)
+							}
+						}
+					}
+
+					for _, v := range d {
+						info, err := v.Info()
+						if err != nil {
+							minorErr = true
+							checkErr(err, "")
+						} else {
+							info, err := item.NewFileInfoWithOption(
+								item.WithFileInfo(info), item.WithAbsPath(filepath.Join(path[i], v.Name())),
+							)
+							if err != nil {
+								checkErr(err, "")
+								seriousErr = true
+								continue
+							}
+							infos = append(infos, info)
+						}
+					}
+
+					// remove non-display items
+					infos = itemFilter.Filter(infos...)
 				}
 
 				// dereference
