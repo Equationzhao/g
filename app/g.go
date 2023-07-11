@@ -59,7 +59,7 @@ var (
 	hookPost        = make([]func(display.Printer, ...*item.FileInfo), 0)
 )
 
-var Version = "0.10.2"
+var Version = "0.11.0"
 
 var G *cli.App
 
@@ -323,12 +323,10 @@ func init() {
 						wgUpdateIndex.Done()
 					}(i)
 				}
-
+				if gitignore {
+					*removeGitIgnore = filter.RemoveGitIgnore(path[i])
+				}
 				if isFile {
-					if gitignore {
-						*removeGitIgnore = filter.RemoveGitIgnore(filepath.Dir(path[i]))
-					}
-
 					// remove non-display items
 					infos = itemFilter.Filter(infos...)
 
@@ -415,13 +413,10 @@ func init() {
 								infos = append(infos, info)
 							}
 						}
-						if gitignore {
-							*removeGitIgnore = filter.RemoveGitIgnore(path[i])
-						}
-					}
 
-					// remove non-display items
-					infos = itemFilter.Filter(infos...)
+						// remove non-display items
+						infos = itemFilter.Filter(infos...)
+					}
 				}
 
 				// dereference

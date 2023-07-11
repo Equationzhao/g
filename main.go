@@ -45,7 +45,14 @@ func main() {
 			},
 		) {
 			defaultArgs, err := config.Load()
-			if err == nil {
+			if err == nil && !slices.ContainsFunc(
+				defaultArgs.Args, func(s string) bool {
+					if s == "-no-config" || s == "--no-config" {
+						return true
+					}
+					return false
+				},
+			) {
 				os.Args = slices.Insert(os.Args, 1, defaultArgs.Args...)
 			} else if _, ok := err.(config.ErrReadConfig); ok {
 				_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(err.Error()))
