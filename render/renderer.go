@@ -37,7 +37,7 @@ func (rd *Renderer) OctalPerm(octal string) string {
 	_, _ = bb.WriteString(s.Color)
 	checkUnderlineAndBold(&s, bb)
 	_, _ = bb.WriteString(octal)
-	_, _ = bb.WriteString(rd.theme.Permission["reset"].Color)
+	_, _ = bb.WriteString(rd.theme.InfoTheme["reset"].Color)
 	return bb.String()
 }
 
@@ -82,7 +82,7 @@ func (rd *Renderer) Size(toRender, unit string) string {
 	_, _ = bb.WriteString(s.Color)
 	checkUnderlineAndBold(&s, bb)
 	_, _ = bb.WriteString(toRender)
-	_, _ = bb.WriteString(rd.theme.Permission["reset"].Color)
+	_, _ = bb.WriteString(rd.theme.InfoTheme["reset"].Color)
 	return bb.String()
 }
 
@@ -97,7 +97,7 @@ func (rd *Renderer) Link(toRender string) string {
 	_, _ = bb.WriteString(s.Color)
 	checkUnderlineAndBold(&s, bb)
 	_, _ = bb.WriteString(toRender)
-	_, _ = bb.WriteString(rd.theme.Permission["reset"].Color)
+	_, _ = bb.WriteString(rd.theme.InfoTheme["reset"].Color)
 	return bb.String()
 }
 
@@ -472,7 +472,7 @@ func (rd *Renderer) PipeIcon(toRender string) string {
 	_, _ = bb.WriteString(" ")
 	checkUnderlineAndBold(&style, bb)
 	_, _ = bb.WriteString(toRender)
-	_, _ = bb.WriteString(rd.theme.Special["reset"].Color)
+	_, _ = bb.WriteString(rd.theme.InfoTheme["reset"].Color)
 	return bb.String()
 }
 
@@ -483,7 +483,7 @@ func (rd *Renderer) Pipe(toRender string) string {
 	_, _ = bb.WriteString(style.Color)
 	checkUnderlineAndBold(&style, bb)
 	_, _ = bb.WriteString(toRender)
-	_, _ = bb.WriteString(rd.theme.Special["reset"].Color)
+	_, _ = bb.WriteString(rd.theme.InfoTheme["reset"].Color)
 	return bb.String()
 }
 
@@ -496,7 +496,7 @@ func (rd *Renderer) SocketIcon(toRender string) string {
 	_, _ = bb.WriteString(" ")
 	checkUnderlineAndBold(&style, bb)
 	_, _ = bb.WriteString(toRender)
-	_, _ = bb.WriteString(rd.theme.Special["reset"].Color)
+	_, _ = bb.WriteString(rd.theme.InfoTheme["reset"].Color)
 	return bb.String()
 }
 
@@ -507,7 +507,7 @@ func (rd *Renderer) Socket(toRender string) string {
 	_, _ = bb.WriteString(style.Color)
 	checkUnderlineAndBold(&style, bb)
 	_, _ = bb.WriteString(toRender)
-	_, _ = bb.WriteString(rd.theme.Special["reset"].Color)
+	_, _ = bb.WriteString(rd.theme.InfoTheme["reset"].Color)
 	return bb.String()
 }
 
@@ -518,7 +518,7 @@ func (rd *Renderer) Executable(toRender string) string {
 	_, _ = bb.WriteString(style.Color)
 	checkUnderlineAndBold(&style, bb)
 	_, _ = bb.WriteString(toRender)
-	_, _ = bb.WriteString(rd.theme.Special["reset"].Color)
+	_, _ = bb.WriteString(rd.theme.InfoTheme["reset"].Color)
 	return bb.String()
 }
 
@@ -531,7 +531,7 @@ func (rd *Renderer) ExecutableIcon(toRender string) string {
 	_, _ = bb.WriteString(" ")
 	checkUnderlineAndBold(&style, bb)
 	_, _ = bb.WriteString(toRender)
-	_, _ = bb.WriteString(rd.theme.Special["reset"].Color)
+	_, _ = bb.WriteString(rd.theme.InfoTheme["reset"].Color)
 	return bb.String()
 }
 
@@ -542,7 +542,7 @@ func (rd *Renderer) Dir(toRender string) string {
 	_, _ = bb.WriteString(style.Color)
 	checkUnderlineAndBold(&style, bb)
 	_, _ = bb.WriteString(toRender)
-	_, _ = bb.WriteString(rd.theme.Special["reset"].Color)
+	_, _ = bb.WriteString(rd.theme.InfoTheme["reset"].Color)
 	return bb.String()
 }
 

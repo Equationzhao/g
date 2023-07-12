@@ -11,9 +11,10 @@ require (
 	github.com/gookit/color v1.5.3
 	github.com/hako/durafmt v0.0.0-20210608085754-5c1018a4e16b
 	github.com/jedib0t/go-pretty/v6 v6.4.6
-	github.com/junegunn/fzf v0.0.0-20230710153544-0130f64934d2
+	github.com/junegunn/fzf v0.0.0-20230712045559-547e101f1d6b
 	github.com/mattn/go-runewidth v0.0.14
 	github.com/olekukonko/ts v0.0.0-20171002115256-78ecb04241c0
+	github.com/panjf2000/ants/v2 v2.8.1
 	github.com/saintfish/chardet v0.0.0-20230101081208-5e3ef4b5456d
 	github.com/savioxavier/termlink v1.3.0
 	github.com/syndtr/goleveldb v1.0.0
@@ -51,7 +52,6 @@ require (
 	github.com/mitchellh/copystructure v1.2.0 // indirect
 	github.com/mitchellh/reflectwalk v1.0.2 // indirect
 	github.com/muesli/termenv v0.15.2 // indirect
-	github.com/panjf2000/ants/v2 v2.8.1 // indirect
 	github.com/rivo/uniseg v0.4.4 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/shopspring/decimal v1.3.1 // indirect

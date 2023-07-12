@@ -316,12 +316,19 @@ func init() {
 
 				if !disableIndex {
 					wgUpdateIndex.Add(1)
-					go func(i int) {
-						if err = fuzzyUpdate(path[i]); err != nil {
-							minorErr = true
-						}
-						wgUpdateIndex.Done()
-					}(i)
+					err := ants.Submit(
+						func() {
+							func(i int) {
+								if err = fuzzyUpdate(path[i]); err != nil {
+									minorErr = true
+								}
+								wgUpdateIndex.Done()
+							}(i)
+						},
+					)
+					if err != nil {
+						panic(err)
+					}
 				}
 				if gitignore {
 					*removeGitIgnore = filter.RemoveGitIgnore(path[i])
