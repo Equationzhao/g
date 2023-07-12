@@ -257,12 +257,19 @@ func (s *SizeEnabler) Size2String(b int64) (string, SizeUnit) {
 	return res, actualUnit
 }
 
+const RecursiveSizeName = "recursive_size"
+
 func (s *SizeEnabler) EnableSize(size SizeUnit, renderer *render.Renderer) filter.ContentOption {
 	s.sizeUint = size
 	return func(info *item.FileInfo) (string, string) {
 		var v int64
 		if s.recursive != nil {
-			v = util.RecursivelySizeOf(info, s.recursive.depth)
+			if r, ok := info.Cache[RecursiveSizeName]; ok {
+				// convert []byte to int64
+				v, _ = strconv.ParseInt(string(r), 10, 64)
+			} else {
+				v = util.RecursivelySizeOf(info, s.recursive.depth)
+			}
 		} else {
 			v = info.Size()
 		}

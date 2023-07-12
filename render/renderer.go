@@ -18,25 +18,27 @@ import (
 )
 
 type Renderer struct {
-	infoTheme, theme theme.Theme
+	theme *theme.All
 }
 
-func (rd *Renderer) SetInfoTheme(theme theme.Theme) *Renderer {
-	rd.infoTheme = theme
-	return rd
-}
-
-func (rd *Renderer) SetTheme(theme theme.Theme) *Renderer {
+func (rd *Renderer) SetTheme(theme *theme.All) *Renderer {
 	rd.theme = theme
 	return rd
 }
 
-func NewRenderer(theme, infoTheme theme.Theme) *Renderer {
-	return &Renderer{infoTheme: infoTheme, theme: theme}
+func NewRenderer(a *theme.All) *Renderer {
+	return &Renderer{theme: a}
 }
 
 func (rd *Renderer) OctalPerm(octal string) string {
-	return rd.infoByName(octal, "octal")
+	s := rd.theme.Permission["octal"]
+	bb := bytebufferpool.Get()
+	defer bytebufferpool.Put(bb)
+	_, _ = bb.WriteString(s.Color)
+	checkUnderlineAndBold(&s, bb)
+	_, _ = bb.WriteString(octal)
+	_, _ = bb.WriteString(rd.theme.InfoTheme["reset"].Color)
+	return bb.String()
 }
 
 func (rd *Renderer) FileMode(toRender string) string {
@@ -46,42 +48,57 @@ func (rd *Renderer) FileMode(toRender string) string {
 	for _, c := range toRender {
 		switch c {
 		case '-':
-			_, _ = bb.WriteString(rd.infoTheme["-"].Color)
+			_, _ = bb.WriteString(rd.theme.Permission["-"].Color)
 		case 'L':
-			_, _ = bb.WriteString(rd.infoTheme["l"].Color)
+			_, _ = bb.WriteString(rd.theme.Permission["l"].Color)
 		case 'd':
-			_, _ = bb.WriteString(rd.infoTheme["d"].Color)
+			_, _ = bb.WriteString(rd.theme.Permission["d"].Color)
 		case 'r':
-			_, _ = bb.WriteString(rd.infoTheme["r"].Color)
+			_, _ = bb.WriteString(rd.theme.Permission["r"].Color)
 		case 'w':
-			_, _ = bb.WriteString(rd.infoTheme["w"].Color)
+			_, _ = bb.WriteString(rd.theme.Permission["w"].Color)
 		case 'x', 's', 't':
-			_, _ = bb.WriteString(rd.infoTheme["x"].Color)
+			_, _ = bb.WriteString(rd.theme.Permission["x"].Color)
+		case 'c':
+			_, _ = bb.WriteString(rd.theme.Permission["c"].Color)
 		case 'S', 'T':
-			_, _ = bb.WriteString(rd.infoTheme["s"].Color)
+			_, _ = bb.WriteString(rd.theme.Permission["s"].Color)
+		case 'D':
+			_, _ = bb.WriteString(rd.theme.Permission["D"].Color)
 		}
 		_, _ = bb.WriteString(string(c))
 	}
-	_, _ = bb.WriteString(rd.infoTheme["reset"].Color)
+	_, _ = bb.WriteString(rd.theme.InfoTheme["reset"].Color)
 	return bb.String()
 }
 
 func (rd *Renderer) Size(toRender, unit string) string {
+	s := rd.theme.Size[unit]
 	if strings.HasSuffix(toRender, "-") {
-		return rd.infoByName(toRender, "-")
+		s = rd.theme.Size["-"]
 	}
-	return rd.infoByName(toRender, unit)
+	bb := bytebufferpool.Get()
+	defer bytebufferpool.Put(bb)
+	_, _ = bb.WriteString(s.Color)
+	checkUnderlineAndBold(&s, bb)
+	_, _ = bb.WriteString(toRender)
+	_, _ = bb.WriteString(rd.theme.InfoTheme["reset"].Color)
+	return bb.String()
 }
 
 func (rd *Renderer) BlockSize(toRender string) string {
-	if strings.HasSuffix(toRender, "-") {
-		return rd.infoByName(toRender, "-")
-	}
-	return rd.infoByName(toRender, "bit")
+	return rd.Size(toRender, "block")
 }
 
 func (rd *Renderer) Link(toRender string) string {
-	return rd.infoByName(toRender, "link")
+	s := rd.theme.Symlink["link"]
+	bb := bytebufferpool.Get()
+	defer bytebufferpool.Put(bb)
+	_, _ = bb.WriteString(s.Color)
+	checkUnderlineAndBold(&s, bb)
+	_, _ = bb.WriteString(toRender)
+	_, _ = bb.WriteString(rd.theme.InfoTheme["reset"].Color)
+	return bb.String()
 }
 
 const adminSidPattern = `^S-1-5-(?:\d+-)*\d+-500$`
@@ -103,20 +120,21 @@ func (rd *Renderer) Owner(toRender string) string {
 		root = []string{"root", "0"}
 	}
 
+	style := rd.theme.User["owner"]
+
 	if slices.Contains(root, toRender) {
-		_, _ = bb.WriteString(rd.infoTheme["root"].Color)
+		style = rd.theme.User["root"]
 	} else {
 		if slices.Contains(byName, toRender) {
-			_, _ = bb.WriteString(rd.infoTheme[toRender].Color)
+			style = rd.theme.User[toRender]
 		} else if runtime.GOOS == "windows" && rootSid.MatchString(toRender) {
-			_, _ = bb.WriteString(rd.infoTheme["root"].Color)
-		} else {
-			_, _ = bb.WriteString(rd.infoTheme["owner"].Color)
+			style = rd.theme.User["root"]
 		}
 	}
-
+	_, _ = bb.WriteString(style.Color)
+	checkUnderlineAndBold(&style, bb)
 	_, _ = bb.WriteString(toRender)
-	_, _ = bb.WriteString(rd.infoTheme["reset"].Color)
+	_, _ = bb.WriteString(rd.theme.InfoTheme["reset"].Color)
 	return bb.String()
 }
 
@@ -135,20 +153,22 @@ func (rd *Renderer) Group(toRender string) string {
 		root = []string{"root", "0"}
 	}
 
+	style := rd.theme.Group["group"]
 	if slices.Contains(root, toRender) {
-		_, _ = bb.WriteString(rd.infoTheme["root"].Color)
+		style = rd.theme.Group["root"]
 	} else {
 		if slices.Contains(byName, toRender) {
-			_, _ = bb.WriteString(rd.infoTheme["byName"].Color)
+			style = rd.theme.Group[toRender]
 		} else if runtime.GOOS == "windows" && rootSid.MatchString(toRender) {
-			_, _ = bb.WriteString(rd.infoTheme["root"].Color)
+			style = rd.theme.Group["root"]
 		} else {
-			_, _ = bb.WriteString(rd.infoTheme["group"].Color)
+			style = rd.theme.Group["group"]
 		}
 	}
-
+	_, _ = bb.WriteString(style.Color)
+	checkUnderlineAndBold(&style, bb)
 	_, _ = bb.WriteString(toRender)
-	_, _ = bb.WriteString(rd.infoTheme["reset"].Color)
+	_, _ = bb.WriteString(rd.theme.InfoTheme["reset"].Color)
 	return bb.String()
 }
 
@@ -164,8 +184,8 @@ func (rd *Renderer) calculateRTimeColor(dura time.Duration) string {
 		week = day * 7
 	)
 
-	const gUint = 10
-	var r, b float64 = 215, 255
+	const gUint = 35
+	var r, b float64 = 165, 255
 
 	switch theme.ColorLevel {
 	case theme.TrueColor:
@@ -179,7 +199,7 @@ func (rd *Renderer) calculateRTimeColor(dura time.Duration) string {
 		rgb, _ := theme.RGB(rUint, gUint, bUint)
 		return rgb
 	case theme.C256:
-		code := 213
+		code := 0
 		if dura <= time.Hour*6 {
 			code = 201
 		} else if dura <= day {
@@ -198,7 +218,7 @@ func (rd *Renderer) calculateRTimeColor(dura time.Duration) string {
 		res, _ := theme.Color256(code)
 		return res
 	case theme.Ascii:
-		return rd.infoTheme["time"].Color
+		return rd.theme.InfoTheme["time"].Color
 	default:
 		return ""
 	}
@@ -210,40 +230,83 @@ func (rd *Renderer) RTime(now, modTime time.Time) string {
 	if t > 0 {
 		dura = durafmt.Parse(t)
 		return fmt.Sprintf(
-			"%s%s ago%s", rd.calculateRTimeColor(t), dura.LimitFirstN(1).String(), rd.infoTheme["reset"].Color,
+			"%s%s ago%s", rd.calculateRTimeColor(t), dura.LimitFirstN(1).String(), rd.theme.InfoTheme["reset"].Color,
 		)
 	} else if t == 0 {
 		return "now"
 	} else {
 		dura = durafmt.Parse(-t)
 		return fmt.Sprintf(
-			"%sin %s%s", rd.calculateRTimeColor(t), dura.LimitFirstN(1).String(), rd.infoTheme["reset"].Color,
+			"%sin %s%s", rd.calculateRTimeColor(t), dura.LimitFirstN(1).String(), rd.theme.InfoTheme["reset"].Color,
 		)
 	}
 }
 
-func (rd *Renderer) Name(toRender string) string {
-	return rd.infoByName(toRender, "name")
+func (rd *Renderer) ByName(toRender string) string {
+	bb := bytebufferpool.Get()
+	defer bytebufferpool.Put(bb)
+	name := strings.ToLower(toRender)
+	style, ok := rd.theme.Name[name]
+	if !ok {
+		return ""
+	}
+	_, _ = bb.WriteString(style.Color)
+	checkUnderlineAndBold(&style, bb)
+	_, _ = bb.WriteString(toRender)
+	_, _ = bb.WriteString(rd.theme.InfoTheme["reset"].Color)
+	return bb.String()
+}
+
+func (rd *Renderer) ByNameIcon(toRender string) string {
+	bb := bytebufferpool.Get()
+	defer bytebufferpool.Put(bb)
+	name := strings.ToLower(toRender)
+	style, ok := rd.theme.Name[name]
+	if !ok {
+		return ""
+	}
+	_, _ = bb.WriteString(style.Color)
+	_, _ = bb.WriteString(style.Icon)
+	_, _ = bb.WriteString(" ")
+	checkUnderlineAndBold(&style, bb)
+	_, _ = bb.WriteString(toRender)
+	_, _ = bb.WriteString(rd.theme.InfoTheme["reset"].Color)
+	return bb.String()
 }
 
 func (rd *Renderer) infoByName(toRender string, name string) string {
 	bb := bytebufferpool.Get()
 	defer bytebufferpool.Put(bb)
-	_, _ = bb.WriteString(rd.infoTheme[name].Color)
+	style := rd.theme.InfoTheme[name]
+	_, _ = bb.WriteString(style.Color)
+	checkUnderlineAndBold(&style, bb)
 	_, _ = bb.WriteString(toRender)
-	_, _ = bb.WriteString(rd.infoTheme["reset"].Color)
+	_, _ = bb.WriteString(rd.theme.InfoTheme["reset"].Color)
 	return bb.String()
 }
 
+// ByExt returns the colorized string by the file extension
+// if the file has no extension it returns an empty string
 func (rd *Renderer) ByExt(toRender string) string {
 	// get ext
 	ext := filepath.Ext(toRender)
 	if len(ext) > 0 {
 		ext = ext[1:]
 	} else {
-		ext = toRender // if no ext, try to color by name
+		return ""
 	}
-	return rd.byName(toRender, strings.ToLower(ext))
+	ext = strings.ToLower(ext)
+	bb := bytebufferpool.Get()
+	defer bytebufferpool.Put(bb)
+	style, ok := rd.theme.Ext[ext]
+	if !ok {
+		return ""
+	}
+	_, _ = bb.WriteString(style.Color)
+	checkUnderlineAndBold(&style, bb)
+	_, _ = bb.WriteString(toRender)
+	_, _ = bb.WriteString(rd.theme.InfoTheme["reset"].Color)
+	return bb.String()
 }
 
 // ByExtIcon returns the icon and the name of the file
@@ -254,40 +317,42 @@ func (rd *Renderer) ByExtIcon(toRender string) string {
 	if len(ext) > 0 {
 		ext = ext[1:]
 	} else {
-		ext = toRender // if no ext, try to color by name
+		return ""
 	}
 	ext = strings.ToLower(ext)
-	icon := rd.Icon(ext)
-	if icon == "" {
-		ext = "file"
-		icon = rd.Icon("file")
+	style, ok := rd.theme.Ext[ext]
+	if !ok {
+		return ""
 	}
 	bb := bytebufferpool.Get()
 	defer bytebufferpool.Put(bb)
-
-	_, _ = bb.WriteString(rd.theme[ext].Color)
-	_, _ = bb.WriteString(icon)
+	_, _ = bb.WriteString(style.Color)
+	_, _ = bb.WriteString(style.Icon)
 	_, _ = bb.WriteString(" ")
+	checkUnderlineAndBold(&style, bb)
 	_, _ = bb.WriteString(toRender)
-	_, _ = bb.WriteString(rd.infoTheme["reset"].Color)
+	_, _ = bb.WriteString(rd.theme.InfoTheme["reset"].Color)
 	return bb.String()
 }
 
 // SymlinkIconPlus returns the icon and the name of the file, and dereferences the symlink
 func (rd *Renderer) SymlinkIconPlus(toRender string, path string, plus string, rel bool) string {
-	icon := rd.Icon("symlink")
+	style := rd.theme.Symlink["symlink"]
 	bb := bytebufferpool.Get()
 	defer bytebufferpool.Put(bb)
-	_, _ = bb.WriteString(rd.theme["symlink"].Color)
-	_, _ = bb.WriteString(icon)
+	_, _ = bb.WriteString(style.Color)
+	_, _ = bb.WriteString(style.Icon)
 	_, _ = bb.WriteString(" ")
+	checkUnderlineAndBold(&style, bb)
 	symlinks, err := filepath.EvalSymlinks(path)
 	if err != nil {
 		var pathErr *fs.PathError
 		if errors.As(err, &pathErr) {
 			_, _ = bb.WriteString(toRender + plus)
-			_, _ = bb.WriteString(rd.theme["symlink_arrow"].Color + rd.theme["symlink_arrow"].Icon)
-			_, _ = bb.WriteString(rd.infoTheme["symlink_broken_path"].Color)
+			_, _ = bb.WriteString(rd.theme.Symlink["symlink_arrow"].Color + theme.Symlink["symlink_arrow"].Icon)
+			brokenStyle := rd.theme.Symlink["symlink_broken_path"]
+			_, _ = bb.WriteString(brokenStyle.Color)
+			checkUnderlineAndBold(&brokenStyle, bb)
 			if rel {
 				symlinksRel, err := filepath.Rel(filepath.Dir(path), pathErr.Path)
 				if err == nil {
@@ -295,7 +360,7 @@ func (rd *Renderer) SymlinkIconPlus(toRender string, path string, plus string, r
 				}
 			}
 			_, _ = bb.WriteString(pathErr.Path)
-			_, _ = bb.WriteString(rd.infoTheme["reset"].Color)
+			_, _ = bb.WriteString(rd.theme.InfoTheme["reset"].Color)
 			return bb.String()
 		}
 		symlinks = err.Error()
@@ -306,24 +371,28 @@ func (rd *Renderer) SymlinkIconPlus(toRender string, path string, plus string, r
 			symlinks = symlinksRel
 		}
 	}
+
 	_, _ = bb.WriteString(toRender + plus)
-	_, _ = bb.WriteString(rd.theme["symlink_arrow"].Color + rd.theme["symlink_arrow"].Icon)
-	_, _ = bb.WriteString(rd.infoTheme["symlink_path"].Color)
+	_, _ = bb.WriteString(rd.theme.Symlink["symlink_arrow"].Color + rd.theme.Symlink["symlink_arrow"].Icon)
+	pathStyle := rd.theme.Symlink["symlink_path"]
+	_, _ = bb.WriteString(pathStyle.Color)
+	checkUnderlineAndBold(&pathStyle, bb)
 	_, _ = bb.WriteString(symlinks)
-	_, _ = bb.WriteString(rd.infoTheme["reset"].Color)
+	_, _ = bb.WriteString(rd.theme.InfoTheme["reset"].Color)
 	return bb.String()
 }
 
 // SymlinkIconNoDereferencePlus returns the icon and the name of the file, but does not dereference the symlink
 func (rd *Renderer) SymlinkIconNoDereferencePlus(toRender string, plus string) string {
-	icon := rd.Icon("symlink")
 	bb := bytebufferpool.Get()
 	defer bytebufferpool.Put(bb)
-	_, _ = bb.WriteString(rd.theme["symlink"].Color)
-	_, _ = bb.WriteString(icon)
+	style := rd.theme.Symlink["symlink"]
+	_, _ = bb.WriteString(style.Color)
+	_, _ = bb.WriteString(style.Icon)
 	_, _ = bb.WriteString(" ")
+	checkUnderlineAndBold(&style, bb)
 	_, _ = bb.WriteString(toRender + plus)
-	_, _ = bb.WriteString(rd.infoTheme["reset"].Color)
+	_, _ = bb.WriteString(rd.theme.InfoTheme["reset"].Color)
 	return bb.String()
 }
 
@@ -339,14 +408,16 @@ func (rd *Renderer) SymlinkIcon(toRender string, path string, rel bool) string {
 func (rd *Renderer) SymlinkPlus(toRender string, path string, plus string, rel bool) string {
 	bb := bytebufferpool.Get()
 	defer bytebufferpool.Put(bb)
-	_, _ = bb.WriteString(rd.theme["symlink"].Color)
+	style := rd.theme.Symlink["symlink"]
+	_, _ = bb.WriteString(style.Color)
+	checkUnderlineAndBold(&style, bb)
 	symlinks, err := filepath.EvalSymlinks(path)
 	if err != nil {
 		var pathErr *fs.PathError
 		if errors.As(err, &pathErr) {
 			_, _ = bb.WriteString(toRender + plus)
-			_, _ = bb.WriteString(rd.theme["symlink_arrow"].Color + rd.theme["symlink_arrow"].Icon)
-			_, _ = bb.WriteString(rd.infoTheme["symlink_broken_path"].Color)
+			_, _ = bb.WriteString(rd.theme.Symlink["symlink_arrow"].Color + rd.theme.Symlink["symlink_arrow"].Icon)
+			_, _ = bb.WriteString(rd.theme.Symlink["symlink_broken_path"].Color)
 			if rel {
 				symlinksRel, err := filepath.Rel(filepath.Dir(path), pathErr.Path)
 				if err == nil {
@@ -354,7 +425,7 @@ func (rd *Renderer) SymlinkPlus(toRender string, path string, plus string, rel b
 				}
 			}
 			_, _ = bb.WriteString(pathErr.Path)
-			_, _ = bb.WriteString(rd.infoTheme["reset"].Color)
+			_, _ = bb.WriteString(rd.theme.InfoTheme["reset"].Color)
 			return bb.String()
 		}
 		symlinks = err.Error()
@@ -366,19 +437,21 @@ func (rd *Renderer) SymlinkPlus(toRender string, path string, plus string, rel b
 		}
 	}
 	_, _ = bb.WriteString(toRender + plus)
-	_, _ = bb.WriteString(rd.theme["symlink_arrow"].Color + rd.theme["symlink_arrow"].Icon)
-	_, _ = bb.WriteString(rd.infoTheme["symlink_path"].Color)
+	_, _ = bb.WriteString(rd.theme.Symlink["symlink_arrow"].Color + rd.theme.Symlink["symlink_arrow"].Icon)
+	pathStyle := rd.theme.Symlink["symlink_path"]
+	_, _ = bb.WriteString(pathStyle.Color)
+	checkUnderlineAndBold(&pathStyle, bb)
 	_, _ = bb.WriteString(symlinks)
-	_, _ = bb.WriteString(rd.infoTheme["reset"].Color)
+	_, _ = bb.WriteString(rd.theme.InfoTheme["reset"].Color)
 	return bb.String()
 }
 
 func (rd *Renderer) SymlinkNoDereferencePlus(toRender string, plus string) string {
 	bb := bytebufferpool.Get()
 	defer bytebufferpool.Put(bb)
-	_, _ = bb.WriteString(rd.theme["symlink"].Color)
+	_, _ = bb.WriteString(rd.theme.Symlink["symlink"].Color)
 	_, _ = bb.WriteString(toRender + plus)
-	_, _ = bb.WriteString(rd.infoTheme["reset"].Color)
+	_, _ = bb.WriteString(rd.theme.InfoTheme["reset"].Color)
 	return bb.String()
 }
 
@@ -391,99 +464,158 @@ func (rd *Renderer) Symlink(toRender string, path string, rel bool) string {
 }
 
 func (rd *Renderer) PipeIcon(toRender string) string {
-	icon := rd.Icon("pipe")
 	bb := bytebufferpool.Get()
 	defer bytebufferpool.Put(bb)
-	_, _ = bb.WriteString(rd.theme["pipe"].Color)
-	_, _ = bb.WriteString(icon)
+	style := rd.theme.Special["pipe"]
+	_, _ = bb.WriteString(style.Color)
+	_, _ = bb.WriteString(style.Icon)
 	_, _ = bb.WriteString(" ")
+	checkUnderlineAndBold(&style, bb)
 	_, _ = bb.WriteString(toRender)
-	_, _ = bb.WriteString(rd.infoTheme["reset"].Color)
+	_, _ = bb.WriteString(rd.theme.InfoTheme["reset"].Color)
 	return bb.String()
 }
 
 func (rd *Renderer) Pipe(toRender string) string {
-	return rd.byName(toRender, "symlink")
+	bb := bytebufferpool.Get()
+	defer bytebufferpool.Put(bb)
+	style := rd.theme.Special["pipe"]
+	_, _ = bb.WriteString(style.Color)
+	checkUnderlineAndBold(&style, bb)
+	_, _ = bb.WriteString(toRender)
+	_, _ = bb.WriteString(rd.theme.InfoTheme["reset"].Color)
+	return bb.String()
 }
 
 func (rd *Renderer) SocketIcon(toRender string) string {
-	icon := rd.Icon("socket")
 	bb := bytebufferpool.Get()
 	defer bytebufferpool.Put(bb)
-	_, _ = bb.WriteString(rd.theme["socket"].Color)
-	_, _ = bb.WriteString(icon)
+	style := rd.theme.Special["socket"]
+	_, _ = bb.WriteString(style.Color)
+	_, _ = bb.WriteString(style.Icon)
 	_, _ = bb.WriteString(" ")
+	checkUnderlineAndBold(&style, bb)
 	_, _ = bb.WriteString(toRender)
-	_, _ = bb.WriteString(rd.infoTheme["reset"].Color)
+	_, _ = bb.WriteString(rd.theme.InfoTheme["reset"].Color)
 	return bb.String()
 }
 
 func (rd *Renderer) Socket(toRender string) string {
-	return rd.byName(toRender, "socket")
+	bb := bytebufferpool.Get()
+	defer bytebufferpool.Put(bb)
+	style := rd.theme.Special["socket"]
+	_, _ = bb.WriteString(style.Color)
+	checkUnderlineAndBold(&style, bb)
+	_, _ = bb.WriteString(toRender)
+	_, _ = bb.WriteString(rd.theme.InfoTheme["reset"].Color)
+	return bb.String()
 }
 
 func (rd *Renderer) Executable(toRender string) string {
-	return rd.byName(toRender, "exe")
+	bb := bytebufferpool.Get()
+	defer bytebufferpool.Put(bb)
+	style := rd.theme.Special["exe"]
+	_, _ = bb.WriteString(style.Color)
+	checkUnderlineAndBold(&style, bb)
+	_, _ = bb.WriteString(toRender)
+	_, _ = bb.WriteString(rd.theme.InfoTheme["reset"].Color)
+	return bb.String()
 }
 
 func (rd *Renderer) ExecutableIcon(toRender string) string {
-	icon := rd.Icon("exe")
 	bb := bytebufferpool.Get()
 	defer bytebufferpool.Put(bb)
-	_, _ = bb.WriteString(rd.theme["exe"].Color)
-	_, _ = bb.WriteString(icon)
+	style := rd.theme.Special["exe"]
+	_, _ = bb.WriteString(style.Color)
+	_, _ = bb.WriteString(style.Icon)
 	_, _ = bb.WriteString(" ")
+	checkUnderlineAndBold(&style, bb)
 	_, _ = bb.WriteString(toRender)
-	_, _ = bb.WriteString(rd.infoTheme["reset"].Color)
+	_, _ = bb.WriteString(rd.theme.InfoTheme["reset"].Color)
 	return bb.String()
-}
-
-func (rd *Renderer) RegularFile(toRender string) string {
-	return rd.byName(toRender, "file")
 }
 
 func (rd *Renderer) Dir(toRender string) string {
-	return rd.byName(toRender, "dir")
+	bb := bytebufferpool.Get()
+	defer bytebufferpool.Put(bb)
+	style := rd.theme.Special["dir"]
+	_, _ = bb.WriteString(style.Color)
+	checkUnderlineAndBold(&style, bb)
+	_, _ = bb.WriteString(toRender)
+	_, _ = bb.WriteString(rd.theme.InfoTheme["reset"].Color)
+	return bb.String()
 }
 
 func (rd *Renderer) DirIcon(toRender string) string {
-	ext := filepath.Ext(toRender)
-	if len(ext) > 0 {
-		ext = ext[1:]
+	bb := bytebufferpool.Get()
+	defer bytebufferpool.Put(bb)
+	style := rd.theme.Special["dir"]
+	_, _ = bb.WriteString(style.Color)
+	if s, ok := rd.theme.Name[strings.ToLower(toRender)]; ok {
+		style = s
 	} else {
-		ext = toRender // if no ext, try to color by name
+		ext := filepath.Ext(toRender)
+		if len(ext) > 0 {
+			ext = ext[1:]
+			ext = strings.ToLower(ext)
+			if s, ok := rd.theme.Ext[ext]; ok {
+				style = s
+			}
+		}
 	}
-	ext = strings.ToLower(ext)
-	icon := rd.Icon(ext)
-	if icon == "" {
-		icon = rd.Icon("dir")
-	}
-	bb := bytebufferpool.Get()
-	defer bytebufferpool.Put(bb)
-	_, _ = bb.WriteString(rd.theme["dir"].Color)
-	_, _ = bb.WriteString(icon)
+	_, _ = bb.WriteString(style.Icon)
 	_, _ = bb.WriteString(" ")
+	checkUnderlineAndBold(&style, bb)
 	_, _ = bb.WriteString(toRender)
-	_, _ = bb.WriteString(rd.infoTheme["reset"].Color)
+	_, _ = bb.WriteString(rd.theme.InfoTheme["reset"].Color)
 
 	return bb.String()
 }
 
-func (rd *Renderer) byName(toRender string, name string) string {
+func (rd *Renderer) File(toRender string) string {
 	bb := bytebufferpool.Get()
 	defer bytebufferpool.Put(bb)
-	_, _ = bb.WriteString(rd.theme[name].Color)
+	style := rd.theme.Special["file"]
+	_, _ = bb.WriteString(style.Color)
+	if s, ok := rd.theme.Name[toRender]; ok {
+		style = s
+	}
+	checkUnderlineAndBold(&style, bb)
 	_, _ = bb.WriteString(toRender)
-	_, _ = bb.WriteString(rd.infoTheme["reset"].Color) // IT IS INFO THEME
+	_, _ = bb.WriteString(rd.theme.InfoTheme["reset"].Color)
+
 	return bb.String()
 }
 
-func (rd *Renderer) Icon(name string) string {
-	return rd.theme[name].Icon
+func (rd *Renderer) FileIcon(toRender string) string {
+	bb := bytebufferpool.Get()
+	defer bytebufferpool.Put(bb)
+	style := rd.theme.Special["file"]
+	_, _ = bb.WriteString(style.Color)
+	if s, ok := rd.theme.Name[toRender]; ok {
+		style = s
+	}
+	_, _ = bb.WriteString(style.Icon)
+	_, _ = bb.WriteString(" ")
+	checkUnderlineAndBold(&style, bb)
+	_, _ = bb.WriteString(toRender)
+	_, _ = bb.WriteString(rd.theme.InfoTheme["reset"].Color)
+
+	return bb.String()
 }
 
 func (rd *Renderer) gitByStatus(name string, status string) string {
-	return rd.infoTheme[status].Color + name + rd.infoTheme["reset"].Color
+	style, ok := rd.theme.Git[status]
+	if !ok {
+		panic("no such git status:" + status)
+	}
+	bb := bytebufferpool.Get()
+	defer bytebufferpool.Put(bb)
+	_, _ = bb.WriteString(style.Color)
+	checkUnderlineAndBold(&style, bb)
+	_, _ = bb.WriteString(name)
+	_, _ = bb.WriteString(rd.theme.InfoTheme["reset"].Color)
+	return bb.String()
 }
 
 func (rd *Renderer) GitUnmodified(name string) string {
@@ -528,4 +660,13 @@ func (rd *Renderer) GitUpdatedButUnmerged(s string) string {
 
 func (rd *Renderer) Inode(inode string) string {
 	return rd.infoByName(inode, "inode")
+}
+
+func checkUnderlineAndBold(style *theme.Style, bb *bytebufferpool.ByteBuffer) {
+	if style.Underline {
+		_, _ = bb.WriteString(theme.Underline)
+	}
+	if style.Bold {
+		_, _ = bb.WriteString(theme.Bold)
+	}
 }

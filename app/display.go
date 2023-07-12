@@ -12,14 +12,13 @@ import (
 var displayFlag = []cli.Flag{
 	// DISPLAY
 
-	// todo
-	// &cli.BoolFlag{
-	// 	Name:               "tree",
-	// 	Aliases:            []string{"t", "T"},
-	// 	Usage:              "recursively list in tree",
-	// 	DisableDefaultText: true,
-	// 	Category:           "DISPLAY",
-	// },
+	&cli.BoolFlag{
+		Name:               "T",
+		Aliases:            []string{"tree"},
+		Usage:              "recursively list in tree",
+		DisableDefaultText: true,
+		Category:           "DISPLAY",
+	},
 	&cli.StringFlag{
 		Name:        "color",
 		DefaultText: "auto",
@@ -50,7 +49,7 @@ var displayFlag = []cli.Flag{
 	&cli.IntFlag{
 		Name:        "depth",
 		Aliases:     []string{"level"},
-		Usage:       "limit recursive depth, negative -> infinity",
+		Usage:       "limit recursive/tree depth, negative -> infinity",
 		DefaultText: "infinity",
 		Value:       -1,
 		Category:    "DISPLAY",
@@ -210,9 +209,7 @@ var displayFlag = []cli.Flag{
 			if b {
 				if _, ok := p.(*display.HTMLPrinter); !ok {
 					p = display.NewHTMLPrinter()
-					r.SetTheme(theme.Colorless)
-					r.SetInfoTheme(theme.Colorless)
-
+					_ = context.Set("no-color", "1")
 					_ = context.Set("no-icon", "1")
 				}
 			}
@@ -229,10 +226,7 @@ var displayFlag = []cli.Flag{
 			if b {
 				if _, ok := p.(*display.MDPrinter); !ok {
 					p = display.NewMDPrinter()
-					r.SetTheme(theme.Colorless)
-					r.SetInfoTheme(theme.Colorless)
-					theme.ColorLevel = theme.None
-
+					_ = context.Set("no-color", "1")
 					err := context.Set("header", "1")
 					if err != nil {
 						return err
@@ -252,10 +246,7 @@ var displayFlag = []cli.Flag{
 			if b {
 				if _, ok := p.(*display.CSVPrinter); !ok {
 					p = display.NewCSVPrinter()
-					r.SetTheme(theme.Colorless)
-					r.SetInfoTheme(theme.Colorless)
-					theme.ColorLevel = theme.None
-
+					_ = context.Set("no-color", "1")
 					_ = context.Set("no-icon", "1")
 				}
 			}
@@ -267,7 +258,7 @@ var displayFlag = []cli.Flag{
 		Name:        "format",
 		DefaultText: "C",
 		Usage: `across  -x,  commas  -m, horizontal -x, long -l, single-column -1,
-	verbose -l, vertical -C, table -tb, HTML -html, Markdown -md, CSV -csv, json -j`,
+	verbose -l, vertical -C, table -tb, HTML -html, Markdown -md, CSV -csv, json -j, tree -T`,
 		Action: func(context *cli.Context, s string) error {
 			switch s {
 			case "across", "x", "horizontal":
@@ -304,19 +295,13 @@ var displayFlag = []cli.Flag{
 			case "HTML", "html":
 				if _, ok := p.(*display.HTMLPrinter); !ok {
 					p = display.NewHTMLPrinter()
-					r.SetTheme(theme.Colorless)
-					r.SetInfoTheme(theme.Colorless)
-					theme.ColorLevel = theme.None
-
+					_ = context.Set("no-color", "1")
 					_ = context.Set("no-icon", "1")
 				}
 			case "Markdown", "md", "MD", "markdown":
 				if _, ok := p.(*display.MDPrinter); !ok {
 					p = display.NewMDPrinter()
-					r.SetTheme(theme.Colorless)
-					r.SetInfoTheme(theme.Colorless)
-					theme.ColorLevel = theme.None
-
+					_ = context.Set("no-color", "1")
 					err := context.Set("header", "1")
 					if err != nil {
 						return err
@@ -325,38 +310,21 @@ var displayFlag = []cli.Flag{
 			case "CSV", "csv":
 				if _, ok := p.(*display.CSVPrinter); !ok {
 					p = display.NewCSVPrinter()
-					r.SetTheme(theme.Colorless)
-					r.SetInfoTheme(theme.Colorless)
-					theme.ColorLevel = theme.None
-
+					_ = context.Set("no-color", "1")
 					_ = context.Set("no-icon", "1")
 				}
 			case "json", "j":
 				if _, ok := p.(*display.JsonPrinter); !ok {
 					p = display.NewJsonPrinter()
-					r.SetTheme(theme.Colorless)
-					r.SetInfoTheme(theme.Colorless)
-					theme.ColorLevel = theme.None
-
+					_ = context.Set("no-color", "1")
 					_ = context.Set("no-icon", "1")
+				}
+			case "tree", "T":
+				if _, ok := p.(*display.TreePrinter); !ok {
+					p = display.NewTreePrinter()
 				}
 			default:
 				return fmt.Errorf("unkown format option:%s", s)
-			}
-			return nil
-		},
-		Category: "DISPLAY",
-	},
-	&cli.BoolFlag{
-		Name:               "colorless",
-		Aliases:            []string{"no-color", "nocolor"},
-		Usage:              "without color",
-		DisableDefaultText: true,
-		Action: func(context *cli.Context, b bool) error {
-			if b {
-				r.SetTheme(theme.Colorless)
-				r.SetInfoTheme(theme.Colorless)
-				theme.ColorLevel = theme.None
 			}
 			return nil
 		},
@@ -371,19 +339,31 @@ var displayFlag = []cli.Flag{
 			if err != nil {
 				return err
 			}
-			theme.SyncColorlessWithTheme()
+			return nil
+		},
+		Category: "DISPLAY",
+	},
+	&cli.BoolFlag{
+		Name:               "colorless",
+		Aliases:            []string{"no-color", "nocolor"},
+		Usage:              "without color",
+		DisableDefaultText: true,
+		Action: func(context *cli.Context, b bool) error {
+			if b {
+				theme.RemoveAllColor()
+				theme.ColorLevel = theme.None
+			}
 			return nil
 		},
 		Category: "DISPLAY",
 	},
 	&cli.BoolFlag{
 		Name:               "classic",
-		Usage:              "Enable classic mode (no colours or icons)",
+		Usage:              "Enable classic mode (no colors or icons)",
 		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
 			if b {
-				r.SetTheme(theme.Colorless)
-				r.SetInfoTheme(theme.Colorless)
+				theme.RemoveAllColor()
 				theme.ColorLevel = theme.None
 				err := context.Set("no-icon", "1")
 				if err != nil {

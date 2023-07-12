@@ -14,4 +14,4 @@ fi
 
 # add the following command to .zshrc
 # eval "$(g --init zsh)"
-# then `source ~/.zshrc`
+# then 'source ~/.zshrc'

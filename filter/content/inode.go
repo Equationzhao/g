@@ -17,6 +17,12 @@ const Inode = "Inode"
 
 func (i *InodeEnabler) Enable(renderer *render.Renderer) filter.ContentOption {
 	return func(info *item.FileInfo) (string, string) {
-		return renderer.Inode(osbased.Inode(info)), Inode
+		i := ""
+		if m, ok := info.Cache[Inode]; ok {
+			i = string(m)
+		} else {
+			i = osbased.Inode(info)
+		}
+		return renderer.Inode(i), Inode
 	}
 }

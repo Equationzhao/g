@@ -9,12 +9,24 @@ import (
 func TestAll(t *testing.T) {
 	ColorLevel = colortool.Level16
 	ConvertThemeColor()
-	t.Logf("info")
-	for key, style := range DefaultInfoTheme {
-		t.Logf("%s%s%s", style.Color, key, Reset)
+	pl := func(m map[string]Style) {
+		for key := range m {
+			t.Logf("%s %s %s %s", m[key].Color, m[key].Icon, key, Reset)
+		}
 	}
-	t.Logf("theme")
-	for key, style := range DefaultTheme {
-		t.Logf("%s%s %s%s", style.Color, style.Icon, key, Reset)
-	}
+	pl(DefaultAll.InfoTheme)
+	pl(DefaultAll.Permission)
+	pl(DefaultAll.Size)
+	pl(DefaultAll.User)
+	pl(DefaultAll.Group)
+	pl(DefaultAll.Symlink)
+	pl(DefaultAll.Git)
+	pl(DefaultAll.Name)
+	pl(DefaultAll.Special)
+	pl(DefaultAll.Ext)
+}
+
+func TestColor(t *testing.T) {
+	println(Green + "\uF48A " + Underline + Bold + "hello" + Red + " hello" + Reset)
+	println(Green + "\uF48A " + Underline + "hello" + Red + " hello" + Reset)
 }

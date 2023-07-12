@@ -36,13 +36,26 @@ func main() {
 		_ = manGz.Flush()
 	} else {
 		// load config
-		if !slices.Contains(os.Args, "-no-config") {
+		if !slices.ContainsFunc(
+			os.Args, match,
+		) {
 			defaultArgs, err := config.Load()
-			if err == nil {
+			if err == nil && !slices.ContainsFunc(
+				defaultArgs.Args, match,
+			) {
+				os.Args = slices.DeleteFunc(
+					os.Args, match,
+				)
 				os.Args = slices.Insert(os.Args, 1, defaultArgs.Args...)
 			} else if _, ok := err.(config.ErrReadConfig); ok {
 				_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(err.Error()))
 			}
+		} else {
+			// contains -no-config
+			// remove it
+			os.Args = slices.DeleteFunc(
+				os.Args, match,
+			)
 		}
 		err := G.Run(os.Args)
 		if err != nil {
@@ -54,4 +67,11 @@ func main() {
 			}
 		}
 	}
+}
+
+func match(s string) bool {
+	if s == "-no-config" || s == "--no-config" {
+		return true
+	}
+	return false
 }

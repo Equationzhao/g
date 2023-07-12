@@ -1,19 +1,36 @@
 package theme
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
+	"os"
 	"strconv"
 	"strings"
-
-	"gopkg.in/ini.v1"
 )
 
 type Style struct {
 	// Color of the text.
-	Color string
+	Color string `json:"color,omitempty"`
 	// unicode Icon
-	Icon string
+	Icon      string `json:"icon,omitempty"`
+	Underline bool   `json:"underline,omitempty"`
+	Bold      bool   `json:"bold,omitempty"`
+}
+
+func (s *Style) ToReadable() Style {
+	r := *s
+	r.Color = color2str(r.Color)
+	return r
+}
+
+func (s *Style) FromReadable() error {
+	c, err := str2color(s.Color)
+	if err != nil {
+		return err
+	}
+	s.Color = c
+	return nil
 }
 
 type Theme map[string]Style
@@ -196,48 +213,13 @@ func str2color(str string) (string, error) {
 }
 
 /*
-theme:
-
-[info]
-d 		= blue
-l 		= purple
-b 		= yellow
-c 		= yellow
-p 		= yellow
-s 		= yellow
-r 		= yellow
-w 		= red
-x 		= green
-- 		= White
-time 	= blue
-size 	= green
-owner 	= yellow
-group 	= yellow
-reset 	= reset
-root 	= red
-
-[dir]
-color = blue
-icon = 📁
-
-[exec,exe]
-color = green
-icon = 🚀
-
-[file]
-color = White
-icon = 📄
-
 ......
 // if using 256 color, you can use color code like this:
-[info]
-d 		= [0-255]@256
+[0-255]@256
 // if using rgb color, you can use color code like this:
-[info]
-d 		= [0-255,0-255,0-255]@rgb
+[0-255,0-255,0-255]@rgb
 // if using hex color, you can use color code like this:
-[info]
-d 		= [hex]@hex
+[hex]@hex
 */
 
 type ErrBadColor struct {
@@ -250,79 +232,54 @@ func (e ErrBadColor) Error() string {
 }
 
 func GetTheme(path string) error {
-	cfg, err := ini.Load(path)
+	themeJson, err := os.ReadFile(path)
 	if err != nil {
 		return err
 	}
-	infoTheme, theme, err := getTheme(cfg)
-
-	for name, style := range infoTheme {
-		DefaultInfoTheme[name] = style
+	a, err, fatal := getTheme(themeJson)
+	if fatal != nil {
+		return fatal
 	}
-	for name, style := range theme {
-		DefaultTheme[name] = style
-	}
-
-	SyncColorlessWithTheme()
+	DefaultAll = a
 	return err
 }
 
-func getTheme(cfg *ini.File) (infoTheme, theme Theme, errSum error) {
-	cfg.BlockMode = false
-	sections := cfg.Sections()
-	infoThem, theme := make(Theme), make(Theme)
-	for _, section := range sections {
-		if section.Name() == "DEFAULT" || section.Name() == "info" {
-			keys := section.Keys()
-			for _, v := range keys {
-				Color, err := str2color(v.String())
-				if err != nil {
-					errSum = errors.Join(errSum, ErrBadColor{v.Name(), err})
-					continue
-				}
-				infoThem[v.Name()] = Style{
-					Color: Color,
-				}
+func getTheme(themeJson []byte) (theme All, errSum error, fatal error) {
+	err := json.Unmarshal(themeJson, &theme)
+	if err != nil {
+		return All{}, nil, err
+	}
+	// check
+	errSum = nil
+	check := func(m Theme) {
+		for key := range m {
+			style := m[key]
+			err := style.FromReadable()
+			if err != nil {
+				errSum = errors.Join(errSum, ErrBadColor{name: key, error: err})
+				continue
 			}
-			continue
-		}
-
-		names := strings.Split(section.Name(), ",")
-		color, err := str2color(section.Key("color").String())
-		if err != nil {
-			errSum = errors.Join(errSum, ErrBadColor{section.Name(), err})
-		}
-
-		icon := section.Key("icon").String()
-		for _, name := range names {
-			theme[name] = Style{
-				Color: color,
-				Icon:  icon,
-			}
+			m[key] = style
 		}
 	}
-	return infoThem, theme, errSum
+	theme.Apply(check)
+	return theme, errSum, nil
 }
 
 func ConvertThemeColor() {
-	for key := range DefaultTheme {
-		color, err := ConvertColorIfGreaterThanExpect(ColorLevel, DefaultTheme[key].Color)
-		if err != nil {
-			continue
-		}
-		DefaultTheme[key] = Style{
-			Icon:  DefaultTheme[key].Icon,
-			Color: color,
-		}
-	}
-
-	for key := range DefaultInfoTheme {
-		color, err := ConvertColorIfGreaterThanExpect(ColorLevel, DefaultInfoTheme[key].Color)
-		if err != nil {
-			continue
-		}
-		DefaultInfoTheme[key] = Style{
-			Color: color,
+	convert := func(m Theme) {
+		for key := range m {
+			color, err := ConvertColorIfGreaterThanExpect(ColorLevel, m[key].Color)
+			if err != nil {
+				continue
+			}
+			m[key] = Style{
+				Icon:      m[key].Icon,
+				Color:     color,
+				Underline: m[key].Underline,
+				Bold:      m[key].Bold,
+			}
 		}
 	}
+	DefaultAll.Apply(convert)
 }

@@ -24,6 +24,7 @@ import (
 	"github.com/Equationzhao/g/util"
 	"github.com/Equationzhao/pathbeautify"
 	"github.com/hako/durafmt"
+	"github.com/panjf2000/ants/v2"
 	"github.com/savioxavier/termlink"
 	"github.com/urfave/cli/v2"
 	"github.com/valyala/bytebufferpool"
@@ -38,7 +39,7 @@ var (
 	itemFilterFunc  = make([]*filter.ItemFilterFunc, 0)
 	contentFunc     = make([]filter.ContentOption, 0)
 	noOutputFunc    = make([]filter.NoOutputOption, 0)
-	r               = render.NewRenderer(theme.DefaultTheme, theme.DefaultInfoTheme)
+	r               = render.NewRenderer(&theme.DefaultAll)
 	p               = display.NewFitTerminal()
 	timeFormat      = "02.Jan'06 15:04"
 	ReturnCode      = 0
@@ -58,7 +59,7 @@ var (
 	hookPost        = make([]func(display.Printer, ...*item.FileInfo), 0)
 )
 
-var Version = "0.10.2"
+var Version = "0.11.0"
 
 var G *cli.App
 
@@ -217,11 +218,21 @@ func init() {
 				}
 			}
 
-			if n := context.Uint("n"); n > 0 {
+			flagSharp := context.Bool("#")
+			tree := context.Bool("tree")
+			if tree {
+				if _, ok := p.(*display.TreePrinter); !ok {
+					p = display.NewTreePrinter()
+					if flagSharp {
+						p.(*display.TreePrinter).NO = true
+					}
+				}
+			}
+
+			if n := context.Uint("n"); n > 0 && !tree {
 				contentFilter.LimitN = n
 			}
 
-			flagSharp := context.Bool("#")
 			longestEachPart := make(map[string]int)
 			startDir, _ := os.Getwd()
 			dereference := context.Bool("dereference")
@@ -255,45 +266,34 @@ func init() {
 				}
 				path[i] = absPath
 
-				if path[i] != "." {
-					stat, err := os.Stat(path[i])
-					if err != nil {
-						// no match
-						if fuzzy {
-							// start fuzzy search
-							if newPath, err := fuzzyPath(filepath.Base(path[i])); err != nil {
-								_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(err.Error()))
-								minorErr = true
-							} else {
-								path[i] = newPath
-								stat, err = os.Stat(path[i])
-								fmt.Printf("%s:\n", path[i])
-								if err != nil {
-									checkErr(err, "")
-									seriousErr = true
-									continue
-								}
-							}
+				stat, err := os.Stat(path[i])
+				if err != nil {
+					// no match
+					if fuzzy {
+						// start fuzzy search
+						if newPath, err := fuzzyPath(filepath.Base(path[i])); err != nil {
+							_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(err.Error()))
+							minorErr = true
 						} else {
-							// output error
-							seriousErr = true
-							checkErr(err, originPath)
-							continue
-						}
-					}
-					if stat.IsDir() {
-						if flagd {
-							// when -d is set, treat dir as file
-							info, err := item.NewFileInfoWithOption(item.WithFileInfo(stat), item.WithPath(path[i]))
+							path[i] = newPath
+							stat, err = os.Stat(path[i])
+							fmt.Printf("%s:\n", path[i])
 							if err != nil {
-								checkErr(err, originPath)
+								checkErr(err, "")
 								seriousErr = true
 								continue
 							}
-							infos = append(infos, info)
-							isFile = true
 						}
 					} else {
+						// output error
+						seriousErr = true
+						checkErr(err, originPath)
+						continue
+					}
+				}
+				if stat.IsDir() {
+					if flagd {
+						// when -d is set, treat dir as file
 						info, err := item.NewFileInfoWithOption(item.WithFileInfo(stat), item.WithPath(path[i]))
 						if err != nil {
 							checkErr(err, originPath)
@@ -303,86 +303,127 @@ func init() {
 						infos = append(infos, info)
 						isFile = true
 					}
+				} else {
+					info, err := item.NewFileInfoWithOption(item.WithFileInfo(stat), item.WithPath(path[i]))
+					if err != nil {
+						checkErr(err, originPath)
+						seriousErr = true
+						continue
+					}
+					infos = append(infos, info)
+					isFile = true
 				}
 
 				if !disableIndex {
 					wgUpdateIndex.Add(1)
-					go func(i int) {
-						if err = fuzzyUpdate(path[i]); err != nil {
-							minorErr = true
-						}
-						wgUpdateIndex.Done()
-					}(i)
-				}
-
-				var d []os.DirEntry
-				if isFile {
-					if gitignore {
-						*removeGitIgnore = filter.RemoveGitIgnore(filepath.Dir(path[i]))
+					err := ants.Submit(
+						func() {
+							func(i int) {
+								if err = fuzzyUpdate(path[i]); err != nil {
+									minorErr = true
+								}
+								wgUpdateIndex.Done()
+							}(i)
+						},
+					)
+					if err != nil {
+						panic(err)
 					}
-
+				}
+				if gitignore {
+					*removeGitIgnore = filter.RemoveGitIgnore(path[i])
+				}
+				if isFile {
 					// remove non-display items
 					infos = itemFilter.Filter(infos...)
 
 					goto final
 				}
 
-				d, err = os.ReadDir(path[i])
-				if err != nil {
-					seriousErr = true
-					checkErr(err, originPath)
-					continue
-				}
-
-				// if -A(almost-all) is not set, add the "."/".." info
-				if !flagA {
-					err := os.Chdir(path[i])
+				if tree { // visit the dir recursively
+					info, err := item.NewFileInfo(path[i])
 					if err != nil {
-						_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(err.Error()))
 						seriousErr = true
-					} else {
-						FileInfoCurrent, err := item.NewFileInfo(".")
-						if err != nil {
-							seriousErr = true
-							checkErr(err, ".")
-						} else {
-							infos = append(infos, FileInfoCurrent)
-						}
+						checkErr(err, originPath)
+						continue
+					}
+					infos = append(
+						infos, info,
+					)
+					infos[0].Cache["level"] = []byte("0")
+					if depth >= 1 || depth < 0 {
+						wg := sync.WaitGroup{}
 
-						FileInfoParent, err := item.NewFileInfo("..")
+						infoSlice := util.NewSlice[*item.FileInfo](10)
+						errSlice := util.NewSlice[error](10)
+						wg.Add(1)
+						dive(
+							path[i], 1, depth, infoSlice, errSlice, &wg,
+							itemFilter,
+						)
+						wg.Wait()
+						infos = append(infos, *infoSlice.GetRaw()...)
+						for _, err := range *errSlice.GetRaw() {
+							if err != nil {
+								minorErr = true
+								checkErr(err, "")
+							}
+						}
+					}
+				} else {
+					var d []os.DirEntry
+					d, err = os.ReadDir(path[i])
+					if err != nil {
+						seriousErr = true
+						checkErr(err, originPath)
+						continue
+					}
+
+					if !flagA && !tree { // if -A(almost-all) is not set, add the "."/".." info
+						err := os.Chdir(path[i])
+						if err != nil {
+							_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(err.Error()))
+							seriousErr = true
+						} else {
+							FileInfoCurrent, err := item.NewFileInfo(".")
+							if err != nil {
+								seriousErr = true
+								checkErr(err, ".")
+							} else {
+								infos = append(infos, FileInfoCurrent)
+							}
+
+							FileInfoParent, err := item.NewFileInfo("..")
+							if err != nil {
+								minorErr = true
+								checkErr(err, "..")
+							} else {
+								infos = append(infos, FileInfoParent)
+							}
+						}
+					}
+
+					for _, v := range d {
+						info, err := v.Info()
 						if err != nil {
 							minorErr = true
-							checkErr(err, "..")
-						} else {
-							infos = append(infos, FileInfoParent)
-						}
-					}
-				}
-
-				for _, v := range d {
-					info, err := v.Info()
-					if err != nil {
-						minorErr = true
-						checkErr(err, "")
-					} else {
-						info, err := item.NewFileInfoWithOption(
-							item.WithFileInfo(info), item.WithAbsPath(filepath.Join(path[i], v.Name())),
-						)
-						if err != nil {
 							checkErr(err, "")
-							seriousErr = true
-							continue
+						} else {
+							info, err := item.NewFileInfoWithOption(
+								item.WithFileInfo(info), item.WithAbsPath(filepath.Join(path[i], v.Name())),
+							)
+							if err != nil {
+								checkErr(err, "")
+								seriousErr = true
+								continue
+							}
+							infos = append(infos, info)
 						}
-						infos = append(infos, info)
 					}
-				}
 
-				if gitignore {
-					*removeGitIgnore = filter.RemoveGitIgnore(path[i])
+					// remove non-display items
+					infos = itemFilter.Filter(infos...)
 				}
-
-				// remove non-display items
-				infos = itemFilter.Filter(infos...)
 
 				// dereference
 				if dereference {
@@ -403,7 +444,7 @@ func init() {
 				}
 
 				// if -R is set, add sub dir, insert into path[i+1]
-				if flagR {
+				if flagR && !tree {
 
 					// set depth
 					dep, ok := depthLimitMap[path[i]]
@@ -495,14 +536,23 @@ func init() {
 						prettyPrinter.SetTitle(path[i])
 					}
 					l := len(strconv.Itoa(len(infos)))
-					for i, info := range infos {
-						// if there is #, add No
-						if flagSharp {
-							no := &display.ItemContent{
-								No:      -1,
-								Content: display.StringContent(strconv.Itoa(i)),
+					if flagSharp {
+						for i, info := range infos {
+							// if there is #, add No
+							var no *display.ItemContent
+							if !tree {
+								no = &display.ItemContent{
+									No:      -1,
+									Content: display.StringContent(strconv.Itoa(i)),
+								}
+								no.SetSuffix(strings.Repeat(" ", l-len(strconv.Itoa(i))))
+							} else {
+								no = &display.ItemContent{
+									No:      -1,
+									Content: display.StringContent(""),
+								}
+								no.SetSuffix(strings.Repeat(" ", l))
 							}
-							no.SetSuffix(strings.Repeat(" ", l-len(strconv.Itoa(i))))
 							info.Set("#", no)
 						}
 					}
@@ -722,8 +772,9 @@ func init() {
 			Category: "SHELL",
 		},
 		&cli.BoolFlag{
-			Name:  "no-config",
-			Usage: "do not load config file",
+			Name:               "no-config",
+			Usage:              "do not load config file",
+			DisableDefaultText: true,
 		},
 	)
 
@@ -736,6 +787,47 @@ func init() {
 	initHelpTemp()
 
 	initVersionHelpFlags()
+}
+
+func dive(
+	parent string, depth, limit int, infos *util.Slice[*item.FileInfo], errSlice *util.Slice[error],
+	wg *sync.WaitGroup, itemFilter *filter.ItemFilter,
+) {
+	defer wg.Done()
+	if limit > 0 && depth > limit {
+		return
+	}
+	dir, err := os.ReadDir(parent)
+	if err != nil {
+		errSlice.AppendTo(err)
+		return
+	}
+	for _, entry := range dir {
+		f, err := entry.Info()
+		if err != nil {
+			errSlice.AppendTo(err)
+			continue
+		}
+		nowAbs := filepath.Join(parent, f.Name())
+		info, _ := item.NewFileInfoWithOption(item.WithAbsPath(nowAbs), item.WithFileInfo(f))
+		if !itemFilter.Match(info) {
+			continue
+		}
+		info.Cache["parent"] = []byte(parent)
+		info.Cache["level"] = []byte(strconv.Itoa(depth))
+		infos.AppendTo(info)
+		if entry.IsDir() {
+			wg.Add(1)
+			err := ants.Submit(
+				func() {
+					dive(info.FullPath, depth+1, limit, infos, errSlice, wg, itemFilter)
+				},
+			)
+			if err != nil {
+				panic(err)
+			}
+		}
+	}
 }
 
 func fuzzyUpdate(path string) error {

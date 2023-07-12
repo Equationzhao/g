@@ -154,7 +154,6 @@ func makeLink(abs string, name string) string {
 }
 
 // Enable enable name filter
-// todo refactor
 func (n *Name) Enable(renderer *render.Renderer) filter.ContentOption {
 	/*
 		 -F      Display a slash (`/`) immediately after each pathname that is a
@@ -211,7 +210,16 @@ func (n *Name) Enable(renderer *render.Renderer) filter.ContentOption {
 					str = renderer.SocketIcon(str)
 					char = "="
 				} else {
-					str = renderer.ByExtIcon(str)
+					if s := renderer.ByNameIcon(str); s != "" {
+						str = s
+					} else {
+						s = renderer.ByExtIcon(str)
+						if s != "" {
+							str = s
+						} else {
+							str = renderer.FileIcon(str)
+						}
+					}
 				}
 			}
 		} else {
@@ -249,13 +257,27 @@ func (n *Name) Enable(renderer *render.Renderer) filter.ContentOption {
 					str = renderer.Socket(str)
 					char = "="
 				} else {
-					str = renderer.ByExt(str)
+					if s := renderer.ByName(str); s != "" {
+						str = s
+					} else {
+						s = renderer.ByExt(str)
+						if s != "" {
+							str = s
+						} else {
+							str = renderer.File(str)
+						}
+					}
 				}
 			}
 		}
 
+		exe := util.IsExecutableMode(mode) && !util.IsSymLinkMode(mode) && !info.IsDir() && mode&os.ModeNamedPipe == 0 && mode&os.ModeSocket == 0
+		if exe {
+			str = strings.Replace(str, name, renderer.Executable(name), 1)
+		}
+
 		if n.classify {
-			if char == "" && (!n.fileType) && util.IsExecutableMode(mode) && mode&os.ModeSymlink == 0 {
+			if char == "" && (!n.fileType) && exe {
 				str += "*"
 			} else {
 				str += char

@@ -1,6 +1,9 @@
 package shell
 
-import _ "embed"
+import (
+	"bytes"
+	_ "embed"
+)
 
 //go:embed g.ps1
 var PSContent []byte
@@ -16,3 +19,12 @@ var FISHContent []byte
 
 //go:embed g.nu
 var NUContent []byte
+
+func init() {
+	// replace os newline with unix newline
+	PSContent = bytes.ReplaceAll(PSContent, []byte("\r\n"), []byte("\n"))
+	BASHContent = bytes.ReplaceAll(BASHContent, []byte("\r\n"), []byte("\n"))
+	ZSHContent = bytes.ReplaceAll(ZSHContent, []byte("\r\n"), []byte("\n"))
+	FISHContent = bytes.ReplaceAll(FISHContent, []byte("\r\n"), []byte("\n"))
+	NUContent = bytes.ReplaceAll(NUContent, []byte("\r\n"), []byte("\n"))
+}

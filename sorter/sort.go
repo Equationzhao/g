@@ -6,264 +6,308 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/Equationzhao/g/filter"
+	"github.com/Equationzhao/g/filter/content"
+	"github.com/Equationzhao/g/item"
 	"github.com/Equationzhao/g/osbased"
 	"github.com/Equationzhao/g/util"
+	"github.com/Equationzhao/g/util/cmp"
 	mt "github.com/gabriel-vasile/mimetype"
 )
 
+// ByNone
+// Deprecated
+//
 //goland:noinspection GoUnusedParameter
-func ByNone(a, b os.FileInfo) bool {
-	return false
+func ByNone(a, b *item.FileInfo) int {
+	return 0
 }
 
-func ByNameDescend(a, b os.FileInfo) bool {
-	return strings.ToLower(a.Name()) > strings.ToLower(b.Name())
+func ByNameDescend(a, b *item.FileInfo) int {
+	return cmp.Compare(strings.ToLower(b.Name()), strings.ToLower(a.Name()))
 }
 
-func ByNameAscend(a, b os.FileInfo) bool {
-	return strings.ToLower(a.Name()) < strings.ToLower(b.Name())
+func ByNameAscend(a, b *item.FileInfo) int {
+	return cmp.Compare(strings.ToLower(a.Name()), strings.ToLower(b.Name()))
 }
 
-func ByNameCaseSensitiveDescend(a, b os.FileInfo) bool {
-	return a.Name() > b.Name()
+func ByNameCaseSensitiveDescend(a, b *item.FileInfo) int {
+	return cmp.Compare(b.Name(), a.Name())
 }
 
-func ByNameCaseSensitiveAscend(a, b os.FileInfo) bool {
-	return a.Name() < b.Name()
+func ByNameCaseSensitiveAscend(a, b *item.FileInfo) int {
+	return cmp.Compare(a.Name(), b.Name())
 }
 
-func ByNameWithoutALeadingDotDescend(a, b os.FileInfo) bool {
-	return strings.ToLower(strings.TrimPrefix(a.Name(), ".")) > strings.ToLower(strings.TrimPrefix(b.Name(), "."))
+func ByNameWithoutALeadingDotDescend(a, b *item.FileInfo) int {
+	return cmp.Compare(
+		strings.ToLower(strings.TrimPrefix(b.Name(), ".")), strings.ToLower(strings.TrimPrefix(a.Name(), ".")),
+	)
 }
 
-func ByNameWithoutALeadingDotAscend(a, b os.FileInfo) bool {
-	return strings.ToLower(strings.TrimPrefix(a.Name(), ".")) < strings.ToLower(strings.TrimPrefix(b.Name(), "."))
+func ByNameWithoutALeadingDotAscend(a, b *item.FileInfo) int {
+	return cmp.Compare(
+		strings.ToLower(strings.TrimPrefix(a.Name(), ".")), strings.ToLower(strings.TrimPrefix(b.Name(), ".")),
+	)
 }
 
-func ByNameWithoutALeadingDotCaseSensitiveDescend(a, b os.FileInfo) bool {
-	return strings.TrimPrefix(a.Name(), ".") > strings.TrimPrefix(b.Name(), ".")
+func ByNameWithoutALeadingDotCaseSensitiveDescend(a, b *item.FileInfo) int {
+	return cmp.Compare(strings.TrimPrefix(b.Name(), "."), strings.TrimPrefix(a.Name(), "."))
 }
 
-func ByNameWithoutALeadingDotCaseSensitiveAscend(a, b os.FileInfo) bool {
-	return strings.TrimPrefix(a.Name(), ".") < strings.TrimPrefix(b.Name(), ".")
+func ByNameWithoutALeadingDotCaseSensitiveAscend(a, b *item.FileInfo) int {
+	return cmp.Compare(strings.TrimPrefix(a.Name(), "."), strings.TrimPrefix(b.Name(), "."))
 }
 
-func ByInodeDescend(a, b os.FileInfo) bool {
+func byInode(a *item.FileInfo, b *item.FileInfo) (int, int) {
 	inodeA, _ := strconv.Atoi(osbased.Inode(a))
 	inodeB, _ := strconv.Atoi(osbased.Inode(b))
-
-	return inodeA > inodeB
+	a.Cache["Inode"] = []byte(strconv.Itoa(inodeA))
+	b.Cache["Inode"] = []byte(strconv.Itoa(inodeB))
+	return inodeA, inodeB
 }
 
-func ByInodeAscend(a, b os.FileInfo) bool {
-	inodeA, _ := strconv.Atoi(osbased.Inode(a))
-	inodeB, _ := strconv.Atoi(osbased.Inode(b))
-
-	return inodeA < inodeB
+func ByInodeDescend(a, b *item.FileInfo) int {
+	inodeA, inodeB := byInode(a, b)
+	return cmp.Compare(inodeB, inodeA)
 }
 
-func BySizeDescend(a, b os.FileInfo) bool {
-	return a.Size() > b.Size()
+func ByInodeAscend(a, b *item.FileInfo) int {
+	inodeA, inodeB := byInode(a, b)
+	return cmp.Compare(inodeA, inodeB)
 }
 
-func BySizeAscend(a, b os.FileInfo) bool {
-	return a.Size() < b.Size()
+func BySizeDescend(a, b *item.FileInfo) int {
+	return cmp.Compare(b.Size(), a.Size())
+}
+
+func BySizeAscend(a, b *item.FileInfo) int {
+	return cmp.Compare(a.Size(), b.Size())
 }
 
 func ByRecursiveSizeDescend(depth int) FileSortFunc {
-	return func(a, b os.FileInfo) bool {
-		return util.RecursivelySizeOf(a, depth) > util.RecursivelySizeOf(b, depth)
+	return func(a, b *item.FileInfo) int {
+		return byRecursiveSize(a, b, depth, false)
 	}
 }
 
 func ByRecursiveSizeAscend(depth int) FileSortFunc {
-	return func(a, b os.FileInfo) bool {
-		return util.RecursivelySizeOf(a, depth) < util.RecursivelySizeOf(b, depth)
-	}
-}
-
-func ByTimeDescend(timeType string) FileSortFunc {
-	switch timeType {
-	case "mod":
-		return func(a, b os.FileInfo) bool {
-			return osbased.ModTime(a).After(osbased.ModTime(b))
-		}
-	case "access":
-		return func(a, b os.FileInfo) bool {
-			return osbased.AccessTime(a).After(osbased.AccessTime(b))
-		}
-	case "create":
-		return func(a, b os.FileInfo) bool {
-			return osbased.CreateTime(a).After(osbased.CreateTime(b))
-		}
-	default:
-		panic("invalid time type")
+	return func(a, b *item.FileInfo) int {
+		return byRecursiveSize(a, b, depth, true)
 	}
 }
 
 func ByTimeAscend(timeType string) FileSortFunc {
 	switch timeType {
-	case "mod":
-		return func(a, b os.FileInfo) bool {
-			return osbased.ModTime(a).Before(osbased.ModTime(b))
+	case "mod", "modified":
+		return func(a, b *item.FileInfo) int {
+			return osbased.ModTime(b).Compare(osbased.ModTime(a))
 		}
-	case "access":
-		return func(a, b os.FileInfo) bool {
-			return osbased.AccessTime(a).Before(osbased.AccessTime(b))
+	case "access", "ac":
+		return func(a, b *item.FileInfo) int {
+			return osbased.AccessTime(b).Compare(osbased.AccessTime(a))
 		}
-	case "create":
-		return func(a, b os.FileInfo) bool {
-			return osbased.CreateTime(a).Before(osbased.CreateTime(b))
+	case "create", "cr":
+		return func(a, b *item.FileInfo) int {
+			return osbased.CreateTime(b).Compare(osbased.CreateTime(a))
 		}
 	default:
 		panic("invalid time type")
 	}
 }
 
-func ByExtensionDescend(a, b os.FileInfo) bool {
-	return filepath.Ext(a.Name()) > filepath.Ext(b.Name())
+func ByTimeDescend(timeType string) FileSortFunc {
+	switch timeType {
+	case "mod", "modified":
+		return func(a, b *item.FileInfo) int {
+			return osbased.ModTime(a).Compare(osbased.ModTime(b))
+		}
+	case "access", "ac":
+		return func(a, b *item.FileInfo) int {
+			return osbased.AccessTime(a).Compare(osbased.AccessTime(b))
+		}
+	case "create", "cr":
+		return func(a, b *item.FileInfo) int {
+			return osbased.CreateTime(a).Compare(osbased.CreateTime(b))
+		}
+	default:
+		panic("invalid time type")
+	}
 }
 
-func ByExtensionAscend(a, b os.FileInfo) bool {
-	return filepath.Ext(a.Name()) < filepath.Ext(b.Name())
+func ByExtensionDescend(a, b *item.FileInfo) int {
+	return cmp.Compare(filepath.Ext(b.Name()), filepath.Ext(a.Name()))
 }
 
-func ByExtensionCaseSensitiveDescend(a, b os.FileInfo) bool {
-	return strings.ToLower(filepath.Ext(a.Name())) > strings.ToLower(filepath.Ext(b.Name()))
+func ByExtensionAscend(a, b *item.FileInfo) int {
+	return cmp.Compare(filepath.Ext(a.Name()), filepath.Ext(b.Name()))
 }
 
-func ByExtensionCaseSensitiveAscend(a, b os.FileInfo) bool {
-	return strings.ToLower(filepath.Ext(a.Name())) < strings.ToLower(filepath.Ext(b.Name()))
+func ByExtensionCaseSensitiveDescend(a, b *item.FileInfo) int {
+	return cmp.Compare(strings.ToLower(filepath.Ext(b.Name())), strings.ToLower(filepath.Ext(a.Name())))
 }
 
-func ByGroupDescend(a, b os.FileInfo) bool {
+func ByExtensionCaseSensitiveAscend(a, b *item.FileInfo) int {
+	return cmp.Compare(strings.ToLower(filepath.Ext(a.Name())), strings.ToLower(filepath.Ext(b.Name())))
+}
+
+func ByGroupDescend(a, b *item.FileInfo) int {
 	return byGroupName(a, b, false)
 }
 
-func ByGroupAscend(a, b os.FileInfo) bool {
+func ByGroupAscend(a, b *item.FileInfo) int {
 	return byGroupName(a, b, true)
 }
 
-func ByGroupCaseSensitiveDescend(a, b os.FileInfo) bool {
+func ByGroupCaseSensitiveDescend(a, b *item.FileInfo) int {
 	return byGroupCaseSensitiveName(a, b, false)
 }
 
-func ByGroupCaseSensitiveAscend(a, b os.FileInfo) bool {
+func ByGroupCaseSensitiveAscend(a, b *item.FileInfo) int {
 	return byGroupCaseSensitiveName(a, b, true)
 }
 
-func ByOwnerDescend(a, b os.FileInfo) bool {
+func ByOwnerDescend(a, b *item.FileInfo) int {
 	return byUserName(a, b, false)
 }
 
-func ByOwnerAscend(a, b os.FileInfo) bool {
+func ByOwnerAscend(a, b *item.FileInfo) int {
 	return byUserName(a, b, true)
 }
 
-func ByOwnerCaseSensitiveDescend(a, b os.FileInfo) bool {
+func ByOwnerCaseSensitiveDescend(a, b *item.FileInfo) int {
 	return byUserCaseSensitiveName(a, b, false)
 }
 
-func ByOwnerCaseSensitiveAscend(a, b os.FileInfo) bool {
+func ByOwnerCaseSensitiveAscend(a, b *item.FileInfo) int {
 	return byUserCaseSensitiveName(a, b, true)
 }
 
-func ByNameWidthDescend(a, b os.FileInfo) bool {
+func ByNameWidthDescend(a, b *item.FileInfo) int {
 	return byNameWidth(a, b, false)
 }
 
-func ByNameWidthAscend(a, b os.FileInfo) bool {
+func ByNameWidthAscend(a, b *item.FileInfo) int {
 	return byNameWidth(a, b, true)
 }
 
-func ByMimeTypeAscend(a, b os.FileInfo) bool {
+func ByMimeTypeAscend(a, b *item.FileInfo) int {
 	return byMimeType(a, b, true)
 }
 
-func ByMimeTypeDescend(a, b os.FileInfo) bool {
+func ByMimeTypeDescend(a, b *item.FileInfo) int {
 	return byMimeType(a, b, false)
 }
 
-func byMimeType(a, b os.FileInfo, ascend bool) bool {
+func byMimeType(a, b *item.FileInfo, ascend bool) int {
 	mimeAstr, mimeBstr := getMimeName(a, b)
 	if ascend {
-		return mimeAstr < mimeBstr
+		return cmp.Compare(mimeAstr, mimeBstr)
 	}
-	return mimeBstr < mimeAstr
+	return cmp.Compare(mimeBstr, mimeAstr)
 }
 
-func getMimeName(a os.FileInfo, b os.FileInfo) (string, string) {
+const MimeTypeName = filter.MimeTypeName
+
+func getMimeName(a *item.FileInfo, b *item.FileInfo) (string, string) {
 	mimeAstr, mimeBstr := "", ""
-	mimeA, err := mt.DetectFile(a.Name())
-	if err != nil {
-		if a.IsDir() {
-			mimeAstr = "directory"
-		} else if a.Mode()&os.ModeSymlink != 0 {
-			mimeAstr = "symlink"
-		} else if a.Mode()&os.ModeNamedPipe != 0 {
-			mimeAstr = "named_pipe"
-		} else if a.Mode()&os.ModeSocket != 0 {
-			mimeAstr = "socket"
-		}
+	if c, ok := a.Cache[MimeTypeName]; ok {
+		mimeAstr = string(c)
 	} else {
-		mimeAstr = mimeA.String()
-	}
-	mimeB, err := mt.DetectFile(b.Name())
-	if err != nil {
-		if b.IsDir() {
-			mimeBstr = "directory"
-		} else if b.Mode()&os.ModeSymlink != 0 {
-			mimeBstr = "symlink"
-		} else if b.Mode()&os.ModeNamedPipe != 0 {
-			mimeBstr = "named_pipe"
-		} else if b.Mode()&os.ModeSocket != 0 {
-			mimeBstr = "socket"
+		mimeA, err := mt.DetectFile(a.FullPath)
+		if err != nil {
+			if a.IsDir() {
+				mimeAstr = "directory"
+			} else if a.Mode()&os.ModeSymlink != 0 {
+				mimeAstr = "symlink"
+			} else if a.Mode()&os.ModeNamedPipe != 0 {
+				mimeAstr = "named_pipe"
+			} else if a.Mode()&os.ModeSocket != 0 {
+				mimeAstr = "socket"
+			}
+		} else {
+			mimeAstr = mimeA.String()
 		}
-	} else {
-		mimeBstr = mimeB.String()
+		a.Cache[MimeTypeName] = []byte(mimeAstr)
 	}
+
+	if c, ok := b.Cache[MimeTypeName]; ok {
+		mimeBstr = string(c)
+	} else {
+		mimeB, err := mt.DetectFile(b.FullPath)
+		if err != nil {
+			if b.IsDir() {
+				mimeBstr = "directory"
+			} else if b.Mode()&os.ModeSymlink != 0 {
+				mimeBstr = "symlink"
+			} else if b.Mode()&os.ModeNamedPipe != 0 {
+				mimeBstr = "named_pipe"
+			} else if b.Mode()&os.ModeSocket != 0 {
+				mimeBstr = "socket"
+			}
+		} else {
+			mimeBstr = mimeB.String()
+		}
+		b.Cache[MimeTypeName] = []byte(mimeBstr)
+	}
+
 	return mimeAstr, mimeBstr
 }
 
-func ByMimeTypeParentAscend(a, b os.FileInfo) bool {
+func ByMimeTypeParentAscend(a, b *item.FileInfo) int {
 	return byMimeTypeParent(a, b, true)
 }
 
-func ByMimeTypeParentDescend(a, b os.FileInfo) bool {
+func ByMimeTypeParentDescend(a, b *item.FileInfo) int {
 	return byMimeTypeParent(a, b, false)
 }
 
-func byMimeTypeParent(a, b os.FileInfo, ascend bool) bool {
+func byMimeTypeParent(a, b *item.FileInfo, ascend bool) int {
 	mimeAstr, mimeBstr := getMimeName(a, b)
 	if ascend {
-		return strings.SplitN(mimeAstr, "/", 2)[0] < strings.SplitN(mimeBstr, "/", 2)[0]
-	} else {
-		return strings.SplitN(mimeAstr, "/", 2)[0] > strings.SplitN(mimeBstr, "/", 2)[0]
+		return cmp.Compare(strings.SplitN(mimeAstr, "/", 2)[0], strings.SplitN(mimeBstr, "/", 2)[0])
 	}
+	return cmp.Compare(strings.SplitN(mimeBstr, "/", 2)[0], strings.SplitN(mimeAstr, "/", 2)[0])
 }
 
-func dirFirst(a, b os.FileInfo) bool {
+const RecursiveSizeName = content.RecursiveSizeName
+
+func byRecursiveSize(a, b *item.FileInfo, depth int, ascend bool) int {
+	sa, sb := util.RecursivelySizeOf(a, depth), util.RecursivelySizeOf(b, depth)
+	a.Cache[RecursiveSizeName] = []byte(strconv.FormatInt(sa, 10))
+	b.Cache[RecursiveSizeName] = []byte(strconv.FormatInt(sb, 10))
+	if ascend {
+		return int(sa - sb)
+	}
+	return int(sb - sa)
+}
+
+func dirFirst(a, b *item.FileInfo) int {
 	hdA := isHiddenDir(a)
 	hdB := isHiddenDir(b)
-	if hdA != hdB {
-		// hidden dir comes first
-		return hdA
+	if hdA && !hdB { // a is hidden dir, b is not
+		return -1
+	}
+	if !hdA && hdB { // a is not hidden dir, b is hidden dir
+		return 1
 	}
 	// same hidden dir status
 	dA := a.IsDir()
 	dB := b.IsDir()
-	if dA != dB {
-		// dir comes first
-		return dA
+	if dA && !dB { // a is dir, b is not
+		return -1
 	}
-	return false
+	if !dA && dB { // a is not dir, b is dir
+		return 1
+	}
+	return 0
 }
 
-func Default(a, b os.FileInfo) bool {
+func Default(a, b *item.FileInfo) int {
 	return compareFileInfo(a, b)
 }
 
-type FileSortFunc = func(a, b os.FileInfo) bool
+type FileSortFunc = func(a, b *item.FileInfo) int
 
 type Sorter struct {
 	reverse  bool
@@ -325,61 +369,59 @@ func (s *Sorter) AddOption(option ...FileSortFunc) {
 }
 
 func (s *Sorter) Build() FileSortFunc {
-	return func(a, b os.FileInfo) bool {
-		result := false
+	return func(a, b *item.FileInfo) int {
+		result := 0
 		for _, sortFunc := range s.option {
 			if s.dirFirst {
-				if dirFirst(a, b) {
-					result = true
-					break
-				}
-				if dirFirst(b, a) {
-					result = false
+				result = dirFirst(a, b)
+				if result != 0 {
 					break
 				}
 			}
-			if sortFunc(a, b) {
-				result = true
-				break
-			}
-			if sortFunc(b, a) {
-				result = false
+			result = sortFunc(a, b)
+			if result != 0 {
 				break
 			}
 		}
 
 		if s.reverse {
-			return !result
+			return -result
 		}
 		return result
 	}
 }
 
-func isHidden(info os.FileInfo) bool {
+func isHidden(info *item.FileInfo) bool {
 	return strings.HasPrefix(info.Name(), ".")
 }
 
-func isLink(info os.FileInfo) bool {
+func isLink(info *item.FileInfo) bool {
 	return info.Mode()&os.ModeSymlink != 0
 }
 
-func isHiddenDir(info os.FileInfo) bool {
+func isHiddenDir(info *item.FileInfo) bool {
 	return isHidden(info) && info.IsDir()
 }
 
-func compareFileInfo(a, b os.FileInfo) bool {
+func compareFileInfo(a, b *item.FileInfo) int {
 	hdA := isHiddenDir(a)
 	hdB := isHiddenDir(b)
-	if hdA != hdB {
-		// hidden dir comes first
-		return hdA
+	// hidden dir comes first
+	if hdA && !hdB {
+		return -1
+	}
+	if !hdA && hdB {
+		return 1
 	}
 	// same hidden dir status
 	dA := a.IsDir()
 	dB := b.IsDir()
-	if dA != dB {
-		// dir comes first
-		return dA
+	// dir comes first
+	if dA && !dB {
+		return -1
+	}
+	if !dA && dB {
+		return 1
 	}
 	// same dir status
 	lA := isLink(a)
@@ -387,50 +429,51 @@ func compareFileInfo(a, b os.FileInfo) bool {
 	switch {
 	case lA && lB:
 		// both are links, compare name
-		return a.Name() < b.Name()
+		// a<b
+		return cmp.Compare(a.Name(), b.Name())
 	case lA:
 		// a is link, b is not link, b comes first
-		return false
+		return 1
 	case lB:
 		// a is not link, b is link, a comes first
-		return true
+		return -1
 	default:
 		// neither are links, compare name
-		return a.Name() < b.Name()
+		return cmp.Compare(a.Name(), b.Name())
 	}
 }
 
-func byGroupName(a, b os.FileInfo, Ascend bool) bool {
+func byGroupName(a, b *item.FileInfo, Ascend bool) int {
 	if Ascend {
-		return strings.ToLower(osbased.Group(a)) < strings.ToLower(osbased.Group(b))
+		return cmp.Compare(strings.ToLower(osbased.Group(a)), strings.ToLower(osbased.Group(b)))
 	}
-	return strings.ToLower(osbased.Group(a)) > strings.ToLower(osbased.Group(b))
+	return cmp.Compare(strings.ToLower(osbased.Group(b)), strings.ToLower(osbased.Group(a)))
 }
 
-func byUserName(a, b os.FileInfo, Ascend bool) bool {
+func byUserName(a, b *item.FileInfo, Ascend bool) int {
 	if Ascend {
-		return strings.ToLower(osbased.Owner(a)) < strings.ToLower(osbased.Owner(b))
+		return cmp.Compare(strings.ToLower(osbased.Owner(a)), strings.ToLower(osbased.Owner(b)))
 	}
-	return strings.ToLower(osbased.Owner(a)) > strings.ToLower(osbased.Owner(b))
+	return cmp.Compare(strings.ToLower(osbased.Owner(b)), strings.ToLower(osbased.Owner(a)))
 }
 
-func byGroupCaseSensitiveName(a, b os.FileInfo, Ascend bool) bool {
+func byGroupCaseSensitiveName(a, b *item.FileInfo, Ascend bool) int {
 	if Ascend {
-		return osbased.Group(a) < osbased.Group(b)
+		return cmp.Compare(osbased.Group(a), osbased.Group(b))
 	}
-	return osbased.Group(a) > osbased.Group(b)
+	return cmp.Compare(osbased.Group(b), osbased.Group(a))
 }
 
-func byUserCaseSensitiveName(a, b os.FileInfo, Ascend bool) bool {
+func byUserCaseSensitiveName(a, b *item.FileInfo, Ascend bool) int {
 	if Ascend {
-		return osbased.Owner(a) < osbased.Owner(b)
+		return cmp.Compare(osbased.Owner(a), osbased.Owner(b))
 	}
-	return osbased.Owner(a) > osbased.Owner(b)
+	return cmp.Compare(osbased.Owner(b), osbased.Owner(a))
 }
 
-func byNameWidth(a, b os.FileInfo, Ascend bool) bool {
+func byNameWidth(a, b *item.FileInfo, Ascend bool) int {
 	if Ascend {
-		return len(a.Name()) < len(b.Name())
+		return len(a.Name()) - len(b.Name())
 	}
-	return len(a.Name()) > len(b.Name())
+	return len(b.Name()) - len(a.Name())
 }

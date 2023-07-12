@@ -13,4 +13,4 @@ end
 
 #  add to fish config:
 #  g --init fish | source
-# `source ~/.config/fish/config.fish`
+# 'source ~/.config/fish/config.fish'

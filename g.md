@@ -41,7 +41,7 @@ g
 [--header|--title]
 [--html|--HTML]
 [--hyperlink]=[value]
-[--icon|--si|--icons]
+[--icon|--icons]
 [--init]=[value]
 [--inode|-i]
 [--lh|--human-readable]
@@ -61,17 +61,17 @@ g
 [--octal-perm|--octal-permission]
 [--only-mime]=[value]
 [--owner|--author]
+[--perm|--permission]
 [--rebuild-index|--ri|--remove-all]
+[--recursive-size]
 [--relative-to]=[value]
 [--remove-current-path|--rcp|--rc|--rmc]
 [--remove-index|--rm]=[value]
 [--remove-invalid-path|--rip]
 [--rt|--relative-time]
 [--show-only-hidden|--hidden]
-[--show-perm|--sp|--permission|--perm]
-[--show-recursive-size|--recursive-size]
-[--show-size|--ss|--size]
 [--size-unit|--su|--block-size]=[value]
+[--size]
 [--sort-by-mime-descend]
 [--sort-by-mime-parent-descend]
 [--sort-by-mime-parent]
@@ -102,6 +102,7 @@ g
 [-Q|--quote-name]
 [-R|--recurse]
 [-S|--sort-by-size|--sizesort]
+[-T|--tree]
 [-U|--nosort|--no-sort]
 [-X|--sort-by-ext]
 [-a|--sh|--show-hidden]
@@ -143,7 +144,7 @@ g [options] [path]
 **--checksum-algorithm, --ca**="": show checksum of file with algorithm: 
 	md5, sha1, sha224, sha256, sha384, sha512, crc32 (default: sha1)
 
-**--classic**: Enable classic mode (no colours or icons)
+**--classic**: Enable classic mode (no colors or icons)
 
 **--color**="": when to use terminal colors [always|auto|never][basic|256|24bit] (default: auto)
 
@@ -151,7 +152,7 @@ g [options] [path]
 
 **--create, --cr, --created**: created time
 
-**--depth, --level**="": limit recursive depth, negative -> infinity (default: infinity)
+**--depth, --level**="": limit recursive/tree depth, negative -> infinity (default: infinity)
 
 **--dereference**: dereference symbolic links
 
@@ -169,7 +170,7 @@ g [options] [path]
 **--footer**: add a footer row
 
 **--format**="": across  -x,  commas  -m, horizontal -x, long -l, single-column -1,
-	verbose -l, vertical -C, table -tb, HTML -html, Markdown -md, CSV -csv, json -j (default: C)
+	verbose -l, vertical -C, table -tb, HTML -html, Markdown -md, CSV -csv, json -j, tree -T (default: C)
 
 **--fp, --full-path, --fullpath**: show full path
 
@@ -193,9 +194,9 @@ g [options] [path]
 
 **--hyperlink**="": Attach hyperlink to filenames [auto|always|never] (default: auto)
 
-**--icon, --si, --icons**: show icon
+**--icon, --icons**: show icon
 
-**--init**="": init the config file, default path is ~/.config/g/config.yaml
+**--init**="": show the init script for shell, support zsh, bash, fish, powershell, nushell
 
 **--inode, -i**: show inode[linux/darwin only]
 
@@ -219,7 +220,7 @@ g [options] [path]
 
 **--no-ext, --noext**="": show file which doesn't have target ext
 
-**--no-icon, --noicon, --ni**: disable icon(always override show-icon)
+**--no-icon, --noicon, --ni**: disable icon(always override --icon)
 
 **--no-path-transform, --np**: By default, .../a/b/c will be transformed to ../../a/b/c, and ~ will be replaced by homedir, 
 	using this flag to disable this feature
@@ -234,7 +235,11 @@ g [options] [path]
 
 **--owner, --author**: show owner
 
+**--perm, --permission**: show permission
+
 **--rebuild-index, --ri, --remove-all**: rebuild index
+
+**--recursive-size**: show recursive size of dir, only work with --size
 
 **--relative-to**="": show relative path to the given path (default: current directory)
 
@@ -248,11 +253,7 @@ g [options] [path]
 
 **--show-only-hidden, --hidden**: show only hidden files(overridden by --show-hidden/-a/-A)
 
-**--show-perm, --sp, --permission, --perm**: show permission
-
-**--show-recursive-size, --recursive-size**: show recursive size of dir, only work with --show-size
-
-**--show-size, --ss, --size**: show file/dir size
+**--size**: show file/dir size
 
 **--size-unit, --su, --block-size**="": size unit:
 			bit, b, k, m, g, t, p,
@@ -262,10 +263,10 @@ g [options] [path]
 	ascending and case insensitive, 
 	field beginning with Uppercase is case sensitive,	
 	available fields: 	
-	nature(default),none(nosort),
-	name,.name(sorts by name without a leading dot),	
-	size,time,owner,group,extension,inode,width,mime. 	
-	following '-descend' to sort descending
+	   nature(default),none(nosort),
+	   name,.name(sorts by name without a leading dot),	
+	   size,time,owner,group,extension,inode,width,mime. 	
+	   following '-descend' to sort descending
 
 **--sort-by-mime**: sort by mimetype
 
@@ -327,6 +328,8 @@ g [options] [path]
 **-R, --recurse**: recurse into directories
 
 **-S, --sort-by-size, --sizesort**: sort by file size, largest first(descending)
+
+**-T, --tree**: recursively list in tree
 
 **-U, --nosort, --no-sort**: do not sort; list entries in directory order. 
 

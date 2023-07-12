@@ -28,6 +28,17 @@ func NewItemFilter(tfs ...*ItemFilterFunc) *ItemFilter {
 	return &ItemFilter{tfs: tfs}
 }
 
+func (tf *ItemFilter) Match(e *item.FileInfo) bool {
+	ok := keep
+	for _, funcPtr := range tf.tfs {
+		if !(*funcPtr)(e) {
+			ok = remove
+			break
+		}
+	}
+	return ok
+}
+
 func (tf *ItemFilter) Filter(e ...*item.FileInfo) (res []*item.FileInfo) {
 	for _, entry := range e {
 		ok := keep
@@ -188,6 +199,8 @@ func isOrIsSonOf(a, b string) bool {
 	return false
 }
 
+const MimeTypeName = "Mime-type"
+
 func MimeTypeOnly(fileTypes ...string) ItemFilterFunc {
 	return func(e *item.FileInfo) bool {
 		if e.IsDir() {
@@ -208,6 +221,7 @@ func MimeTypeOnly(fileTypes ...string) ItemFilterFunc {
 				s = strings.SplitN(s, ";", 2)[0]
 			}
 			if isOrIsSonOf(s, fileTypes[i]) {
+				e.Cache[MimeTypeName] = []byte(s)
 				return keep
 			}
 		}

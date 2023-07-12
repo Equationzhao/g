@@ -3,7 +3,7 @@
 package theme
 
 func init() {
-	DefaultTheme["sys"] = Style{
+	DefaultAll.Name["sys"] = Style{
 		Icon:  "\ue712",
 		Color: BrightBlue,
 	}

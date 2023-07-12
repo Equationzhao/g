@@ -1,27 +1,27 @@
 package filter
 
 import (
-	"os"
 	"strings"
 	"sync"
 
 	"github.com/Equationzhao/g/display"
 	"github.com/Equationzhao/g/item"
 	"github.com/Equationzhao/g/slices"
+	"github.com/panjf2000/ants/v2"
 )
 
 type ContentFilter struct {
 	noOutputOptions []NoOutputOption
 	options         []ContentOption
-	sortFunc        func(a, b os.FileInfo) bool
+	sortFunc        func(a, b *item.FileInfo) int
 	LimitN          uint // <=0 means no limit
 }
 
-func (cf *ContentFilter) SortFunc() func(a, b os.FileInfo) bool {
+func (cf *ContentFilter) SortFunc() func(a, b *item.FileInfo) int {
 	return cf.sortFunc
 }
 
-func (cf *ContentFilter) SetSortFunc(sortFunc func(a, b os.FileInfo) bool) {
+func (cf *ContentFilter) SetSortFunc(sortFunc func(a, b *item.FileInfo) int) {
 	cf.sortFunc = sortFunc
 }
 
@@ -90,17 +90,11 @@ func NewContentFilter(options ...ContentFilterOption) *ContentFilter {
 }
 
 func (cf *ContentFilter) GetDisplayItems(e *[]*item.FileInfo) {
-	slices.SortFunc(
-		*e, func(a, b *item.FileInfo) int {
-			if cf.sortFunc != nil {
-				if cf.sortFunc(a, b) {
-					return -1
-				}
-				return 1
-			}
-			return 0
-		},
-	)
+	if cf.sortFunc != nil {
+		slices.SortFunc(
+			*e, cf.sortFunc,
+		)
+	}
 
 	// limit number of entries
 	// 0 means no limit
@@ -111,19 +105,25 @@ func (cf *ContentFilter) GetDisplayItems(e *[]*item.FileInfo) {
 	wg := sync.WaitGroup{}
 	wg.Add(len(*e))
 
-	for i, entry := range *e {
-		go func(entry *item.FileInfo, i int) {
-			for j, option := range cf.options {
-				stringContent, funcName := option(entry)
-				content := display.ItemContent{Content: display.StringContent(stringContent), No: j}
-				entry.Set(funcName, &content)
-			}
+	for _, entry := range *e {
+		entry := entry
+		err := ants.Submit(
+			func() {
+				for j, option := range cf.options {
+					stringContent, funcName := option(entry)
+					content := display.ItemContent{Content: display.StringContent(stringContent), No: j}
+					entry.Set(funcName, &content)
+				}
 
-			for _, option := range cf.noOutputOptions {
-				option(entry)
-			}
-			wg.Done()
-		}(entry, i)
+				for _, option := range cf.noOutputOptions {
+					option(entry)
+				}
+				wg.Done()
+			},
+		)
+		if err != nil {
+			panic(err)
+		}
 	}
 	wg.Wait()
 }

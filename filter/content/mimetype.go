@@ -21,7 +21,7 @@ func NewMimeFileTypeEnabler() *MimeFileTypeEnabler {
 }
 
 const (
-	MimeTypeName       = "Mime-type"
+	MimeTypeName       = filter.MimeTypeName
 	ParentMimeTypeName = "Parent-Mime-type"
 )
 
@@ -32,15 +32,30 @@ func (e *MimeFileTypeEnabler) Enable() filter.ContentOption {
 		if e.ParentOnly {
 			returnName = ParentMimeTypeName
 		}
-		if info.IsDir() {
-			tn = "directory"
-		} else if util.IsSymLink(info) {
-			tn = "symlink"
-		} else if info.Mode()&os.ModeNamedPipe != 0 {
-			tn = "named_pipe"
-		} else if info.Mode()&os.ModeSocket != 0 {
-			tn = "socket"
+		if c, ok := info.Cache[MimeTypeName]; ok {
+			tn = string(c)
 		} else {
+			if info.IsDir() {
+				tn = "directory"
+				return tn, returnName
+			}
+			if util.IsSymLink(info) {
+				tn = "symlink"
+				return tn, returnName
+			}
+			if info.Mode()&os.ModeNamedPipe != 0 {
+				tn = "named_pipe"
+				return tn, returnName
+			}
+			if info.Mode()&os.ModeSocket != 0 {
+				tn = "socket"
+				return tn, returnName
+			}
+			if m, ok := info.Cache[MimeTypeName]; ok {
+				info.Cache[Charset] = m
+				return string(m), returnName
+			}
+
 			file, err := os.Open(info.FullPath)
 			defer file.Close()
 			if err != nil {
@@ -51,20 +66,20 @@ func (e *MimeFileTypeEnabler) Enable() filter.ContentOption {
 				return err.Error(), returnName
 			}
 			tn = mtype.String()
-
-			if e.ParentOnly {
-				tn = strings.SplitN(tn, "/", 2)[0]
-			}
-
-			if strings.Contains(tn, ";") {
-				// remove charset
-				s := strings.SplitN(tn, ";", 2)
-				tn = s[0]
-				charset := strings.SplitN(s[1], "=", 2)[1]
-				info.Cache[charsetIdentifier] = []byte(charset)
-			}
-
 		}
+
+		if e.ParentOnly {
+			tn = strings.SplitN(tn, "/", 2)[0]
+		}
+
+		if strings.Contains(tn, ";") {
+			// remove charset
+			s := strings.SplitN(tn, ";", 2)
+			tn = s[0]
+			charset := strings.SplitN(s[1], "=", 2)[1]
+			info.Cache[Charset] = []byte(charset)
+		}
+
 		return tn, returnName
 	}
 }

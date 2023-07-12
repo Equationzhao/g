@@ -1,0 +1,1211 @@
+{
+    "info": {
+        "-": {
+            "color": "white"
+        },
+        "inode": {
+            "color": "purple"
+        },
+        "reset": {
+            "color": "reset"
+        },
+        "time": {
+            "color": "blue"
+        }
+    },
+    "permission": {
+        "-": {
+            "color": "white"
+        },
+        "D": {
+            "color": "cyan"
+        },
+        "b": {
+            "color": "yellow"
+        },
+        "c": {
+            "color": "yellow"
+        },
+        "d": {
+            "color": "blue"
+        },
+        "l": {
+            "color": "purple"
+        },
+        "octal": {
+            "color": "[208]@256"
+        },
+        "p": {
+            "color": "yellow"
+        },
+        "r": {
+            "color": "yellow"
+        },
+        "s": {
+            "color": "yellow"
+        },
+        "w": {
+            "color": "red"
+        },
+        "x": {
+            "color": "green"
+        }
+    },
+    "size": {
+        "-": {
+            "color": "white"
+        },
+        "B": {
+            "color": "[20,230,100]@rgb"
+        },
+        "BB": {
+            "color": "[20,90,100]@rgb"
+        },
+        "EB": {
+            "color": "[20,125,100]@rgb"
+        },
+        "GB": {
+            "color": "[20,170,100]@rgb"
+        },
+        "KB": {
+            "color": "[20,207,100]@rgb"
+        },
+        "MB": {
+            "color": "[20,188,100]@rgb"
+        },
+        "NB": {
+            "color": "[20,70,100]@rgb"
+        },
+        "PB": {
+            "color": "[20,138,100]@rgb"
+        },
+        "TB": {
+            "color": "[20,153,100]@rgb"
+        },
+        "YB": {
+            "color": "[20,100,100]@rgb"
+        },
+        "ZB": {
+            "color": "[20,112,100]@rgb"
+        },
+        "bit": {
+            "color": "[20,255,100]@rgb"
+        },
+        "block": {
+            "color": "[20,255,100]@rgb"
+        }
+    },
+    "user": {
+        "owner": {
+            "color": "yellow"
+        },
+        "root": {
+            "color": "red"
+        }
+    },
+    "group": {
+        "group": {
+            "color": "yellow"
+        },
+        "root": {
+            "color": "red"
+        }
+    },
+    "symlink": {
+        "symlink": {
+            "color": "purple",
+            "icon": ""
+        },
+        "symlink_arrow": {
+            "color": "BrightWhite",
+            "icon": " =\u003e "
+        },
+        "symlink_broken_path": {
+            "color": "red",
+            "underline": true
+        },
+        "symlink_path": {
+            "color": "green"
+        }
+    },
+    "git": {
+        "git_added": {
+            "color": "green"
+        },
+        "git_copied": {
+            "color": "purple"
+        },
+        "git_deleted": {
+            "color": "red"
+        },
+        "git_ignored": {
+            "color": "BrightPed"
+        },
+        "git_modified": {
+            "color": "yellow"
+        },
+        "git_renamed": {
+            "color": "blue"
+        },
+        "git_type_changed": {
+            "color": "yellow"
+        },
+        "git_unmodified": {
+            "color": "BrightBlack"
+        },
+        "git_untracked": {
+            "color": "BrightBlack"
+        },
+        "git_updated_but_unmerged": {
+            "color": "BrightYellow"
+        }
+    },
+    "name": {
+        ".azure": {
+            "color": "white",
+            "icon": ""
+        },
+        ".dotnet": {
+            "color": "white",
+            "icon": ""
+        },
+        ".ds_store": {
+            "color": "BrightBlack",
+            "icon": ""
+        },
+        ".git": {
+            "color": "white",
+            "icon": ""
+        },
+        ".gitconfig": {
+            "color": "white",
+            "icon": ""
+        },
+        ".github": {
+            "color": "white",
+            "icon": ""
+        },
+        ".gitignore": {
+            "color": "BrightBlack",
+            "icon": ""
+        },
+        ".history": {
+            "color": "BrightBlack",
+            "icon": ""
+        },
+        ".idea": {
+            "color": "white",
+            "icon": ""
+        },
+        ".srcinfo": {
+            "color": "BrightYellow",
+            "icon": ""
+        },
+        ".ssh": {
+            "color": "white",
+            "icon": ""
+        },
+        ".vscode": {
+            "color": "white",
+            "icon": ""
+        },
+        ".wakatime": {
+            "color": "white",
+            "icon": ""
+        },
+        "android": {
+            "color": "white",
+            "icon": ""
+        },
+        "apple": {
+            "color": "BrightBlack",
+            "icon": ""
+        },
+        "applications": {
+            "color": "green",
+            "icon": ""
+        },
+        "audio": {
+            "color": "white",
+            "icon": ""
+        },
+        "bin": {
+            "color": "green",
+            "icon": ""
+        },
+        "boot": {
+            "color": "white",
+            "icon": ""
+        },
+        "cache": {
+            "color": "white",
+            "icon": ""
+        },
+        "cargo.lock": {
+            "color": "[227]@256",
+            "icon": ""
+        },
+        "cargo.toml": {
+            "color": "[158]@256",
+            "icon": ""
+        },
+        "cmakeLists.txt": {
+            "color": "[158]@256",
+            "icon": ""
+        },
+        "config": {
+            "color": "white",
+            "icon": ""
+        },
+        "contacts": {
+            "color": "white",
+            "icon": ""
+        },
+        "desktop": {
+            "color": "white",
+            "icon": ""
+        },
+        "dockerfile": {
+            "color": "yellow",
+            "icon": ""
+        },
+        "documents": {
+            "color": "white",
+            "icon": ""
+        },
+        "downloads": {
+            "color": "white",
+            "icon": ""
+        },
+        "favorites": {
+            "color": "red",
+            "icon": ""
+        },
+        "font": {
+            "color": "white",
+            "icon": ""
+        },
+        "fonts": {
+            "color": "white",
+            "icon": ""
+        },
+        "google": {
+            "color": "white",
+            "icon": ""
+        },
+        "history": {
+            "color": "BrightBlack",
+            "icon": ""
+        },
+        "home": {
+            "color": "white",
+            "icon": ""
+        },
+        "include": {
+            "color": "white",
+            "icon": ""
+        },
+        "justfile": {
+            "color": "[158]@256",
+            "icon": ""
+        },
+        "known_hosts": {
+            "color": "white",
+            "icon": ""
+        },
+        "lib": {
+            "color": "white",
+            "icon": ""
+        },
+        "library": {
+            "color": "white",
+            "icon": ""
+        },
+        "license": {
+            "color": "[214]@256",
+            "icon": ""
+        },
+        "links": {
+            "color": "white",
+            "icon": ""
+        },
+        "makefile": {
+            "color": "[158]@256",
+            "icon": ""
+        },
+        "microsoft": {
+            "color": "white",
+            "icon": ""
+        },
+        "movies": {
+            "color": "white",
+            "icon": ""
+        },
+        "music": {
+            "color": "white",
+            "icon": ""
+        },
+        "node_modules": {
+            "color": "white",
+            "icon": ""
+        },
+        "onedrive": {
+            "color": "blue",
+            "icon": ""
+        },
+        "onedrivetemp": {
+            "color": "blue",
+            "icon": ""
+        },
+        "pictures": {
+            "color": "white",
+            "icon": ""
+        },
+        "pkgbuild": {
+            "color": "BrightYellow",
+            "icon": ""
+        },
+        "readme": {
+            "color": "BrightYellow",
+            "icon": "",
+            "underline": true,
+            "bold": true
+        },
+        "readme.md": {
+            "color": "BrightYellow",
+            "icon": "",
+            "underline": true,
+            "bold": true
+        },
+        "recovery": {
+            "color": "BrightBlack",
+            "icon": ""
+        },
+        "repo": {
+            "color": "white",
+            "icon": ""
+        },
+        "saved games": {
+            "color": "red",
+            "icon": ""
+        },
+        "sdk": {
+            "color": "white",
+            "icon": ""
+        },
+        "searches": {
+            "color": "white",
+            "icon": ""
+        },
+        "share": {
+            "color": "white",
+            "icon": ""
+        },
+        "shell": {
+            "color": "BrightPreen",
+            "icon": ""
+        },
+        "src": {
+            "color": "white",
+            "icon": ""
+        },
+        "trash": {
+            "color": "BrightBlack",
+            "icon": ""
+        },
+        "users": {
+            "color": "white",
+            "icon": ""
+        },
+        "videos": {
+            "color": "white",
+            "icon": ""
+        }
+    },
+    "special": {
+        "dir": {
+            "color": "BrightBlue",
+            "icon": ""
+        },
+        "exe": {
+            "color": "green",
+            "icon": ""
+        },
+        "file": {
+            "color": "white",
+            "icon": ""
+        },
+        "link": {
+            "color": "purple"
+        },
+        "pipe": {
+            "color": "cyan",
+            "icon": ""
+        },
+        "socket": {
+            "color": "cyan",
+            "icon": ""
+        }
+    },
+    "ext": {
+        "7z": {
+            "color": "red",
+            "icon": ""
+        },
+        "aac": {
+            "color": "[199]@256",
+            "icon": ""
+        },
+        "accdb": {
+            "color": "[195]@256",
+            "icon": ""
+        },
+        "ai": {
+            "color": "cyan",
+            "icon": ""
+        },
+        "alac": {
+            "color": "[199]@256",
+            "icon": ""
+        },
+        "ape": {
+            "color": "[199]@256",
+            "icon": ""
+        },
+        "apk": {
+            "color": "green",
+            "icon": ""
+        },
+        "app": {
+            "icon": ""
+        },
+        "asm": {
+            "color": "[158]@256",
+            "icon": "﬙"
+        },
+        "atom": {
+            "color": "[158]@256",
+            "icon": ""
+        },
+        "avi": {
+            "color": "[200]@256",
+            "icon": ""
+        },
+        "avif": {
+            "color": "BrightPurple",
+            "icon": ""
+        },
+        "azw": {
+            "color": "cyan",
+            "icon": ""
+        },
+        "azw3": {
+            "color": "cyan",
+            "icon": ""
+        },
+        "bash": {
+            "color": "BrightPreen",
+            "icon": ""
+        },
+        "bash_history": {
+            "color": "BrightPreen",
+            "icon": ""
+        },
+        "bash_profile": {
+            "color": "BrightPreen",
+            "icon": ""
+        },
+        "bashrc": {
+            "color": "BrightPreen",
+            "icon": ""
+        },
+        "bat": {
+            "color": "BrightPreen",
+            "icon": ""
+        },
+        "bmp": {
+            "color": "BrightPurple",
+            "icon": ""
+        },
+        "c": {
+            "color": "[158]@256",
+            "icon": ""
+        },
+        "c++": {
+            "color": "[158]@256",
+            "icon": ""
+        },
+        "cargo": {
+            "color": "[158]@256",
+            "icon": ""
+        },
+        "cc": {
+            "color": "[158]@256",
+            "icon": ""
+        },
+        "cer": {
+            "color": "[214]@256",
+            "icon": ""
+        },
+        "cfg": {
+            "color": "white",
+            "icon": ""
+        },
+        "cmake": {
+            "color": "[158]@256",
+            "icon": ""
+        },
+        "code-workspace": {
+            "color": "[158]@256",
+            "icon": ""
+        },
+        "coffee": {
+            "color": "[158]@256",
+            "icon": ""
+        },
+        "conf": {
+            "color": "white",
+            "icon": ""
+        },
+        "config": {
+            "color": "white",
+            "icon": ""
+        },
+        "cpp": {
+            "color": "[158]@256",
+            "icon": ""
+        },
+        "crt": {
+            "color": "[214]@256",
+            "icon": ""
+        },
+        "cs": {
+            "color": "[158]@256",
+            "icon": "󰌛"
+        },
+        "csh": {
+            "color": "BrightPreen",
+            "icon": ""
+        },
+        "cson": {
+            "color": "white",
+            "icon": ""
+        },
+        "css": {
+            "color": "[158]@256",
+            "icon": ""
+        },
+        "csv": {
+            "color": "[150]@256",
+            "icon": ""
+        },
+        "cxx": {
+            "color": "[158]@256",
+            "icon": ""
+        },
+        "d": {
+            "color": "[158]@256",
+            "icon": ""
+        },
+        "dart": {
+            "color": "[158]@256",
+            "icon": ""
+        },
+        "db": {
+            "color": "[195]@256",
+            "icon": ""
+        },
+        "db3": {
+            "color": "[195]@256",
+            "icon": ""
+        },
+        "deb": {
+            "color": "BrightYellow",
+            "icon": ""
+        },
+        "diff": {
+            "color": "cyan",
+            "icon": ""
+        },
+        "dll": {
+            "color": "cyan",
+            "icon": ""
+        },
+        "dmg": {
+            "color": "[88]@256",
+            "icon": ""
+        },
+        "doc": {
+            "color": "[150]@256",
+            "icon": ""
+        },
+        "docker": {
+            "color": "yellow",
+            "icon": ""
+        },
+        "docm": {
+            "color": "[150]@256",
+            "icon": ""
+        },
+        "docx": {
+            "color": "[150]@256",
+            "icon": ""
+        },
+        "dot": {
+            "color": "[150]@256",
+            "icon": ""
+        },
+        "dotx": {
+            "color": "[150]@256",
+            "icon": ""
+        },
+        "dpkg": {
+            "color": "BrightYellow",
+            "icon": ""
+        },
+        "eot": {
+            "color": "cyan",
+            "icon": ""
+        },
+        "epub": {
+            "color": "cyan",
+            "icon": ""
+        },
+        "erl": {
+            "color": "[158]@256",
+            "icon": ""
+        },
+        "exe": {
+            "color": "green",
+            "icon": ""
+        },
+        "f": {
+            "color": "[158]@256",
+            "icon": ""
+        },
+        "fish": {
+            "color": "BrightPreen",
+            "icon": ""
+        },
+        "flac": {
+            "color": "[199]@256",
+            "icon": ""
+        },
+        "flv": {
+            "color": "[200]@256",
+            "icon": ""
+        },
+        "gif": {
+            "color": "BrightPurple",
+            "icon": ""
+        },
+        "go": {
+            "color": "[158]@256",
+            "icon": ""
+        },
+        "gpg": {
+            "color": "[214]@256",
+            "icon": ""
+        },
+        "groovy": {
+            "color": "[158]@256",
+            "icon": ""
+        },
+        "gv": {
+            "color": "cyan",
+            "icon": ""
+        },
+        "gvimrc": {
+            "color": "[41]@256",
+            "icon": ""
+        },
+        "gz": {
+            "color": "red",
+            "icon": ""
+        },
+        "h": {
+            "color": "[158]@256",
+            "icon": ""
+        },
+        "h++": {
+            "color": "[158]@256",
+            "icon": ""
+        },
+        "hh": {
+            "color": "[158]@256",
+            "icon": ""
+        },
+        "hpp": {
+            "color": "[158]@256",
+            "icon": ""
+        },
+        "hrl": {
+            "color": "[158]@256",
+            "icon": ""
+        },
+        "hs": {
+            "color": "[158]@256",
+            "icon": ""
+        },
+        "hson": {
+            "color": "white",
+            "icon": ""
+        },
+        "htm": {
+            "color": "[158]@256",
+            "icon": ""
+        },
+        "html": {
+            "color": "[158]@256",
+            "icon": ""
+        },
+        "http": {
+            "color": "[158]@256",
+            "icon": ""
+        },
+        "hxx": {
+            "color": "[158]@256",
+            "icon": ""
+        },
+        "id_rsa": {
+            "color": "[214]@256",
+            "icon": ""
+        },
+        "img": {
+            "color": "[88]@256",
+            "icon": ""
+        },
+        "ini": {
+            "color": "white",
+            "icon": ""
+        },
+        "ipynb": {
+            "color": "[158]@256",
+            "icon": ""
+        },
+        "iso": {
+            "color": "[88]@256",
+            "icon": ""
+        },
+        "jar": {
+            "color": "[158]@256",
+            "icon": ""
+        },
+        "java": {
+            "color": "[158]@256",
+            "icon": ""
+        },
+        "jpeg": {
+            "color": "BrightPurple",
+            "icon": ""
+        },
+        "jpg": {
+            "color": "BrightPurple",
+            "icon": ""
+        },
+        "js": {
+            "color": "[158]@256",
+            "icon": ""
+        },
+        "json": {
+            "color": "white",
+            "icon": ""
+        },
+        "json5": {
+            "color": "white",
+            "icon": ""
+        },
+        "jsx": {
+            "color": "[158]@256",
+            "icon": ""
+        },
+        "key": {
+            "color": "[214]@256",
+            "icon": ""
+        },
+        "ko": {
+            "color": "[158]@256",
+            "icon": ""
+        },
+        "ksh": {
+            "color": "BrightPreen",
+            "icon": ""
+        },
+        "kt": {
+            "color": "[158]@256",
+            "icon": ""
+        },
+        "less": {
+            "color": "[158]@256",
+            "icon": ""
+        },
+        "link": {
+            "color": "purple",
+            "icon": ""
+        },
+        "links": {
+            "color": "purple",
+            "icon": ""
+        },
+        "lnk": {
+            "color": "purple",
+            "icon": ""
+        },
+        "lock": {
+            "color": "[227]@256",
+            "icon": ""
+        },
+        "log": {
+            "color": "white",
+            "icon": ""
+        },
+        "lua": {
+            "color": "[158]@256",
+            "icon": ""
+        },
+        "m": {
+            "color": "[158]@256",
+            "icon": ""
+        },
+        "m4a": {
+            "color": "[199]@256",
+            "icon": ""
+        },
+        "m4v": {
+            "color": "[200]@256",
+            "icon": ""
+        },
+        "maintainers": {
+            "color": "cyan",
+            "icon": ""
+        },
+        "md": {
+            "color": "BrightYellow",
+            "icon": ""
+        },
+        "mid": {
+            "color": "[199]@256",
+            "icon": ""
+        },
+        "midi": {
+            "color": "[199]@256",
+            "icon": ""
+        },
+        "mkv": {
+            "color": "[200]@256",
+            "icon": ""
+        },
+        "mobi": {
+            "color": "cyan",
+            "icon": ""
+        },
+        "mov": {
+            "color": "[200]@256",
+            "icon": ""
+        },
+        "mp3": {
+            "color": "[199]@256",
+            "icon": ""
+        },
+        "mp4": {
+            "color": "[200]@256",
+            "icon": ""
+        },
+        "mpeg": {
+            "color": "[200]@256",
+            "icon": ""
+        },
+        "msi": {
+            "color": "BrightYellow",
+            "icon": ""
+        },
+        "npm": {
+            "color": "[158]@256",
+            "icon": ""
+        },
+        "nu": {
+            "color": "BrightPreen",
+            "icon": ""
+        },
+        "numbers": {
+            "color": "[150]@256",
+            "icon": ""
+        },
+        "nvim": {
+            "color": "[41]@256",
+            "icon": ""
+        },
+        "nvimrc": {
+            "color": "[41]@256",
+            "icon": ""
+        },
+        "ogg": {
+            "color": "[199]@256",
+            "icon": ""
+        },
+        "otf": {
+            "color": "cyan",
+            "icon": ""
+        },
+        "passwd": {
+            "color": "cyan",
+            "icon": ""
+        },
+        "pcx": {
+            "color": "BrightPurple",
+            "icon": ""
+        },
+        "pdf": {
+            "color": "cyan",
+            "icon": ""
+        },
+        "pgp": {
+            "color": "[214]@256",
+            "icon": ""
+        },
+        "php": {
+            "color": "[158]@256",
+            "icon": ""
+        },
+        "png": {
+            "color": "BrightPurple",
+            "icon": ""
+        },
+        "ppt": {
+            "color": "[150]@256",
+            "icon": ""
+        },
+        "pptm": {
+            "color": "[150]@256",
+            "icon": ""
+        },
+        "pptx": {
+            "color": "[150]@256",
+            "icon": ""
+        },
+        "properties": {
+            "color": "white",
+            "icon": ""
+        },
+        "ps1": {
+            "color": "BrightPreen",
+            "icon": ""
+        },
+        "psd": {
+            "color": "BrightPurple",
+            "icon": ""
+        },
+        "pub": {
+            "color": "[214]@256",
+            "icon": ""
+        },
+        "py": {
+            "color": "[158]@256",
+            "icon": ""
+        },
+        "pyc": {
+            "color": "[158]@256",
+            "icon": ""
+        },
+        "r": {
+            "color": "[158]@256",
+            "icon": ""
+        },
+        "rar": {
+            "color": "red",
+            "icon": ""
+        },
+        "rb": {
+            "color": "[158]@256",
+            "icon": ""
+        },
+        "rdp": {
+            "color": "white",
+            "icon": ""
+        },
+        "rs": {
+            "color": "[158]@256",
+            "icon": ""
+        },
+        "rss": {
+            "color": "[158]@256",
+            "icon": ""
+        },
+        "rustup": {
+            "color": "[158]@256",
+            "icon": ""
+        },
+        "s": {
+            "color": "[158]@256",
+            "icon": ""
+        },
+        "scala": {
+            "color": "[158]@256",
+            "icon": ""
+        },
+        "sh": {
+            "color": "BrightPreen",
+            "icon": ""
+        },
+        "sitx": {
+            "color": "red",
+            "icon": ""
+        },
+        "so": {
+            "color": "cyan",
+            "icon": ""
+        },
+        "sql": {
+            "color": "[195]@256",
+            "icon": ""
+        },
+        "sqlite": {
+            "color": "[195]@256",
+            "icon": ""
+        },
+        "sqlite3": {
+            "color": "[195]@256",
+            "icon": ""
+        },
+        "svg": {
+            "color": "BrightPurple",
+            "icon": ""
+        },
+        "swift": {
+            "color": "[158]@256",
+            "icon": ""
+        },
+        "tar": {
+            "color": "red",
+            "icon": ""
+        },
+        "tex": {
+            "color": "[158]@256",
+            "icon": ""
+        },
+        "tif": {
+            "color": "BrightPurple",
+            "icon": ""
+        },
+        "tiff": {
+            "color": "BrightPurple",
+            "icon": ""
+        },
+        "toml": {
+            "color": "white",
+            "icon": ""
+        },
+        "ts": {
+            "color": "[158]@256",
+            "icon": ""
+        },
+        "ttf": {
+            "color": "cyan",
+            "icon": ""
+        },
+        "txt": {
+            "color": "[153]@256",
+            "icon": ""
+        },
+        "typ": {
+            "color": "[158]@256",
+            "icon": "∫"
+        },
+        "vhd": {
+            "color": "[88]@256",
+            "icon": ""
+        },
+        "vhdx": {
+            "color": "[88]@256",
+            "icon": ""
+        },
+        "vim": {
+            "color": "[41]@256",
+            "icon": ""
+        },
+        "viminfo": {
+            "color": "[41]@256",
+            "icon": ""
+        },
+        "vimrc": {
+            "color": "[41]@256",
+            "icon": ""
+        },
+        "vue": {
+            "color": "[158]@256",
+            "icon": ""
+        },
+        "wav": {
+            "color": "[199]@256",
+            "icon": ""
+        },
+        "webp": {
+            "color": "BrightPurple",
+            "icon": ""
+        },
+        "whl": {
+            "color": "[158]@256",
+            "icon": ""
+        },
+        "woff": {
+            "color": "cyan",
+            "icon": ""
+        },
+        "woff2": {
+            "color": "cyan",
+            "icon": ""
+        },
+        "xls": {
+            "color": "[150]@256",
+            "icon": ""
+        },
+        "xlsm": {
+            "color": "[150]@256",
+            "icon": ""
+        },
+        "xlsx": {
+            "color": "[150]@256",
+            "icon": ""
+        },
+        "xml": {
+            "color": "white",
+            "icon": ""
+        },
+        "xz": {
+            "color": "red",
+            "icon": ""
+        },
+        "yaml": {
+            "color": "white",
+            "icon": ""
+        },
+        "yml": {
+            "color": "white",
+            "icon": ""
+        },
+        "zig": {
+            "color": "[158]@256",
+            "icon": ""
+        },
+        "zip": {
+            "color": "red",
+            "icon": ""
+        },
+        "zsh": {
+            "color": "BrightPreen",
+            "icon": ""
+        },
+        "zsh_history": {
+            "color": "BrightPreen",
+            "icon": ""
+        },
+        "zshrc": {
+            "color": "BrightPreen",
+            "icon": ""
+        },
+        "zst": {
+            "color": "red",
+            "icon": ""
+        }
+    }
+}
