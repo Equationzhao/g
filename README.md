@@ -18,7 +18,7 @@
 g is a ls alternative with features:
 
 1. display items with type-specific icons and colors that are easy to be customized
-2. display in various layouts ( grid/across/byline/zero/comma/table/html/json/markdown )
+2. display in various layouts ( grid/across/byline/zero/comma/table/html/json/markdown/tree )
 3. user-friendly options with many aliases
 4. check file git-status when listing entries
 5. highly customizable sort option
@@ -72,66 +72,66 @@ g path(s)
 with icon
 
 ```bash
-g -icons path
+g -icons
 ```
 
 with mod(default) time
 
 ```bash
-g -time      path
+g -time      
 ```
 
 with access/create/mod time
 
 ```bash
-g -time -time-type=access path
-g -time -ac/cr/mod path
+g -time -time-type=access 
+g -time -ac/cr/mod 
 ```
 
 with fileperm
 
 ```bash
-g -permission path
+g -permission 
 ```
 
 with owner/group
 
 ```bash
-g -owner path
-g -group path
+g -owner 
+g -group 
 ```
 
 with size
 
 ```bash
-g -size path
+g -size 
 ```
 
 show all files, including hidden files
 
 ```bash
-g -sh path
-g -a  path
+g -sh 
+g -a  
 ```
 
 show dir only
 
 ```bash
-g -dir path
+g -dir 
 ```
 
 list by line
 
 ```bash
-g -1             path
-g -oneline       path
-g -single-column path
+g -1             
+g -oneline       
+g -single-column 
 ```
 
 show file only with target ext
 
 ```bash
-g -ext=<target ext(s)> path
+g -ext=<target ext(s)> 
 # eg:
 # g -ext=go,md
 ```
@@ -139,21 +139,21 @@ g -ext=<target ext(s)> path
 recurse into directories
 
 ```bash
-g -R       path
-g -recurse path
+g -R       
+g -recurse 
 ```
 
 limit depth in tree/recurse (default: no limit)
 
 ```bash
-g -R -depth=<level> path
+g -R -depth=<level> 
 ```
 
 fuzzy search
 
 ```bash
-g -f     path
-g -fuzzy path
+g -f     
+g -fuzzy 
 # eg: g -f in
 # /mnt/e/Project/gverything/index
 # pathindex.go
@@ -162,45 +162,50 @@ g -fuzzy path
 disable index update
 
 ```bash
-g -di            path  
-g -no-update     path
-g -disable-index path
+g -di              
+g -no-update     
+g -disable-index 
 ```
 
 disable color
 
 ```bash
-g -no-color  path
-g -colorless path
+g -no-color  
+g -colorless 
 ```
 
 set color 
 ```bash
-g -color=always path
-g -color=auto   path # default
-g -color=never  path 
-g -color=16/basic      path # 16-color
-g -color=256/8bit      path # 256-color
-g -color=16m/24bit/true-color  path # 24-bit
+g -color=always 
+g -color=auto    # default
+g -color=never   
+g -color=16/basic       # 16-color
+g -color=256/8bit       # 256-color
+g -color=16m/24bit/true-color   # 24-bit
 ```
 
 show checksum (md5,sha1,sha224,sha256,sha384,sha512,crc32)
 
 ```bash
-g -cs -ca=sha256 path
+g -cs -ca=sha256 
 ```
 
 show git status
 
 ```bash
-g -gs         path
-g -git        path
-g -git-status path
+g -gs        
+g -git       
+g -git-status
 ```
 
 output in table
 ```bash
 g -tb
+```
+
+list in tree
+```bash
+g -tree
 ```
 
 output in markdown, and render with [glow](github.com/charmbracelet/glow) 

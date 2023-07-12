@@ -118,7 +118,7 @@
     },
     "symlink_arrow": {
       "color": "BrightWhite",
-      "icon": " ~\u003e "
+      "icon": " =\u003e "
     },
     "symlink_broken_path": {
       "color": "red",
@@ -170,10 +170,14 @@
       "icon": ""
     },
     ".ds_store": {
-      "color": "black",
+      "color": "BrightBlack",
       "icon": ""
     },
     ".git": {
+      "color": "white",
+      "icon": ""
+    },
+    ".gitconfig": {
       "color": "white",
       "icon": ""
     },
@@ -205,12 +209,16 @@
       "color": "white",
       "icon": ""
     },
+    ".wakatime": {
+      "color": "white",
+      "icon": ""
+    },
     "android": {
       "color": "white",
       "icon": ""
     },
     "apple": {
-      "color": "black",
+      "color": "BrightBlack",
       "icon": ""
     },
     "applications": {
@@ -260,6 +268,10 @@
     "dockerfile": {
       "color": "yellow",
       "icon": ""
+    },
+    "documents": {
+      "color": "white",
+      "icon": ""
     },
     "downloads": {
       "color": "white",
@@ -313,6 +325,10 @@
       "color": "[214]@256",
       "icon": ""
     },
+    "links": {
+      "color": "white",
+      "icon": ""
+    },
     "makefile": {
       "color": "[158]@256",
       "icon": ""
@@ -352,12 +368,14 @@
     "readme": {
       "color": "BrightYellow",
       "icon": "",
-      "underline": true
+      "underline": true,
+      "bold": true
     },
     "readme.md": {
       "color": "BrightYellow",
       "icon": "",
-      "underline": true
+      "underline": true,
+      "bold": true
     },
     "recovery": {
       "color": "BrightBlack",
@@ -366,6 +384,10 @@
     "repo": {
       "color": "white",
       "icon": ""
+    },
+    "saved games": {
+      "color": "red",
+      "icon": ""
     },
     "sdk": {
       "color": "white",
@@ -542,6 +564,10 @@
       "icon": ""
     },
     "conf": {
+      "color": "white",
+      "icon": ""
+    },
+    "config": {
       "color": "white",
       "icon": ""
     },
@@ -855,8 +881,7 @@
     },
     "md": {
       "color": "BrightYellow",
-      "icon": "",
-      "underline": true
+      "icon": ""
     },
     "mid": {
       "color": "[199]@256",
