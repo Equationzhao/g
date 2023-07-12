@@ -84,14 +84,15 @@ g -time
 with access/create/mod time
 
 ```bash
-g -time -time-type=access 
-g -time -ac/cr/mod 
+g -time -time-type=access
+g -time -ac/cr/mod
 ```
 
 with fileperm
 
 ```bash
 g -permission 
+g -octal-perm # show octal permission like 0777
 ```
 
 with owner/group
@@ -105,6 +106,7 @@ with size
 
 ```bash
 g -size 
+g -size -recusive-size # show size of dir recursively
 ```
 
 show all files, including hidden files
@@ -193,7 +195,6 @@ g -cs -ca=sha256
 show git status
 
 ```bash
-g -gs        
 g -git       
 g -git-status
 ```
