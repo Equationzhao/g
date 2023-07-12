@@ -72,7 +72,7 @@ func (s SumEnabler) EnableSum(sumTypes ...SumType) filter.ContentOption {
 		if content_, ok := info.Cache["content"]; ok {
 			content = content_
 		} else {
-			file, err := os.Open(info.Name())
+			file, err := os.Open(info.FullPath)
 			if err != nil {
 				return filter.FillBlank("", length), sumName
 			}
