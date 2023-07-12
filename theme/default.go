@@ -1059,11 +1059,13 @@ var Name = map[string]Style{
 		Color:     BrightYellow,
 		Icon:      "\uF48A",
 		Underline: true,
+		Bold:      true,
 	},
 	"readme.md": {
 		Color:     BrightYellow,
 		Icon:      "\uF48A",
 		Underline: true,
+		Bold:      true,
 	},
 	"sdk": {
 		Icon:  "\uF121",
