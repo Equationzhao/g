@@ -57,9 +57,10 @@ var (
 	hookOnce        = util.Once{}
 	duplicateDetect = filtercontent.NewDuplicateDetect()
 	hookPost        = make([]func(display.Printer, ...*item.FileInfo), 0)
+	pool            *ants.Pool
 )
 
-var Version = "0.11.0"
+var Version = "0.11.1"
 
 var G *cli.App
 
@@ -238,6 +239,14 @@ func init() {
 			dereference := context.Bool("dereference")
 
 			theme.ConvertThemeColor()
+			{
+				var err error
+				pool, err = ants.NewPool(ants.DefaultAntsPoolSize)
+				if err != nil {
+					panic(err)
+				}
+				filter.Pool = pool
+			}
 
 			for i := 0; i < len(path); i++ {
 				start := time.Now()
@@ -316,7 +325,7 @@ func init() {
 
 				if !disableIndex {
 					wgUpdateIndex.Add(1)
-					err := ants.Submit(
+					err := pool.Submit(
 						func() {
 							func(i int) {
 								if err = fuzzyUpdate(path[i]); err != nil {
@@ -353,10 +362,10 @@ func init() {
 					infos[0].Cache["level"] = []byte("0")
 					if depth >= 1 || depth < 0 {
 						wg := sync.WaitGroup{}
-
 						infoSlice := util.NewSlice[*item.FileInfo](10)
 						errSlice := util.NewSlice[error](10)
 						wg.Add(1)
+						pool.Tune(ants.DefaultAntsPoolSize)
 						dive(
 							path[i], 1, depth, infoSlice, errSlice, &wg,
 							itemFilter,
@@ -460,8 +469,13 @@ func init() {
 									continue
 								}
 								abs := filepath.Join(path[i], info.Name())
-								newPath, _ := filepath.Rel(startDir, abs)
-								path = slices.Insert(path, i+1+j, newPath)
+								newPath, err := filepath.Rel(startDir, abs)
+								if err == nil {
+									// if the path is relative, use it
+									path = slices.Insert(path, i+1+j, newPath)
+								} else {
+									path = slices.Insert(path, i+1+j, abs)
+								}
 								j++
 								depthLimitMap[abs] = dep - 1
 							}
@@ -479,7 +493,9 @@ func init() {
 					gitEnabler.InitCache(repo)
 				}
 
+				pool.Tune(1000)
 				contentFilter.GetDisplayItems(&infos)
+
 				if len(infos) == 0 {
 					goto clean
 				}
@@ -679,7 +695,6 @@ func init() {
 							return nil
 						},
 					)
-
 					p.Print(infos...)
 				}
 
@@ -695,7 +710,7 @@ func init() {
 					sizeEnabler.Reset()
 				}
 			}
-			// }
+			pool.Release()
 			wgUpdateIndex.Wait()
 
 			if seriousErr {
@@ -818,7 +833,7 @@ func dive(
 		infos.AppendTo(info)
 		if entry.IsDir() {
 			wg.Add(1)
-			err := ants.Submit(
+			err := pool.Submit(
 				func() {
 					dive(info.FullPath, depth+1, limit, infos, errSlice, wg, itemFilter)
 				},

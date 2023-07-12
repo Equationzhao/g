@@ -10,6 +10,8 @@ import (
 	"github.com/panjf2000/ants/v2"
 )
 
+var Pool *ants.Pool
+
 type ContentFilter struct {
 	noOutputOptions []NoOutputOption
 	options         []ContentOption
@@ -101,13 +103,11 @@ func (cf *ContentFilter) GetDisplayItems(e *[]*item.FileInfo) {
 	if cf.LimitN != 0 && len(*e) > int(cf.LimitN) {
 		*e = (*e)[:cf.LimitN]
 	}
-
 	wg := sync.WaitGroup{}
 	wg.Add(len(*e))
-
 	for _, entry := range *e {
 		entry := entry
-		err := ants.Submit(
+		err := Pool.Submit(
 			func() {
 				for j, option := range cf.options {
 					stringContent, funcName := option(entry)
