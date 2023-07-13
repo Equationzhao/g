@@ -19,6 +19,9 @@ func main() {
 			fmt.Println(Version)
 			fmt.Println(MakeErrorStr(fmt.Sprint(err)))
 			fmt.Println(MakeErrorStr(string(debug.Stack())))
+			if ReturnCode == 0 {
+				ReturnCode = 2
+			}
 		}
 		os.Exit(ReturnCode)
 	}()
