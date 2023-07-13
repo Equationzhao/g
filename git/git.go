@@ -120,7 +120,15 @@ func ParseShort(r string) (res FileGits) {
 		}
 		status := str[0:2]
 		fg.Set(status)
-		fg.Name = util.RemoveSep(pathbeautify.CleanSeparator(str[3:]))
+		if fg.X == Renamed || fg.Y == Renamed || fg.X == Copied || fg.Y == Copied {
+			// origin -> rename
+			// the actual file name is rename
+			o2r := str[3:]
+			fg.Name = util.RemoveSep(pathbeautify.CleanSeparator(o2r[strings.Index(o2r, " -> ")+4:]))
+		} else {
+			fg.Name = util.RemoveSep(pathbeautify.CleanSeparator(str[3:]))
+		}
+
 		res = append(res, fg)
 		if !s.Scan() {
 			break
