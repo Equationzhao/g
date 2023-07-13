@@ -944,7 +944,7 @@ var Name = map[string]Style{
 		Color: White,
 	},
 	"license": {
-		Icon:  "\uF084",
+		Icon:  "",
 		Color: key,
 	},
 	"shell": {
