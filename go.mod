@@ -8,11 +8,11 @@ require (
 	github.com/acarl005/stripansi v0.0.0-20180116102854-5a71ef0e047d
 	github.com/gabriel-vasile/mimetype v1.4.2
 	github.com/gobwas/glob v0.2.3
-	github.com/gookit/color v1.5.3
+	github.com/gookit/color v1.5.4
 	github.com/hako/durafmt v0.0.0-20210608085754-5c1018a4e16b
 	github.com/jedib0t/go-pretty/v6 v6.4.6
-	github.com/junegunn/fzf v0.0.0-20230712045559-547e101f1d6b
-	github.com/mattn/go-runewidth v0.0.14
+	github.com/junegunn/fzf v0.0.0-20230725132031-dd59b8c7b910
+	github.com/mattn/go-runewidth v0.0.15
 	github.com/olekukonko/ts v0.0.0-20171002115256-78ecb04241c0
 	github.com/panjf2000/ants/v2 v2.8.1
 	github.com/saintfish/chardet v0.0.0-20230101081208-5e3ef4b5456d
