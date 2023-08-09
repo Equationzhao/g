@@ -323,7 +323,7 @@
         },
         "license": {
             "color": "[214]@256",
-            "icon": ""
+            "icon": ""
         },
         "links": {
             "color": "white",
@@ -426,6 +426,10 @@
         "dir": {
             "color": "BrightBlue",
             "icon": ""
+        },
+        "dir-prompt": {
+            "color": "yellow",
+            "icon": "► "
         },
         "exe": {
             "color": "green",

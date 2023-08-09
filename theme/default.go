@@ -837,6 +837,10 @@ var Special = map[string]Style{
 		Color: dir,
 		Icon:  "\uF115",
 	},
+	"dir-prompt": {
+		Color: Yellow,
+		Icon:  "► ",
+	},
 	"pipe": {
 		Color: Cyan,
 		Icon:  "\uF124",
