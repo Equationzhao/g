@@ -347,24 +347,26 @@ func (rd *Renderer) SymlinkIconPlus(toRender string, path string, plus string, r
 	symlinks, err := filepath.EvalSymlinks(path)
 	if err != nil {
 		var pathErr *fs.PathError
+		_, _ = bb.WriteString(toRender + plus)
+		_, _ = bb.WriteString(rd.theme.Symlink["symlink_arrow"].Color + theme.Symlink["symlink_arrow"].Icon)
+		brokenStyle := rd.theme.Symlink["symlink_broken_path"]
+		_, _ = bb.WriteString(brokenStyle.Color)
+		checkUnderlineAndBold(&brokenStyle, bb)
 		if errors.As(err, &pathErr) {
-			_, _ = bb.WriteString(toRender + plus)
-			_, _ = bb.WriteString(rd.theme.Symlink["symlink_arrow"].Color + theme.Symlink["symlink_arrow"].Icon)
-			brokenStyle := rd.theme.Symlink["symlink_broken_path"]
-			_, _ = bb.WriteString(brokenStyle.Color)
-			checkUnderlineAndBold(&brokenStyle, bb)
 			if rel {
 				symlinksRel, err := filepath.Rel(filepath.Dir(path), pathErr.Path)
 				if err == nil {
 					pathErr.Path = symlinksRel
 				}
 			}
-			_, _ = bb.WriteString(pathErr.Path)
-			_, _ = bb.WriteString(rd.theme.InfoTheme["reset"].Color)
-			return bb.String()
+			symlinks = pathErr.Path
 		}
 		symlinks = err.Error()
+		_, _ = bb.WriteString(symlinks)
+		_, _ = bb.WriteString(rd.theme.InfoTheme["reset"].Color)
+		return bb.String()
 	}
+
 	if rel {
 		symlinksRel, err := filepath.Rel(filepath.Dir(path), symlinks)
 		if err == nil {
@@ -414,21 +416,24 @@ func (rd *Renderer) SymlinkPlus(toRender string, path string, plus string, rel b
 	symlinks, err := filepath.EvalSymlinks(path)
 	if err != nil {
 		var pathErr *fs.PathError
+		_, _ = bb.WriteString(toRender + plus)
+		_, _ = bb.WriteString(rd.theme.Symlink["symlink_arrow"].Color + theme.Symlink["symlink_arrow"].Icon)
+		brokenStyle := rd.theme.Symlink["symlink_broken_path"]
+		_, _ = bb.WriteString(brokenStyle.Color)
+		checkUnderlineAndBold(&brokenStyle, bb)
 		if errors.As(err, &pathErr) {
-			_, _ = bb.WriteString(toRender + plus)
-			_, _ = bb.WriteString(rd.theme.Symlink["symlink_arrow"].Color + rd.theme.Symlink["symlink_arrow"].Icon)
-			_, _ = bb.WriteString(rd.theme.Symlink["symlink_broken_path"].Color)
 			if rel {
 				symlinksRel, err := filepath.Rel(filepath.Dir(path), pathErr.Path)
 				if err == nil {
 					pathErr.Path = symlinksRel
 				}
 			}
-			_, _ = bb.WriteString(pathErr.Path)
-			_, _ = bb.WriteString(rd.theme.InfoTheme["reset"].Color)
-			return bb.String()
+			symlinks = pathErr.Path
 		}
 		symlinks = err.Error()
+		_, _ = bb.WriteString(symlinks)
+		_, _ = bb.WriteString(rd.theme.InfoTheme["reset"].Color)
+		return bb.String()
 	}
 	if rel {
 		symlinksRel, err := filepath.Rel(filepath.Dir(path), symlinks)
