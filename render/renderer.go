@@ -360,8 +360,9 @@ func (rd *Renderer) SymlinkIconPlus(toRender string, path string, plus string, r
 				}
 			}
 			symlinks = pathErr.Path
+		}else{
+			symlinks = err.Error()
 		}
-		symlinks = err.Error()
 		_, _ = bb.WriteString(symlinks)
 		_, _ = bb.WriteString(rd.theme.InfoTheme["reset"].Color)
 		return bb.String()
@@ -429,8 +430,9 @@ func (rd *Renderer) SymlinkPlus(toRender string, path string, plus string, rel b
 				}
 			}
 			symlinks = pathErr.Path
+		}else{
+			symlinks = err.Error()
 		}
-		symlinks = err.Error()
 		_, _ = bb.WriteString(symlinks)
 		_, _ = bb.WriteString(rd.theme.InfoTheme["reset"].Color)
 		return bb.String()
