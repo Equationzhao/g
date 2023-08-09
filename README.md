@@ -29,7 +29,7 @@ g is a ls alternative with features:
 
 ![image](how-g-works.gif)
 
-## install
+## Install
 
 ### From source
 
@@ -57,13 +57,21 @@ user can install `g` from AUR
 yay -S g-ls
 ```
 
-homebrew: ***todo***
+homebrew:
+
+```bash
+brew tap equationzhao/core git@github.com:Equationzhao/homebrew-g.git
+```
+
+```bash
+brew install g-ls
+```
 
 ### Pre-built executable
 
 just download from [release page](https://github.com/Equationzhao/g/releases), extract the gzip and add the executable file to your `PATH`
 
-## usage
+## Usage
 
 ```bash
 g path(s)
@@ -78,7 +86,7 @@ g -icons
 with mod(default) time
 
 ```bash
-g -time      
+g -time    
 ```
 
 with access/create/mod time
@@ -125,8 +133,8 @@ g -dir
 list by line
 
 ```bash
-g -1             
-g -oneline       
+g -1           
+g -oneline     
 g -single-column 
 ```
 
@@ -141,7 +149,7 @@ g -ext=<target ext(s)>
 recurse into directories
 
 ```bash
-g -R       
+g -R     
 g -recurse 
 ```
 
@@ -154,7 +162,7 @@ g -R -depth=<level>
 fuzzy search
 
 ```bash
-g -f     
+g -f   
 g -fuzzy 
 # eg: g -f in
 # /mnt/e/Project/gverything/index
@@ -164,8 +172,8 @@ g -fuzzy
 disable index update
 
 ```bash
-g -di              
-g -no-update     
+g -di            
+g -no-update   
 g -disable-index 
 ```
 
@@ -176,7 +184,8 @@ g -no-color
 g -colorless 
 ```
 
-set color 
+set color
+
 ```bash
 g -color=always 
 g -color=auto    # default
@@ -195,37 +204,43 @@ g -cs -ca=sha256
 show git status
 
 ```bash
-g -git       
+g -git     
 g -git-status
 ```
 
 output in table
+
 ```bash
 g -tb
 ```
 
 list in tree
+
 ```bash
 g -tree
 ```
 
-output in markdown, and render with [glow](github.com/charmbracelet/glow) 
+output in markdown, and render with [glow](github.com/charmbracelet/glow)
 (colors are not supported in markdown )
 
 ```bash
 g -md | glow 
 ```
+
 ![image](https://github.com/Equationzhao/g/assets/75521101/7ec1e0d7-03cd-4968-ba48-2ec5375086fa)
 
 ...
 
 ## Shell scripts
+
 generate shell scripts
+
 ```bash
 g -init bash/zsh/fish/pwsh
 ```
 
 ### bash
+
 ```.bash
 # add the following command to .bashrc
 eval "$(g --init bash)"
@@ -233,6 +248,7 @@ eval "$(g --init bash)"
 ```
 
 ### zsh
+
 ```zsh
 # add the following command to .zshrc
 eval "$(g --init zsh)"
@@ -240,6 +256,7 @@ eval "$(g --init zsh)"
 ```
 
 ### fish
+
 ```fish
 #  add to fish config:
 g --init fish | source
@@ -247,13 +264,16 @@ g --init fish | source
 ```
 
 ### powershell
+
 ```powershell
 # add the following line to your profile
 Invoke-Expression (& { (g --init powershell | Out-String) })
 ```
+
 use command `echo $profile` to find your profile path
 
 ### nushell
+
 ```nu
 # add the following to your $nu.env-path
 ^g --init nushell | save -f ~/.g.nu
