@@ -245,7 +245,7 @@ func (rd *Renderer) RTime(now, modTime time.Time) string {
 func (rd *Renderer) ByName(toRender string) string {
 	bb := bytebufferpool.Get()
 	defer bytebufferpool.Put(bb)
-	name := strings.ToLower(toRender)
+	name := strings.ToLower(filepath.Base(toRender))
 	style, ok := rd.theme.Name[name]
 	if !ok {
 		return ""
@@ -260,7 +260,7 @@ func (rd *Renderer) ByName(toRender string) string {
 func (rd *Renderer) ByNameIcon(toRender string) string {
 	bb := bytebufferpool.Get()
 	defer bytebufferpool.Put(bb)
-	name := strings.ToLower(toRender)
+	name := strings.ToLower(filepath.Base(toRender))
 	style, ok := rd.theme.Name[name]
 	if !ok {
 		return ""
@@ -360,7 +360,7 @@ func (rd *Renderer) SymlinkIconPlus(toRender string, path string, plus string, r
 				}
 			}
 			symlinks = pathErr.Path
-		}else{
+		} else {
 			symlinks = err.Error()
 		}
 		_, _ = bb.WriteString(symlinks)
@@ -430,7 +430,7 @@ func (rd *Renderer) SymlinkPlus(toRender string, path string, plus string, rel b
 				}
 			}
 			symlinks = pathErr.Path
-		}else{
+		} else {
 			symlinks = err.Error()
 		}
 		_, _ = bb.WriteString(symlinks)
@@ -667,6 +667,18 @@ func (rd *Renderer) GitUpdatedButUnmerged(s string) string {
 
 func (rd *Renderer) Inode(inode string) string {
 	return rd.infoByName(inode, "inode")
+}
+
+func (rd *Renderer) DirPrompt(dir string) string {
+	bb := bytebufferpool.Get()
+	defer bytebufferpool.Put(bb)
+	style := rd.theme.Special["dir-prompt"]
+	_, _ = bb.WriteString(style.Color)
+	checkUnderlineAndBold(&style, bb)
+	_, _ = bb.WriteString(style.Icon)
+	_, _ = bb.WriteString(dir)
+	_, _ = bb.WriteString(rd.theme.InfoTheme["reset"].Color)
+	return bb.String()
 }
 
 func checkUnderlineAndBold(style *theme.Style, bb *bytebufferpool.ByteBuffer) {

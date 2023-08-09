@@ -60,7 +60,7 @@ var (
 	pool            *ants.Pool
 )
 
-var Version = "0.11.5"
+var Version = "0.12.0"
 
 var G *cli.App
 
@@ -252,7 +252,7 @@ func init() {
 				start := time.Now()
 
 				if len(path) > 1 {
-					fmt.Printf("%s:\n", path[i])
+					fmt.Println(r.DirPrompt(path[i]), ":")
 				}
 
 				if transformEnabled {
