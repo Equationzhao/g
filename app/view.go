@@ -133,7 +133,7 @@ var viewFlag = []cli.Flag{
 	&cli.StringFlag{
 		Name: "time-style",
 		Usage: `time/date format with -l, 
-	Valid timestamp styles are default, iso, long iso, full-iso, locale, 
+	Valid timestamp styles are default, iso, long-iso, full-iso, locale, 
 	custom +FORMAT like date(1). 
 	(default: +%d.%b'%y %H:%M ,like 02.Jan'06 15:04)`,
 		EnvVars: []string{"TIME_STYLE"},
@@ -621,7 +621,36 @@ var viewFlag = []cli.Flag{
 	&cli.BoolFlag{
 		Name:               "o",
 		DisableDefaultText: true,
-		Usage:              "like -all/l, but do not list group information",
+		Usage:              "like -all, but do not list group information",
+		Action: func(context *cli.Context, b bool) error {
+			if b {
+				// remove filter.RemoveHidden
+				newFF := make([]*filter.ItemFilterFunc, 0, len(itemFilterFunc))
+				for _, typeFunc := range itemFilterFunc {
+					if typeFunc != &filter.RemoveHidden {
+						newFF = append(newFF, typeFunc)
+					}
+				}
+				itemFilterFunc = newFF
+				contentFunc = append(
+					contentFunc, filtercontent.EnableFileMode(r), sizeEnabler.EnableSize(sizeUint, r),
+					ownerEnabler.EnableOwner(r),
+				)
+				for _, s := range timeType {
+					contentFunc = append(contentFunc, filtercontent.EnableTime(timeFormat, s, r))
+				}
+				if _, ok := p.(*display.Byline); !ok {
+					p = display.NewByline()
+				}
+			}
+			return nil
+		},
+		Category: "VIEW",
+	},
+	&cli.BoolFlag{
+		Name:               "g",
+		DisableDefaultText: true,
+		Usage:              "like -all, but do not list owner",
 		Action: func(context *cli.Context, b bool) error {
 			if b {
 				// remove filter.RemoveHidden
@@ -648,23 +677,36 @@ var viewFlag = []cli.Flag{
 		Category: "VIEW",
 	},
 	&cli.BoolFlag{
-		Name:               "g",
+		Name:               "G",
 		DisableDefaultText: true,
-		Usage:              "like -all/l, but do not list owner",
+		Aliases:            []string{"no-group"},
+		Usage:              "in a long listing, don't print group names",
+		Category:           "VIEW",
+	},
+	&cli.BoolFlag{
+		Name:               "O",
+		DisableDefaultText: true,
+		Aliases:            []string{"no-owner"},
+		Usage:              "in a long listing, don't print owner names",
+		Category:           "VIEW",
+	},
+	&cli.BoolFlag{
+		Name:               "l",
+		Aliases:            []string{"long"},
+		Usage:              "use a long listing format",
+		Category:           "VIEW",
+		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
 			if b {
-				// remove filter.RemoveHidden
-				newFF := make([]*filter.ItemFilterFunc, 0, len(itemFilterFunc))
-				for _, typeFunc := range itemFilterFunc {
-					if typeFunc != &filter.RemoveHidden {
-						newFF = append(newFF, typeFunc)
-					}
-				}
-				itemFilterFunc = newFF
 				contentFunc = append(
 					contentFunc, filtercontent.EnableFileMode(r), sizeEnabler.EnableSize(sizeUint, r),
-					ownerEnabler.EnableOwner(r),
 				)
+				if !context.Bool("O") {
+					contentFunc = append(contentFunc, ownerEnabler.EnableOwner(r))
+				}
+				if !context.Bool("G") {
+					contentFunc = append(contentFunc, groupEnabler.EnableGroup(r))
+				}
 				for _, s := range timeType {
 					contentFunc = append(contentFunc, filtercontent.EnableTime(timeFormat, s, r))
 				}
@@ -674,18 +716,10 @@ var viewFlag = []cli.Flag{
 			}
 			return nil
 		},
-		Category: "VIEW",
-	},
-	&cli.BoolFlag{
-		Name:               "G",
-		DisableDefaultText: true,
-		Aliases:            []string{"no-group"},
-		Usage:              "in a long listing, don't print group names",
-		Category:           "VIEW",
 	},
 	&cli.BoolFlag{
 		Name:               "all",
-		Aliases:            []string{"la", "l", "long"},
+		Aliases:            []string{"la"},
 		Usage:              "show all info/use a long listing format",
 		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
@@ -700,8 +734,10 @@ var viewFlag = []cli.Flag{
 				itemFilterFunc = newFF
 				contentFunc = append(
 					contentFunc, filtercontent.EnableFileMode(r), sizeEnabler.EnableSize(sizeUint, r),
-					ownerEnabler.EnableOwner(r),
 				)
+				if !context.Bool("O") {
+					contentFunc = append(contentFunc, ownerEnabler.EnableOwner(r))
+				}
 				if !context.Bool("G") {
 					contentFunc = append(contentFunc, groupEnabler.EnableGroup(r))
 				}

@@ -60,7 +60,7 @@ var (
 	pool            *ants.Pool
 )
 
-var Version = "0.12.0"
+var Version = "0.13.0"
 
 var G *cli.App
 
@@ -894,6 +894,8 @@ DESCRIPTION:
 
 CONFIG:
 	Configuration: %s
+	See More at: g.equationzhao.space
+
 {{- if len .Authors}}
 
 AUTHOR{{template "authorsTemplate" .}}{{end}}{{if .VisibleCommands}}
