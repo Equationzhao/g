@@ -272,8 +272,13 @@ var displayFlag = []cli.Flag{
 			case "long", "l", "verbose":
 				contentFunc = append(
 					contentFunc, content.EnableFileMode(r), sizeEnabler.EnableSize(sizeUint, r),
-					ownerEnabler.EnableOwner(r), groupEnabler.EnableGroup(r),
 				)
+				if !context.Bool("O") {
+					contentFunc = append(contentFunc, ownerEnabler.EnableOwner(r))
+				}
+				if !context.Bool("G") {
+					contentFunc = append(contentFunc, groupEnabler.EnableGroup(r))
+				}
 				for _, s := range timeType {
 					contentFunc = append(contentFunc, content.EnableTime(timeFormat, s, r))
 				}

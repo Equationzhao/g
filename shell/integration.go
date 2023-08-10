@@ -20,7 +20,7 @@ var FISHContent []byte
 //go:embed g.nu
 var NUContent []byte
 
-func init() {
+func Init() {
 	// replace os newline with unix newline
 	PSContent = bytes.ReplaceAll(PSContent, []byte("\r\n"), []byte("\n"))
 	BASHContent = bytes.ReplaceAll(BASHContent, []byte("\r\n"), []byte("\n"))

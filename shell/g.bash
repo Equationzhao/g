@@ -1,10 +1,6 @@
 #!/bin/bash
 
 if [ "$(command -v g)" ]; then
-    if [ "$(command -v ls)" ]; then
-      unalias ls
-    fi
-
     if [ "$(command -v ll)" ]; then
       unalias ll
     fi
