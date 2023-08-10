@@ -770,14 +770,19 @@ func init() {
 			Action: func(context *cli.Context, s string) error {
 				switch s {
 				case "zsh":
+					shell.Init()
 					_, _ = G.Writer.Write(shell.ZSHContent)
 				case "bash":
+					shell.Init()
 					_, _ = G.Writer.Write(shell.BASHContent)
 				case "fish":
+					shell.Init()
 					_, _ = G.Writer.Write(shell.FISHContent)
 				case "powershell", "pwsh":
+					shell.Init()
 					_, _ = G.Writer.Write(shell.PSContent)
 				case "nushell", "nu":
+					shell.Init()
 					_, _ = G.Writer.Write(shell.NUContent)
 				default:
 					return fmt.Errorf("unsupported shell: %s \n %s[zsh|bash|fish|powershell|nushell]", s, theme.Success)
