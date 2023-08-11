@@ -357,6 +357,10 @@
             "color": "blue",
             "icon": ""
         },
+        "passwd": {
+            "color": "cyan",
+            "icon": ""
+        },
         "pictures": {
             "color": "white",
             "icon": ""
@@ -416,6 +420,10 @@
         "users": {
             "color": "white",
             "icon": ""
+        },
+        "vagrantfile": {
+            "color": "[158]@256",
+            "icon": ""
         },
         "videos": {
             "color": "white",
@@ -485,7 +493,7 @@
         },
         "asm": {
             "color": "[158]@256",
-            "icon": "﬙"
+            "icon": ""
         },
         "atom": {
             "color": "[158]@256",
@@ -498,6 +506,10 @@
         "avif": {
             "color": "BrightPurple",
             "icon": ""
+        },
+        "avro": {
+            "color": "[158]@256",
+            "icon": ""
         },
         "azw": {
             "color": "cyan",
@@ -531,6 +543,10 @@
             "color": "BrightPurple",
             "icon": ""
         },
+        "bzl": {
+            "color": "[158]@256",
+            "icon": ""
+        },
         "c": {
             "color": "[158]@256",
             "icon": ""
@@ -554,6 +570,10 @@
         "cfg": {
             "color": "white",
             "icon": ""
+        },
+        "clj": {
+            "color": "[158]@256",
+            "icon": ""
         },
         "cmake": {
             "color": "[158]@256",
@@ -679,6 +699,10 @@
             "color": "[158]@256",
             "icon": ""
         },
+        "ex": {
+            "color": "[158]@256",
+            "icon": ""
+        },
         "exe": {
             "color": "green",
             "icon": ""
@@ -698,6 +722,10 @@
         "flv": {
             "color": "[200]@256",
             "icon": ""
+        },
+        "fs": {
+            "color": "[158]@256",
+            "icon": ""
         },
         "gif": {
             "color": "BrightPurple",
@@ -729,19 +757,19 @@
         },
         "h": {
             "color": "[158]@256",
-            "icon": ""
+            "icon": ""
         },
         "h++": {
             "color": "[158]@256",
-            "icon": ""
+            "icon": ""
         },
         "hh": {
             "color": "[158]@256",
-            "icon": ""
+            "icon": ""
         },
         "hpp": {
             "color": "[158]@256",
-            "icon": ""
+            "icon": ""
         },
         "hrl": {
             "color": "[158]@256",
@@ -769,7 +797,7 @@
         },
         "hxx": {
             "color": "[158]@256",
-            "icon": ""
+            "icon": ""
         },
         "id_rsa": {
             "color": "[214]@256",
@@ -798,6 +826,10 @@
         "java": {
             "color": "[158]@256",
             "icon": ""
+        },
+        "jl": {
+            "color": "[158]@256",
+            "icon": ""
         },
         "jpeg": {
             "color": "BrightPurple",
@@ -923,6 +955,10 @@
             "color": "BrightYellow",
             "icon": ""
         },
+        "mustache": {
+            "color": "[158]@256",
+            "icon": ""
+        },
         "npm": {
             "color": "[158]@256",
             "icon": ""
@@ -954,6 +990,10 @@
         "passwd": {
             "color": "cyan",
             "icon": ""
+        },
+        "patch": {
+            "color": "white",
+            "icon": ""
         },
         "pcx": {
             "color": "BrightPurple",
@@ -1023,9 +1063,17 @@
             "color": "[158]@256",
             "icon": ""
         },
+        "rdb": {
+            "color": "[195]@256",
+            "icon": ""
+        },
         "rdp": {
             "color": "white",
             "icon": ""
+        },
+        "rpm": {
+            "color": "BrightYellow",
+            "icon": ""
         },
         "rs": {
             "color": "[158]@256",
@@ -1042,6 +1090,10 @@
         "s": {
             "color": "[158]@256",
             "icon": ""
+        },
+        "sass": {
+            "color": "[158]@256",
+            "icon": ""
         },
         "scala": {
             "color": "[158]@256",
@@ -1070,6 +1122,10 @@
         "sqlite3": {
             "color": "[195]@256",
             "icon": ""
+        },
+        "svelte": {
+            "color": "[158]@256",
+            "icon": ""
         },
         "svg": {
             "color": "BrightPurple",
@@ -1106,6 +1162,10 @@
         "ttf": {
             "color": "cyan",
             "icon": ""
+        },
+        "twig": {
+            "color": "[158]@256",
+            "icon": ""
         },
         "txt": {
             "color": "[153]@256",
