@@ -90,6 +90,10 @@ var Ext = Theme{
 		Color: pkg,
 		Icon:  "\ue77d",
 	},
+	"rpm": Style{
+		Color: pkg,
+		Icon:  "",
+	},
 	"exe": Style{
 		Color: Green,
 		Icon:  "\uF17A",
@@ -148,23 +152,23 @@ var Ext = Theme{
 	},
 	"h": Style{
 		Color: lang,
-		Icon:  "\uE61F",
+		Icon:  "",
 	},
 	"hpp": Style{
 		Color: lang,
-		Icon:  "\uE61F",
+		Icon:  "",
 	},
 	"h++": Style{
 		Color: lang,
-		Icon:  "\uE61F",
+		Icon:  "",
 	},
 	"hh": Style{
 		Color: lang,
-		Icon:  "\uE61F",
+		Icon:  "",
 	},
 	"hxx": Style{
 		Color: lang,
-		Icon:  "\uE61F",
+		Icon:  "",
 	},
 	"cs": Style{
 		Color: lang,
@@ -292,7 +296,7 @@ var Ext = Theme{
 	},
 	"asm": Style{
 		Color: lang,
-		Icon:  "\uFB19",
+		Icon:  "\ue637",
 	},
 	"groovy": Style{
 		Color: lang,
@@ -325,6 +329,30 @@ var Ext = Theme{
 	"hrl": Style{
 		Color: lang,
 		Icon:  "\uE7B1",
+	},
+	"clj": Style{
+		Color: lang,
+		Icon:  "",
+	},
+	"bzl": Style{
+		Color: lang,
+		Icon:  "",
+	},
+	"avro": Style{
+		Color: lang,
+		Icon:  "\ue60b",
+	},
+	"svelte": Style{
+		Color: lang,
+		Icon:  "",
+	},
+	"mustache": Style{
+		Color: lang,
+		Icon:  "\ue60f",
+	},
+	"sass": Style{
+		Color: lang,
+		Icon:  "\ue603",
 	},
 	"coffee": Style{
 		Color: lang,
@@ -361,6 +389,18 @@ var Ext = Theme{
 	"php": Style{
 		Color: lang,
 		Icon:  "\uE73D",
+	},
+	"twig": Style{
+		Color: lang,
+		Icon:  "",
+	},
+	"fs": Style{
+		Color: lang,
+		Icon:  "",
+	},
+	"ex": Style{
+		Color: lang,
+		Icon:  "",
 	},
 	"cmake": Style{
 		Color: lang,
@@ -666,6 +706,10 @@ var Ext = Theme{
 		Color: lang,
 		Icon:  "∫",
 	},
+	"jl": Style{
+		Color: lang,
+		Icon:  "",
+	},
 	"toml": Style{
 		Color: conf,
 		Icon:  "\uE615",
@@ -675,6 +719,10 @@ var Ext = Theme{
 		Icon:  "\uF1C0",
 	},
 	"accdb": Style{
+		Color: db,
+		Icon:  "\uF1C0",
+	},
+	"rdb": Style{
 		Color: db,
 		Icon:  "\uF1C0",
 	},
@@ -829,6 +877,10 @@ var Ext = Theme{
 	"dll": Style{
 		Color: Cyan,
 		Icon:  "\uF121",
+	},
+	"patch": Style{
+		Color: White,
+		Icon:  "",
 	},
 }
 
@@ -1122,6 +1174,14 @@ var Name = map[string]Style{
 	"cache": {
 		Icon:  "\uf49b",
 		Color: White,
+	},
+	"passwd": {
+		Color: Cyan,
+		Icon:  "\uF023",
+	},
+	"vagrantfile": {
+		Color: lang,
+		Icon:  "\uE20F",
 	},
 }
 

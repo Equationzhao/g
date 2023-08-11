@@ -10,7 +10,7 @@ g
 [-#]
 [--CSV|--csv]
 [--access|--ac|--accessed]
-[--all|--la|-l|--long]
+[--all|--la]
 [--block|--blocks]
 [--byline|-1|--oneline|--single-column]
 [--charset]
@@ -99,6 +99,7 @@ g
 [-I|--ignore]=[value]
 [-M|--match]=[value]
 [-N|--literal]
+[-O|--no-owner]
 [-Q|--quote-name]
 [-R|--recurse]
 [-S|--sort-by-size|--sizesort]
@@ -109,6 +110,7 @@ g
 [-d|--directory|--list-dirs]
 [-g]
 [-j|--json]
+[-l|--long]
 [-m|--comma]
 [-n|--limitN|--limit|--topN|--top]=[value]
 [-o]
@@ -129,7 +131,7 @@ g [options] [path]
 
 **--access, --ac, --accessed**: accessed time
 
-**--all, --la, -l, --long**: show all info/use a long listing format
+**--all, --la**: show all info/use a long listing format
 
 **--block, --blocks**: show block size
 
@@ -289,7 +291,7 @@ g [options] [path]
 **--time**: show time
 
 **--time-style**="": time/date format with -l, 
-	Valid timestamp styles are default, iso, long iso, full-iso, locale, 
+	Valid timestamp styles are default, iso, long-iso, full-iso, locale, 
 	custom +FORMAT like date(1). 
 	(default: +%d.%b'%y %H:%M ,like 02.Jan'06 15:04)
 
@@ -323,6 +325,8 @@ g [options] [path]
 
 **-N, --literal**: print entry names without quoting
 
+**-O, --no-owner**: in a long listing, don't print owner names
+
 **-Q, --quote-name**: enclose entry names in double quotes(overridden by --literal)
 
 **-R, --recurse**: recurse into directories
@@ -339,15 +343,17 @@ g [options] [path]
 
 **-d, --directory, --list-dirs**: list directories themselves, not their contents
 
-**-g**: like -all/l, but do not list owner
+**-g**: like -all, but do not list owner
 
 **-j, --json**: output in json format
+
+**-l, --long**: use a long listing format
 
 **-m, --comma**: fill width with a comma separated list of entries
 
 **-n, --limitN, --limit, --topN, --top**="": Limit display to a max of n items (n <=0 means unlimited) (default: unlimited)
 
-**-o**: like -all/l, but do not list group information
+**-o**: like -all, but do not list group information
 
 **-x, --col, --across, --horizontal**: list entries by lines instead of by columns
 
