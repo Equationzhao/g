@@ -10,8 +10,8 @@ require (
 	github.com/gobwas/glob v0.2.3
 	github.com/gookit/color v1.5.4
 	github.com/hako/durafmt v0.0.0-20210608085754-5c1018a4e16b
-	github.com/jedib0t/go-pretty/v6 v6.4.6
-	github.com/junegunn/fzf v0.0.0-20230808051003-84a9c2c11224
+	github.com/jedib0t/go-pretty/v6 v6.4.7
+	github.com/junegunn/fzf v0.0.0-20230903073035-0f50dc848e58
 	github.com/mattn/go-runewidth v0.0.15
 	github.com/olekukonko/ts v0.0.0-20171002115256-78ecb04241c0
 	github.com/panjf2000/ants/v2 v2.8.1
@@ -40,7 +40,7 @@ require (
 	github.com/fatih/color v1.15.0 // indirect
 	github.com/goccy/go-yaml v1.11.0 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
-	github.com/google/uuid v1.3.0 // indirect
+	github.com/google/uuid v1.3.1 // indirect
 	github.com/hashicorp/go-version v1.6.0 // indirect
 	github.com/hokaccha/go-prettyjson v0.0.0-20211117102719-0474bc63780f // indirect
 	github.com/huandu/xstrings v1.4.0 // indirect
@@ -58,10 +58,10 @@ require (
 	github.com/spf13/cast v1.5.1 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/xo/terminfo v0.0.0-20220910002029-abceb7e1c41e // indirect
-	golang.org/x/crypto v0.12.0 // indirect
+	golang.org/x/crypto v0.13.0 // indirect
 	golang.org/x/exp v0.0.0-20230626212559-97b1e661b5df // indirect
 	golang.org/x/net v0.14.0 // indirect
-	golang.org/x/sys v0.11.0 // indirect
+	golang.org/x/sys v0.12.0 // indirect
 	golang.org/x/xerrors v0.0.0-20220907171357-04be3eba64a2 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )

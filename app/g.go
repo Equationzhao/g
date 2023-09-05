@@ -60,7 +60,7 @@ var (
 	pool            *ants.Pool
 )
 
-var Version = "0.13.1"
+var Version = "0.13.2"
 
 var G *cli.App
 

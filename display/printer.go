@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"math"
 	"os"
 	"regexp"
 	"strconv"
@@ -150,63 +149,47 @@ func (f *FitTerminal) Print(i ...*item.FileInfo) {
 }
 
 func (f *FitTerminal) printColumns(strs *[]string) {
-	maxLength, lengths, numCols, numRows := calculateRowCol(strs, 6)
+	stringsArray := *strs
 
-	// if we're forced into a single column, fall back to simple printing (one per line)
-	if numCols == 1 {
-		for _, str := range *strs {
-			_, _ = f.WriteString(str)
-			_ = f.WriteByte('\n')
-		}
-		return
-	}
+	termWidth := getTermWidth()
 
-	// `i` will be a left-to-right index. this will need to get converted to a top-to-bottom index
-	for i := 0; i < numCols*numRows; i++ {
-		// treat output like a "table" with (x, y) coordinates as an intermediate representation
-		// first calculate (x, y) from i
-		x, y := rowIndexToTableCoords(i, numCols)
-		// then convey (x, y) to `j`, the top-to-bottom index
-		j := tableCoordsToColIndex(x, y, numRows)
-
-		// try to access the array, but the table might have more cells than array elements, so only try to access if within bounds
-		strLen := 0
-		str := ""
-		if j < len(lengths) {
-			strLen = lengths[j]
-			str = (*strs)[j]
-		}
-
-		// calculate the amount of padding required
-		numSpacesRequired := maxLength - strLen
-		spaceStr := strings.Repeat(" ", numSpacesRequired+1)
-
-		// print the item itself
-		_, _ = f.WriteString(str)
-		// if we're at the last column, print a line break
-		if x+1 == numCols {
-			_ = f.WriteByte('\n')
-		} else {
-			_, _ = f.WriteString(spaceStr)
+	numColumns := 1
+	maxColumnWidths := make([]int, numColumns)
+	for i := 0; i < len(stringsArray); i++ {
+		width := WidthLen(stringsArray[i])
+		if width > maxColumnWidths[0] {
+			maxColumnWidths[0] = width
 		}
 	}
-}
 
-// maxLength, maxLength, numCols, numRows
-func calculateRowCol(strs *[]string, margin int) (maxLength int, lengths []int, numCols int, numRows int) {
-	// also keep track of each individual length to easily calculate padding
-	lengths = make([]int, 0, len(*strs))
-	for _, str := range *strs {
-		length := WidthLen(str)
-		maxLength = util.Max(maxLength, length)
-		lengths = append(lengths, length)
+	columnSpacing := 2
+
+	maxTotalWidth := 0
+	for i := range maxColumnWidths {
+		maxTotalWidth += maxColumnWidths[i]
+	}
+	numColumns = (termWidth + columnSpacing) / (maxTotalWidth + columnSpacing)
+	if numColumns < 1 {
+		numColumns = 1
 	}
 
-	// see how wide the terminal is
-	width := getTermWidth()
-	// calculate the dimensions of the columns
-	numCols, numRows = calculateTableSize(width, margin, maxLength, len(*strs))
-	return
+	numRows := (len(stringsArray) + numColumns - 1) / numColumns
+
+	for i := 0; i < numRows; i++ {
+		for j := 0; j < numColumns; j++ {
+			index := j*numRows + i
+			if index >= len(stringsArray) {
+				break
+			}
+			s := stringsArray[index]
+			width := WidthLen(s)
+			fmt.Print(s)
+
+			padding := maxColumnWidths[0] - width + columnSpacing
+			fmt.Print(strings.Repeat(" ", padding))
+		}
+		fmt.Println()
+	}
 }
 
 var IncludeHyperlink = false
@@ -282,25 +265,6 @@ func getTermWidth() int {
 		return width
 	}
 */
-
-func calculateTableSize(width, margin, maxLength, numCells int) (int, int) {
-	numCols := (width + margin) / (maxLength + 1)
-	if numCols == 0 {
-		numCols = 1
-	}
-	numRows := int(math.Ceil(float64(numCells) / float64(numCols)))
-	return numCols, numRows
-}
-
-func rowIndexToTableCoords(i, numCols int) (int, int) {
-	x := i % numCols
-	y := i / numCols
-	return x, y
-}
-
-func tableCoordsToColIndex(x, y, numRows int) int {
-	return y + numRows*x
-}
 
 type CommaPrint struct {
 	*Across
@@ -379,48 +343,44 @@ func (a *Across) printRowWithNoSpace(strs *[]string) {
 }
 
 func (a *Across) printRow(strs *[]string) {
-	width := getTermWidth()
+	stringsArray := *strs
 
-	const m = 1
-	strLen := make([]int, len(*strs))
+	termWidth := getTermWidth()
 
-	maxLength := 0
-	for i, str := range *strs {
-		strLen[i] = WidthLen(str)
-		maxLength = util.Max(maxLength, strLen[i])
-	}
-
-	cols := (width + 1) / (maxLength + 1)
-	if cols == 0 {
-		cols = 1
-	}
-
-	colWidth := (width+1)/cols - 1
-
-	for i := 0; i < len(*strs); i += cols {
-		for j := 0; j < cols && i+j < len(*strs); j++ {
-			index := i + j
-			str := (*strs)[index]
-			padding := colWidth - strLen[index]
-			if padding < 0 {
-				padding = 0
-			}
-			if j < cols-1 {
-				_, _ = fmt.Fprintf(a, "%s%s", str, a.stringOf(' ', padding+m))
-			} else {
-				_, _ = fmt.Fprintf(a, "%s%s", str, a.stringOf(' ', padding+1))
-			}
+	numColumns := 1
+	maxColumnWidths := make([]int, numColumns)
+	for i := 0; i < len(stringsArray); i++ {
+		width := WidthLen(stringsArray[i])
+		if width > maxColumnWidths[0] {
+			maxColumnWidths[0] = width
 		}
-		_ = a.WriteByte('\n')
 	}
-}
 
-func (a *Across) stringOf(ch rune, count int) string {
-	s := make([]rune, count)
-	for i := 0; i < count; i++ {
-		s[i] = ch
+	columnSpacing := 2
+
+	maxTotalWidth := 0
+	for i := range maxColumnWidths {
+		maxTotalWidth += maxColumnWidths[i]
 	}
-	return string(s)
+	numColumns = (termWidth + columnSpacing) / (maxTotalWidth + columnSpacing)
+	if numColumns < 1 {
+		numColumns = 1
+	}
+
+	for i := 0; i < len(stringsArray); i += numColumns {
+		for j := 0; j < numColumns; j++ {
+			if i+j >= len(stringsArray) {
+				break
+			}
+			s := stringsArray[i+j]
+			width := WidthLen(s)
+			fmt.Print(s)
+
+			padding := maxColumnWidths[0] - width + columnSpacing
+			fmt.Print(strings.Repeat(" ", padding))
+		}
+		fmt.Println()
+	}
 }
 
 type Zero struct {
