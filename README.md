@@ -71,6 +71,19 @@ brew install g-ls
 
 just download from [release page](https://github.com/Equationzhao/g/releases), extract the gzip and add the executable file to your `PATH`
 
+## Recommended terminal
+
+macOS:
+- [Iterm2](https://iterm2.com/)
+- [Warp](https://www.warp.dev)
+
+Windows:
+- [Windows Terminal](https://github.com/microsoft/terminal)
+
+cross-platform:
+- [Hyper](https://hyper.is/)
+- [WezTerm](https://wezfurlong.org/wezterm/index.html)
+
 ## Usage
 
 ```bash
@@ -301,9 +314,23 @@ source ~/.g.nu
 
 [theme](THEME.md)
 
+## TODO
+- [ ] Version sort
+- [ ] Git sort
+- [ ] Print security context
+- [ ] $OLDPWD ?
+
 ## Logo
 
 created by bing
+
+## Alternatives
+
+this project is highly inspired by following projects that you wanna try!
+
+- [exa](https://github.com/ogham/exa)
+- [lsd](https://github.com/lsd-rs/lsd)
+- [ls-go](https://github.com/acarl005/ls-go)
 
 ## [![Repography logo](https://images.repography.com/logo.svg)](https://repography.com) / Recent activity [![Time period](https://images.repography.com/35290882/Equationzhao/g/recent-activity/d06TKxKV8-Bc1zgTdodyAUFkmX-KdMR5ydV1GeE2jJY/r-OWQ7WewQlCCz2r7byT3_mCR0x8LTCx95ZyLfOY7CI_badge.svg)](https://repography.com)
 

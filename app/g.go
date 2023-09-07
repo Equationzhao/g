@@ -277,10 +277,18 @@ func init() {
 
 				stat, err := os.Stat(path[i])
 				if err != nil {
-					// no match
-					if fuzzy {
+					base := filepath.Base(path[i])
+					if base == "-" {
+						path[i] = os.Getenv("OLDPWD")
+						stat, err = os.Stat(path[i])
+						if err != nil {
+							checkErr(err, "")
+							seriousErr = true
+							continue
+						}
+					} else if fuzzy { // no match
 						// start fuzzy search
-						if newPath, err := fuzzyPath(filepath.Base(path[i])); err != nil {
+						if newPath, err := fuzzyPath(base); err != nil {
 							_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(err.Error()))
 							minorErr = true
 						} else {

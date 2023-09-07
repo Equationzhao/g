@@ -153,22 +153,19 @@ func (f *FitTerminal) printColumns(strs *[]string) {
 
 	termWidth := getTermWidth()
 
-	numColumns := 1
-	maxColumnWidths := make([]int, numColumns)
+	maxColumnWidths := 0
 	for i := 0; i < len(stringsArray); i++ {
 		width := WidthLen(stringsArray[i])
-		if width > maxColumnWidths[0] {
-			maxColumnWidths[0] = width
+		if width > maxColumnWidths {
+			maxColumnWidths = width
 		}
 	}
 
 	columnSpacing := 2
 
 	maxTotalWidth := 0
-	for i := range maxColumnWidths {
-		maxTotalWidth += maxColumnWidths[i]
-	}
-	numColumns = (termWidth + columnSpacing) / (maxTotalWidth + columnSpacing)
+	maxTotalWidth += maxColumnWidths
+	numColumns := (termWidth + columnSpacing) / (maxTotalWidth + columnSpacing)
 	if numColumns < 1 {
 		numColumns = 1
 	}
@@ -183,12 +180,11 @@ func (f *FitTerminal) printColumns(strs *[]string) {
 			}
 			s := stringsArray[index]
 			width := WidthLen(s)
-			fmt.Print(s)
-
-			padding := maxColumnWidths[0] - width + columnSpacing
-			fmt.Print(strings.Repeat(" ", padding))
+			_, _ = f.WriteString(s)
+			padding := maxColumnWidths - width + columnSpacing
+			_, _ = f.WriteString(strings.Repeat(" ", padding))
 		}
-		fmt.Println()
+		_ = f.WriteByte('\n')
 	}
 }
 
@@ -347,22 +343,19 @@ func (a *Across) printRow(strs *[]string) {
 
 	termWidth := getTermWidth()
 
-	numColumns := 1
-	maxColumnWidths := make([]int, numColumns)
+	maxColumnWidths := 0
 	for i := 0; i < len(stringsArray); i++ {
 		width := WidthLen(stringsArray[i])
-		if width > maxColumnWidths[0] {
-			maxColumnWidths[0] = width
+		if width > maxColumnWidths {
+			maxColumnWidths = width
 		}
 	}
 
 	columnSpacing := 2
 
 	maxTotalWidth := 0
-	for i := range maxColumnWidths {
-		maxTotalWidth += maxColumnWidths[i]
-	}
-	numColumns = (termWidth + columnSpacing) / (maxTotalWidth + columnSpacing)
+	maxTotalWidth += maxColumnWidths
+	numColumns := (termWidth + columnSpacing) / (maxTotalWidth + columnSpacing)
 	if numColumns < 1 {
 		numColumns = 1
 	}
@@ -374,12 +367,12 @@ func (a *Across) printRow(strs *[]string) {
 			}
 			s := stringsArray[i+j]
 			width := WidthLen(s)
-			fmt.Print(s)
+			_, _ = a.WriteString(s)
 
-			padding := maxColumnWidths[0] - width + columnSpacing
-			fmt.Print(strings.Repeat(" ", padding))
+			padding := maxColumnWidths - width + columnSpacing
+			_, _ = a.WriteString(strings.Repeat(" ", padding))
 		}
-		fmt.Println()
+		_ = a.WriteByte('\n')
 	}
 }
 
