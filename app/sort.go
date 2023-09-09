@@ -19,7 +19,7 @@ var sortingFlags = []cli.Flag{
 	ascending and case insensitive, 
 	field beginning with Uppercase is case sensitive,	
 	available fields: 	
-	   nature(default),none(nosort),
+	nature(default),none(nosort),
 	   name,.name(sorts by name without a leading dot),	
 	   size,time,owner,group,extension,inode,width,mime. 	
 	   following '-descend' to sort descending`,
@@ -147,8 +147,10 @@ var sortingFlags = []cli.Flag{
 					sort.AddOption(sorter.ByInodeDescend)
 				case "inode":
 					sort.AddOption(sorter.ByInodeAscend)
-				//	todo
-				//	case "v", "version":
+				case "version":
+					sort.AddOption(sorter.ByVersionAscend)
+				case "version-descend":
+					sort.AddOption(sorter.ByVersionDescend)
 				default:
 					return fmt.Errorf("unknown sort field: %s", s)
 				}
@@ -360,6 +362,15 @@ var sortingFlags = []cli.Flag{
 			return nil
 		},
 		Category: "SORTING",
+	},
+	&cli.BoolFlag{
+		Name:    "versionsort",
+		Aliases: []string{"sort-by-version"},
+		Usage:   "sort by version numbers, ascending",
+		Action: func(context *cli.Context, b bool) error {
+			sort.AddOption(sorter.ByVersionAscend)
+			return nil
+		},
 	},
 	&cli.BoolFlag{
 		Name:               "U",

@@ -643,7 +643,7 @@ func (t *TreePrinter) Print(s ...*item.FileInfo) {
 	// and the order is the same as the input
 	total := len(s)
 
-	buildTree := tree.NewTree(tree.WithCap(total))
+	buildTree := tree.NewTree(tree.WithCap(total / 2))
 	level := make(map[string][]*item.FileInfo)
 	for _, v := range s {
 		level[string(v.Cache["level"])] = append(level[string(v.Cache["level"])], v)

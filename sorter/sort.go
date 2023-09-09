@@ -3,6 +3,7 @@ package sorter
 import (
 	"os"
 	"path/filepath"
+	"regexp"
 	"strconv"
 	"strings"
 
@@ -476,4 +477,72 @@ func byNameWidth(a, b *item.FileInfo, Ascend bool) int {
 		return len(a.Name()) - len(b.Name())
 	}
 	return len(b.Name()) - len(a.Name())
+}
+
+func ByVersionAscend(a, b *item.FileInfo) int {
+	return byVersion(a, b, true)
+}
+
+func ByVersionDescend(a, b *item.FileInfo) int {
+	return byVersion(a, b, false)
+}
+
+// compare version number of two files
+// like 1.10.0 > 1.9.0
+func byVersion(a, b *item.FileInfo, ascend bool) int {
+	av, bv := getVersion(a.Name()), getVersion(b.Name())
+	if ascend {
+		return av.Compare(bv)
+	}
+	return bv.Compare(av)
+}
+
+type version struct {
+	major, minor, patch int
+}
+
+func (v *version) Compare(other *version) int {
+	if v.major != other.major {
+		return cmp.Compare(v.major, other.major)
+	}
+	if v.minor != other.minor {
+		return cmp.Compare(v.minor, other.minor)
+	}
+	return cmp.Compare(v.patch, other.patch)
+}
+
+var v3 = regexp.MustCompile(`\d+\.\d+\.\d+`)
+var v2 = regexp.MustCompile(`\d+\.\d+`)
+
+// extract version number
+// possible formats:
+// name_1.0.0.ext
+// name-1.0.0.ext
+func getVersion(name string) *version {
+	v := &version{}
+	if len(name) == 0 {
+		return v
+	}
+
+	isV3 := true
+	vs := v3.FindString(name)
+	if len(vs) == 0 {
+		isV3 = false
+		vs = v2.FindString(name)
+	}
+	if len(vs) == 0 {
+		return v
+	}
+
+	vsAfterSplit := strings.Split(vs, ".")
+	if isV3 {
+		v.major, _ = strconv.Atoi(vsAfterSplit[0])
+		v.minor, _ = strconv.Atoi(vsAfterSplit[1])
+		v.patch, _ = strconv.Atoi(vsAfterSplit[2])
+	} else {
+		v.major, _ = strconv.Atoi(vsAfterSplit[0])
+		v.minor, _ = strconv.Atoi(vsAfterSplit[1])
+	}
+
+	return v
 }
