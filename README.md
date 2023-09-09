@@ -331,6 +331,7 @@ source ~/.g.nu
 - [ ] Git sort
 - [ ] Print security context
 - [x] $OLDPWD
+- [ ] Color Support for html/markdown
 
 ## Logo
 
