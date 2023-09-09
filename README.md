@@ -16,7 +16,7 @@
 ![AUR version](https://img.shields.io/aur/version/g-ls?color=1793d1&label=g-ls&logo=arch-linux&style=for-the-badge)
 
 <p align="center">
-  <a href="README_EN.md">View this document in English</a>
+<a href="README_EN.md">View this document in English</a>
 </p>
 
 
@@ -149,7 +149,7 @@ g -show-hidden
 g -a  
 ```
 
- 只显示目录
+只显示目录
 
 ```bash
 g -dir 
@@ -233,7 +233,7 @@ g -git
 g -git-status
 ```
 
- 表格式输出
+表格式输出
 
 ```bash
 g -tb
@@ -258,7 +258,7 @@ g -md | glow
 
 ## Shell 脚本
 
- 生成 shell 脚本
+生成 shell 脚本
 
 ```bash
 g -init bash/zsh/fish/pwsh
@@ -327,7 +327,7 @@ source ~/.g.nu
 [theme](THEME.md)
 
 ## TODO
-- [ ] Version sort
+- [x] Version sort
 - [ ] Git sort
 - [ ] Print security context
 - [x] $OLDPWD
@@ -347,7 +347,7 @@ created by bing
 
 ## 查看帖子
 
--   [deepin bbs]()
+- [deepin bbs](https://bbs.deepin.org/post/261954)
 
 ## [![Repography logo](https://images.repography.com/logo.svg)](https://repography.com) / Recent activity [![Time period](https://images.repography.com/35290882/Equationzhao/g/recent-activity/d06TKxKV8-Bc1zgTdodyAUFkmX-KdMR5ydV1GeE2jJY/r-OWQ7WewQlCCz2r7byT3_mCR0x8LTCx95ZyLfOY7CI_badge.svg)](https://repography.com)
 

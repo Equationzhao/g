@@ -322,7 +322,7 @@ source ~/.g.nu
 [theme](THEME.md)
 
 ## TODO
-- [ ] Version sort
+- [x] Version sort
 - [ ] Git sort
 - [ ] Print security context
 - [x] $OLDPWD
