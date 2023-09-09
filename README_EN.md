@@ -2,7 +2,7 @@
 
 <div style="text-align: center;"><img src="logo.jpg" width="400"  alt="logo"/></div>
 
-> 一个强大的 ls 工具
+> a powerful ls
 
 [![CodeFactor](https://www.codefactor.io/repository/github/equationzhao/g/badge/master)](https://www.codefactor.io/repository/github/equationzhao/g/overview/master)
 [![Go Report Card](https://goreportcard.com/badge/github.com/Equationzhao/g)](https://goreportcard.com/report/github.com/Equationzhao/g)
@@ -15,36 +15,31 @@
 ![windows](https://img.shields.io/badge/Windows-0078D6?style=for-the-badge&logo=windows&logoColor=white)
 ![AUR version](https://img.shields.io/aur/version/g-ls?color=1793d1&label=g-ls&logo=arch-linux&style=for-the-badge)
 
-<p align="center">
-  <a href="README_EN.md">View this document in English</a>
-</p>
+g is a ls alternative with features:
 
+1. display items with type-specific icons and colors that are easy to be customized
+2. display in various layouts ( grid/across/byline/zero/comma/table/html/json/markdown/tree )
+3. user-friendly options with many aliases
+4. check file git-status when listing entries
+5. highly customizable sort option
+6. cross-platform ( Linux/Windows/MacOS )
+7. option to fuzzy match the path like [`zoxide`](https://github.com/ajeetdsouza/zoxide) with [`fzf`](https://github.com/junegunn/fzf) algorithm
 
-g 是一个 ls 替代品，拥有下面一些功能：
-
-1. 显示带有类型特定图标和颜色的条目，并且易于更改
-2. 有丰富的输出格式  ( grid/across/byline/zero/comma/table/html/json/markdown/tree )
-3.  用户友好的选项
-4. 支持显示 git status 
-5. 丰富且可自定义的排序选项
-6. 跨平台 ( Linux/Windows/MacOS )
-7. 支持使用[`fzf`](https://github.com/junegunn/fzf) 算法，像 [`zoxide`](https://github.com/ajeetdsouza/zoxide) 一样模糊匹配路径 
-
-## 截图
+## Screenshots
 
 ![image](how-g-works.gif)
 
-## 安装
+## Install
 
-### 源码安装
+### From source
 
-要求 go version >= 1.20
+go version required >= 1.20
 
 ```bash
 go install -ldflags="-s -w"  github.com/Equationzhao/g@latest
 ```
 
-或者 clone 这个仓库 (nightly build)
+or Clone this repo (nightly build)
 
 ```bash
 git clone github.com/Equationzhao/g
@@ -53,10 +48,10 @@ go build -ldflags="-s -w" # use -s -w to shrink size
 # then add the executable file to your `PATH`
 ```
 
-### 通过包管理器
+### Via package manager
 
 ![archlinux](https://img.shields.io/badge/Arch_Linux-1793D1?logo=arch-linux&logoColor=white)
-用户可以通过 AUR 安装 `g`
+user can install `g` from AUR
 
 ```bash
 yay -S g-ls
@@ -72,7 +67,7 @@ brew tap equationzhao/core git@github.com:Equationzhao/homebrew-g.git
 brew install g-ls
 ```
 
-### 二进制文件
+### Pre-built executable
 
 #### deb
 ```bash
@@ -80,9 +75,9 @@ sudo dpkg -i g_$version_$arch.deb
 ```
 
 #### tar,gz/zip
-从 [release page](https://github.com/Equationzhao/g/releases) 下载对应平台的文件, 解压 gzip 并将可执行文件添加到 `PATH`
+just download from [release page](https://github.com/Equationzhao/g/releases), extract the gzip and add the executable file to your `PATH`
 
-## 推荐使用的终端
+## Recommended terminal
 
 macOS:
 - [Iterm2](https://iterm2.com/)
@@ -95,53 +90,53 @@ cross-platform:
 - [Hyper](https://hyper.is/)
 - [WezTerm](https://wezfurlong.org/wezterm/index.html)
 
-## 用法
+## Usage
 
 ```bash
 g path(s)
 ```
 
-显示图标
+with icon
 
 ```bash
 g -icons
 ```
 
-显示修改(默认)时间
+with mod(default) time
 
 ```bash
 g -time    
 ```
 
-显示 访问/创建/修改 时间
+with access/create/mod time
 
 ```bash
 g -time -time-type=access
 g -time -ac/cr/mod
 ```
 
-显示文件权限
+with fileperm
 
 ```bash
 g -permission 
 g -octal-perm # show octal permission like 0777
 ```
 
-显示用户/群组
+with owner/group
 
 ```bash
 g -owner 
 g -group 
 ```
 
-显示文件大小
+with size
 
 ```bash
 g -size 
 g -size -recusive-size # show size of dir recursively
 ```
 
-显示所有文件，包括隐藏文件
+show all files, including hidden files
 
 ```bash
 g -sh 
@@ -149,13 +144,13 @@ g -show-hidden
 g -a  
 ```
 
- 只显示目录
+show dir only
 
 ```bash
 g -dir 
 ```
 
-按行显示
+list by line
 
 ```bash
 g -1           
@@ -163,7 +158,7 @@ g -oneline
 g -single-column 
 ```
 
-显示有指定拓展名的文件
+show file only with target ext
 
 ```bash
 g -ext=<target ext(s)> 
@@ -171,20 +166,20 @@ g -ext=<target ext(s)>
 # g -ext=go,md
 ```
 
-递归显示目录
+recurse into directories
 
 ```bash
 g -R     
 g -recurse 
 ```
 
-限制在 树/递归 模式下的 递归深度 (默认: 无限制)
+limit depth in tree/recurse (default: no limit)
 
 ```bash
 g -R -depth=<level> 
 ```
 
-模糊搜索
+fuzzy search
 
 ```bash
 g -f   
@@ -194,7 +189,7 @@ g -fuzzy
 # pathindex.go
 ```
 
-禁用索引更新
+disable index update
 
 ```bash
 g -di            
@@ -202,14 +197,14 @@ g -no-update
 g -disable-index 
 ```
 
-禁用颜色
+disable color
 
 ```bash
 g -no-color  
 g -colorless 
 ```
 
-设置颜色
+set color
 
 ```bash
 g -color=always 
@@ -220,33 +215,33 @@ g -color=256/8bit       # 256-color
 g -color=16m/24bit/true-color   # 24-bit
 ```
 
-显示校验和 (md5,sha1,sha224,sha256,sha384,sha512,crc32)
+show checksum (md5,sha1,sha224,sha256,sha384,sha512,crc32)
 
 ```bash
 g -cs -ca=sha256 
 ```
 
-显示 git status
+show git status
 
 ```bash
 g -git     
 g -git-status
 ```
 
- 表格式输出
+output in table
 
 ```bash
 g -tb
 ```
 
-树状输出
+list in tree
 
 ```bash
 g -tree
 ```
 
-以 markdown 格式输出, 并用 [glow](github.com/charmbracelet/glow) 渲染
-( 不支持颜色 )
+output in markdown, and render with [glow](github.com/charmbracelet/glow)
+(colors are not supported in markdown )
 
 ```bash
 g -md | glow 
@@ -256,9 +251,9 @@ g -md | glow
 
 ...
 
-## Shell 脚本
+## Shell scripts
 
- 生成 shell 脚本
+generate shell scripts
 
 ```bash
 g -init bash/zsh/fish/pwsh
@@ -295,7 +290,7 @@ g --init fish | source
 Invoke-Expression (& { (g --init powershell | Out-String) })
 ```
 
-使用 `echo $profile`命令查找配置文件路径
+use command `echo $profile` to find your profile path
 
 ### nushell
 
@@ -318,11 +313,11 @@ source ~/.g.nu
 # alias g = ^g
 ```
 
-## 更多选项
+## More options
 
-[g.md](g.md)  或查看 [主页](g.equationzhao.space)
+[g.md](g.md) or check [g.equationzhao.space](g.equationzhao.space)
 
-## 自定义主题
+## Custom theme
 
 [theme](THEME.md)
 
@@ -336,17 +331,13 @@ source ~/.g.nu
 
 created by bing
 
-## 其他选择
+## Alternatives
 
-本项目受到以下项目的启发，你也许想试试
+this project is highly inspired by following projects that you wanna try!
 
-- [exa](https://github.com/ogham/exa) 或者 [eza](https://github.com/eza-community/eza)
+- [exa](https://github.com/ogham/exa) or [eza](https://github.com/eza-community/eza)
 - [lsd](https://github.com/lsd-rs/lsd)
 - [ls-go](https://github.com/acarl005/ls-go)
-
-## 查看帖子
-
--   [deepin bbs]()
 
 ## [![Repography logo](https://images.repography.com/logo.svg)](https://repography.com) / Recent activity [![Time period](https://images.repography.com/35290882/Equationzhao/g/recent-activity/d06TKxKV8-Bc1zgTdodyAUFkmX-KdMR5ydV1GeE2jJY/r-OWQ7WewQlCCz2r7byT3_mCR0x8LTCx95ZyLfOY7CI_badge.svg)](https://repography.com)
 
