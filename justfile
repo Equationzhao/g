@@ -2,7 +2,8 @@
 latest := `git describe --abbrev=0 --tags | sed 's/v//'`
 ldflags := "-ldflags='-s -w'"
 
-build: # build binaries for all platforms
+# build binaries for all platforms
+build: 
     # build the binary in build/
     # Linux macOS Windows
     # 386 amd64 arm arm64
@@ -28,7 +29,8 @@ build: # build binaries for all platforms
     upx build/g-windows-amd64.exe
     upx build/g-windows-386.exe
 
-compress: # compress the binaries for all platforms
+# compress the binaries for all platforms
+compress: 
     # g_OS_ARCH.tar.gz or g_Windows_ARCH.zip
     tar -zcvf build/g-Linux-386.tar.gz build/g-linux-386
     tar -zcvf build/g-Linux-amd64.tar.gz build/g-linux-amd64
@@ -43,7 +45,8 @@ compress: # compress the binaries for all platforms
     zip -r build/g-Windows-arm64.zip build/g-windows-arm64.exe
     zip -r build/g-Windows-arm.zip build/g-windows-arm.exe
 
-deb: # build deb package for all ARCH
+# build deb package for all ARCH
+deb: 
     # g_VERSION_ARCH.deb
     # |__DEBIAN
     # |  |__control
@@ -122,15 +125,18 @@ deb: # build deb package for all ARCH
     dpkg-deb -b build/g_{{latest}}_arm
     rm -rf build/g_{{latest}}_arm
 
-checksum: # generate the checksum file for all build files
+# generate the checksum file for all build files
+checksum: 
     shasum -a 256 build/* > build/checksum.txt
 
-release: # release to github
+# release to github
+release: 
     gh release create v{{latest}} build/*
 
 url := "https://github.com/Equationzhao/g"
 
-aur: # update aur 
+# update aur 
+aur: 
     # download the latest source code from {{url}}/"archive/refs/tags/v{{latest}}.tar.gz"
     #!/usr/bin/env bash
     wget -c {{url}}/archive/refs/tags/v{{latest}}.tar.gz -O v{{latest}}.tar.gz
@@ -142,13 +148,15 @@ aur: # update aur
     # update .SRCINFO
     sed -i bak "s/pkgver = .*/pkgver = {{latest}}/g" ../g-ls/.SRCINFO
     sed -i bak "s/sha256sums = .*/sha256sums = '$(shasum -a 256 v{{latest}}.tar.gz | choose 0)'/g" ../g-ls/.SRCINFO
-
+    
+    cd ../g-ls
     # input git commit message
-    git add -u
-    git commit
-    git push
+    cd ../g-ls && git add -u
+    cd ../g-ls && git commit
+    cd ../g-ls && git push
 
-brew: # update homebrew
+# update homebrew
+brew: 
     # class GLs < Formula
     #   desc "a powerfull cross-platform ls"
     #   homepage "g.equationzhao.space"
@@ -161,26 +169,32 @@ brew: # update homebrew
     #     bin.install "g"
     #   end
     # end
+    wget -c {{url}}/archive/refs/tags/v{{latest}}.tar.gz -O v{{latest}}.tar.gz
     sed -i bak "s#url .*#url \"{{url}}/archive/refs/tags/v{{latest}}.tar.gz\" , :tag => \"v{{latest}}\"#g" ../homebrew-g/g-ls.rb
     sed -i bak "s/sha256 .*/sha256 \"$(shasum -a 256 v{{latest}}.tar.gz | choose 0)\"/g" ../homebrew-g/g-ls.rb
-    git add -u
-    git commit
-    git push
+    cd ../homebrew-g
+    cd ../homebrew-g && git add -u
+    cd ../homebrew-g && git commit
+    cd ../homebrew-g && git push
 
 all : build compress deb checksum 
 
-clean: # clean the build directory
+# clean the build directory
+clean: 
     rm -rf build
 
-format: # format the code
+# format the code
+format: 
     gofumpt -w -l .
 
-doc: # generate the documentation
+# generate the documentation
+doc: 
     go build -tags 'doc'
     ./g 
     rm g
 
-theme: # generate the theme
+# generate the theme
+theme: 
     go build -tags 'theme'
     ./g 
     rm g
