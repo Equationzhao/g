@@ -1,23 +1,32 @@
 # get the latest git tag like v0.14.0 and remove the prefix v
 latest := `git describe --abbrev=0 --tags | sed 's/v//'`
+ldflags := "-ldflags='-s -w'"
 
 build: # build binaries for all platforms
     # build the binary in build/
     # Linux macOS Windows
     # 386 amd64 arm arm64
     mkdir -p build
-    CGO_ENABLED=0 GOOS=linux GOARCH=386 go build -o build/g-linux-386
-    CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o build/g-linux-amd64
-    CGO_ENABLED=0 GOOS=linux GOARCH=arm go build -o build/g-linux-arm
-    CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -o build/g-linux-arm64
+    CGO_ENABLED=0 GOOS=linux GOARCH=386     go build {{ldflags}} -o build/g-linux-386
+    CGO_ENABLED=0 GOOS=linux GOARCH=amd64   go build {{ldflags}} -o build/g-linux-amd64
+    CGO_ENABLED=0 GOOS=linux GOARCH=arm     go build {{ldflags}} -o build/g-linux-arm
+    CGO_ENABLED=0 GOOS=linux GOARCH=arm64   go build {{ldflags}} -o build/g-linux-arm64
 
-    CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -o build/g-darwin-amd64
-    CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build -o build/g-darwin-arm64
+    CGO_ENABLED=0 GOOS=darwin GOARCH=amd64  go build {{ldflags}} -o build/g-darwin-amd64
+    CGO_ENABLED=0 GOOS=darwin GOARCH=arm64  go build {{ldflags}} -o build/g-darwin-arm64
 
-    CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -o build/g-windows-amd64.exe
-    CGO_ENABLED=0 GOOS=windows GOARCH=386 go build -o build/g-windows-386.exe
-    CGO_ENABLED=0 GOOS=windows GOARCH=arm64 go build -o build/g-windows-arm64.exe
-    CGO_ENABLED=0 GOOS=windows GOARCH=arm go build -o build/g-windows-arm.exe
+    CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build {{ldflags}} -o build/g-windows-amd64.exe
+    CGO_ENABLED=0 GOOS=windows GOARCH=386   go build {{ldflags}} -o build/g-windows-386.exe
+    CGO_ENABLED=0 GOOS=windows GOARCH=arm64 go build {{ldflags}} -o build/g-windows-arm64.exe
+    CGO_ENABLED=0 GOOS=windows GOARCH=arm   go build {{ldflags}} -o build/g-windows-arm.exe
+
+    upx build/g-linux-386
+    upx build/g-linux-amd64
+    upx build/g-linux-arm
+    upx build/g-linux-arm64
+    upx build/g-darwin-amd64
+    upx build/g-windows-amd64.exe
+    upx build/g-windows-386.exe
 
 compress: # compress the binaries for all platforms
     # g_OS_ARCH.tar.gz or g_Windows_ARCH.zip
