@@ -167,6 +167,8 @@ brew: # update homebrew
     git commit
     git push
 
+all : build compress deb checksum 
+
 clean: # clean the build directory
     rm -rf build
 
