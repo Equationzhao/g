@@ -1,0 +1,16 @@
+# ide 
+.vscode/
+.idea/
+
+# system
+.DS_Store
+
+# binary
+g
+g.exe
+build/
+
+# compress
+*.gz
+
+example/

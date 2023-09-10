@@ -511,8 +511,10 @@ func (v *version) Compare(other *version) int {
 	return cmp.Compare(v.patch, other.patch)
 }
 
-var v3 = regexp.MustCompile(`\d+\.\d+\.\d+`)
-var v2 = regexp.MustCompile(`\d+\.\d+`)
+var (
+	v3 = regexp.MustCompile(`\d+\.\d+\.\d+`)
+	v2 = regexp.MustCompile(`\d+\.\d+`)
+)
 
 // extract version number
 // possible formats:

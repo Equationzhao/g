@@ -87,6 +87,7 @@ g
 [--time]
 [--total-size]
 [--uid]
+[--versionsort|--sort-by-version]
 [--width]
 [--zero|-0]
 [-A|--almost-all]
@@ -265,7 +266,7 @@ g [options] [path]
 	ascending and case insensitive, 
 	field beginning with Uppercase is case sensitive,	
 	available fields: 	
-	   nature(default),none(nosort),
+	nature(default),none(nosort),
 	   name,.name(sorts by name without a leading dot),	
 	   size,time,owner,group,extension,inode,width,mime. 	
 	   following '-descend' to sort descending
@@ -300,6 +301,8 @@ g [options] [path]
 **--total-size**: show total size
 
 **--uid**: show uid instead of username [sid in windows]
+
+**--versionsort, --sort-by-version**: sort by version numbers, ascending
 
 **--width**: sort by entry name width
 
