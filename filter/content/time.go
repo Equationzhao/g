@@ -1,6 +1,7 @@
 package content
 
 import (
+	"runtime"
 	"time"
 
 	"github.com/Equationzhao/g/filter"
@@ -33,6 +34,14 @@ func (r *RelativeTimeEnabler) Enable(renderer *render.Renderer) filter.ContentOp
 		case "access":
 			t = osbased.AccessTime(info)
 			timeType = timeAccessed
+		case "birth":
+			timeType = timeBirth
+			// if darwin, check birth time
+			if runtime.GOOS == "darwin" {
+				t = osbased.BirthTime(info)
+			} else {
+				t = osbased.CreateTime(info)
+			}
 		default:
 			t = osbased.ModTime(info)
 			timeType = timeModified
@@ -46,10 +55,11 @@ const (
 	timeModified = "Modified"
 	timeCreated  = "Created"
 	timeAccessed = "Accessed"
+	timeBirth    = "Birth"
 )
 
 // EnableTime enables time
-// accepts ['mod', 'modified', 'create', 'access']
+// accepts ['mod', 'modified', 'create', 'access', 'birth']
 func EnableTime(format string, mode string, renderer *render.Renderer) filter.ContentOption {
 	return func(info *item.FileInfo) (string, string) {
 		// get mod time/ create time/ access time
@@ -65,6 +75,14 @@ func EnableTime(format string, mode string, renderer *render.Renderer) filter.Co
 		case "access", "ac":
 			t = osbased.AccessTime(info)
 			timeType = timeAccessed
+		case "birth":
+			timeType = timeBirth
+			// if darwin, check birth time
+			if runtime.GOOS == "darwin" {
+				t = osbased.BirthTime(info)
+			} else {
+				t = osbased.CreateTime(info)
+			}
 		default:
 			t = osbased.ModTime(info)
 			timeType = timeModified

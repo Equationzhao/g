@@ -21,3 +21,7 @@ func CreateTime(a os.FileInfo) time.Time {
 	ctim := a.Sys().(*syscall.Stat_t).Ctim
 	return time.Unix(ctim.Sec, ctim.Nsec)
 }
+
+func BirthTime(a os.FileInfo) time.Time {
+	return CreateTime(a)
+}

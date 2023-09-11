@@ -53,11 +53,11 @@ var viewFlag = []cli.Flag{
 	},
 	&cli.StringSliceFlag{
 		Name:    "time-type",
-		Usage:   "time type, mod(default), create, access, all",
+		Usage:   "time type, mod(default), create, access, all, birth[macOS only]",
 		EnvVars: []string{"TIME_TYPE"},
 		Action: func(context *cli.Context, ss []string) error {
 			timeType = make([]string, 0, len(ss))
-			accepts := []string{"mod", "modified", "create", "cr", "access", "ac"}
+			accepts := []string{"mod", "modified", "create", "cr", "access", "ac", "birth"}
 			for _, s := range ss {
 				if slices.Contains(accepts, strings.ToLower(s)) {
 					timeType = append(timeType, s)
@@ -106,6 +106,18 @@ var viewFlag = []cli.Flag{
 		Action: func(context *cli.Context, b bool) error {
 			if b {
 				timeType = append(timeType, "create")
+			}
+			return nil
+		},
+		Category: "VIEW",
+	},
+	&cli.BoolFlag{
+		Name:               "birth",
+		Usage:              "birth time[macOS only]",
+		DisableDefaultText: true,
+		Action: func(context *cli.Context, b bool) error {
+			if b {
+				timeType = append(timeType, "birth")
 			}
 			return nil
 		},

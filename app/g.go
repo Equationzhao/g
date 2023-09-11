@@ -354,6 +354,9 @@ func init() {
 					// remove non-display items
 					infos = itemFilter.Filter(infos...)
 
+					if tree {
+						infos[0].Cache["level"] = []byte("0")
+					}
 					goto final
 				}
 

@@ -21,3 +21,7 @@ func CreateTime(a os.FileInfo) time.Time {
 	atim := a.Sys().(*syscall.Win32FileAttributeData).CreationTime
 	return time.Unix(0, atim.Nanoseconds())
 }
+
+func BirthTime(a os.FileInfo) time.Time {
+	return CreateTime(a)
+}
