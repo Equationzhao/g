@@ -1155,6 +1155,10 @@
             "color": "white",
             "icon": ""
         },
+        "torrent": {
+            "color": "green",
+            "icon": ""
+        },
         "ts": {
             "color": "[158]@256",
             "icon": ""

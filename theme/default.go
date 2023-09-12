@@ -882,6 +882,10 @@ var Ext = Theme{
 		Color: White,
 		Icon:  "",
 	},
+	"torrent": Style{
+		Color: Green,
+		Icon:  "\ueac2",
+	},
 }
 
 var Special = map[string]Style{
