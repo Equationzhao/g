@@ -8,6 +8,8 @@
 # binary
 g
 g.exe
+g-git
+g-git.exe
 build/
 
 # compress
