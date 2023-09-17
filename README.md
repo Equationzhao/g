@@ -345,6 +345,11 @@ created by bing
 - [lsd](https://github.com/lsd-rs/lsd)
 - [ls-go](https://github.com/acarl005/ls-go)
 
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=Equationzhao/g&type=Date)](https://star-history.com/#Equationzhao/g&Date)
+
+
 ## 查看帖子
 
 - [deepin bbs](https://bbs.deepin.org/post/261954)
