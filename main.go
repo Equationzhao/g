@@ -50,8 +50,11 @@ func main() {
 					os.Args, match,
 				)
 				os.Args = slices.Insert(os.Args, 1, defaultArgs.Args...)
-			} else if _, ok := err.(config.ErrReadConfig); ok {
-				_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(err.Error()))
+			} else {
+				var errReadConfig config.ErrReadConfig
+				if errors.As(err, &errReadConfig) {
+					_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(err.Error()))
+				}
 			}
 		} else {
 			// contains -no-config
