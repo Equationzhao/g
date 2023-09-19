@@ -7,10 +7,10 @@ import (
 	"os"
 	"path/filepath"
 	"runtime/debug"
+	"slices"
 
 	. "github.com/Equationzhao/g/app"
 	"github.com/Equationzhao/g/config"
-	"github.com/Equationzhao/g/slices"
 )
 
 func main() {

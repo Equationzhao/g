@@ -21,8 +21,8 @@ func GetUserConfigDir() (string, error) {
 			if err != nil {
 				return err
 			}
-			ConfigDir = filepath.Join(home, "g")
-			err = os.MkdirAll(ConfigDir, os.ModePerm)
+			Dir = filepath.Join(home, "g")
+			err = os.MkdirAll(Dir, os.ModePerm)
 			if err != nil {
 				return err
 			}
@@ -32,12 +32,12 @@ func GetUserConfigDir() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return ConfigDir, nil
+	return Dir, nil
 }
 
 var (
 	InitConfigDir util.Once
-	ConfigDir     = ""
+	Dir           = ""
 )
 
 // READ config

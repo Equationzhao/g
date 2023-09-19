@@ -1,10 +1,9 @@
 package util
 
 import (
+	"cmp"
 	"path/filepath"
 	"strings"
-
-	"github.com/Equationzhao/g/util/cmp"
 )
 
 func Max[T cmp.Ordered](a, b T) T {

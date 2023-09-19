@@ -1,6 +1,6 @@
 module github.com/Equationzhao/g
 
-go 1.20
+go 1.21
 
 require (
 	github.com/Equationzhao/pathbeautify v0.0.7
@@ -14,7 +14,7 @@ require (
 	github.com/junegunn/fzf v0.0.0-20230903073035-0f50dc848e58
 	github.com/mattn/go-runewidth v0.0.15
 	github.com/olekukonko/ts v0.0.0-20171002115256-78ecb04241c0
-	github.com/panjf2000/ants/v2 v2.8.1
+	github.com/panjf2000/ants/v2 v2.8.2
 	github.com/saintfish/chardet v0.0.0-20230101081208-5e3ef4b5456d
 	github.com/savioxavier/termlink v1.3.0
 	github.com/syndtr/goleveldb v1.0.0
@@ -38,7 +38,7 @@ require (
 	github.com/dolthub/maphash v0.1.0 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/fatih/color v1.15.0 // indirect
-	github.com/goccy/go-yaml v1.11.0 // indirect
+	github.com/goccy/go-yaml v1.11.2 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/google/uuid v1.3.1 // indirect
 	github.com/hashicorp/go-version v1.6.0 // indirect

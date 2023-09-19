@@ -7,12 +7,12 @@ import (
 	"io"
 	"os"
 	"regexp"
+	"slices"
 	"strconv"
 	"strings"
 
 	"github.com/Equationzhao/g/display/tree"
 	"github.com/Equationzhao/g/item"
-	"github.com/Equationzhao/g/slices"
 	"github.com/Equationzhao/g/util"
 	"github.com/acarl005/stripansi"
 	"github.com/jedib0t/go-pretty/v6/table"

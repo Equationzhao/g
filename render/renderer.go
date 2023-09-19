@@ -8,10 +8,10 @@ import (
 	"path/filepath"
 	"regexp"
 	"runtime"
+	"slices"
 	"strings"
 	"time"
 
-	"github.com/Equationzhao/g/slices"
 	"github.com/Equationzhao/g/theme"
 	"github.com/hako/durafmt"
 	"github.com/valyala/bytebufferpool"

@@ -1,12 +1,12 @@
 package filter
 
 import (
+	"slices"
 	"strings"
 	"sync"
 
 	"github.com/Equationzhao/g/display"
 	"github.com/Equationzhao/g/item"
-	"github.com/Equationzhao/g/slices"
 	"github.com/panjf2000/ants/v2"
 )
 

@@ -1,6 +1,7 @@
 package sorter
 
 import (
+	"cmp"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -12,7 +13,6 @@ import (
 	"github.com/Equationzhao/g/item"
 	"github.com/Equationzhao/g/osbased"
 	"github.com/Equationzhao/g/util"
-	"github.com/Equationzhao/g/util/cmp"
 	mt "github.com/gabriel-vasile/mimetype"
 )
 

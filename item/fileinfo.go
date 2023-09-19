@@ -4,8 +4,8 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
+	"slices"
 
-	"github.com/Equationzhao/g/slices"
 	"github.com/Equationzhao/tsmap"
 	"github.com/valyala/bytebufferpool"
 )
