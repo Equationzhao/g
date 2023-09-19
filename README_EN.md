@@ -328,6 +328,11 @@ source ~/.g.nu
 - [x] $OLDPWD
 - [ ] Color Support for html/markdown
 
+The following are new features of `eza`, we may support them in the future
+- [ ] --git-repos: list each directory’s Git status, if tracked
+- [ ] --git-repos-no-status: list whether a directory is a Git repository, but not its status (faster)
+
+
 ## Logo
 
 created by bing
