@@ -1,6 +1,7 @@
 package app
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/Equationzhao/g/display"
@@ -399,5 +400,18 @@ var displayFlag = []cli.Flag{
 		DisableDefaultText: true,
 		Usage:              "likewise, except do not append '*'",
 		Category:           "DISPLAY",
+	},
+	&cli.UintFlag{
+		Name:        "term-width",
+		DefaultText: "auto",
+		Usage:       "set screen width",
+		Category:    "DISPLAY",
+		Action: func(context *cli.Context, u uint) error {
+			if u >= 0 {
+				display.CustomTermSize = u
+				return nil
+			}
+			return errors.New("term size not valid")
+		},
 	},
 }

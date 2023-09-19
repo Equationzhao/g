@@ -227,11 +227,16 @@ func WidthNoHyperLinkLen(str string) int {
 var (
 	getTermWidthOnce util.Once
 	size             ts.Size
+	CustomTermSize   uint
 )
 
 // getTermWidth returns the width of the terminal in characters
 // this is a modified version
 func getTermWidth() int {
+	if CustomTermSize != 0 {
+		return int(CustomTermSize)
+	}
+
 	if err := getTermWidthOnce.Do(
 		func() error {
 			var err error
