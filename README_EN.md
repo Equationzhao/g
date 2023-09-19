@@ -33,7 +33,7 @@ g is a ls alternative with features:
 
 ### From source
 
-go version required >= 1.20
+go version required >= 1.21
 
 ```bash
 go install -ldflags="-s -w"  github.com/Equationzhao/g@latest

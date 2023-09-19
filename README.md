@@ -38,7 +38,7 @@ g 是一个 ls 替代品，拥有下面一些功能：
 
 ### 源码安装
 
-要求 go version >= 1.20
+要求 go version >= 1.21
 
 ```bash
 go install -ldflags="-s -w"  github.com/Equationzhao/g@latest

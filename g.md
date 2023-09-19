@@ -11,6 +11,7 @@ g
 [--CSV|--csv]
 [--access|--ac|--accessed]
 [--all|--la]
+[--birth]
 [--block|--blocks]
 [--byline|-1|--oneline|--single-column]
 [--charset]
@@ -81,6 +82,7 @@ g
 [--statistic]
 [--tb-style|--table-style]=[value]
 [--tb|--table]
+[--term-width]=[value]
 [--theme|--th]=[value]
 [--time-style]=[value]
 [--time-type]=[value]
@@ -133,6 +135,8 @@ g [options] [path]
 **--access, --ac, --accessed**: accessed time
 
 **--all, --la**: show all info/use a long listing format
+
+**--birth**: birth time[macOS only]
 
 **--block, --blocks**: show block size
 
@@ -287,6 +291,8 @@ g [options] [path]
 
 **--tb-style, --table-style**="": set table style [ascii(default)/unicode]
 
+**--term-width**="": set screen width (default: auto)
+
 **--theme, --th**="": apply theme `path/to/theme`
 
 **--time**: show time
@@ -296,7 +302,7 @@ g [options] [path]
 	custom +FORMAT like date(1). 
 	(default: +%d.%b'%y %H:%M ,like 02.Jan'06 15:04)
 
-**--time-type**="": time type, mod(default), create, access, all
+**--time-type**="": time type, mod(default), create, access, all, birth[macOS only]
 
 **--total-size**: show total size
 
