@@ -177,6 +177,10 @@ brew:
     cd ../homebrew-g && git commit
     cd ../homebrew-g && git push
 
+# update scoop
+scoop:
+    cd scoop && sh scoop.sh
+
 all : build compress deb checksum 
 
 # clean the build directory
