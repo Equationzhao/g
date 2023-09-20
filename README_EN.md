@@ -327,6 +327,7 @@ source ~/.g.nu
 - [ ] Print security context
 - [x] $OLDPWD
 - [ ] Color Support for html/markdown
+- [ ] Support Scoop
 
 The following are new features of `eza`, we may support them in the future
 - [ ] --git-repos: list each directory’s Git status, if tracked
