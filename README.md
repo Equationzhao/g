@@ -72,6 +72,27 @@ brew tap equationzhao/core git@github.com:Equationzhao/homebrew-g.git
 brew install g-ls
 ```
 
+windows scoop:
+
+```powershell
+scoop install https://raw.githubusercontent.com/Equationzhao/g/master/scoop/g.json
+```
+
+```powershell
+# upgrade
+scoop uninstall g # uninstall first
+scoop install https://raw.githubusercontent.com/Equationzhao/g/master/scoop/g.json
+# error msg like this can be ignored
+# Move-Item: 
+# Line |
+#    2 |  mv g-amd64.exe g.exe
+#      |  ~~~~~~~~~~~~~~~~~~~~
+# Move-Item: 
+# Line |
+#    3 |  mv g-amd64.shim g.shim
+#      |  ~~~~~~~~~~~~~~~~~~~~~~
+```
+
 ### 二进制文件
 
 #### deb
@@ -79,7 +100,7 @@ brew install g-ls
 sudo dpkg -i g_$version_$arch.deb
 ```
 
-#### tar,gz/zip
+#### tar.gz/zip
 从 [release page](https://github.com/Equationzhao/g/releases) 下载对应平台的文件, 解压 gzip 并将可执行文件添加到 `PATH`
 
 ## 推荐使用的终端
