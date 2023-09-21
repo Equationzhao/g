@@ -1099,6 +1099,10 @@
             "color": "[158]@256",
             "icon": ""
         },
+        "service": {
+            "color": "white",
+            "icon": ""
+        },
         "sh": {
             "color": "BrightPreen",
             "icon": ""

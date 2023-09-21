@@ -886,6 +886,10 @@ var Ext = Theme{
 		Color: Green,
 		Icon:  "\ueac2",
 	},
+	"service": Style{
+		Color: White,
+		Icon:  "",
+	},
 }
 
 var Special = map[string]Style{
