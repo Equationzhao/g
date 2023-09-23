@@ -3,10 +3,13 @@ package filter
 import (
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
+	"time"
 
 	"github.com/Equationzhao/g/git"
 	"github.com/Equationzhao/g/item"
+	"github.com/Equationzhao/g/osbased"
 	"github.com/gabriel-vasile/mimetype"
 	"github.com/gobwas/glob"
 )
@@ -252,4 +255,35 @@ func RemoveMimeType(fileTypes ...string) ItemFilterFunc {
 		}
 		return keep
 	}
+}
+
+func BeforeTime(t int64, timeFunc func(os.FileInfo) time.Time) ItemFilterFunc {
+	return func(e *item.FileInfo) bool {
+		return timeFunc(e).Unix() < t
+	}
+}
+
+func AfterTime(t int64, timeFunc func(os.FileInfo) time.Time) ItemFilterFunc {
+	return func(e *item.FileInfo) bool {
+		return timeFunc(e).Unix() > t
+	}
+}
+
+func WhichTimeFiled(mod string) (t func(os.FileInfo) time.Time) {
+	switch mod {
+	case "mod":
+		t = osbased.ModTime
+	case "create":
+		t = osbased.CreateTime
+	case "access":
+		t = osbased.AccessTime
+	case "birth":
+		// if darwin, check birth time
+		if runtime.GOOS == "darwin" {
+			t = osbased.BirthTime
+		} else {
+			t = osbased.CreateTime
+		}
+	}
+	return
 }

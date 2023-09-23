@@ -1,6 +1,8 @@
 package app
 
 import (
+	"time"
+
 	"github.com/Equationzhao/g/filter"
 	"github.com/Equationzhao/g/filter/content"
 	"github.com/gabriel-vasile/mimetype"
@@ -209,5 +211,33 @@ var filteringFlag = []cli.Flag{
 		Usage:              "hide git ignored file/dir [if git is installed]",
 		DisableDefaultText: true,
 		Category:           "FILTERING",
+	},
+	&cli.StringFlag{
+		Name:     "before",
+		Usage:    "show items which was modified/access/created before given time, the time field is determined by --time-style/--time-type",
+		Category: "FILTERING",
+		Action: func(ctx *cli.Context, s string) error {
+			t, err := time.Parse(timeFormat, s)
+			if err != nil {
+				return err
+			}
+			f := filter.BeforeTime(t.Unix(), filter.WhichTimeFiled(timeType[0]))
+			itemFilterFunc = append(itemFilterFunc, &f)
+			return nil
+		},
+	},
+	&cli.StringFlag{
+		Name:     "after",
+		Usage:    "show items which was modified/access/created after given time, the time field is determined by --time-style/--time-type",
+		Category: "FILTERING",
+		Action: func(ctx *cli.Context, s string) error {
+			t, err := time.Parse(timeFormat, s)
+			if err != nil {
+				return err
+			}
+			f := filter.AfterTime(t.Unix(), filter.WhichTimeFiled(timeType[0]))
+			itemFilterFunc = append(itemFilterFunc, &f)
+			return nil
+		},
 	},
 }
