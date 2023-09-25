@@ -257,15 +257,15 @@ func RemoveMimeType(fileTypes ...string) ItemFilterFunc {
 	}
 }
 
-func BeforeTime(t int64, timeFunc func(os.FileInfo) time.Time) ItemFilterFunc {
+func BeforeTime(t time.Time, timeFunc func(os.FileInfo) time.Time) ItemFilterFunc {
 	return func(e *item.FileInfo) bool {
-		return timeFunc(e).Unix() < t
+		return timeFunc(e).Before(t)
 	}
 }
 
-func AfterTime(t int64, timeFunc func(os.FileInfo) time.Time) ItemFilterFunc {
+func AfterTime(t time.Time, timeFunc func(os.FileInfo) time.Time) ItemFilterFunc {
 	return func(e *item.FileInfo) bool {
-		return timeFunc(e).Unix() > t
+		return timeFunc(e).After(t)
 	}
 }
 

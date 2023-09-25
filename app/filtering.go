@@ -1,6 +1,8 @@
 package app
 
 import (
+	"errors"
+	"strings"
 	"time"
 
 	"github.com/Equationzhao/g/filter"
@@ -213,31 +215,55 @@ var filteringFlag = []cli.Flag{
 		Category:           "FILTERING",
 	},
 	&cli.StringFlag{
-		Name:     "before",
-		Usage:    "show items which was modified/access/created before given time, the time field is determined by --time-style/--time-type",
+		Name: "before",
+		Usage: `show items which was modified/access/created before given time, the time field is determined by --time-type,
+	the time will be parsed using format:
+		MM-dd, MM-dd HH:mm, HH:mm, YYYY-MM-dd, YYYY-MM-dd HH:mm, and the format set by --time-style`,
 		Category: "FILTERING",
 		Action: func(ctx *cli.Context, s string) error {
-			t, err := time.Parse(timeFormat, s)
-			if err != nil {
-				return err
+			possibleTimeFormat := []string{"01-02", "01-02 15:04", "15:04", "2006-01-02", "2006-01-02 15:04", timeFormat}
+			for _, f := range possibleTimeFormat {
+				t, err := time.ParseInLocation(f, s, time.Local)
+				if err != nil {
+					continue
+				} else {
+					if strings.HasPrefix(f, "01-02") {
+						t = t.AddDate(time.Now().Year(), 0, 0)
+					} else if strings.HasPrefix(f, "15:04") {
+						now := time.Now()
+						t = t.AddDate(now.Year(), int(now.Month()), now.Minute())
+					}
+					f := filter.BeforeTime(t, filter.WhichTimeFiled(timeType[0]))
+					itemFilterFunc = append(itemFilterFunc, &f)
+					return nil
+				}
 			}
-			f := filter.BeforeTime(t.Unix(), filter.WhichTimeFiled(timeType[0]))
-			itemFilterFunc = append(itemFilterFunc, &f)
-			return nil
+			return errors.New("invalid time format")
 		},
 	},
 	&cli.StringFlag{
 		Name:     "after",
-		Usage:    "show items which was modified/access/created after given time, the time field is determined by --time-style/--time-type",
+		Usage:    "show items which was modified/access/created after given time, see --before",
 		Category: "FILTERING",
 		Action: func(ctx *cli.Context, s string) error {
-			t, err := time.Parse(timeFormat, s)
-			if err != nil {
-				return err
+			possibleTimeFormat := []string{"01-02", "01-02 15:04", "15:04", "2006-01-02", "2006-01-02 15:04", timeFormat}
+			for _, f := range possibleTimeFormat {
+				t, err := time.ParseInLocation(f, s, time.Local)
+				if err != nil {
+					continue
+				} else {
+					if strings.HasPrefix(f, "01-02") {
+						t = t.AddDate(time.Now().Year(), 0, 0)
+					} else if strings.HasPrefix(f, "15:04") {
+						now := time.Now()
+						t = t.AddDate(now.Year(), int(now.Month()), now.Minute())
+					}
+					f := filter.AfterTime(t, filter.WhichTimeFiled(timeType[0]))
+					itemFilterFunc = append(itemFilterFunc, &f)
+					return nil
+				}
 			}
-			f := filter.AfterTime(t.Unix(), filter.WhichTimeFiled(timeType[0]))
-			itemFilterFunc = append(itemFilterFunc, &f)
-			return nil
+			return errors.New("invalid time format")
 		},
 	},
 }
