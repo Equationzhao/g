@@ -155,27 +155,27 @@ aur:
     cd ../g-ls && git commit
     cd ../g-ls && git push
 
-# update homebrew
-brew: 
-    # class GLs < Formula
-    #   desc "a powerfull cross-platform ls"
-    #   homepage "g.equationzhao.space"
-    #   url "https://github.com/Equationzhao/g/archive/refs/tags/v0.13.2.tar.gz" , :tag => "v0.13.2"
-    #   sha256 "be8afefb7952c2e74127a55fdc0c056fadbd58e652957af1b9f913d0e0a82123"  
-    #   license "MIT"
-    #   depends_on "go" => :build
-    #   def install
-    #     system "go build -ldflags='-s -w'"
-    #     bin.install "g"
-    #   end
-    # end
+# update homebrew-tap
+brew-tap:
     wget -c {{url}}/archive/refs/tags/v{{latest}}.tar.gz -O v{{latest}}.tar.gz
-    sed -i bak "s#url .*#url \"{{url}}/archive/refs/tags/v{{latest}}.tar.gz\" , :tag => \"v{{latest}}\"#g" ../homebrew-g/g-ls.rb
+    sed -i bak "s#url .*#url \"{{url}}/archive/refs/tags/v{{latest}}.tar.gz\", tag: \"v{{latest}}\"#g" ../homebrew-g/g-ls.rb 
     sed -i bak "s/sha256 .*/sha256 \"$(shasum -a 256 v{{latest}}.tar.gz | choose 0)\"/g" ../homebrew-g/g-ls.rb
+    sed -i bak "s/assert_match .*/assert_match \"{{latest}}\", output/g" ../homebrew-g/g-ls.rb
     cd ../homebrew-g
     cd ../homebrew-g && git add -u
     cd ../homebrew-g && git commit
     cd ../homebrew-g && git push
+
+# update homebrew-core
+brew: 
+    wget -c {{url}}/archive/refs/tags/v{{latest}}.tar.gz -O v{{latest}}.tar.gz
+    sed -i bak "s#url .*#url \"{{url}}/archive/refs/tags/v{{latest}}.tar.gz\", tag: \"v{{latest}}\"#g" $(brew --repository homebrew/core)/Formula/g/g-ls.rb 
+    sed -i bak "s/sha256 .*/sha256 \"$(shasum -a 256 v{{latest}}.tar.gz | choose 0)\"/g" $(brew --repository homebrew/core)/Formula/g/g-ls.rb
+    sed -i bak "s/assert_match .*/assert_match \"{{latest}}\", output/g" $(brew --repository homebrew/core)/Formula/g/g-ls.rb
+    cd $(brew --repository homebrew/core)/Formula/g && rm g-ls.rbbak
+    cd $(brew --repository homebrew/core) && git add -u
+    cd $(brew --repository homebrew/core) && git commit
+    cd $(brew --repository homebrew/core) && git push
 
 # update scoop
 scoop:
