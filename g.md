@@ -10,7 +10,9 @@ g
 [-#]
 [--CSV|--csv]
 [--access|--ac|--accessed]
+[--after]=[value]
 [--all|--la]
+[--before]=[value]
 [--birth]
 [--block|--blocks]
 [--byline|-1|--oneline|--single-column]
@@ -134,7 +136,13 @@ g [options] [path]
 
 **--access, --ac, --accessed**: accessed time
 
+**--after**="": show items which was modified/access/created after given time, see --before
+
 **--all, --la**: show all info/use a long listing format
+
+**--before**="": show items which was modified/access/created before given time, the time field is determined by --time-type,
+	the time will be parsed using format:
+		MM-dd, MM-dd HH:mm, HH:mm, YYYY-MM-dd, YYYY-MM-dd HH:mm, and the format set by --time-style
 
 **--birth**: birth time[macOS only]
 

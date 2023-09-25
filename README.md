@@ -353,7 +353,7 @@ source ~/.g.nu
 - [ ] Print security context
 - [x] $OLDPWD
 - [ ] Color Support for html/markdown
-- [ ] Support Scoop
+- [x] Support Scoop
 
 以下是 eza 的新功能，后续计划支持
 - [ ] --git-repos: list each directory’s Git status, if tracked
