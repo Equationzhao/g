@@ -91,6 +91,9 @@ scoop install https://raw.githubusercontent.com/Equationzhao/g/master/scoop/g.js
 ### Pre-built executable
 
 #### deb
+
+download from [release](https://github.com/Equationzhao/g/releases) page 
+
 ```bash
 sudo dpkg -i g_$version_$arch.deb
 ```

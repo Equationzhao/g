@@ -96,6 +96,9 @@ scoop install https://raw.githubusercontent.com/Equationzhao/g/master/scoop/g.js
 ### 二进制文件
 
 #### deb
+
+从 [release](https://github.com/Equationzhao/g/releases) 页下载对应deb文件后安装
+
 ```bash
 sudo dpkg -i g_$version_$arch.deb
 ```
