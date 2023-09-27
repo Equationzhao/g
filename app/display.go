@@ -12,7 +12,24 @@ import (
 
 var displayFlag = []cli.Flag{
 	// DISPLAY
-
+	&cli.StringFlag{
+		Name:     "tree-style",
+		Usage:    "set tree style [ascii/unicode(default)/rectangle]",
+		Category: "DISPLAY",
+		Action: func(context *cli.Context, s string) error {
+			switch s {
+			case "ascii", "ASCII", "Ascii":
+				display.DefaultTreeStyle = display.TreeASCII
+			case "unicode", "Unicode", "UNICODE":
+			// no action needed
+			case "rectangle", "Rectangle", "RECTANGLE":
+				display.DefaultTreeStyle = display.TreeRectangle
+			default:
+				return fmt.Errorf("invalid tree style: %s", s)
+			}
+			return nil
+		},
+	},
 	&cli.BoolFlag{
 		Name:               "T",
 		Aliases:            []string{"tree"},

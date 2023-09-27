@@ -568,10 +568,18 @@ func (t *TablePrinter) setTB(s ...*item.FileInfo) {
 	}
 }
 
+const (
+	_ = iota
+	TreeUnicode
+	TreeASCII
+	TreeRectangle
+)
+
 var (
-	UNICODEStyle   = table.StyleRounded
-	ASCIIStyle     = table.StyleDefault
-	DefaultTBStyle = ASCIIStyle
+	UNICODEStyle     = table.StyleRounded
+	ASCIIStyle       = table.StyleDefault
+	DefaultTBStyle   = ASCIIStyle
+	DefaultTreeStyle = TreeUnicode
 )
 
 func DefaultTB(w table.Writer) {
@@ -692,10 +700,20 @@ func (t *TreePrinter) Print(s ...*item.FileInfo) {
 		}
 	}
 
-	const Child = "├── "
-	const LastChild = "╰── "
-	const Mid = "│   "
-	const Empty = "    "
+	var Child = "├── "
+	var LastChild = "╰── "
+	var Mid = "│   "
+	var Empty = "    "
+
+	if DefaultTreeStyle == TreeASCII {
+		Child = "|---- "
+		LastChild = "|----"
+		Mid = "|     "
+		Empty = "    "
+	} else if DefaultTreeStyle == TreeRectangle {
+		LastChild = "└── "
+	}
+
 	// print
 	// the number of the prefixes is the level of the node
 	// the length of prefix is 4
