@@ -580,6 +580,12 @@ var viewFlag = []cli.Flag{
 		Category:           "VIEW",
 	},
 	&cli.BoolFlag{
+		Name:               "mounts",
+		Usage:              "show mount details",
+		DisableDefaultText: true,
+		Category:           "VIEW",
+	},
+	&cli.BoolFlag{
 		Name:               "N",
 		Aliases:            []string{"literal"},
 		Usage:              "print entry names without quoting",
@@ -776,7 +782,6 @@ var viewFlag = []cli.Flag{
 			return nil
 		},
 	},
-
 	&cli.BoolFlag{
 		Name:               "rt",
 		Aliases:            []string{"relative-time"},

@@ -15,6 +15,7 @@ g
 [--before]=[value]
 [--birth]
 [--block|--blocks]
+[--bug]
 [--byline|-1|--oneline|--single-column]
 [--charset]
 [--check-new-version]
@@ -53,6 +54,7 @@ g
 [--mime-parent|--mime-parent-type|--mimetype-parent]
 [--mime|--mime-type|--mimetype]
 [--modify|--mod|--modified]
+[--mounts]
 [--no-config]
 [--no-dereference]
 [--no-dir|--nodir|--file]
@@ -90,6 +92,7 @@ g
 [--time-type]=[value]
 [--time]
 [--total-size]
+[--tree-style]=[value]
 [--uid]
 [--versionsort|--sort-by-version]
 [--width]
@@ -147,6 +150,8 @@ g [options] [path]
 **--birth**: birth time[macOS only]
 
 **--block, --blocks**: show block size
+
+**--bug**: report bug
 
 **--byline, -1, --oneline, --single-column**: print by line
 
@@ -226,6 +231,8 @@ g [options] [path]
 **--mime-parent, --mime-parent-type, --mimetype-parent**: show mime parent type
 
 **--modify, --mod, --modified**: modified time
+
+**--mounts**: show mount details
 
 **--no-config**: do not load config file
 
@@ -313,6 +320,8 @@ g [options] [path]
 **--time-type**="": time type, mod(default), create, access, all, birth[macOS only]
 
 **--total-size**: show total size
+
+**--tree-style**="": set tree style [ascii/unicode(default)/rectangle]
 
 **--uid**: show uid instead of username [sid in windows]
 

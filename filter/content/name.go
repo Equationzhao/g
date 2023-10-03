@@ -17,10 +17,10 @@ import (
 
 type (
 	Name struct {
-		icon, classify, fileType, fullPath, noDeference, hyperLink bool
-		statistics                                                 *Statistics
-		relativeTo                                                 string
-		Quote                                                      string
+		icon, classify, fileType, fullPath, noDeference, hyperLink, mounts bool
+		statistics                                                         *Statistics
+		relativeTo                                                         string
+		Quote                                                              string
 	}
 )
 
@@ -140,6 +140,16 @@ func (n *Name) SetClassify() *Name {
 // if classify is false, fileType will be ignored
 func (n *Name) SetFileType() *Name {
 	n.fileType = true
+	return n
+}
+
+func (n *Name) SetMounts() *Name {
+	n.mounts = true
+	return n
+}
+
+func (n *Name) UnsetMounts() *Name {
+	n.mounts = false
 	return n
 }
 
@@ -296,6 +306,13 @@ func (n *Name) Enable(renderer *render.Renderer) filter.ContentOption {
 		}
 		if n.hyperLink {
 			str = makeLink("file://"+info.FullPath, str)
+		}
+
+		if n.mounts {
+			m := util.MountsOn(info)
+			if m != "" {
+				str = str + " " + renderer.Mounts(m)
+			}
 		}
 
 		return str, NameName

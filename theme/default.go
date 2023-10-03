@@ -920,6 +920,9 @@ var Special = map[string]Style{
 		Color: White,
 		Icon:  "\uF016",
 	},
+	"mounts": {
+		Color: BrightBlack,
+	},
 }
 
 var Name = map[string]Style{

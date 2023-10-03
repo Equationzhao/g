@@ -59,7 +59,7 @@ var (
 	hookPost        = make([]func(display.Printer, ...*item.FileInfo), 0)
 	pool            *ants.Pool
 )
-var Version = "0.16.0"
+var Version = "0.17.0"
 
 var G *cli.App
 
@@ -139,6 +139,10 @@ func init() {
 			// set quote
 			if context.Bool("Q") {
 				nameToDisplay.SetQuote(`"`)
+			}
+
+			if context.Bool("mounts") {
+				nameToDisplay.SetMounts()
 			}
 
 			// if no quote, set quote to empty
@@ -805,6 +809,15 @@ func init() {
 			Name:               "no-config",
 			Usage:              "do not load config file",
 			DisableDefaultText: true,
+		},
+		&cli.BoolFlag{
+			Name:               "bug",
+			Usage:              "report bug",
+			DisableDefaultText: true,
+			Action: func(context *cli.Context, b bool) error {
+				_, _ = G.Writer.Write([]byte("please report bug to equationzhao@foxmail.com\nor file an issue at https://github.com/Equationzhao/g/issues\n"))
+				return Err4Exit{}
+			},
 		},
 	)
 

@@ -3,6 +3,10 @@ package util
 import (
 	"os"
 	"path/filepath"
+
+	"github.com/Equationzhao/g/item"
+	"github.com/shirou/gopsutil/disk"
+	"github.com/valyala/bytebufferpool"
 )
 
 func IsSymLink(file os.FileInfo) bool {
@@ -78,3 +82,33 @@ func RecursivelySizeOf(info os.FileInfo, depth int) int64 {
 	}
 	return info.Size()
 }
+
+func MountsOn(info *item.FileInfo) string {
+	err := mountsOnce.Do(func() error {
+		mount, err := disk.Partitions(true)
+		if err != nil {
+			return err
+		}
+		mounts = mount
+		return nil
+	})
+	if err != nil {
+		return ""
+	}
+	b := bytebufferpool.Get()
+	defer bytebufferpool.Put(b)
+	for _, stat := range mounts {
+		if stat.Mountpoint == info.FullPath {
+			_ = b.WriteByte('[')
+			_, _ = b.WriteString(stat.Device)
+			_, _ = b.WriteString(" (")
+			_, _ = b.WriteString(stat.Fstype)
+			_, _ = b.WriteString(")]")
+			return b.String()
+		}
+	}
+	return ""
+}
+
+var mounts = make([]disk.PartitionStat, 10)
+var mountsOnce = Once{}

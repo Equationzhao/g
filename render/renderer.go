@@ -681,6 +681,18 @@ func (rd *Renderer) DirPrompt(dir string) string {
 	return bb.String()
 }
 
+func (rd *Renderer) Mounts(mounts string) string {
+	bb := bytebufferpool.Get()
+	defer bytebufferpool.Put(bb)
+	style := rd.theme.Special["mounts"]
+	_, _ = bb.WriteString(style.Color)
+	checkUnderlineAndBold(&style, bb)
+	_, _ = bb.WriteString(style.Icon)
+	_, _ = bb.WriteString(mounts)
+	_, _ = bb.WriteString(rd.theme.InfoTheme["reset"].Color)
+	return bb.String()
+}
+
 func checkUnderlineAndBold(style *theme.Style, bb *bytebufferpool.ByteBuffer) {
 	if style.Underline {
 		_, _ = bb.WriteString(theme.Underline)

@@ -450,6 +450,9 @@
         "link": {
             "color": "purple"
         },
+        "mounts": {
+            "color": "BrightBlack"
+        },
         "pipe": {
             "color": "cyan",
             "icon": ""
