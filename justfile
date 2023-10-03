@@ -193,12 +193,12 @@ format:
 
 # generate the documentation
 doc: 
-    go build -tags 'doc'
+    CGO_ENABLED=0 go build -tags 'doc'
     ./g 
     rm g
 
 # generate the theme
 theme: 
-    go build -tags 'theme'
+    CGO_ENABLED=0 go build -tags 'theme'
     ./g 
     rm g
