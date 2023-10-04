@@ -164,6 +164,8 @@ func makeLink(abs string, name string) string {
 }
 
 // Enable enable name filter
+// todo refactor
+// bug: see #69 https://github.com/Equationzhao/g/issues/69
 func (n *Name) Enable(renderer *render.Renderer) filter.ContentOption {
 	/*
 		-F      Display a slash (`/`) immediately after each pathname that is a
