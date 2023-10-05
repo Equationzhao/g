@@ -714,10 +714,10 @@ func (t *TreePrinter) Print(s ...*item.FileInfo) {
 		}
 	}
 
-	var Child = "├── "
-	var LastChild = "╰── "
-	var Mid = "│   "
-	var Empty = "    "
+	Child := "├── "
+	LastChild := "╰── "
+	Mid := "│   "
+	Empty := "    "
 
 	if DefaultTreeStyle == TreeASCII {
 		Child = "|---- "

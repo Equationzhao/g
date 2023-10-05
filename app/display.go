@@ -431,7 +431,7 @@ var displayFlag = []cli.Flag{
 		Name:               "F",
 		Aliases:            []string{"classify"},
 		DisableDefaultText: true,
-		Usage:              "append indicator (one of */=>@|) to entries",
+		Usage:              "append indicator (one of */=@|) to entries",
 		Category:           "DISPLAY",
 	},
 	&cli.BoolFlag{

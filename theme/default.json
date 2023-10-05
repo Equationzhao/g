@@ -266,7 +266,7 @@
             "icon": ""
         },
         "dockerfile": {
-            "color": "yellow",
+            "color": "BrightYellow",
             "icon": ""
         },
         "documents": {
@@ -370,13 +370,13 @@
             "icon": ""
         },
         "readme": {
-            "color": "BrightYellow",
+            "color": "yellow",
             "icon": "",
             "underline": true,
             "bold": true
         },
         "readme.md": {
-            "color": "BrightYellow",
+            "color": "yellow",
             "icon": "",
             "underline": true,
             "bold": true

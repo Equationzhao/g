@@ -110,5 +110,7 @@ func MountsOn(info *item.FileInfo) string {
 	return ""
 }
 
-var mounts = make([]disk.PartitionStat, 10)
-var mountsOnce = Once{}
+var (
+	mounts     = make([]disk.PartitionStat, 10)
+	mountsOnce = Once{}
+)

@@ -9,6 +9,7 @@ g
 ```
 [-#]
 [--CSV|--csv]
+[--TSV|--tsv]
 [--access|--ac|--accessed]
 [--after]=[value]
 [--all|--la]
@@ -137,6 +138,8 @@ g [options] [path]
 
 **--CSV, --csv**: output in csv format
 
+**--TSV, --tsv**: output in tsv format
+
 **--access, --ac, --accessed**: accessed time
 
 **--after**="": show items which was modified/access/created after given time, see --before
@@ -190,7 +193,7 @@ g [options] [path]
 **--footer**: add a footer row
 
 **--format**="": across  -x,  commas  -m, horizontal -x, long -l, single-column -1,
-	verbose -l, vertical -C, table -tb, HTML -html, Markdown -md, CSV -csv, json -j, tree -T (default: C)
+	verbose -l, vertical -C, table -tb, HTML -html, Markdown -md, CSV -csv, TSV -tsv, json -j, tree -T (default: C)
 
 **--fp, --full-path, --fullpath**: show full path
 
@@ -339,7 +342,7 @@ g [options] [path]
 
 **-D, --dir, --only-dir**: show directory only
 
-**-F, --classify**: append indicator (one of */=>@|) to entries
+**-F, --classify**: append indicator (one of */=@|) to entries
 
 **-G, --no-group**: in a long listing, don't print group names
 
