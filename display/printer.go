@@ -632,6 +632,20 @@ func (c *CSVPrinter) Print(s ...*item.FileInfo) {
 	c.PrintBase(c.w.RenderCSV, s...)
 }
 
+type TSVPrinter struct {
+	*TablePrinter
+}
+
+func NewTSVPrinter() Printer {
+	t := &TSVPrinter{}
+	t.TablePrinter = NewTablePrinter(DefaultTB).(*TablePrinter)
+	return t
+}
+
+func (t *TSVPrinter) Print(s ...*item.FileInfo) {
+	t.PrintBase(t.w.RenderTSV, s...)
+}
+
 type TreePrinter struct {
 	*bufio.Writer
 	*hook

@@ -10,7 +10,7 @@ require (
 	github.com/gobwas/glob v0.2.3
 	github.com/gookit/color v1.5.4
 	github.com/hako/durafmt v0.0.0-20210608085754-5c1018a4e16b
-	github.com/jedib0t/go-pretty/v6 v6.4.7
+	github.com/jedib0t/go-pretty/v6 v6.4.8
 	github.com/junegunn/fzf v0.0.0-20230903073035-0f50dc848e58
 	github.com/mattn/go-runewidth v0.0.15
 	github.com/olekukonko/ts v0.0.0-20171002115256-78ecb04241c0
@@ -27,7 +27,7 @@ require (
 )
 
 require (
-	github.com/go-ole/go-ole v1.2.6 // indirect
+	github.com/go-ole/go-ole v1.3.0 // indirect
 	github.com/onsi/gomega v1.27.4 // indirect
 	github.com/yusufpapurcu/wmi v1.2.3 // indirect
 )
