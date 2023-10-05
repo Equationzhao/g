@@ -223,16 +223,6 @@ var sortingFlags = []cli.Flag{
 		},
 		Category: "SORTING",
 	},
-	// todo sort by version
-	// &cli.BoolFlag{
-	// 	Name:  "v",
-	// 	Usage: "sort by version",
-	// 	Action: func(context *cli.Context, b bool) error {
-	// 		sort.AddOption(sorter.ByVersionAscend)
-	// 		return nil
-	// 	},
-	// 	Category: "SORTING",
-	// },
 	&cli.BoolFlag{
 		Name:               "sort-by-mime",
 		Usage:              "sort by mimetype",
@@ -371,6 +361,7 @@ var sortingFlags = []cli.Flag{
 			sort.AddOption(sorter.ByVersionAscend)
 			return nil
 		},
+		Category: "SORTING",
 	},
 	&cli.BoolFlag{
 		Name:               "U",
