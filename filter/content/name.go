@@ -193,8 +193,7 @@ func (n *Name) Enable(renderer *render.Renderer) filter.ContentOption {
 			if n.classify {
 				classify = "/"
 			}
-			color = style.Color
-			underline, bold = style.Underline, style.Bold
+			color, underline, bold = style.Color, style.Underline, style.Bold
 		} else if util.IsSymLinkMode(mode) {
 			if n.statistics != nil {
 				n.statistics.link.Add(1)
@@ -203,8 +202,7 @@ func (n *Name) Enable(renderer *render.Renderer) filter.ContentOption {
 			if n.icon {
 				icon = style.Icon
 			}
-			color = style.Color
-			underline, bold = style.Underline, style.Bold
+			color, underline, bold = style.Color, style.Underline, style.Bold
 			if n.classify {
 				classify = "@"
 			}
@@ -273,8 +271,7 @@ func (n *Name) Enable(renderer *render.Renderer) filter.ContentOption {
 				if n.classify {
 					classify = "|"
 				}
-				color = style.Color
-				underline, bold = style.Underline, style.Bold
+				color, underline, bold = style.Color, style.Underline, style.Bold
 			} else if mode&os.ModeSocket != 0 {
 				style := renderer.Socket()
 				if n.icon {
@@ -283,30 +280,26 @@ func (n *Name) Enable(renderer *render.Renderer) filter.ContentOption {
 				if n.classify {
 					classify = "="
 				}
-				color = style.Color
-				underline, bold = style.Underline, style.Bold
+				color, underline, bold = style.Color, style.Underline, style.Bold
 			} else {
 				if s, ok := renderer.ByName(name); ok {
-					color = s.Color
 					if n.icon {
 						icon = s.Icon
 					}
-					underline, bold = s.Underline, s.Bold
+					color, underline, bold = s.Color, s.Underline, s.Bold
 				} else {
 					s, ok = renderer.ByExt(name)
 					if ok {
-						color = s.Color
 						if n.icon {
 							icon = s.Icon
 						}
-						underline, bold = s.Underline, s.Bold
+						color, underline, bold = s.Color, s.Underline, s.Bold
 					} else {
 						s = renderer.File()
-						color = s.Color
 						if n.icon {
 							icon = s.Icon
 						}
-						underline, bold = s.Underline, s.Bold
+						color, underline, bold = s.Color, s.Underline, s.Bold
 					}
 				}
 			}
@@ -320,8 +313,7 @@ func (n *Name) Enable(renderer *render.Renderer) filter.ContentOption {
 		}
 		if exe {
 			s := renderer.Executable()
-			color = s.Color
-			underline, bold = s.Underline, s.Bold
+			color, underline, bold = s.Color, s.Underline, s.Bold
 		}
 
 		if n.mounts {
