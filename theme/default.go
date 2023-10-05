@@ -1119,17 +1119,17 @@ var Name = map[string]Style{
 		Icon:  "\uF179",
 	},
 	"dockerfile": {
-		Color: Yellow,
+		Color: BrightYellow,
 		Icon:  "\ue7b0",
 	},
 	"readme": {
-		Color:     BrightYellow,
+		Color:     Yellow,
 		Icon:      "\uF48A",
 		Underline: true,
 		Bold:      true,
 	},
 	"readme.md": {
-		Color:     BrightYellow,
+		Color:     Yellow,
 		Icon:      "\uF48A",
 		Underline: true,
 		Bold:      true,
