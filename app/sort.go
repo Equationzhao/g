@@ -19,7 +19,7 @@ var sortingFlags = []cli.Flag{
 	ascending and case insensitive, 
 	field beginning with Uppercase is case sensitive,	
 	available fields: 	
-	nature(default),none(nosort),
+	   nature(default),none(nosort),
 	   name,.name(sorts by name without a leading dot),	
 	   size,time,owner,group,extension,inode,width,mime. 	
 	   following '-descend' to sort descending`,
