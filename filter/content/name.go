@@ -2,15 +2,17 @@ package content
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
+	"io/fs"
 	"os"
 	"path/filepath"
-	"strings"
 	"sync/atomic"
 
 	"github.com/Equationzhao/g/filter"
 	"github.com/Equationzhao/g/item"
 	"github.com/Equationzhao/g/render"
+	"github.com/Equationzhao/g/theme"
 	"github.com/Equationzhao/g/util"
 	"github.com/valyala/bytebufferpool"
 )
@@ -163,160 +165,221 @@ func makeLink(abs string, name string) string {
 	return fmt.Sprintf("\033]8;;%s\033\\%s\033]8;;\033\\", abs, name)
 }
 
-// Enable enable name filter
-// todo refactor
-// bug: see #69 https://github.com/Equationzhao/g/issues/69
+/*
+Enable
+color + icon + file://quote+filename/relative-name+quote + classify + color-end + dereference + mounts
+color: filetype->filename->fileext->file
+*/
 func (n *Name) Enable(renderer *render.Renderer) filter.ContentOption {
-	/*
-		-F      Display a slash (`/`) immediately after each pathname that is a
-				directory, an asterisk (`*`) after each that is executable, an at
-				sign (`@`) after each symbolic link, a percent sign (`%`) after
-				each whiteout, an equal sign (`=`) after each socket, and a
-				vertical bar (`|`) after each that is a FIFO.
-	*/
-
-	return func(info *item.FileInfo) (string, string) {
-		buffer := bytebufferpool.Get()
-		defer bytebufferpool.Put(buffer)
-		str := info.Name()
-		if n.FullPath() {
-			str = info.FullPath
-		}
-		name := str
+	return func(info *item.FileInfo) (stringContent string, funcName string) {
+		name := info.Name()
+		color := ""
+		icon := ""
+		classify := ""
+		dereference := bytebufferpool.Get()
+		defer bytebufferpool.Put(dereference)
+		mounts := ""
 		mode := info.Mode()
+		underline, bold := false, false
 
-		char := ""
-
-		if n.icon {
-			if info.IsDir() {
-				if n.statistics != nil {
-					n.statistics.dir.Add(1)
+		if info.IsDir() {
+			if n.statistics != nil {
+				n.statistics.dir.Add(1)
+			}
+			style := renderer.Dir(name)
+			if n.icon {
+				icon = style.Icon
+			}
+			if n.classify {
+				classify = "/"
+			}
+			color = style.Color
+			underline, bold = style.Underline, style.Bold
+		} else if util.IsSymLinkMode(mode) {
+			if n.statistics != nil {
+				n.statistics.link.Add(1)
+			}
+			style := renderer.Symlink()
+			if n.icon {
+				icon = style.Icon
+			}
+			color = style.Color
+			underline, bold = style.Underline, style.Bold
+			if n.classify {
+				classify = "@"
+			}
+			// color + arrow + color-end + color + path + color-end
+			if !n.noDeference {
+				arrowStyle := renderer.SymlinkArrow()
+				_, _ = dereference.WriteString(arrowStyle.Color)
+				if arrowStyle.Underline {
+					_, _ = dereference.WriteString(theme.Underline)
 				}
-				str = renderer.DirIcon(str)
-				char = "/"
-			} else if mode&os.ModeSymlink != 0 {
-				if n.statistics != nil {
-					n.statistics.link.Add(1)
+				if arrowStyle.Bold {
+					_, _ = dereference.WriteString(theme.Bold)
 				}
-				if n.classify {
-					if n.noDeference {
-						str = renderer.SymlinkIconNoDereferencePlus(str, "@")
+				_, _ = dereference.WriteString(arrowStyle.Icon)
+				_, _ = dereference.WriteString(renderer.Colorend())
+				broken := false
+				symlinks, err := filepath.EvalSymlinks(info.FullPath)
+				if err != nil {
+					broken = true
+					var pathErr *fs.PathError
+					if errors.As(err, &pathErr) {
+						if n.fullPath {
+							symlinksRel, err := filepath.Rel(info.FullPath, pathErr.Path)
+							if err == nil {
+								pathErr.Path = symlinksRel
+							}
+						}
+						symlinks = pathErr.Path
 					} else {
-						str = renderer.SymlinkIconPlus(str, info.FullPath, "@", !n.fullPath)
+						symlinks = err.Error()
 					}
 				} else {
-					if n.noDeference {
-						str = renderer.SymlinkIconNoDereference(str)
-					} else {
-						str = renderer.SymlinkIcon(str, info.FullPath, !n.fullPath)
-					}
-				}
-			} else {
-				if n.statistics != nil {
-					n.statistics.file.Add(1)
-				}
-				if mode&os.ModeNamedPipe != 0 {
-					str = renderer.PipeIcon(str)
-					char = "|"
-				} else if mode&os.ModeSocket != 0 {
-					str = renderer.SocketIcon(str)
-					char = "="
-				} else {
-					if s := renderer.ByNameIcon(str); s != "" {
-						str = s
-					} else {
-						s = renderer.ByExtIcon(str)
-						if s != "" {
-							str = s
-						} else {
-							str = renderer.FileIcon(str)
+					if n.fullPath {
+						symlinksRel, err := filepath.Rel(filepath.Dir(info.FullPath), symlinks)
+						if err == nil {
+							symlinks = symlinksRel
 						}
 					}
 				}
+				var style theme.Style
+				if broken {
+					style = renderer.SymlinkBroken()
+				} else {
+					style = renderer.SymlinkDereference()
+				}
+				_, _ = dereference.WriteString(style.Color)
+				if style.Underline {
+					_, _ = dereference.WriteString(theme.Underline)
+				}
+				if style.Bold {
+					_, _ = dereference.WriteString(theme.Bold)
+				}
+				_, _ = dereference.WriteString(style.Icon)
+				_, _ = dereference.WriteString(symlinks)
+				_, _ = dereference.WriteString(renderer.Colorend())
 			}
 		} else {
-			if info.IsDir() {
-				if n.statistics != nil {
-					n.statistics.dir.Add(1)
-				}
-				str = renderer.Dir(str)
-				char = "/"
-			} else if mode&os.ModeSymlink != 0 {
-				if n.statistics != nil {
-					n.statistics.link.Add(1)
+			if n.statistics != nil {
+				n.statistics.file.Add(1)
+			}
+			if mode&os.ModeNamedPipe != 0 {
+				style := renderer.Pipe()
+				if n.icon {
+					icon = style.Icon
 				}
 				if n.classify {
-					if n.noDeference {
-						str = renderer.SymlinkNoDereferencePlus(str, "@")
-					} else {
-						str = renderer.SymlinkPlus(str, info.FullPath, "@", !n.fullPath)
-					}
-				} else {
-					if n.noDeference {
-						str = renderer.SymlinkNoDereference(str)
-					} else {
-						str = renderer.Symlink(str, info.FullPath, !n.fullPath)
-					}
+					classify = "|"
 				}
+				color = style.Color
+				underline, bold = style.Underline, style.Bold
+			} else if mode&os.ModeSocket != 0 {
+				style := renderer.Socket()
+				if n.icon {
+					icon = style.Icon
+				}
+				if n.classify {
+					classify = "="
+				}
+				color = style.Color
+				underline, bold = style.Underline, style.Bold
 			} else {
-				if n.statistics != nil {
-					n.statistics.file.Add(1)
-				}
-				if mode&os.ModeNamedPipe != 0 {
-					str = renderer.Pipe(str)
-					char = "|"
-				} else if mode&os.ModeSocket != 0 {
-					str = renderer.Socket(str)
-					char = "="
+				if s, ok := renderer.ByName(name); ok {
+					color = s.Color
+					if n.icon {
+						icon = s.Icon
+					}
+					underline, bold = s.Underline, s.Bold
 				} else {
-					if s := renderer.ByName(str); s != "" {
-						str = s
-					} else {
-						s = renderer.ByExt(str)
-						if s != "" {
-							str = s
-						} else {
-							str = renderer.File(str)
+					s, ok = renderer.ByExt(name)
+					if ok {
+						color = s.Color
+						if n.icon {
+							icon = s.Icon
 						}
+						underline, bold = s.Underline, s.Bold
+					} else {
+						s = renderer.File()
+						color = s.Color
+						if n.icon {
+							icon = s.Icon
+						}
+						underline, bold = s.Underline, s.Bold
 					}
 				}
 			}
 		}
 
 		exe := util.IsExecutableMode(mode) && !util.IsSymLinkMode(mode) && !info.IsDir() && mode&os.ModeNamedPipe == 0 && mode&os.ModeSocket == 0
-		if exe {
-			str = strings.Replace(str, name, renderer.Executable(name), 1)
-		}
-
 		if n.classify {
-			if char == "" && (!n.fileType) && exe {
-				str += "*"
-			} else {
-				str += char
+			if classify == "" && (!n.fileType) && exe {
+				classify = "*"
 			}
 		}
+		if exe {
+			s := renderer.Executable()
+			color = s.Color
+			underline, bold = s.Underline, s.Bold
+		}
 
-		if n.Quote != "" {
-			str = strings.Replace(str, name, n.Quote+name+n.Quote, 1)
+		if n.mounts {
+			mounts = util.MountsOn(info)
 		}
 
 		if n.relativeTo != "" {
 			relativePath, err := filepath.Rel(n.relativeTo, info.FullPath)
 			if err == nil {
-				str = strings.Replace(str, name, relativePath, 1)
+				name = relativePath
 			}
+		} else if n.fullPath {
+			name = info.FullPath
+		}
+
+		b := bytebufferpool.Get()
+		defer bytebufferpool.Put(b)
+		if color != "" {
+			_, _ = b.WriteString(color)
+		}
+		if icon != "" {
+			_, _ = b.WriteString(icon)
+			_ = b.WriteByte(' ')
+		}
+		if underline {
+			_, _ = b.WriteString(theme.Underline)
+		}
+		if bold {
+			_, _ = b.WriteString(theme.Bold)
+		}
+		if n.Quote != "" {
+			_, _ = b.WriteString(n.Quote)
 		}
 		if n.hyperLink {
-			str = makeLink("file://"+info.FullPath, str)
+			_, _ = b.WriteString(makeLink("file://"+info.FullPath, name))
+		} else {
+			_, _ = b.WriteString(name)
 		}
-
-		if n.mounts {
-			m := util.MountsOn(info)
-			if m != "" {
-				str = str + " " + renderer.Mounts(m)
-			}
+		if n.Quote != "" {
+			_, _ = b.WriteString(n.Quote)
 		}
-
-		return str, NameName
+		if classify == "@" {
+			_, _ = b.WriteString(classify)
+		}
+		if color != "" {
+			_, _ = b.WriteString(renderer.Colorend())
+		}
+		if classify != "" && classify != "@" {
+			_, _ = b.WriteString(classify)
+		}
+		d := dereference.String()
+		if d != "" {
+			_, _ = b.WriteString(d)
+		}
+		if mounts != "" {
+			_ = b.WriteByte(' ')
+			_, _ = b.WriteString(renderer.Mounts(mounts))
+		}
+		return b.String(), NameName
 	}
 }
