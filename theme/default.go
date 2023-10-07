@@ -738,6 +738,10 @@ var Ext = Theme{
 		Color: db,
 		Icon:  "\uE706",
 	},
+	"prql": Style{
+		Color: db,
+		Icon:  "\uE706",
+	},
 	"db3": Style{
 		Color: db,
 		Icon:  "\uF1C0",
