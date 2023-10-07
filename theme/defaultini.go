@@ -20,6 +20,7 @@ func init() {
 		panic(err)
 	}
 	err = os.WriteFile(filepath.Join("theme", "default.json"), marshal, 0o644)
+	err = os.WriteFile(filepath.Join("theme", "custom_builtin.json"), marshal, 0o644)
 	if err != nil {
 		panic(err)
 	}
