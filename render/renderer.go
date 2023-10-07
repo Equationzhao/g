@@ -309,7 +309,12 @@ func (rd *Renderer) Executable() theme.Style {
 func (rd *Renderer) Dir(name string) theme.Style {
 	style := rd.theme.Special["dir"]
 	if s, ok := rd.theme.Name[strings.ToLower(name)]; ok {
-		style = s
+		// keep color
+		style.Icon = s.Icon
+		style.Underline = s.Underline
+		style.Bold = s.Bold
+		style.Italics = s.Italics
+		style.Faint = s.Faint
 	}
 	return style
 }
