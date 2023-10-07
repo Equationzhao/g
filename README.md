@@ -358,6 +358,10 @@ source ~/.g.nu
 - [ ] Color Support for html/markdown
 - [x] Support Scoop
 
+## CONTRIBUTING
+
+查看 [CONTRIBUTING](./CONTRIBUTING.md)
+
 以下是 eza 的新功能，后续计划支持
 - [ ] --git-repos: list each directory’s Git status, if tracked
 - [ ] --git-repos-no-status: list whether a directory is a Git repository, but not its status (faster)
