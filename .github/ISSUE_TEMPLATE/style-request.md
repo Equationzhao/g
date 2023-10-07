@@ -2,7 +2,7 @@
 name: Style request
 about: Suggest a new Style
 title: "[STYLE]"
-labels: bug
+labels: style
 assignees: ''
 
 ---
