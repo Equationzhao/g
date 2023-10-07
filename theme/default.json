@@ -1034,6 +1034,10 @@
             "color": "white",
             "icon": ""
         },
+        "prql": {
+            "color": "[195]@256",
+            "icon": ""
+        },
         "ps1": {
             "color": "BrightPreen",
             "icon": ""
