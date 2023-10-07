@@ -34,6 +34,8 @@ const (
 	Warn         = Yellow
 	Underline    = "\033[4m"
 	Bold         = "\033[1m"
+	Faint        = "\033[2m"
+	Italics      = "\033[3m"
 )
 
 const Reset = "\033[0m"

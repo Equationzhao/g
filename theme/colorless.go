@@ -14,6 +14,8 @@ func resetColor(m Theme) {
 			Color:     "",
 			Underline: false,
 			Bold:      false,
+			Faint:     false,
+			Italics:   false,
 		}
 	}
 }

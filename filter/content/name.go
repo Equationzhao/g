@@ -180,7 +180,7 @@ func (n *Name) Enable(renderer *render.Renderer) filter.ContentOption {
 		defer bytebufferpool.Put(dereference)
 		mounts := ""
 		mode := info.Mode()
-		underline, bold := false, false
+		underline, bold, italics, faint := false, false, false, false
 
 		if info.IsDir() {
 			if n.statistics != nil {
@@ -193,7 +193,7 @@ func (n *Name) Enable(renderer *render.Renderer) filter.ContentOption {
 			if n.classify {
 				classify = "/"
 			}
-			color, underline, bold = style.Color, style.Underline, style.Bold
+			color, underline, bold, italics, faint = style.Color, style.Underline, style.Bold, style.Italics, style.Faint
 		} else if util.IsSymLinkMode(mode) {
 			if n.statistics != nil {
 				n.statistics.link.Add(1)
@@ -202,7 +202,7 @@ func (n *Name) Enable(renderer *render.Renderer) filter.ContentOption {
 			if n.icon {
 				icon = style.Icon
 			}
-			color, underline, bold = style.Color, style.Underline, style.Bold
+			color, underline, bold, italics, faint = style.Color, style.Underline, style.Bold, style.Italics, style.Faint
 			if n.classify {
 				classify = "@"
 			}
@@ -255,6 +255,12 @@ func (n *Name) Enable(renderer *render.Renderer) filter.ContentOption {
 				if style.Bold {
 					_, _ = dereference.WriteString(theme.Bold)
 				}
+				if style.Italics {
+					_, _ = dereference.WriteString(theme.Italics)
+				}
+				if style.Faint {
+					_, _ = dereference.WriteString(theme.Faint)
+				}
 				_, _ = dereference.WriteString(style.Icon)
 				_, _ = dereference.WriteString(symlinks)
 				_, _ = dereference.WriteString(renderer.Colorend())
@@ -271,7 +277,7 @@ func (n *Name) Enable(renderer *render.Renderer) filter.ContentOption {
 				if n.classify {
 					classify = "|"
 				}
-				color, underline, bold = style.Color, style.Underline, style.Bold
+				color, underline, bold, italics, faint = style.Color, style.Underline, style.Bold, style.Italics, style.Faint
 			} else if mode&os.ModeSocket != 0 {
 				style := renderer.Socket()
 				if n.icon {
@@ -280,26 +286,26 @@ func (n *Name) Enable(renderer *render.Renderer) filter.ContentOption {
 				if n.classify {
 					classify = "="
 				}
-				color, underline, bold = style.Color, style.Underline, style.Bold
+				color, underline, bold, italics, faint = style.Color, style.Underline, style.Bold, style.Italics, style.Faint
 			} else {
 				if s, ok := renderer.ByName(name); ok {
 					if n.icon {
 						icon = s.Icon
 					}
-					color, underline, bold = s.Color, s.Underline, s.Bold
+					color, underline, bold, italics, faint = s.Color, s.Underline, s.Bold, s.Italics, s.Faint
 				} else {
 					s, ok = renderer.ByExt(name)
 					if ok {
 						if n.icon {
 							icon = s.Icon
 						}
-						color, underline, bold = s.Color, s.Underline, s.Bold
+						color, underline, bold, italics, faint = s.Color, s.Underline, s.Bold, s.Italics, s.Faint
 					} else {
 						s = renderer.File()
 						if n.icon {
 							icon = s.Icon
 						}
-						color, underline, bold = s.Color, s.Underline, s.Bold
+						color, underline, bold, italics, faint = s.Color, s.Underline, s.Bold, s.Italics, s.Faint
 					}
 				}
 			}
@@ -313,7 +319,7 @@ func (n *Name) Enable(renderer *render.Renderer) filter.ContentOption {
 		}
 		if exe {
 			s := renderer.Executable()
-			color, underline, bold = s.Color, s.Underline, s.Bold
+			color, underline, bold, italics, faint = s.Color, s.Underline, s.Bold, s.Italics, s.Faint
 		}
 
 		if n.mounts {
@@ -343,6 +349,12 @@ func (n *Name) Enable(renderer *render.Renderer) filter.ContentOption {
 		}
 		if bold {
 			_, _ = b.WriteString(theme.Bold)
+		}
+		if italics {
+			_, _ = b.WriteString(theme.Italics)
+		}
+		if faint {
+			_, _ = b.WriteString(theme.Faint)
 		}
 		if n.Quote != "" {
 			_, _ = b.WriteString(n.Quote)

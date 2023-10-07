@@ -16,6 +16,8 @@ type Style struct {
 	Icon      string `json:"icon,omitempty"`
 	Underline bool   `json:"underline,omitempty"`
 	Bold      bool   `json:"bold,omitempty"`
+	Faint     bool   `json:"faint,omitempty"`
+	Italics   bool   `json:"italics,omitempty"`
 }
 
 func (s *Style) ToReadable() Style {
@@ -149,8 +151,6 @@ func str2color(str string) (string, error) {
 		return BrightBlack, nil
 	case "reset", "Reset":
 		return Reset, nil
-	case "underline", "Underline":
-		return Underline, nil
 	default:
 		// remove spaces
 		str = strings.ReplaceAll(str, " ", "")
@@ -197,15 +197,6 @@ func str2color(str string) (string, error) {
 				return "", errors.New("rgb values must be numbers")
 			}
 			return colorStr, nil
-		}
-
-		// underline
-		if strings.HasPrefix(str, "underline+") {
-			color, err := str2color(str[len("underline+"):])
-			if err != nil {
-				return "", err
-			}
-			return Underline + color, nil
 		}
 
 		return Reset, nil
@@ -278,6 +269,8 @@ func ConvertThemeColor() {
 				Color:     color,
 				Underline: m[key].Underline,
 				Bold:      m[key].Bold,
+				Faint:     m[key].Faint,
+				Italics:   m[key].Italics,
 			}
 		}
 	}
