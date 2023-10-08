@@ -93,7 +93,7 @@ var filteringFlag = []cli.Flag{
 	},
 	&cli.StringSliceFlag{
 		Name:  "ext",
-		Usage: "show file which has target ext, eg: --show-only-ext=go,java",
+		Usage: "show file which has target ext, eg: --ext=go,java",
 		Action: func(context *cli.Context, s []string) error {
 			if len(s) > 0 {
 				f := filter.ExtOnly(s...)
