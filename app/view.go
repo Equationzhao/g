@@ -384,6 +384,12 @@ var viewFlag = []cli.Flag{
 		Category: "VIEW",
 	},
 	&cli.BoolFlag{
+		Name:               "smart-group",
+		Usage:              "only show group if it has a different name from owner",
+		DisableDefaultText: true,
+		Category:           "VIEW",
+	},
+	&cli.BoolFlag{
 		Name:               "time",
 		Usage:              "show time",
 		DisableDefaultText: true,

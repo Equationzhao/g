@@ -233,6 +233,11 @@ func init() {
 				}
 			}
 
+			smartGroup := context.Bool("smart-group")
+			if smartGroup {
+				groupEnabler.EnableSmartMode()
+			}
+
 			if n := context.Uint("n"); n > 0 && !tree {
 				contentFilter.LimitN = n
 			}
