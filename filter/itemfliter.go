@@ -170,7 +170,7 @@ func RemoveGitIgnore(repoPath git.RepoPath) ItemFilterFunc {
 	ignoredCache := git.GetCache()
 
 	return func(e *item.FileInfo) (ok bool) {
-		actual, _ := ignoredCache.GetOrInit(repoPath, git.DefaultInit(repoPath))
+		actual, _ := ignoredCache.GetOrCompute(repoPath, git.DefaultInit(repoPath))
 		ok = true
 		topLevel, err := git.GetTopLevel(repoPath)
 		if err != nil {
