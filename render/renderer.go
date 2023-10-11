@@ -306,8 +306,15 @@ func (rd *Renderer) Executable() theme.Style {
 	return rd.theme.Special["exe"]
 }
 
-func (rd *Renderer) Dir(name string) theme.Style {
-	style := rd.theme.Special["dir"]
+func (rd *Renderer) Dir(name string, empty bool) theme.Style {
+	var style theme.Style
+
+	if empty {
+		style = rd.theme.Special["empty-dir"]
+	} else {
+		style = rd.theme.Special["dir"]
+	}
+
 	if s, ok := rd.theme.Name[strings.ToLower(name)]; ok {
 		// keep color
 		style.Icon = s.Icon
