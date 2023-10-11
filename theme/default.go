@@ -916,6 +916,10 @@ var Ext = Theme{
 var Special = map[string]Style{
 	"dir": {
 		Color: dir,
+		Icon:  "\uE5FF",
+	},
+	"empty-dir": {
+		Color: dir,
 		Icon:  "\uF115",
 	},
 	"dir-prompt": {

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -165,6 +166,18 @@ func makeLink(abs string, name string) string {
 	return fmt.Sprintf("\033]8;;%s\033\\%s\033]8;;\033\\", abs, name)
 }
 
+func checkIfEmpty(info *item.FileInfo) bool {
+	f, err := os.Open(info.FullPath)
+	if err == io.EOF {
+		return true
+	}
+	_, err = f.Readdirnames(1)
+	if err == io.EOF {
+		return true
+	}
+	return false
+}
+
 /*
 Enable
 color + icon + file://quote+filename/relative-name+quote + classify + color-end + dereference + mounts
@@ -186,7 +199,10 @@ func (n *Name) Enable(renderer *render.Renderer) filter.ContentOption {
 			if n.statistics != nil {
 				n.statistics.dir.Add(1)
 			}
-			style := renderer.Dir(name)
+
+			empty := checkIfEmpty(info)
+			style := renderer.Dir(name, empty)
+
 			if n.icon {
 				icon = style.Icon
 			}
