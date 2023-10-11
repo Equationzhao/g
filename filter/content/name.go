@@ -240,8 +240,8 @@ func (n *Name) Enable(renderer *render.Renderer) filter.ContentOption {
 					broken = true
 					var pathErr *fs.PathError
 					if errors.As(err, &pathErr) {
-						if n.fullPath {
-							symlinksRel, err := filepath.Rel(info.FullPath, pathErr.Path)
+						if n.relativeTo != "" {
+							symlinksRel, err := filepath.Rel(n.relativeTo, pathErr.Path)
 							if err == nil {
 								pathErr.Path = symlinksRel
 							}
@@ -251,8 +251,8 @@ func (n *Name) Enable(renderer *render.Renderer) filter.ContentOption {
 						symlinks = err.Error()
 					}
 				} else {
-					if n.fullPath {
-						symlinksRel, err := filepath.Rel(filepath.Dir(info.FullPath), symlinks)
+					if n.relativeTo != "" {
+						symlinksRel, err := filepath.Rel(n.relativeTo, symlinks)
 						if err == nil {
 							symlinks = symlinksRel
 						}
@@ -398,8 +398,7 @@ func (n *Name) Enable(renderer *render.Renderer) filter.ContentOption {
 		if classify != "" && classify != "@" {
 			_, _ = b.WriteString(classify)
 		}
-		d := dereference.String()
-		if d != "" {
+		if d := dereference.String(); d != "" {
 			_, _ = b.WriteString(d)
 		}
 		if mounts != "" {
