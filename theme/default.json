@@ -289,6 +289,17 @@
             "color": "white",
             "icon": ""
         },
+        "go.mod": {
+            "color": "[158]@256",
+            "icon": "",
+            "underline": true
+        },
+        "go.sum": {
+            "color": "[158]@256",
+            "icon": "",
+            "underline": true,
+            "faint": true
+        },
         "google": {
             "color": "white",
             "icon": ""
@@ -357,6 +368,11 @@
             "color": "blue",
             "icon": ""
         },
+        "package.json": {
+            "color": "white",
+            "icon": "",
+            "underline": true
+        },
         "passwd": {
             "color": "cyan",
             "icon": ""
@@ -417,6 +433,11 @@
             "color": "BrightBlack",
             "icon": ""
         },
+        "tsconfig.json": {
+            "color": "white",
+            "icon": "",
+            "underline": true
+        },
         "users": {
             "color": "white",
             "icon": ""
@@ -433,11 +454,15 @@
     "special": {
         "dir": {
             "color": "BrightBlue",
-            "icon": ""
+            "icon": ""
         },
         "dir-prompt": {
             "color": "yellow",
             "icon": "► "
+        },
+        "empty-dir": {
+            "color": "BrightBlue",
+            "icon": ""
         },
         "exe": {
             "color": "green",
@@ -492,11 +517,16 @@
             "icon": ""
         },
         "app": {
+            "color": "green",
             "icon": ""
         },
         "asm": {
             "color": "[158]@256",
             "icon": ""
+        },
+        "astro": {
+            "color": "[158]@256",
+            "icon": "\\uf135"
         },
         "atom": {
             "color": "[158]@256",
@@ -573,6 +603,10 @@
         "cfg": {
             "color": "white",
             "icon": ""
+        },
+        "cjs": {
+            "color": "[158]@256",
+            "icon": ""
         },
         "clj": {
             "color": "[158]@256",
@@ -930,6 +964,10 @@
             "color": "[199]@256",
             "icon": ""
         },
+        "mjs": {
+            "color": "[158]@256",
+            "icon": ""
+        },
         "mkv": {
             "color": "[200]@256",
             "icon": ""
@@ -989,6 +1027,10 @@
         "otf": {
             "color": "cyan",
             "icon": ""
+        },
+        "pages": {
+            "color": "[150]@256",
+            "icon": ""
         },
         "passwd": {
             "color": "cyan",

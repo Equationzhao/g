@@ -78,6 +78,7 @@ g
 [--show-only-hidden|--hidden]
 [--size-unit|--su|--block-size]=[value]
 [--size]
+[--smart-group]
 [--sort-by-mime-descend]
 [--sort-by-mime-parent-descend]
 [--sort-by-mime-parent]
@@ -188,7 +189,7 @@ g [options] [path]
 
 **--duplicate, --dup**: show duplicate files
 
-**--ext**="": show file which has target ext, eg: --show-only-ext=go,java
+**--ext**="": show file which has target ext, eg: --ext=go,java
 
 **--footer**: add a footer row
 
@@ -283,6 +284,8 @@ g [options] [path]
 **--size-unit, --su, --block-size**="": size unit:
 			bit, b, k, m, g, t, p,
 			e, z, y, bb, nb, auto
+
+**--smart-group**: only show group if it has a different name from owner
 
 **--sort, --SORT_FIELD**="": sort by field, default: 
 	ascending and case insensitive, 
