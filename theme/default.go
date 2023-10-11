@@ -80,7 +80,8 @@ var Ext = Theme{
 		Icon:  "\uF17B",
 	},
 	"app": Style{
-		Icon: "\ueb44",
+		Color: Green,
+		Icon:  "\ueb44",
 	},
 	"msi": Style{
 		Color: pkg,
@@ -210,7 +211,19 @@ var Ext = Theme{
 		Color: lang,
 		Icon:  "\uE21E",
 	},
+	"astro": Style{
+		Color: lang,
+		Icon:  "\\uf135",
+	},
 	"js": Style{
+		Color: lang,
+		Icon:  "\uE781",
+	},
+	"cjs": Style{
+		Color: lang,
+		Icon:  "\uE781",
+	},
+	"mjs": Style{
 		Color: lang,
 		Icon:  "\uE781",
 	},
@@ -627,6 +640,10 @@ var Ext = Theme{
 		Icon:  "\uf1c2",
 	},
 	"docm": Style{
+		Color: doc,
+		Icon:  "\uf1c2",
+	},
+	"pages": Style{
 		Color: doc,
 		Icon:  "\uf1c2",
 	},
@@ -1197,6 +1214,27 @@ var Name = map[string]Style{
 	"vagrantfile": {
 		Color: lang,
 		Icon:  "\uE20F",
+	},
+	"package.json": {
+		Color:     conf,
+		Icon:      "\uE60B",
+		Underline: true,
+	},
+	"tsconfig.json": {
+		Color:     conf,
+		Icon:      "\uE628",
+		Underline: true,
+	},
+	"go.mod": {
+		Color:     lang,
+		Icon:      "\uE626",
+		Underline: true,
+	},
+	"go.sum": {
+		Color:     lang,
+		Icon:      "\uE626",
+		Underline: true,
+		Faint:     true,
 	},
 }
 
