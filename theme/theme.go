@@ -18,6 +18,7 @@ type Style struct {
 	Bold      bool   `json:"bold,omitempty"`
 	Faint     bool   `json:"faint,omitempty"`
 	Italics   bool   `json:"italics,omitempty"`
+	Blink     bool   `json:"blink,omitempty"`
 }
 
 func (s *Style) ToReadable() Style {
@@ -271,6 +272,7 @@ func ConvertThemeColor() {
 				Bold:      m[key].Bold,
 				Faint:     m[key].Faint,
 				Italics:   m[key].Italics,
+				Blink:     m[key].Blink,
 			}
 		}
 	}

@@ -180,7 +180,7 @@ func (n *Name) Enable(renderer *render.Renderer) filter.ContentOption {
 		defer bytebufferpool.Put(dereference)
 		mounts := ""
 		mode := info.Mode()
-		underline, bold, italics, faint := false, false, false, false
+		underline, bold, italics, faint, blink := false, false, false, false, false
 
 		if info.IsDir() {
 			if n.statistics != nil {
@@ -193,7 +193,7 @@ func (n *Name) Enable(renderer *render.Renderer) filter.ContentOption {
 			if n.classify {
 				classify = "/"
 			}
-			color, underline, bold, italics, faint = style.Color, style.Underline, style.Bold, style.Italics, style.Faint
+			color, underline, bold, italics, faint, blink = style.Color, style.Underline, style.Bold, style.Italics, style.Faint, style.Blink
 		} else if util.IsSymLinkMode(mode) {
 			if n.statistics != nil {
 				n.statistics.link.Add(1)
@@ -202,7 +202,7 @@ func (n *Name) Enable(renderer *render.Renderer) filter.ContentOption {
 			if n.icon {
 				icon = style.Icon
 			}
-			color, underline, bold, italics, faint = style.Color, style.Underline, style.Bold, style.Italics, style.Faint
+			color, underline, bold, italics, faint, blink = style.Color, style.Underline, style.Bold, style.Italics, style.Faint, style.Blink
 			if n.classify {
 				classify = "@"
 			}
@@ -261,6 +261,9 @@ func (n *Name) Enable(renderer *render.Renderer) filter.ContentOption {
 				if style.Faint {
 					_, _ = dereference.WriteString(theme.Faint)
 				}
+				if style.Blink {
+					_, _ = dereference.WriteString(theme.Blink)
+				}
 				_, _ = dereference.WriteString(style.Icon)
 				_, _ = dereference.WriteString(symlinks)
 				_, _ = dereference.WriteString(renderer.Colorend())
@@ -277,7 +280,7 @@ func (n *Name) Enable(renderer *render.Renderer) filter.ContentOption {
 				if n.classify {
 					classify = "|"
 				}
-				color, underline, bold, italics, faint = style.Color, style.Underline, style.Bold, style.Italics, style.Faint
+				color, underline, bold, italics, faint, blink = style.Color, style.Underline, style.Bold, style.Italics, style.Faint, style.Blink
 			} else if mode&os.ModeSocket != 0 {
 				style := renderer.Socket()
 				if n.icon {
@@ -286,26 +289,26 @@ func (n *Name) Enable(renderer *render.Renderer) filter.ContentOption {
 				if n.classify {
 					classify = "="
 				}
-				color, underline, bold, italics, faint = style.Color, style.Underline, style.Bold, style.Italics, style.Faint
+				color, underline, bold, italics, faint, blink = style.Color, style.Underline, style.Bold, style.Italics, style.Faint, style.Blink
 			} else {
 				if s, ok := renderer.ByName(name); ok {
 					if n.icon {
 						icon = s.Icon
 					}
-					color, underline, bold, italics, faint = s.Color, s.Underline, s.Bold, s.Italics, s.Faint
+					color, underline, bold, italics, faint, blink = s.Color, s.Underline, s.Bold, s.Italics, s.Faint, s.Blink
 				} else {
 					s, ok = renderer.ByExt(name)
 					if ok {
 						if n.icon {
 							icon = s.Icon
 						}
-						color, underline, bold, italics, faint = s.Color, s.Underline, s.Bold, s.Italics, s.Faint
+						color, underline, bold, italics, faint, blink = s.Color, s.Underline, s.Bold, s.Italics, s.Faint, s.Blink
 					} else {
 						s = renderer.File()
 						if n.icon {
 							icon = s.Icon
 						}
-						color, underline, bold, italics, faint = s.Color, s.Underline, s.Bold, s.Italics, s.Faint
+						color, underline, bold, italics, faint, blink = s.Color, s.Underline, s.Bold, s.Italics, s.Faint, s.Blink
 					}
 				}
 			}
@@ -319,7 +322,7 @@ func (n *Name) Enable(renderer *render.Renderer) filter.ContentOption {
 		}
 		if exe {
 			s := renderer.Executable()
-			color, underline, bold, italics, faint = s.Color, s.Underline, s.Bold, s.Italics, s.Faint
+			color, underline, bold, italics, faint, blink = s.Color, s.Underline, s.Bold, s.Italics, s.Faint, s.Blink
 		}
 
 		if n.mounts {
@@ -355,6 +358,9 @@ func (n *Name) Enable(renderer *render.Renderer) filter.ContentOption {
 		}
 		if faint {
 			_, _ = b.WriteString(theme.Faint)
+		}
+		if blink {
+			_, _ = b.WriteString(theme.Blink)
 		}
 		if n.Quote != "" {
 			_, _ = b.WriteString(n.Quote)
