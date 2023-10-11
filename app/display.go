@@ -58,7 +58,7 @@ var displayFlag = []cli.Flag{
 			case "24bit", "truecolor", "true-color", "24-bit", "16m":
 				theme.ColorLevel = theme.TrueColor
 			default:
-				return fmt.Errorf("unkown color option:%s", s)
+				return fmt.Errorf("unknown color option:%s", s)
 			}
 			return nil
 		},
@@ -370,7 +370,7 @@ var displayFlag = []cli.Flag{
 					p = display.NewTreePrinter()
 				}
 			default:
-				return fmt.Errorf("unkown format option:%s", s)
+				return fmt.Errorf("unknown format option:%s", s)
 			}
 			return nil
 		},

@@ -158,7 +158,7 @@ with size
 
 ```bash
 g -size 
-g -size -recusive-size # show size of dir recursively
+g -size -recursive-size # show size of dir recursively
 ```
 
 show all files, including hidden files
