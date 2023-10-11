@@ -102,6 +102,19 @@ var displayFlag = []cli.Flag{
 		},
 		Category: "DISPLAY",
 	},
+	&cli.UintFlag{
+		Name:        "sepline",
+		Usage:       "add split line per `N` lines when printing by line",
+		DefaultText: "disabled",
+		Action: func(context *cli.Context, u uint) error {
+			if u > 0 {
+				if bl, ok := p.(*display.Byline); ok {
+					bl.NewlinePerN = u
+				}
+			}
+			return nil
+		},
+	},
 	&cli.BoolFlag{
 		Name:               "zero",
 		Aliases:            []string{"0"},

@@ -95,12 +95,14 @@ type Printer interface {
 type Byline struct {
 	*bufio.Writer
 	*hook
+	NewlinePerN uint
 }
 
 func NewByline() Printer {
 	return &Byline{
-		Writer: bufio.NewWriter(Output),
-		hook:   newHook(),
+		Writer:      bufio.NewWriter(Output),
+		hook:        newHook(),
+		NewlinePerN: 0,
 	}
 }
 
@@ -109,9 +111,31 @@ func (b *Byline) Print(i ...*item.FileInfo) {
 		fire(b.BeforePrint, b, i...)
 	}
 	defer b.Flush()
+
+	strs := make([]string, 0, len(i))
+	maxLen := 0
 	for _, v := range i {
-		_, _ = b.WriteString(v.OrderedContent(" "))
+		str := v.OrderedContent(" ")
+		if b.NewlinePerN != 0 {
+			if w := WidthLen(str); w > maxLen {
+				maxLen = w
+			}
+		}
+		strs = append(strs, str)
+	}
+
+	var count uint = 0
+	for _, str := range strs {
+		_, _ = b.WriteString(str)
 		_ = b.WriteByte('\n')
+		if b.NewlinePerN != 0 {
+			count++
+			if count == b.NewlinePerN {
+				_, _ = b.WriteString(strings.Repeat("—", maxLen))
+				_ = b.WriteByte('\n')
+				count = 0
+			}
+		}
 	}
 	if !b.disableAfter {
 		fire(b.AfterPrint, b, i...)
