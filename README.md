@@ -162,7 +162,7 @@ g -group
 
 ```bash
 g -size 
-g -size -recusive-size # show size of dir recursively
+g -size -recursive-size # show size of dir recursively
 ```
 
 显示所有文件，包括隐藏文件
