@@ -3,8 +3,9 @@ package git
 import (
 	"sync"
 
-	"github.com/Equationzhao/g/cached"
 	"github.com/Equationzhao/pathbeautify"
+	cached "github.com/alphadose/haxmap"
+	"github.com/zeebo/xxh3"
 )
 
 var (
@@ -14,21 +15,23 @@ var (
 	TopLevelInitOnce sync.Once
 )
 
-const shardSize = 20
+const size = 20
+
+// your custom hash function
+func hasher(s string) uintptr {
+	return uintptr(xxh3.HashString(s))
+}
 
 type Cache = *cached.Map[RepoPath, *FileGits]
 
 func GetCache() Cache {
 	IgnoredInitOnce.Do(
 		func() {
-			ignored = cached.NewCacheMap[RepoPath, *FileGits](shardSize)
+			ignored = cached.New[RepoPath, *FileGits](size)
+			ignored.SetHasher(hasher)
 		},
 	)
 	return ignored
-}
-
-func FreeCache() {
-	ignored.Free()
 }
 
 func DefaultInit(repoPath RepoPath) func() *FileGits {
@@ -48,12 +51,13 @@ func GetTopLevel(path string) (RepoPath, error) {
 	TopLevelInitOnce.Do(
 		func() {
 			if TopLevelCache == nil {
-				TopLevelCache = cached.NewCacheMap[RepoPath, RepoPath](shardSize)
+				TopLevelCache = cached.New[RepoPath, RepoPath](size)
+				TopLevelCache.SetHasher(hasher)
 			}
 		},
 	)
 	var err error
-	actual, _ := TopLevelCache.GetOrInit(
+	actual, _ := TopLevelCache.GetOrCompute(
 		path, func() RepoPath {
 			out, err_ := getTopLevel(path)
 			if err_ != nil {

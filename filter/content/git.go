@@ -15,10 +15,6 @@ type GitEnabler struct {
 	Path  git.RepoPath
 }
 
-func (g *GitEnabler) FreeCache() {
-	g.cache.Free()
-}
-
 func (g *GitEnabler) InitCache(repo git.RepoPath) {
 	g.cache.Set(repo, git.DefaultInit(repo)())
 }

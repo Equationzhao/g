@@ -7,6 +7,7 @@ import (
 
 	"github.com/Equationzhao/g/util"
 	"github.com/Equationzhao/pathbeautify"
+	"github.com/go-git/go-git/v5"
 )
 
 // FileGit is an entry name with git status
@@ -67,22 +68,57 @@ func GetShortGitStatus(repoPath RepoPath) (string, error) {
 	c := exec.Command("git", "status", "-s", "--ignored", "--porcelain", repoPath)
 	c.Dir = repoPath
 	out, err := c.Output()
-	return string(out), err
+	if err == nil {
+		return string(out), err
+	}
+
+	// if failed, try go-git
+	return goGitStatus(repoPath)
+}
+
+func goGitStatus(repoPath RepoPath) (string, error) {
+	r, err := git.PlainOpenWithOptions(repoPath, &git.PlainOpenOptions{DetectDotGit: true})
+	if err != nil {
+		return "", err
+	}
+	w, err := r.Worktree()
+	if err != nil {
+		return "", err
+	}
+	status, err := w.Status()
+	if err != nil {
+		return "", err
+	}
+	return status.String(), nil
 }
 
 func getTopLevel(path RepoPath) (string, error) {
 	c := exec.Command("git", "rev-parse", "--show-toplevel", path)
 	c.Dir = path
 	out, err := c.Output()
+	if err == nil {
+		// 	 get the first line
+		lines := strings.Split(string(out), "\n")[0]
+		return lines, err
+	}
+
+	// if failed, try go-git
+	return goGitTopLevel(path)
+}
+
+func goGitTopLevel(path RepoPath) (string, error) {
+	r, err := git.PlainOpenWithOptions(path, &git.PlainOpenOptions{DetectDotGit: true})
 	if err != nil {
 		return "", err
 	}
-	// 	 get the first line
-	lines := strings.Split(string(out), "\n")[0]
-	return lines, err
+	w, err := r.Worktree()
+	if err != nil {
+		return "", err
+	}
+	return w.Filesystem.Root(), nil
 }
 
-type Status int
+type Status uint8
 
 const (
 	Unknown           Status = iota
