@@ -11,6 +11,7 @@ import (
 
 type GroupEnabler struct {
 	Numeric bool
+	Smart   bool
 }
 
 const (
@@ -31,6 +32,14 @@ func (g *GroupEnabler) DisableNumeric() {
 	g.Numeric = false
 }
 
+func (g *GroupEnabler) EnableSmartMode() {
+	g.Smart = true
+}
+
+func (g *GroupEnabler) DisableSmartMode() {
+	g.Smart = false
+}
+
 func (g *GroupEnabler) EnableGroup(renderer *render.Renderer) filter.ContentOption {
 	return func(info *item.FileInfo) (string, string) {
 		name, returnFuncName := "", GroupName
@@ -43,6 +52,9 @@ func (g *GroupEnabler) EnableGroup(renderer *render.Renderer) filter.ContentOpti
 			}
 		} else {
 			name = osbased.Group(info)
+			if g.Smart && name == osbased.Owner(info) {
+				name = ""
+			}
 		}
 		return renderer.Group(name), returnFuncName
 	}
