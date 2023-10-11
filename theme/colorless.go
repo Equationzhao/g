@@ -10,7 +10,7 @@ func RemoveAllColor() {
 func resetColor(m Theme) {
 	for k := range m {
 		m[k] = Style{
-			Icon:      InfoTheme[k].Icon,
+			Icon:      m[k].Icon,
 			Color:     "",
 			Underline: false,
 			Bold:      false,
