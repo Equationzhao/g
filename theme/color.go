@@ -32,10 +32,11 @@ const (
 	Success      = Green
 	Error        = Red
 	Warn         = Yellow
-	Underline    = "\033[4m"
 	Bold         = "\033[1m"
 	Faint        = "\033[2m"
 	Italics      = "\033[3m"
+	Underline    = "\033[4m"
+	Blink        = "\033[5m"
 )
 
 const Reset = "\033[0m"

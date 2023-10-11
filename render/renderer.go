@@ -422,4 +422,7 @@ func checkUnderlineAndBold(style *theme.Style, bb *bytebufferpool.ByteBuffer) {
 	if style.Faint {
 		_, _ = bb.WriteString(theme.Faint)
 	}
+	if style.Blink {
+		_, _ = bb.WriteString(theme.Blink)
+	}
 }
