@@ -452,6 +452,14 @@
         }
     },
     "special": {
+        "char": {
+            "color": "yellow",
+            "icon": ""
+        },
+        "device": {
+            "color": "yellow",
+            "icon": ""
+        },
         "dir": {
             "color": "BrightBlue",
             "icon": ""
