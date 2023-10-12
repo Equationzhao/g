@@ -721,7 +721,7 @@ func (t *TreePrinter) Print(s ...*item.FileInfo) {
 
 	if DefaultTreeStyle == TreeASCII {
 		Child = "|---- "
-		LastChild = "|----"
+		LastChild = "|---- "
 		Mid = "|     "
 		Empty = "    "
 	} else if DefaultTreeStyle == TreeRectangle {
