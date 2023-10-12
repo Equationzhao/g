@@ -302,6 +302,14 @@ func (rd *Renderer) Socket() theme.Style {
 	return rd.theme.Special["socket"]
 }
 
+func (rd *Renderer) Device() theme.Style {
+	return rd.theme.Special["device"]
+}
+
+func (rd *Renderer) Char() theme.Style {
+	return rd.theme.Special["char"]
+}
+
 func (rd *Renderer) Executable() theme.Style {
 	return rd.theme.Special["exe"]
 }
