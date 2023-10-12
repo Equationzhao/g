@@ -236,6 +236,7 @@ func (n *Name) Enable(renderer *render.Renderer) filter.ContentOption {
 				_, _ = dereference.WriteString(renderer.Colorend())
 				broken := false
 				symlinks, err := filepath.EvalSymlinks(info.FullPath)
+				var linkStyle theme.Style
 				if err != nil {
 					broken = true
 					var pathErr *fs.PathError
@@ -251,6 +252,33 @@ func (n *Name) Enable(renderer *render.Renderer) filter.ContentOption {
 						symlinks = err.Error()
 					}
 				} else {
+
+					stat, err := os.Stat(symlinks)
+					if err == nil {
+						if stat.IsDir() {
+							empty := checkIfEmpty(info)
+							linkStyle = renderer.Dir(stat.Name(), empty)
+						} else if mode := stat.Mode(); util.IsSymLinkMode(mode) {
+							linkStyle = renderer.Symlink()
+						} else if mode&os.ModeNamedPipe != 0 {
+							linkStyle = renderer.Pipe()
+						} else if mode&os.ModeSocket != 0 {
+							linkStyle = renderer.Socket()
+						} else if mode&os.ModeDevice != 0 {
+							if mode&os.ModeCharDevice != 0 {
+								linkStyle = renderer.Char()
+							} else {
+								linkStyle = renderer.Device()
+							}
+						} else if s, ok := renderer.ByName(stat.Name()); ok {
+							linkStyle = s
+						} else if s, ok = renderer.ByExt(stat.Name()); ok {
+							linkStyle = s
+						} else {
+							linkStyle = renderer.File()
+						}
+					}
+
 					if n.relativeTo != "" {
 						symlinksRel, err := filepath.Rel(n.relativeTo, symlinks)
 						if err == nil {
@@ -262,7 +290,7 @@ func (n *Name) Enable(renderer *render.Renderer) filter.ContentOption {
 				if broken {
 					style = renderer.SymlinkBroken()
 				} else {
-					style = renderer.SymlinkDereference()
+					style = linkStyle
 				}
 				_, _ = dereference.WriteString(style.Color)
 				if style.Underline {
@@ -280,7 +308,7 @@ func (n *Name) Enable(renderer *render.Renderer) filter.ContentOption {
 				if style.Blink {
 					_, _ = dereference.WriteString(theme.Blink)
 				}
-				_, _ = dereference.WriteString(style.Icon)
+				// _, _ = dereference.WriteString(style.Icon)
 				_, _ = dereference.WriteString(symlinks)
 				_, _ = dereference.WriteString(renderer.Colorend())
 			}
@@ -306,6 +334,18 @@ func (n *Name) Enable(renderer *render.Renderer) filter.ContentOption {
 					classify = "="
 				}
 				color, underline, bold, italics, faint, blink = style.Color, style.Underline, style.Bold, style.Italics, style.Faint, style.Blink
+			} else if mode&os.ModeDevice != 0 {
+				s := theme.Style{}
+				if mode&os.ModeCharDevice != 0 {
+					s = renderer.Char()
+				} else {
+					s = renderer.Device()
+				}
+
+				if n.icon {
+					icon = s.Icon
+				}
+				color, underline, bold, italics, faint, blink = s.Color, s.Underline, s.Bold, s.Italics, s.Faint, s.Blink
 			} else {
 				if s, ok := renderer.ByName(name); ok {
 					if n.icon {
