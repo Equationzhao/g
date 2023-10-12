@@ -236,7 +236,7 @@ func (s *SizeEnabler) Size2String(b int64) (string, SizeUnit) {
 				res = strconv.FormatFloat(v, 'f', 1, 64)
 				if res == "0.0" {
 					// make align
-					return "      - ", actualUnit
+					return "       -", actualUnit
 				}
 				res += " " + Convert2SizeString(i)
 				actualUnit = i
