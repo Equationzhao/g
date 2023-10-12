@@ -623,7 +623,7 @@ func init() {
 								}
 								if l < longestEachPart[part] {
 									// expand
-									content.SetSuffix(strings.Repeat(" ", longestEachPart[part]-l))
+									content.SetPrefix(strings.Repeat(" ", longestEachPart[part]-l))
 									it.Set(part, content)
 								}
 							}
