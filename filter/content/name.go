@@ -8,6 +8,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"strings"
 	"sync/atomic"
 
 	"github.com/Equationzhao/g/filter"
@@ -360,7 +361,11 @@ func (n *Name) Enable(renderer *render.Renderer) filter.ContentOption {
 						}
 						color, underline, bold, italics, faint, blink = s.Color, s.Underline, s.Bold, s.Italics, s.Faint, s.Blink
 					} else {
-						s = renderer.File()
+						if strings.HasPrefix(name, ".") {
+							s = renderer.HiddenFile()
+						} else {
+							s = renderer.File()
+						}
 						if n.icon {
 							icon = s.Icon
 						}

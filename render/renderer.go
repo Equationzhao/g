@@ -338,6 +338,10 @@ func (rd *Renderer) File() theme.Style {
 	return rd.theme.Special["file"]
 }
 
+func (rd *Renderer) HiddenFile() theme.Style {
+	return rd.theme.Special["hidden-file"]
+}
+
 func (rd *Renderer) gitByStatus(name string, status string) string {
 	style, ok := rd.theme.Git[status]
 	if !ok {
