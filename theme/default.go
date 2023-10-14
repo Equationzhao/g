@@ -961,6 +961,10 @@ var Special = map[string]Style{
 		Color: White,
 		Icon:  "\uF016",
 	},
+	"hidden-file": {
+		Color: White,
+		Icon:  "",
+	},
 	"mounts": {
 		Color: BrightBlack,
 	},
