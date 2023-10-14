@@ -815,6 +815,10 @@ var Ext = Theme{
 		Color: bash,
 		Icon:  "\uF489",
 	},
+	".profile": Style{
+		Color: bash,
+		Icon:  "\uF489",
+	},
 	"nu": Style{
 		Color: bash,
 		Icon:  "\uF489",
@@ -911,6 +915,10 @@ var Ext = Theme{
 		Color: White,
 		Icon:  "",
 	},
+	"swp": Style{
+		Color: White,
+		Icon:  "\uebcb",
+	},
 }
 
 var Special = map[string]Style{
@@ -980,6 +988,10 @@ var Name = map[string]Style{
 		Color: White,
 	},
 	"trash": {
+		Icon:  "\uf1f8",
+		Color: BrightBlack,
+	},
+	".trash": {
 		Icon:  "\uf1f8",
 		Color: BrightBlack,
 	},
@@ -1247,6 +1259,14 @@ var Name = map[string]Style{
 		Icon:      "\uE626",
 		Underline: true,
 		Faint:     true,
+	},
+	".python_history": {
+		Color: lang,
+		Icon:  "\uE606",
+	},
+	".cfusertextencoding": {
+		Color: BrightBlack,
+		Icon:  "\uF179",
 	},
 }
 
