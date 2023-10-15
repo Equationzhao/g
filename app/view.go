@@ -778,7 +778,7 @@ var viewFlag = []cli.Flag{
 	},
 	&cli.BoolFlag{
 		Name:               "no-total-size",
-		Usage:              "disable total size(always override show-total-size)",
+		Usage:              "disable total size(always override --total-size)",
 		DisableDefaultText: true,
 		Category:           "VIEW",
 		Action: func(context *cli.Context, b bool) error {
