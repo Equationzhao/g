@@ -1208,12 +1208,15 @@ var Name = map[string]Style{
 		Color: White,
 	},
 	"cargo.lock": {
-		Color: lock,
-		Icon:  "\uE7A8",
+		Color:     lang,
+		Icon:      "\uE7A8",
+		Faint:     true,
+		Underline: true,
 	},
 	"cargo.toml": {
-		Color: lang,
-		Icon:  "\uE7A8",
+		Color:     lang,
+		Icon:      "\uE7A8",
+		Underline: true,
 	},
 	"known_hosts": {
 		Color: White,
