@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 
 	"github.com/Equationzhao/g/item"
-	"github.com/shirou/gopsutil/disk"
+	"github.com/shirou/gopsutil/v3/disk"
 	"github.com/valyala/bytebufferpool"
 )
 
