@@ -53,7 +53,7 @@ var viewFlag = []cli.Flag{
 	},
 	&cli.StringSliceFlag{
 		Name:    "time-type",
-		Usage:   "time type, mod(default), create, access, all, birth[macOS only]",
+		Usage:   "time type, mod(default), create, access, all, birth[macOS/openbsd]",
 		EnvVars: []string{"TIME_TYPE"},
 		Action: func(context *cli.Context, ss []string) error {
 			timeType = make([]string, 0, len(ss))
@@ -113,7 +113,7 @@ var viewFlag = []cli.Flag{
 	},
 	&cli.BoolFlag{
 		Name:               "birth",
-		Usage:              "birth time[macOS only]",
+		Usage:              "birth time[macOS/openbsd]",
 		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
 			if b {
