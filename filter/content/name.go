@@ -19,14 +19,21 @@ import (
 	"github.com/valyala/bytebufferpool"
 )
 
-type (
-	Name struct {
-		icon, classify, fileType, fullPath, noDeference, hyperLink, mounts bool
-		statistics                                                         *Statistics
-		relativeTo                                                         string
-		Quote                                                              string
-	}
-)
+type Name struct {
+	icon, classify, fileType, fullPath, noDeference, hyperLink, mounts bool
+	statistics                                                         *Statistics
+	relativeTo                                                         string
+	Quote                                                              string
+	QuoteStatus                                                        int8 // >1 always quote || =0 default || <0 never quote
+}
+
+func neverQuote(qs int8) bool {
+	return qs < 0
+}
+
+func alwaysQuote(qs int8) bool {
+	return qs > 0
+}
 
 type Statistics struct {
 	file, dir, link atomic.Uint64
@@ -104,13 +111,18 @@ func (n *Name) SetStatistics(Statistics *Statistics) *Name {
 	return n
 }
 
-func (n *Name) SetQuote(quote string) *Name {
+func (n *Name) SetQuoteString(quote string) *Name {
 	n.Quote = quote
 	return n
 }
 
+func (n *Name) SetQuote() *Name {
+	n.QuoteStatus = 1
+	return n
+}
+
 func (n *Name) UnsetQuote() *Name {
-	n.Quote = ""
+	n.QuoteStatus = -1
 	return n
 }
 
@@ -310,7 +322,24 @@ func (n *Name) Enable(renderer *render.Renderer) filter.ContentOption {
 					_, _ = dereference.WriteString(theme.Blink)
 				}
 				// _, _ = dereference.WriteString(style.Icon)
+				hasQuote := false
+				// if the name contains space and QuoteStatus >=0, add quote
+				if strings.ContainsRune(symlinks, ' ') {
+					if !neverQuote(n.QuoteStatus) {
+						hasQuote = true
+						_, _ = dereference.WriteString(n.Quote)
+					}
+				} else {
+					// no space, but QuoteStatus == 1
+					if alwaysQuote(n.QuoteStatus) {
+						hasQuote = true
+						_, _ = dereference.WriteString(n.Quote)
+					}
+				}
 				_, _ = dereference.WriteString(symlinks)
+				if hasQuote {
+					_, _ = dereference.WriteString(n.Quote)
+				}
 				_, _ = dereference.WriteString(renderer.Colorend())
 			}
 		} else {
@@ -423,15 +452,26 @@ func (n *Name) Enable(renderer *render.Renderer) filter.ContentOption {
 		if blink {
 			_, _ = b.WriteString(theme.Blink)
 		}
-		if n.Quote != "" {
-			_, _ = b.WriteString(n.Quote)
+		hasQuote := false
+		// if the name contains space and QuoteStatus >=0, add quote
+		if strings.ContainsRune(name, ' ') {
+			if !neverQuote(n.QuoteStatus) {
+				hasQuote = true
+				_, _ = b.WriteString(n.Quote)
+			}
+		} else {
+			// no space, but QuoteStatus == 1
+			if alwaysQuote(n.QuoteStatus) {
+				hasQuote = true
+				_, _ = b.WriteString(n.Quote)
+			}
 		}
 		if n.hyperLink {
 			_, _ = b.WriteString(makeLink("file://"+info.FullPath, name))
 		} else {
 			_, _ = b.WriteString(name)
 		}
-		if n.Quote != "" {
+		if hasQuote {
 			_, _ = b.WriteString(n.Quote)
 		}
 		if classify == "@" {
