@@ -1278,34 +1278,37 @@ var Name = map[string]Style{
 }
 
 var Permission = map[string]Style{
-	"D": {
+	"block": {
 		Color: Cyan,
 	},
-	"d": {
+	"directory": {
 		Color: Blue,
 	},
-	"l": {
+	"link": {
 		Color: Purple,
 	},
-	"b": {
+	"char": {
 		Color: Yellow,
 	},
-	"c": {
+	"pipe": {
 		Color: Yellow,
 	},
-	"p": {
+	"socket": {
 		Color: Yellow,
 	},
-	"s": {
+	"setuid": {
+		Color: Purple,
+	},
+	"setgid": {
+		Color: Purple,
+	},
+	"read": {
 		Color: Yellow,
 	},
-	"r": {
-		Color: Yellow,
-	},
-	"w": {
+	"write": {
 		Color: Red,
 	},
-	"x": {
+	"exe": {
 		Color: Green,
 	},
 	"-": {
