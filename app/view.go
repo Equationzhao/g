@@ -262,9 +262,6 @@ var viewFlag = []cli.Flag{
 		Action: func(context *cli.Context, b bool) error {
 			if b {
 				contentFunc = append(contentFunc, filtercontent.EnableFileOctalPermissions(r))
-				if _, ok := p.(*display.Byline); !ok {
-					p = display.NewByline()
-				}
 			}
 			return nil
 		},
@@ -278,9 +275,6 @@ var viewFlag = []cli.Flag{
 		Action: func(context *cli.Context, b bool) error {
 			if b {
 				contentFunc = append(contentFunc, filtercontent.EnableFileMode(r))
-				if _, ok := p.(*display.Byline); !ok {
-					p = display.NewByline()
-				}
 			}
 			return nil
 		},
@@ -293,9 +287,6 @@ var viewFlag = []cli.Flag{
 		Action: func(context *cli.Context, b bool) error {
 			if b {
 				contentFunc = append(contentFunc, sizeEnabler.EnableSize(sizeUint, r))
-				if _, ok := p.(*display.Byline); !ok {
-					p = display.NewByline()
-				}
 			}
 			return nil
 		},
@@ -322,9 +313,6 @@ var viewFlag = []cli.Flag{
 		Action: func(context *cli.Context, b bool) error {
 			if b {
 				contentFunc = append(contentFunc, blockEnabler.Enable(r))
-				if _, ok := p.(*display.Byline); !ok {
-					p = display.NewByline()
-				}
 			}
 			return nil
 		},
@@ -360,9 +348,6 @@ var viewFlag = []cli.Flag{
 		Action: func(context *cli.Context, b bool) error {
 			if b {
 				contentFunc = append(contentFunc, ownerEnabler.EnableOwner(r))
-				if _, ok := p.(*display.Byline); !ok {
-					p = display.NewByline()
-				}
 			}
 			return nil
 		},
@@ -375,9 +360,6 @@ var viewFlag = []cli.Flag{
 		Action: func(context *cli.Context, b bool) error {
 			if b {
 				contentFunc = append(contentFunc, groupEnabler.EnableGroup(r))
-				if _, ok := p.(*display.Byline); !ok {
-					p = display.NewByline()
-				}
 			}
 			return nil
 		},
@@ -397,9 +379,6 @@ var viewFlag = []cli.Flag{
 			if b {
 				for _, s := range timeType {
 					contentFunc = append(contentFunc, filtercontent.EnableTime(timeFormat, s, r))
-				}
-				if _, ok := p.(*display.Byline); !ok {
-					p = display.NewByline()
 				}
 			}
 			return nil
@@ -564,9 +543,6 @@ var viewFlag = []cli.Flag{
 
 			if b {
 				contentFunc = append(contentFunc, filtercontent.SumEnabler{}.EnableSum(sums...))
-				if _, ok := p.(*display.Byline); !ok {
-					p = display.NewByline()
-				}
 			}
 			return nil
 		},
