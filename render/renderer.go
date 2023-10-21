@@ -337,6 +337,10 @@ func (rd *Renderer) Mime(toRender string) string {
 	return rd.infoByName(toRender, "mime")
 }
 
+func (rd *Renderer) Checksum(toRender string) string {
+	return rd.infoByName(toRender, "checksum")
+}
+
 func (rd *Renderer) ByName(toRender string) (s theme.Style, found bool) {
 	name := strings.ToLower(filepath.Base(toRender))
 	style, ok := rd.theme.Name[name]

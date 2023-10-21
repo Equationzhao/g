@@ -15,6 +15,7 @@ import (
 
 	"github.com/Equationzhao/g/filter"
 	"github.com/Equationzhao/g/item"
+	"github.com/Equationzhao/g/render"
 )
 
 type SumType int
@@ -33,7 +34,7 @@ const SumName = "Sum"
 
 type SumEnabler struct{}
 
-func (s SumEnabler) EnableSum(sumTypes ...SumType) filter.ContentOption {
+func (s SumEnabler) EnableSum(renderer *render.Renderer, sumTypes ...SumType) filter.ContentOption {
 	length := 0
 	types := make([]string, 0, len(sumTypes))
 	for _, t := range sumTypes {
@@ -116,6 +117,6 @@ func (s SumEnabler) EnableSum(sumTypes ...SumType) filter.ContentOption {
 			sums = append(sums, fmt.Sprintf("%x", h.Sum(nil)))
 		}
 		sumsStr := strings.Join(sums, " ")
-		return filter.FillBlank(sumsStr, length), sumName
+		return renderer.Checksum(filter.FillBlank(sumsStr, length)), sumName
 	}
 }

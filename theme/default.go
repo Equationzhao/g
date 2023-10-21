@@ -76,6 +76,9 @@ var InfoTheme = Theme{
 		Color:   White,
 		Italics: true,
 	},
+	"checksum": {
+		Underline: true,
+	},
 }
 
 var Ext = Theme{

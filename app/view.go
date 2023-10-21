@@ -542,7 +542,7 @@ var viewFlag = []cli.Flag{
 			}
 
 			if b {
-				contentFunc = append(contentFunc, filtercontent.SumEnabler{}.EnableSum(sums...))
+				contentFunc = append(contentFunc, filtercontent.SumEnabler{}.EnableSum(r, sums...))
 			}
 			return nil
 		},
