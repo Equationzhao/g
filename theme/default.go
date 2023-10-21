@@ -68,6 +68,17 @@ var InfoTheme = Theme{
 	"-": {
 		Color: White,
 	},
+	"charset": {
+		Color:   White,
+		Italics: true,
+	},
+	"mime": {
+		Color:   White,
+		Italics: true,
+	},
+	"checksum": {
+		Underline: true,
+	},
 }
 
 var Ext = Theme{
@@ -1323,8 +1334,7 @@ var Permission = map[string]Style{
 		Bold:  true,
 	},
 	"-": {
-		Color: White,
-		Bold:  true,
+		Color: BrightBlack,
 	},
 	"octal": {
 		Color: color256(208),
