@@ -69,76 +69,73 @@ func (rd *Renderer) FileMode(toRender string) string {
 	bb := bytebufferpool.Get()
 	defer bytebufferpool.Put(bb)
 	toRenderBytes := []byte(toRender)
-	for i, c := range toRenderBytes {
+	prefixBytes := toRenderBytes[:len(toRenderBytes)-9]
+	suffixBytes := toRenderBytes[len(toRenderBytes)-9:]
+	var firstByte byte = '-'
+	firstStyle := rd.theme.Permission["-"]
+	for _, c := range prefixBytes {
 		switch c {
 		case '-', 't', 'T', 'a', 'l', '?':
-			s := rd.theme.Permission["-"]
-			_, _ = bb.WriteString(s.Color)
-			checkStyle(&s, bb)
+			continue
 		case 'u': // setuid
-			var s theme.Style
-			if i == 0 && toRenderBytes[3] == 'x' {
-				toRenderBytes[3] = 'u'
+			if suffixBytes[2] == 'x' {
+				suffixBytes[2] = 'u'
 				c = '-'
-				s = rd.theme.Permission["-"]
-			} else {
-				s = rd.theme.Permission["setuid"]
+				firstStyle = rd.theme.Permission["-"]
 			}
-			_, _ = bb.WriteString(s.Color)
-			checkStyle(&s, bb)
+			firstByte = '-'
 		case 'g': // setgid
-			var s theme.Style
-			if i == 0 && toRenderBytes[3] == 'x' {
-				toRenderBytes[3] = 'g'
+			if suffixBytes[5] == 'x' {
+				suffixBytes[5] = 'g'
 				c = '-'
-				s = rd.theme.Permission["-"]
-			} else {
-				s = rd.theme.Permission["setgid"]
+				firstStyle = rd.theme.Permission["-"]
 			}
-			_, _ = bb.WriteString(s.Color)
-			checkStyle(&s, bb)
+			firstByte = '-'
 		case 'L': // symlink
-			s := rd.theme.Permission["link"]
-			_, _ = bb.WriteString(s.Color)
-			checkStyle(&s, bb)
+			firstStyle = rd.theme.Permission["link"]
+			firstByte = 'L'
 		case 'd': // directory
-			s := rd.theme.Permission["directory"]
-			_, _ = bb.WriteString(s.Color)
-			checkStyle(&s, bb)
-		case 'r': // readable
-			s := rd.theme.Permission["read"]
-			_, _ = bb.WriteString(s.Color)
-			checkStyle(&s, bb)
-		case 'w': // writable
-			s := rd.theme.Permission["write"]
-			_, _ = bb.WriteString(s.Color)
-			checkStyle(&s, bb)
-		case 'x': // executable
-			s := rd.theme.Permission["exe"]
-			_, _ = bb.WriteString(s.Color)
-			checkStyle(&s, bb)
+			firstStyle = rd.theme.Permission["directory"]
+			firstByte = 'd'
 		case 'c': // char device
-			s := rd.theme.Permission["char"]
-			_, _ = bb.WriteString(s.Color)
-			checkStyle(&s, bb)
+			firstStyle = rd.theme.Permission["char"]
+			firstByte = 'c'
 		case 'S': // socket
-			s := rd.theme.Permission["socket"]
-			_, _ = bb.WriteString(s.Color)
-			checkStyle(&s, bb)
+			firstStyle = rd.theme.Permission["socket"]
+			firstByte = 'S'
 		case 'D': // block device
-			if i == 0 && toRenderBytes[1] == 'c' {
-				continue
-			}
-			s := rd.theme.Permission["block"]
-			_, _ = bb.WriteString(s.Color)
-			checkStyle(&s, bb)
+			firstStyle = rd.theme.Permission["block"]
+			firstByte = 'D'
 		case 'p': // FIFO
-			s := rd.theme.Permission["pipe"]
-			_, _ = bb.WriteString(s.Color)
-			checkStyle(&s, bb)
+			firstStyle = rd.theme.Permission["pipe"]
+			firstByte = 'p'
 		}
+	}
+	_, _ = bb.WriteString(firstStyle.Color)
+	checkStyle(&firstStyle, bb)
+	_, _ = bb.WriteString(string(trans(firstByte)))
+
+	for _, c := range suffixBytes {
+		var s theme.Style
+		switch c {
+		case '-':
+			s = rd.theme.Permission["-"]
+		case 'r': // readable
+			s = rd.theme.Permission["read"]
+		case 'w': // writable
+			s = rd.theme.Permission["write"]
+		case 'x': // executable
+			s = rd.theme.Permission["exe"]
+		case 'g': // setgid
+			s = rd.theme.Permission["setgid"]
+		case 'u': // setuid
+			s = rd.theme.Permission["setuid"]
+		}
+		_, _ = bb.WriteString(s.Color)
+		checkStyle(&s, bb)
 		_, _ = bb.WriteString(string(trans(c)))
 	}
+
 	_, _ = bb.WriteString(rd.theme.InfoTheme["reset"].Color)
 	return bb.String()
 }
