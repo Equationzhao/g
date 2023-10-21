@@ -1280,42 +1280,55 @@ var Name = map[string]Style{
 var Permission = map[string]Style{
 	"block": {
 		Color: Cyan,
+		Bold:  true,
 	},
 	"directory": {
 		Color: Blue,
+		Bold:  true,
 	},
 	"link": {
 		Color: Purple,
+		Bold:  true,
 	},
 	"char": {
 		Color: Yellow,
+		Bold:  true,
 	},
 	"pipe": {
 		Color: Yellow,
+		Bold:  true,
 	},
 	"socket": {
 		Color: Yellow,
+		Bold:  true,
 	},
 	"setuid": {
 		Color: Purple,
+		Bold:  true,
 	},
 	"setgid": {
 		Color: Purple,
+		Bold:  true,
 	},
 	"read": {
 		Color: Yellow,
+		Bold:  true,
 	},
 	"write": {
 		Color: Red,
+		Bold:  true,
 	},
 	"exe": {
 		Color: Green,
+		Bold:  true,
 	},
 	"-": {
 		Color: White,
+		Bold:  true,
 	},
 	"octal": {
 		Color: color256(208),
+		Bold:  true,
 	},
 }
 
@@ -1400,18 +1413,22 @@ var Git = map[string]Style{
 var Owner = map[string]Style{
 	"owner": {
 		Color: Yellow,
+		Bold:  true,
 	},
 	"root": {
 		Color: Red,
+		Bold:  true,
 	},
 }
 
 var Group = map[string]Style{
 	"group": {
 		Color: Yellow,
+		Bold:  true,
 	},
 	"root": {
 		Color: Red,
+		Bold:  true,
 	},
 }
 
