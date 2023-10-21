@@ -3,8 +3,19 @@
         "-": {
             "color": "white"
         },
+        "charset": {
+            "color": "white",
+            "italics": true
+        },
+        "checksum": {
+            "underline": true
+        },
         "inode": {
             "color": "purple"
+        },
+        "mime": {
+            "color": "white",
+            "italics": true
         },
         "reset": {
             "color": "reset"
@@ -15,40 +26,55 @@
     },
     "permission": {
         "-": {
-            "color": "white"
+            "color": "BrightBlack"
         },
-        "D": {
-            "color": "cyan"
+        "block": {
+            "color": "cyan",
+            "bold": true
         },
-        "b": {
-            "color": "yellow"
+        "char": {
+            "color": "yellow",
+            "bold": true
         },
-        "c": {
-            "color": "yellow"
+        "directory": {
+            "color": "blue",
+            "bold": true
         },
-        "d": {
-            "color": "blue"
+        "exe": {
+            "color": "green",
+            "bold": true
         },
-        "l": {
-            "color": "purple"
+        "link": {
+            "color": "purple",
+            "bold": true
         },
         "octal": {
-            "color": "[208]@256"
+            "color": "[208]@256",
+            "bold": true
         },
-        "p": {
-            "color": "yellow"
+        "pipe": {
+            "color": "yellow",
+            "bold": true
         },
-        "r": {
-            "color": "yellow"
+        "read": {
+            "color": "yellow",
+            "bold": true
         },
-        "s": {
-            "color": "yellow"
+        "setgid": {
+            "color": "purple",
+            "bold": true
         },
-        "w": {
-            "color": "red"
+        "setuid": {
+            "color": "purple",
+            "bold": true
         },
-        "x": {
-            "color": "green"
+        "socket": {
+            "color": "yellow",
+            "bold": true
+        },
+        "write": {
+            "color": "red",
+            "bold": true
         }
     },
     "size": {
@@ -97,18 +123,22 @@
     },
     "user": {
         "owner": {
-            "color": "yellow"
+            "color": "yellow",
+            "bold": true
         },
         "root": {
-            "color": "red"
+            "color": "red",
+            "bold": true
         }
     },
     "group": {
         "group": {
-            "color": "yellow"
+            "color": "yellow",
+            "bold": true
         },
         "root": {
-            "color": "red"
+            "color": "red",
+            "bold": true
         }
     },
     "symlink": {
