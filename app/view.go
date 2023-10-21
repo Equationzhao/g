@@ -449,7 +449,7 @@ var viewFlag = []cli.Flag{
 				if err != nil {
 					return err
 				}
-				contentFunc = append(contentFunc, exact.Enable())
+				contentFunc = append(contentFunc, exact.Enable(r))
 			}
 			return nil
 		},
@@ -473,7 +473,7 @@ var viewFlag = []cli.Flag{
 				if err != nil {
 					return err
 				}
-				contentFunc = append(contentFunc, exact.Enable())
+				contentFunc = append(contentFunc, exact.Enable(r))
 			}
 			return nil
 		},
@@ -494,7 +494,7 @@ var viewFlag = []cli.Flag{
 				if err != nil {
 					return err
 				}
-				contentFunc = append(contentFunc, charset.Enable())
+				contentFunc = append(contentFunc, charset.Enable(r))
 			}
 			return nil
 		},

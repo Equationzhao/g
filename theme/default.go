@@ -68,6 +68,14 @@ var InfoTheme = Theme{
 	"-": {
 		Color: White,
 	},
+	"charset": {
+		Color:   White,
+		Italics: true,
+	},
+	"mime": {
+		Color:   White,
+		Italics: true,
+	},
 }
 
 var Ext = Theme{
