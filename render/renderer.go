@@ -51,7 +51,7 @@ func (rd *Renderer) FileMode(toRender string) string {
 	// return file mode like -rwxrwxrwx/drwxrwxrwx but in color
 	bb := bytebufferpool.Get()
 	defer bytebufferpool.Put(bb)
-	for _, c := range toRender {
+	for i, c := range toRender {
 		switch c {
 		case '-':
 			_, _ = bb.WriteString(rd.theme.Permission["-"].Color)
@@ -70,6 +70,9 @@ func (rd *Renderer) FileMode(toRender string) string {
 		case 'S', 'T':
 			_, _ = bb.WriteString(rd.theme.Permission["s"].Color)
 		case 'D':
+			if i == 0 && toRender[1] == 'c' {
+				continue
+			}
 			_, _ = bb.WriteString(rd.theme.Permission["D"].Color)
 		case 'p':
 			_, _ = bb.WriteString(rd.theme.Permission["p"].Color)
