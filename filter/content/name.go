@@ -245,6 +245,15 @@ func (n *Name) Enable(renderer *render.Renderer) filter.ContentOption {
 				if arrowStyle.Bold {
 					_, _ = dereference.WriteString(theme.Bold)
 				}
+				if arrowStyle.Italics {
+					_, _ = dereference.WriteString(theme.Italics)
+				}
+				if arrowStyle.Faint {
+					_, _ = dereference.WriteString(theme.Faint)
+				}
+				if arrowStyle.Blink {
+					_, _ = dereference.WriteString(theme.Blink)
+				}
 				_, _ = dereference.WriteString(arrowStyle.Icon)
 				_, _ = dereference.WriteString(renderer.Colorend())
 				broken := false
