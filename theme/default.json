@@ -165,6 +165,10 @@
             "color": "white",
             "icon": ""
         },
+        ".cfusertextencoding": {
+            "color": "BrightBlack",
+            "icon": ""
+        },
         ".dotnet": {
             "color": "white",
             "icon": ""
@@ -197,6 +201,10 @@
             "color": "white",
             "icon": ""
         },
+        ".python_history": {
+            "color": "[158]@256",
+            "icon": ""
+        },
         ".srcinfo": {
             "color": "BrightYellow",
             "icon": ""
@@ -204,6 +212,10 @@
         ".ssh": {
             "color": "white",
             "icon": ""
+        },
+        ".trash": {
+            "color": "BrightBlack",
+            "icon": ""
         },
         ".vscode": {
             "color": "white",
@@ -242,12 +254,15 @@
             "icon": ""
         },
         "cargo.lock": {
-            "color": "[227]@256",
-            "icon": ""
+            "color": "[158]@256",
+            "icon": "",
+            "underline": true,
+            "faint": true
         },
         "cargo.toml": {
             "color": "[158]@256",
-            "icon": ""
+            "icon": "",
+            "underline": true
         },
         "cmakeLists.txt": {
             "color": "[158]@256",
@@ -454,11 +469,11 @@
     "special": {
         "char": {
             "color": "yellow",
-            "icon": ""
+            "icon": ""
         },
         "device": {
             "color": "yellow",
-            "icon": ""
+            "icon": "󰜫"
         },
         "dir": {
             "color": "BrightBlue",
@@ -480,6 +495,10 @@
             "color": "white",
             "icon": ""
         },
+        "hidden-file": {
+            "color": "white",
+            "icon": ""
+        },
         "link": {
             "color": "purple"
         },
@@ -496,6 +515,10 @@
         }
     },
     "ext": {
+        ".profile": {
+            "color": "BrightPreen",
+            "icon": ""
+        },
         "7z": {
             "color": "red",
             "icon": ""
@@ -1195,6 +1218,10 @@
         "swift": {
             "color": "[158]@256",
             "icon": ""
+        },
+        "swp": {
+            "color": "white",
+            "icon": ""
         },
         "tar": {
             "color": "red",

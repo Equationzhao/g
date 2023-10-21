@@ -251,7 +251,7 @@ g [options] [path]
 **--no-path-transform, --np**: By default, .../a/b/c will be transformed to ../../a/b/c, and ~ will be replaced by homedir, 
 	using this flag to disable this feature
 
-**--no-total-size**: disable total size(always override show-total-size)
+**--no-total-size**: disable total size(always override --total-size)
 
 **--numeric, --numeric-uid-gid**:  List numeric user and group IDs instead of name [sid in windows]
 
