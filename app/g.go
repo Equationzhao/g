@@ -136,16 +136,17 @@ func init() {
 			disableIndex := context.Bool("di")
 			wgUpdateIndex := sync.WaitGroup{}
 
-			// set quote
+			nameToDisplay.SetQuoteString(`'`)
+			// set quote to always
 			if context.Bool("Q") {
-				nameToDisplay.SetQuote(`"`)
+				nameToDisplay.SetQuote()
 			}
 
 			if context.Bool("mounts") {
-				nameToDisplay.SetMounts()
+				nameToDisplay.UnsetQuote()
 			}
 
-			// if no quote, set quote to empty
+			// if no quote, set quote to never
 			// this will override the quote set by -Q
 			if context.Bool("N") {
 				nameToDisplay.UnsetQuote()
