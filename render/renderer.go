@@ -33,12 +33,13 @@ func (rd *Renderer) OctalPerm(octal string) string {
 	bb := bytebufferpool.Get()
 	defer bytebufferpool.Put(bb)
 	_, _ = bb.WriteString(s.Color)
-	checkUnderlineAndBold(&s, bb)
+	checkStyle(&s, bb)
 	_, _ = bb.WriteString(octal)
 	_, _ = bb.WriteString(rd.theme.InfoTheme["reset"].Color)
 	return bb.String()
 }
 
+// FileMode
 // -     Regular file.
 // b     Block special file.
 // c     Character special file.
@@ -47,35 +48,94 @@ func (rd *Renderer) OctalPerm(octal string) string {
 // p     FIFO.
 // s     Socket.
 // w     Whiteout.
+/*
+go std fs.FileMode
+	ModeDir        FileMode = 1 << (32 - 1 - iota) // d: is a directory
+	ModeAppend                                     // a: append-only
+	ModeExclusive                                  // l: exclusive use
+	ModeTemporary                                  // T: temporary file; Plan 9 only
+	ModeSymlink                                    // L: symbolic link
+	ModeDevice                                     // D: device file
+	ModeNamedPipe                                  // p: named pipe (FIFO)
+	ModeSocket                                     // S: Unix domain socket
+	ModeSetuid                                     // u: setuid
+	ModeSetgid                                     // g: setgid
+	ModeCharDevice                                 // c: Unix character device, when ModeDevice is set
+	ModeSticky                                     // t: sticky
+	ModeIrregular                                  // ?: non-regular file; nothing else is known about this file
+*/
 func (rd *Renderer) FileMode(toRender string) string {
 	// return file mode like -rwxrwxrwx/drwxrwxrwx but in color
 	bb := bytebufferpool.Get()
 	defer bytebufferpool.Put(bb)
-	for i, c := range toRender {
+	toRenderBytes := []byte(toRender)
+	for i, c := range toRenderBytes {
 		switch c {
-		case '-':
-			_, _ = bb.WriteString(rd.theme.Permission["-"].Color)
-		case 'L':
-			_, _ = bb.WriteString(rd.theme.Permission["l"].Color)
-		case 'd':
-			_, _ = bb.WriteString(rd.theme.Permission["d"].Color)
-		case 'r':
-			_, _ = bb.WriteString(rd.theme.Permission["r"].Color)
-		case 'w':
-			_, _ = bb.WriteString(rd.theme.Permission["w"].Color)
-		case 'x', 's', 't':
-			_, _ = bb.WriteString(rd.theme.Permission["x"].Color)
-		case 'c':
-			_, _ = bb.WriteString(rd.theme.Permission["c"].Color)
-		case 'S', 'T':
-			_, _ = bb.WriteString(rd.theme.Permission["s"].Color)
-		case 'D':
-			if i == 0 && toRender[1] == 'c' {
+		case '-', 't', 'T', 'a', 'l', '?':
+			s := rd.theme.Permission["-"]
+			_, _ = bb.WriteString(s.Color)
+			checkStyle(&s, bb)
+		case 'u': // setuid
+			var s theme.Style
+			if i == 0 && toRenderBytes[3] == 'x' {
+				toRenderBytes[3] = 'u'
+				c = '-'
+				s = rd.theme.Permission["-"]
+			} else {
+				s = rd.theme.Permission["setuid"]
+			}
+			_, _ = bb.WriteString(s.Color)
+			checkStyle(&s, bb)
+		case 'g': // setgid
+			var s theme.Style
+			if i == 0 && toRenderBytes[3] == 'x' {
+				toRenderBytes[3] = 'g'
+				c = '-'
+				s = rd.theme.Permission["-"]
+			} else {
+				s = rd.theme.Permission["setgid"]
+			}
+			_, _ = bb.WriteString(s.Color)
+			checkStyle(&s, bb)
+		case 'L': // symlink
+			s := rd.theme.Permission["link"]
+			_, _ = bb.WriteString(s.Color)
+			checkStyle(&s, bb)
+		case 'd': // directory
+			s := rd.theme.Permission["directory"]
+			_, _ = bb.WriteString(s.Color)
+			checkStyle(&s, bb)
+		case 'r': // readable
+			s := rd.theme.Permission["read"]
+			_, _ = bb.WriteString(s.Color)
+			checkStyle(&s, bb)
+		case 'w': // writable
+			s := rd.theme.Permission["write"]
+			_, _ = bb.WriteString(s.Color)
+			checkStyle(&s, bb)
+		case 'x': // executable
+			s := rd.theme.Permission["exe"]
+			_, _ = bb.WriteString(s.Color)
+			checkStyle(&s, bb)
+		case 'c': // char device
+			s := rd.theme.Permission["char"]
+			_, _ = bb.WriteString(s.Color)
+			checkStyle(&s, bb)
+		case 'S': // socket
+			s := rd.theme.Permission["socket"]
+			_, _ = bb.WriteString(s.Color)
+			checkStyle(&s, bb)
+		case 'D': // block device
+			if i == 0 && toRenderBytes[1] == 'c' {
 				continue
 			}
-			_, _ = bb.WriteString(rd.theme.Permission["D"].Color)
-		case 'p':
-			_, _ = bb.WriteString(rd.theme.Permission["p"].Color)
+			s := rd.theme.Permission["block"]
+			_, _ = bb.WriteString(s.Color)
+			checkStyle(&s, bb)
+		case 'p': // FIFO
+			s := rd.theme.Permission["pipe"]
+			_, _ = bb.WriteString(s.Color)
+			checkStyle(&s, bb)
 		}
 		_, _ = bb.WriteString(string(trans(c)))
 	}
@@ -83,7 +143,7 @@ func (rd *Renderer) FileMode(toRender string) string {
 	return bb.String()
 }
 
-func trans(s rune) rune {
+func trans(s byte) byte {
 	switch s {
 	case 'D':
 		return 'b'
@@ -93,6 +153,8 @@ func trans(s rune) rune {
 		return 's'
 	case 'T':
 		return 't'
+	case 'u', 'g':
+		return 's'
 	}
 	return s
 }
@@ -105,7 +167,7 @@ func (rd *Renderer) Size(toRender, unit string) string {
 	bb := bytebufferpool.Get()
 	defer bytebufferpool.Put(bb)
 	_, _ = bb.WriteString(s.Color)
-	checkUnderlineAndBold(&s, bb)
+	checkStyle(&s, bb)
 	_, _ = bb.WriteString(toRender)
 	_, _ = bb.WriteString(rd.theme.InfoTheme["reset"].Color)
 	return bb.String()
@@ -120,7 +182,7 @@ func (rd *Renderer) Link(toRender string) string {
 	bb := bytebufferpool.Get()
 	defer bytebufferpool.Put(bb)
 	_, _ = bb.WriteString(s.Color)
-	checkUnderlineAndBold(&s, bb)
+	checkStyle(&s, bb)
 	_, _ = bb.WriteString(toRender)
 	_, _ = bb.WriteString(rd.theme.InfoTheme["reset"].Color)
 	return bb.String()
@@ -157,7 +219,7 @@ func (rd *Renderer) Owner(toRender string) string {
 		}
 	}
 	_, _ = bb.WriteString(style.Color)
-	checkUnderlineAndBold(&style, bb)
+	checkStyle(&style, bb)
 	_, _ = bb.WriteString(toRender)
 	_, _ = bb.WriteString(rd.theme.InfoTheme["reset"].Color)
 	return bb.String()
@@ -191,7 +253,7 @@ func (rd *Renderer) Group(toRender string) string {
 		}
 	}
 	_, _ = bb.WriteString(style.Color)
-	checkUnderlineAndBold(&style, bb)
+	checkStyle(&style, bb)
 	_, _ = bb.WriteString(toRender)
 	_, _ = bb.WriteString(rd.theme.InfoTheme["reset"].Color)
 	return bb.String()
@@ -281,7 +343,7 @@ func (rd *Renderer) infoByName(toRender string, name string) string {
 	defer bytebufferpool.Put(bb)
 	style := rd.theme.InfoTheme[name]
 	_, _ = bb.WriteString(style.Color)
-	checkUnderlineAndBold(&style, bb)
+	checkStyle(&style, bb)
 	_, _ = bb.WriteString(toRender)
 	_, _ = bb.WriteString(rd.theme.InfoTheme["reset"].Color)
 	return bb.String()
@@ -377,7 +439,7 @@ func (rd *Renderer) gitByStatus(name string, status string) string {
 	bb := bytebufferpool.Get()
 	defer bytebufferpool.Put(bb)
 	_, _ = bb.WriteString(style.Color)
-	checkUnderlineAndBold(&style, bb)
+	checkStyle(&style, bb)
 	_, _ = bb.WriteString(name)
 	_, _ = bb.WriteString(rd.theme.InfoTheme["reset"].Color)
 	return bb.String()
@@ -432,7 +494,7 @@ func (rd *Renderer) DirPrompt(dir string) string {
 	defer bytebufferpool.Put(bb)
 	style := rd.theme.Special["dir-prompt"]
 	_, _ = bb.WriteString(style.Color)
-	checkUnderlineAndBold(&style, bb)
+	checkStyle(&style, bb)
 	_, _ = bb.WriteString(style.Icon)
 	_, _ = bb.WriteString(dir)
 	_, _ = bb.WriteString(rd.theme.InfoTheme["reset"].Color)
@@ -444,7 +506,7 @@ func (rd *Renderer) Mounts(mounts string) string {
 	defer bytebufferpool.Put(bb)
 	style := rd.theme.Special["mounts"]
 	_, _ = bb.WriteString(style.Color)
-	checkUnderlineAndBold(&style, bb)
+	checkStyle(&style, bb)
 	_, _ = bb.WriteString(style.Icon)
 	_, _ = bb.WriteString(mounts)
 	_, _ = bb.WriteString(rd.theme.InfoTheme["reset"].Color)
@@ -455,7 +517,7 @@ func (rd *Renderer) Colorend() string {
 	return rd.theme.InfoTheme["reset"].Color
 }
 
-func checkUnderlineAndBold(style *theme.Style, bb *bytebufferpool.ByteBuffer) {
+func checkStyle(style *theme.Style, bb *bytebufferpool.ByteBuffer) {
 	if style.Underline {
 		_, _ = bb.WriteString(theme.Underline)
 	}
