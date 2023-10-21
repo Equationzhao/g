@@ -87,7 +87,6 @@ func (rd *Renderer) FileMode(toRender string) string {
 		case 'g': // setgid
 			if suffixBytes[5] == 'x' {
 				suffixBytes[5] = 'g'
-				c = '-'
 				firstStyle = rd.theme.Permission["-"]
 			}
 			firstByte = '-'
