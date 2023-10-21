@@ -1334,8 +1334,7 @@ var Permission = map[string]Style{
 		Bold:  true,
 	},
 	"-": {
-		Color: White,
-		Bold:  true,
+		Color: BrightBlack,
 	},
 	"octal": {
 		Color: color256(208),
