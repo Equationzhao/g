@@ -944,11 +944,11 @@ var Special = map[string]Style{
 	},
 	"device": {
 		Color: Yellow,
-		Icon:  "\uF15B",
+		Icon:  "󰜫",
 	},
 	"char": {
 		Color: Yellow,
-		Icon:  "\uF016",
+		Icon:  "",
 	},
 	"exe": {
 		Color: Green,
