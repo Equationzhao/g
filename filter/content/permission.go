@@ -22,7 +22,7 @@ const OctalPermissions = "Octal"
 func EnableFileOctalPermissions(renderer *render.Renderer) filter.ContentOption {
 	return func(info *item.FileInfo) (string, string) {
 		return renderer.OctalPerm(
-			" 0" + strconv.FormatUint(uint64(info.Mode().Perm()), 8),
+			"0" + strconv.FormatUint(uint64(info.Mode().Perm()), 8),
 		), OctalPermissions
 	}
 }
