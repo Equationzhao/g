@@ -279,6 +279,10 @@
             "color": "white",
             "icon": ""
         },
+        "brewfile": {
+            "color": "[158]@256",
+            "icon": ""
+        },
         "cache": {
             "color": "white",
             "icon": ""
@@ -326,6 +330,12 @@
             "color": "red",
             "icon": ""
         },
+        "flake.nix": {
+            "color": "yellow",
+            "icon": "",
+            "underline": true,
+            "bold": true
+        },
         "font": {
             "color": "white",
             "icon": ""
@@ -360,6 +370,10 @@
         "include": {
             "color": "white",
             "icon": ""
+        },
+        "jenkinsfile": {
+            "color": "[158]@256",
+            "icon": ""
         },
         "justfile": {
             "color": "[158]@256",
@@ -489,7 +503,7 @@
         },
         "vagrantfile": {
             "color": "[158]@256",
-            "icon": ""
+            "icon": "⍱"
         },
         "videos": {
             "color": "white",
@@ -580,6 +594,10 @@
         "app": {
             "color": "green",
             "icon": ""
+        },
+        "asc": {
+            "color": "BrightPreen",
+            "icon": "󰦝"
         },
         "asm": {
             "color": "[158]@256",
@@ -785,6 +803,10 @@
             "color": "BrightYellow",
             "icon": ""
         },
+        "env": {
+            "color": "black",
+            "icon": ""
+        },
         "eot": {
             "color": "cyan",
             "icon": ""
@@ -897,6 +919,10 @@
             "color": "[158]@256",
             "icon": ""
         },
+        "ics": {
+            "color": "white",
+            "icon": ""
+        },
         "id_rsa": {
             "color": "[214]@256",
             "icon": ""
@@ -904,6 +930,10 @@
         "img": {
             "color": "[88]@256",
             "icon": ""
+        },
+        "iml": {
+            "color": "white",
+            "icon": ""
         },
         "ini": {
             "color": "white",
@@ -1061,6 +1091,10 @@
             "color": "[158]@256",
             "icon": ""
         },
+        "nix": {
+            "color": "yellow",
+            "icon": ""
+        },
         "npm": {
             "color": "[158]@256",
             "icon": ""
@@ -1116,6 +1150,10 @@
         "php": {
             "color": "[158]@256",
             "icon": ""
+        },
+        "pl": {
+            "color": "[158]@256",
+            "icon": ""
         },
         "png": {
             "color": "BrightPurple",
@@ -1193,6 +1231,10 @@
             "color": "[158]@256",
             "icon": ""
         },
+        "rubydoc": {
+            "color": "[158]@256",
+            "icon": ""
+        },
         "rustup": {
             "color": "[158]@256",
             "icon": ""
@@ -1237,6 +1279,10 @@
             "color": "[195]@256",
             "icon": ""
         },
+        "styl": {
+            "color": "[158]@256",
+            "icon": ""
+        },
         "svelte": {
             "color": "[158]@256",
             "icon": ""
@@ -1260,6 +1306,10 @@
         "tex": {
             "color": "[158]@256",
             "icon": ""
+        },
+        "tf": {
+            "color": "[158]@256",
+            "icon": "󱁢"
         },
         "tif": {
             "color": "BrightPurple",
