@@ -1027,8 +1027,12 @@ var Name = map[string]Style{
 		Color: White,
 	},
 	"documents": {
-		Icon:  "\uf0f6",
+		Icon:  "\uF02D",
 		Color: White,
+	},
+	"doc": {
+		Color: doc,
+		Icon:  "\uf02d",
 	},
 	"links": {
 		Icon:  "\uf0f6",
@@ -1309,7 +1313,7 @@ var Name = map[string]Style{
 	},
 	"package.json": {
 		Color:     conf,
-		Icon:      "\uE60B",
+		Icon:      "\uE718",
 		Underline: true,
 	},
 	"tsconfig.json": {
@@ -1335,6 +1339,32 @@ var Name = map[string]Style{
 	".cfusertextencoding": {
 		Color: BrightBlack,
 		Icon:  "\uF179",
+	},
+	"maintainers": {
+		Color: White,
+		Icon:  "\uF0C0",
+	},
+	"__pycache__": {
+		Color: lang,
+		Icon:  "\uE606",
+		Faint: true,
+	},
+	"requirements.txt": {
+		Color: White,
+		Icon:  "\uE606",
+		Faint: true,
+	},
+	"robots.txt": {
+		Color: White,
+		Icon:  "\U000F06A9",
+	},
+	"docker-compose.yml": {
+		Color: BrightYellow,
+		Icon:  "\ue7b0",
+	},
+	"contributing": {
+		Color: White,
+		Icon:  "\uF0C0",
 	},
 }
 

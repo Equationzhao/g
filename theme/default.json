@@ -255,6 +255,11 @@
             "color": "white",
             "icon": ""
         },
+        "__pycache__": {
+            "color": "[158]@256",
+            "icon": "",
+            "faint": true
+        },
         "android": {
             "color": "white",
             "icon": ""
@@ -310,9 +315,21 @@
             "color": "white",
             "icon": ""
         },
+        "contributing": {
+            "color": "white",
+            "icon": ""
+        },
         "desktop": {
             "color": "white",
             "icon": ""
+        },
+        "doc": {
+            "color": "[150]@256",
+            "icon": ""
+        },
+        "docker-compose.yml": {
+            "color": "BrightYellow",
+            "icon": ""
         },
         "dockerfile": {
             "color": "BrightYellow",
@@ -320,7 +337,7 @@
         },
         "documents": {
             "color": "white",
-            "icon": ""
+            "icon": ""
         },
         "downloads": {
             "color": "white",
@@ -399,6 +416,10 @@
             "color": "white",
             "icon": ""
         },
+        "maintainers": {
+            "color": "white",
+            "icon": ""
+        },
         "makefile": {
             "color": "[158]@256",
             "icon": ""
@@ -429,7 +450,7 @@
         },
         "package.json": {
             "color": "white",
-            "icon": "",
+            "icon": "",
             "underline": true
         },
         "passwd": {
@@ -463,6 +484,15 @@
         "repo": {
             "color": "white",
             "icon": ""
+        },
+        "requirements.txt": {
+            "color": "white",
+            "icon": "",
+            "faint": true
+        },
+        "robots.txt": {
+            "color": "white",
+            "icon": "󰚩"
         },
         "saved games": {
             "color": "red",
