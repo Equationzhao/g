@@ -2,6 +2,7 @@ package app
 
 import (
 	"errors"
+	"slices"
 	"strings"
 	"time"
 
@@ -59,13 +60,10 @@ var filteringFlag = []cli.Flag{
 		Usage:              "show only hidden files(overridden by --show-hidden/-a/-A)",
 		Action: func(context *cli.Context, b bool) error {
 			if b {
-				newFF := make([]*filter.ItemFilterFunc, 0, len(itemFilterFunc))
-				for _, typeFunc := range itemFilterFunc {
-					if typeFunc != &filter.RemoveHidden {
-						newFF = append(newFF, typeFunc)
-					}
-				}
-				itemFilterFunc = append(newFF, &filter.HiddenOnly)
+				itemFilterFunc = slices.DeleteFunc(itemFilterFunc, func(e *filter.ItemFilterFunc) bool {
+					return e == &filter.RemoveHidden
+				})
+				itemFilterFunc = append(itemFilterFunc, &filter.HiddenOnly)
 			}
 			return nil
 		},
@@ -79,13 +77,9 @@ var filteringFlag = []cli.Flag{
 		Action: func(context *cli.Context, b bool) error {
 			if b {
 				// remove filter.RemoveHidden
-				newFF := make([]*filter.ItemFilterFunc, 0, len(itemFilterFunc))
-				for _, typeFunc := range itemFilterFunc {
-					if typeFunc != &filter.RemoveHidden {
-						newFF = append(newFF, typeFunc)
-					}
-				}
-				itemFilterFunc = newFF
+				itemFilterFunc = slices.DeleteFunc(itemFilterFunc, func(e *filter.ItemFilterFunc) bool {
+					return e == &filter.RemoveHidden
+				})
 			}
 			return nil
 		},
@@ -163,13 +157,9 @@ var filteringFlag = []cli.Flag{
 		Action: func(context *cli.Context, b bool) error {
 			if b {
 				// remove filter.RemoveHidden
-				newFF := make([]*filter.ItemFilterFunc, 0, len(itemFilterFunc))
-				for _, typeFunc := range itemFilterFunc {
-					if typeFunc != &filter.RemoveHidden {
-						newFF = append(newFF, typeFunc)
-					}
-				}
-				itemFilterFunc = newFF
+				itemFilterFunc = slices.DeleteFunc(itemFilterFunc, func(e *filter.ItemFilterFunc) bool {
+					return e == &filter.RemoveHidden
+				})
 			}
 			return nil
 		},
