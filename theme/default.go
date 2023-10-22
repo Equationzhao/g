@@ -222,6 +222,10 @@ var Ext = Theme{
 		Color: lang,
 		Icon:  "\uE21E",
 	},
+	"rubydoc": Style{
+		Color: lang,
+		Icon:  "\uE73B",
+	},
 	"astro": Style{
 		Color: lang,
 		Icon:  "\\uf135",
@@ -249,6 +253,26 @@ var Ext = Theme{
 	"npm": Style{
 		Color: lang,
 		Icon:  "\ue71e",
+	},
+	"nix": Style{
+		Color: Yellow,
+		Icon:  "\uF313",
+	},
+	"asc": Style{
+		Color: BrightGreen,
+		Icon:  "\U000F099D",
+	},
+	"tf": {
+		Color: lang,
+		Icon:  "\U000F1062",
+	},
+	"ics": {
+		Color: White,
+		Icon:  "\uEAB0",
+	},
+	"env": {
+		Color: Black,
+		Icon:  "\uF462",
 	},
 	"jsx": Style{
 		Color: lang,
@@ -329,6 +353,14 @@ var Ext = Theme{
 	"s": Style{
 		Color: lang,
 		Icon:  "\ue637",
+	},
+	"styl": Style{
+		Color: lang,
+		Icon:  "\uE600",
+	},
+	"iml": Style{
+		Color: White,
+		Icon:  "\uE7B5",
 	},
 	"gv": Style{
 		Color: Cyan,
@@ -625,6 +657,10 @@ var Ext = Theme{
 	"pdf": Style{
 		Color: Cyan,
 		Icon:  "\uF1C1",
+	},
+	"pl": Style{
+		Color: lang,
+		Icon:  "\uE67E",
 	},
 	"epub": Style{
 		Color: Cyan,
@@ -1194,6 +1230,20 @@ var Name = map[string]Style{
 		Underline: true,
 		Bold:      true,
 	},
+	"flake.nix": {
+		Color:     Yellow,
+		Icon:      "\uF313",
+		Underline: true,
+		Bold:      true,
+	},
+	"jenkinsfile": {
+		Color: lang,
+		Icon:  "\uE66E",
+	},
+	"brewfile": {
+		Color: lang,
+		Icon:  "\uF016",
+	},
 	"sdk": {
 		Icon:  "\uF121",
 		Color: White,
@@ -1255,7 +1305,7 @@ var Name = map[string]Style{
 	},
 	"vagrantfile": {
 		Color: lang,
-		Icon:  "\uE20F",
+		Icon:  "⍱",
 	},
 	"package.json": {
 		Color:     conf,
