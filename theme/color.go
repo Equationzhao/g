@@ -37,6 +37,8 @@ const (
 	Italics      = "\033[3m"
 	Underline    = "\033[4m"
 	Blink        = "\033[5m"
+	Reverse      = "\033[7m"
+	ReverseDone  = "\033[27m"
 )
 
 const Reset = "\033[0m"

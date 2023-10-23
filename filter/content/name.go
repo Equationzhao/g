@@ -437,6 +437,8 @@ func (n *Name) Enable(renderer *render.Renderer) filter.ContentOption {
 			name = info.FullPath
 		}
 
+		name = util.Escape(name)
+
 		b := bytebufferpool.Get()
 		defer bytebufferpool.Put(b)
 		if color != "" {
