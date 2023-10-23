@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 	"strings"
 	"sync/atomic"
+	"unicode"
 
 	"github.com/Equationzhao/g/filter"
 	"github.com/Equationzhao/g/item"
@@ -333,7 +334,7 @@ func (n *Name) Enable(renderer *render.Renderer) filter.ContentOption {
 				// _, _ = dereference.WriteString(style.Icon)
 				hasQuote := false
 				// if the name contains space and QuoteStatus >=0, add quote
-				if strings.ContainsRune(symlinks, ' ') {
+				if strings.ContainsFunc(symlinks, contains) {
 					if !neverQuote(n.QuoteStatus) {
 						hasQuote = true
 						_, _ = dereference.WriteString(n.Quote)
@@ -465,7 +466,7 @@ func (n *Name) Enable(renderer *render.Renderer) filter.ContentOption {
 		}
 		hasQuote := false
 		// if the name contains space and QuoteStatus >=0, add quote
-		if strings.ContainsRune(name, ' ') {
+		if strings.ContainsFunc(name, contains) {
 			if !neverQuote(n.QuoteStatus) {
 				hasQuote = true
 				_, _ = b.WriteString(n.Quote)
@@ -503,4 +504,8 @@ func (n *Name) Enable(renderer *render.Renderer) filter.ContentOption {
 		}
 		return b.String(), NameName
 	}
+}
+
+func contains(r rune) bool {
+	return unicode.IsSpace(r)
 }
