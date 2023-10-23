@@ -59,7 +59,7 @@ var (
 	hookPost        = make([]func(display.Printer, ...*item.FileInfo), 0)
 	pool            *ants.Pool
 )
-var Version = "0.22.2"
+var Version = "0.23.0"
 
 var G *cli.App
 
