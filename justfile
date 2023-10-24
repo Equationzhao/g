@@ -2,24 +2,45 @@
 latest := `git describe --abbrev=0 --tags | sed 's/v//'`
 ldflags := "-ldflags='-s -w'"
 
+linux:
+    CGO_ENABLED=0 GOOS=linux GOARCH=386     go build {{ldflags}} -o build/g-linux-386
+    CGO_ENABLED=0 GOOS=linux GOARCH=amd64   go build {{ldflags}} -o build/g-linux-amd64
+    CGO_ENABLED=0 GOOS=linux GOARCH=arm     go build {{ldflags}} -o build/g-linux-arm
+    CGO_ENABLED=0 GOOS=linux GOARCH=arm64   go build {{ldflags}} -o build/g-linux-arm64
+
+darwin:
+    CGO_ENABLED=0 GOOS=darwin GOARCH=amd64  go build {{ldflags}} -o build/g-darwin-amd64
+    CGO_ENABLED=0 GOOS=darwin GOARCH=arm64  go build {{ldflags}} -o build/g-darwin-arm64
+
+freebsd:
+    CGO_ENABLED=0 GOOS=freebsd GOARCH=386      go build {{ldflags}} -o build/g-freebsd-386
+    CGO_ENABLED=0 GOOS=freebsd GOARCH=amd64    go build {{ldflags}} -o build/g-freebsd-amd64
+    CGO_ENABLED=0 GOOS=freebsd GOARCH=arm      go build {{ldflags}} -o build/g-freebsd-arm
+    CGO_ENABLED=0 GOOS=freebsd GOARCH=arm64    go build {{ldflags}} -o build/g-freebsd-arm64
+
+openbsd:
+    CGO_ENABLED=0 GOOS=openbsd GOARCH=386      go build {{ldflags}} -o build/g-openbsd-386
+    CGO_ENABLED=0 GOOS=openbsd GOARCH=amd64    go build {{ldflags}} -o build/g-openbsd-amd64
+    CGO_ENABLED=0 GOOS=openbsd GOARCH=arm      go build {{ldflags}} -o build/g-openbsd-arm
+    CGO_ENABLED=0 GOOS=openbsd GOARCH=arm64    go build {{ldflags}} -o build/g-openbsd-arm64
+
+windows:
+    CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build {{ldflags}} -o build/g-windows-amd64.exe
+    CGO_ENABLED=0 GOOS=windows GOARCH=386   go build {{ldflags}} -o build/g-windows-386.exe
+    CGO_ENABLED=0 GOOS=windows GOARCH=arm64 go build {{ldflags}} -o build/g-windows-arm64.exe
+    CGO_ENABLED=0 GOOS=windows GOARCH=arm   go build {{ldflags}} -o build/g-windows-arm.exe
+
 # build binaries for all platforms
 build: 
     # build the binary in build/
     # Linux macOS Windows
     # 386 amd64 arm arm64
     mkdir -p build
-    CGO_ENABLED=0 GOOS=linux GOARCH=386     go build {{ldflags}} -o build/g-linux-386
-    CGO_ENABLED=0 GOOS=linux GOARCH=amd64   go build {{ldflags}} -o build/g-linux-amd64
-    CGO_ENABLED=0 GOOS=linux GOARCH=arm     go build {{ldflags}} -o build/g-linux-arm
-    CGO_ENABLED=0 GOOS=linux GOARCH=arm64   go build {{ldflags}} -o build/g-linux-arm64
-
-    CGO_ENABLED=0 GOOS=darwin GOARCH=amd64  go build {{ldflags}} -o build/g-darwin-amd64
-    CGO_ENABLED=0 GOOS=darwin GOARCH=arm64  go build {{ldflags}} -o build/g-darwin-arm64
-
-    CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build {{ldflags}} -o build/g-windows-amd64.exe
-    CGO_ENABLED=0 GOOS=windows GOARCH=386   go build {{ldflags}} -o build/g-windows-386.exe
-    CGO_ENABLED=0 GOOS=windows GOARCH=arm64 go build {{ldflags}} -o build/g-windows-arm64.exe
-    CGO_ENABLED=0 GOOS=windows GOARCH=arm   go build {{ldflags}} -o build/g-windows-arm.exe
+    just linux
+    just darwin
+    just freebsd
+    just openbsd
+    just windows
 
     upx build/g-linux-386
     upx build/g-linux-amd64
@@ -39,6 +60,16 @@ compress:
 
     tar -zcvf build/g-Darwin-amd64.tar.gz build/g-darwin-amd64
     tar -zcvf build/g-Darwin-arm64.tar.gz build/g-darwin-arm64
+
+    tar -zcvf build/g-FreeBSD-386.tar.gz build/g-freebsd-386
+    tar -zcvf build/g-FreeBSD-amd64.tar.gz build/g-freebsd-amd64
+    tar -zcvf build/g-FreeBSD-arm.tar.gz build/g-freebsd-arm
+    tar -zcvf build/g-FreeBSD-arm64.tar.gz build/g-freebsd-arm64
+
+    tar -zcvf build/g-OpenBSD-386.tar.gz build/g-openbsd-386
+    tar -zcvf build/g-OpenBSD-amd64.tar.gz build/g-openbsd-amd64
+    tar -zcvf build/g-OpenBSD-arm.tar.gz build/g-openbsd-arm
+    tar -zcvf build/g-OpenBSD-arm64.tar.gz build/g-openbsd-arm64
 
     zip -r build/g-Windows-amd64.zip build/g-windows-amd64.exe
     zip -r build/g-Windows-386.zip build/g-windows-386.exe
