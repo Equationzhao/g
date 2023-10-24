@@ -1114,6 +1114,10 @@ var Name = map[string]Style{
 		Icon:  "",
 		Color: key,
 	},
+	"licence": {
+		Icon:  "",
+		Color: key,
+	},
 	"shell": {
 		Icon:  "\uF489",
 		Color: bash,
@@ -1363,6 +1367,10 @@ var Name = map[string]Style{
 		Icon:  "\ue7b0",
 	},
 	"contributing": {
+		Color: White,
+		Icon:  "\uF0C0",
+	},
+	"contributing.md": {
 		Color: White,
 		Icon:  "\uF0C0",
 	},
