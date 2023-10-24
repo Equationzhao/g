@@ -34,6 +34,7 @@ const SumName = "Sum"
 
 type SumEnabler struct{}
 
+// todo simd
 func (s SumEnabler) EnableSum(renderer *render.Renderer, sumTypes ...SumType) filter.ContentOption {
 	length := 0
 	types := make([]string, 0, len(sumTypes))

@@ -964,7 +964,7 @@ func initVersionHelpFlags() {
  | {{ Key "Go Version"  }}        {{ .GoVersion  | trimPrefix "go"| Val   }}
  | {{ Key "Compiler"    }}        {{ .Compiler                    | Val   }}
  | {{ Key "Platform"    }}        {{ .Platform                    | Val   }}
-   
+
  | Copyright (C) 2023 Equationzhao. MIT License
  | This is free software: you are free to change and redistribute it.
  | There is NO WARRANTY, to the extent permitted by law.
