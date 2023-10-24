@@ -526,6 +526,10 @@ func init() {
 						// if -l/show-total-size is set, add total size
 						jp, isJsonPrinter := p.(*display.JsonPrinter)
 
+						if isJsonPrinter {
+							jp.Extra = make([]any, 0, len(jp.Extra))
+						}
+
 						if total, ok := sizeEnabler.Total(); ok {
 							s, unit := sizeEnabler.Size2String(total)
 							s = r.Size(s, filtercontent.Convert2SizeString(unit))
