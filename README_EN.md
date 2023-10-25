@@ -27,7 +27,10 @@ g is a ls alternative with features:
 
 ## Screenshots
 
-![image](how-g-works.gif)
+![image](screenshot_1.png)
+![image](screenshot_2.png)
+![image](screenshot_3.png)
+![image](screenshot_4.png)
 
 ## Install
 

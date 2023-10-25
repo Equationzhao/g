@@ -32,7 +32,10 @@ g 是一个 ls 替代品，拥有下面一些功能：
 
 ## 截图
 
-![image](how-g-works.gif)
+![image](screenshot_1.png)
+![image](screenshot_2.png)
+![image](screenshot_3.png)
+![image](screenshot_4.png)
 
 ## 安装
 
