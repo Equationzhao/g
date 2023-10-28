@@ -94,8 +94,10 @@ func gitByName(status git.Status, renderer *render.Renderer) string {
 	return " "
 }
 
-const GitRepoBranch = "Branch"
-const GitRepoStatus = "Repo-status"
+const (
+	GitRepoBranch = "Branch"
+	GitRepoStatus = "Repo-status"
+)
 
 type GitRepoEnabler struct{}
 
