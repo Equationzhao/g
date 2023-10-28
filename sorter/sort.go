@@ -285,7 +285,7 @@ func byRecursiveSize(a, b *item.FileInfo, depth int, ascend bool) int {
 	} else {
 		sai, _ = strconv.ParseInt(string(sa), 10, 64)
 	}
-	if sb, exist = a.Cache[RecursiveSizeName]; !exist {
+	if sb, exist = b.Cache[RecursiveSizeName]; !exist {
 		sbi = util.RecursivelySizeOf(b, depth)
 		sb = []byte(strconv.FormatInt(sbi, 10))
 		b.Cache[RecursiveSizeName] = sb
