@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/Equationzhao/g/git"
 	"github.com/Equationzhao/g/theme"
 	"github.com/hako/durafmt"
 	"github.com/valyala/bytebufferpool"
@@ -491,6 +492,46 @@ func (rd *Renderer) GitTypeChanged(s string) string {
 
 func (rd *Renderer) GitUpdatedButUnmerged(s string) string {
 	return rd.gitByStatus(s, "git_updated_but_unmerged")
+}
+
+func (rd *Renderer) GitRepoBranch(branch string) string {
+	var style theme.Style
+	switch branch {
+	case "master", "main":
+		style = rd.theme.Git["git-branch-master"]
+	case "":
+		style = rd.theme.Git["git-branch-none"]
+		branch = style.Icon // if branch is empty, set it to the icon of none
+	default:
+		style = rd.theme.Git["git-branch"]
+	}
+	bb := bytebufferpool.Get()
+	defer bytebufferpool.Put(bb)
+
+	_, _ = bb.WriteString(style.Color)
+	checkStyle(&style, bb)
+	_, _ = bb.WriteString(branch)
+	_, _ = bb.WriteString(rd.theme.InfoTheme["reset"].Color)
+	return bb.String()
+}
+
+func (rd *Renderer) GitRepoStatus(status git.RepoStatus) string {
+	var style theme.Style
+	switch status {
+	case git.RepoStatusClean:
+		style = rd.theme.Git["git-repo-clean"]
+	case git.RepoStatusDirty:
+		style = rd.theme.Git["git-repo-dirty"]
+	case git.RepoStatusSkip:
+		style = rd.theme.Git["git-repo-skip"]
+	}
+	bb := bytebufferpool.Get()
+	defer bytebufferpool.Put(bb)
+	bb.WriteString(style.Color)
+	checkStyle(&style, bb)
+	_, _ = bb.WriteString(style.Icon)
+	_, _ = bb.WriteString(rd.theme.InfoTheme["reset"].Color)
+	return bb.String()
 }
 
 func (rd *Renderer) Inode(inode string) string {

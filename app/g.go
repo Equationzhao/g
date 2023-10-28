@@ -53,6 +53,7 @@ var (
 	ownerEnabler    = filtercontent.NewOwnerEnabler()
 	groupEnabler    = filtercontent.NewGroupEnabler()
 	gitEnabler      = filtercontent.NewGitEnabler()
+	gitRepoEnabler  = filtercontent.NewGitRepoEnabler()
 	depthLimitMap   map[string]int
 	limitOnce       = util.Once{}
 	hookOnce        = util.Once{}

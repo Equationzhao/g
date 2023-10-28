@@ -1506,6 +1506,29 @@ var Git = map[string]Style{
 	"git_updated_but_unmerged": {
 		Color: BrightYellow,
 	},
+	"git-repo-skip": {
+		Color: BrightBlack,
+		Icon:  "-",
+	},
+	"git-repo-clean": {
+		Color: Green,
+		Icon:  "clean",
+	},
+	"git-repo-dirty": {
+		Color: Yellow,
+		Icon:  "dirty",
+	},
+	"git-branch-master": { // master and main
+		Color: Green,
+		Bold:  true,
+	},
+	"git-branch": {
+		Color: Yellow,
+	},
+	"git-branch-none": {
+		Color: BrightBlack,
+		Icon:  "-",
+	},
 }
 
 var Owner = map[string]Style{
