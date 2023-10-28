@@ -274,13 +274,29 @@ func byMimeTypeParent(a, b *item.FileInfo, ascend bool) int {
 const RecursiveSizeName = content.RecursiveSizeName
 
 func byRecursiveSize(a, b *item.FileInfo, depth int, ascend bool) int {
-	sa, sb := util.RecursivelySizeOf(a, depth), util.RecursivelySizeOf(b, depth)
-	a.Cache[RecursiveSizeName] = []byte(strconv.FormatInt(sa, 10))
-	b.Cache[RecursiveSizeName] = []byte(strconv.FormatInt(sb, 10))
-	if ascend {
-		return int(sa - sb)
+	var sa []byte
+	var sb []byte
+	exist := false
+	sai, sbi := int64(0), int64(0)
+	if sa, exist = a.Cache[RecursiveSizeName]; !exist {
+		sai = util.RecursivelySizeOf(a, depth)
+		sa = []byte(strconv.FormatInt(sai, 10))
+		a.Cache[RecursiveSizeName] = sa
+	} else {
+		sai, _ = strconv.ParseInt(string(sa), 10, 64)
 	}
-	return int(sb - sa)
+	if sb, exist = a.Cache[RecursiveSizeName]; !exist {
+		sbi = util.RecursivelySizeOf(b, depth)
+		sb = []byte(strconv.FormatInt(sbi, 10))
+		b.Cache[RecursiveSizeName] = sb
+	} else {
+		sbi, _ = strconv.ParseInt(string(sb), 10, 64)
+	}
+
+	if ascend {
+		return int(sai - sbi)
+	}
+	return int(sbi - sai)
 }
 
 func dirFirst(a, b *item.FileInfo) int {
