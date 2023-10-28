@@ -555,6 +555,20 @@ var viewFlag = []cli.Flag{
 		Category:           "VIEW",
 	},
 	&cli.BoolFlag{
+		Name:               "git-repo-branch",
+		Usage:              "list root of git-tree branch [if git is installed]",
+		Aliases:            []string{"branch"},
+		DisableDefaultText: true,
+		Category:           "VIEW",
+	},
+	&cli.BoolFlag{
+		Name:               "git-repo-status",
+		Usage:              "list root of git-tree status [if git is installed]",
+		Aliases:            []string{"repo-status"},
+		DisableDefaultText: true,
+		Category:           "VIEW",
+	},
+	&cli.BoolFlag{
 		Name:               "Q",
 		Aliases:            []string{"quote-name"},
 		Usage:              "enclose entry names in double quotes(overridden by --literal)",

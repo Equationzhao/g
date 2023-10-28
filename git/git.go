@@ -99,7 +99,7 @@ func getTopLevel(path RepoPath) (string, error) {
 	if err == nil {
 		// 	 get the first line
 		lines := strings.Split(string(out), "\n")[0]
-		return lines, err
+		return lines, nil
 	}
 
 	// if failed, try go-git
@@ -228,4 +228,90 @@ func Byte2Status(c byte) Status {
 		return Unknown
 	}
 	return Unknown
+}
+
+func (r RepoStatus) String() string {
+	switch r {
+	case RepoStatusClean:
+		return "+"
+	case RepoStatusDirty:
+		return "|"
+	case RepoStatusSkip:
+		return ""
+	}
+	return ""
+}
+
+const (
+	RepoStatusSkip RepoStatus = iota
+	RepoStatusClean
+	RepoStatusDirty
+)
+
+type RepoStatus uint8
+
+// GetBranch returns the branch of the repository
+// only return the branch when the path is the root of the repository
+func GetBranch(repoPath RepoPath) string {
+	if root, _ := getTopLevel(repoPath); root != repoPath {
+		return ""
+	}
+
+	c := exec.Command("git", "branch", "--show-current")
+	c.Dir = repoPath
+	out, err := c.Output()
+	if err == nil {
+		return strings.TrimSpace(string(out))
+	}
+	return goBranch(repoPath)
+}
+
+func goBranch(repoPath RepoPath) string {
+	r, err := git.PlainOpenWithOptions(repoPath, &git.PlainOpenOptions{DetectDotGit: true})
+	if err != nil {
+		return ""
+	}
+	ref, err := r.Head()
+	if err != nil {
+		return ""
+	}
+	return ref.Name().Short()
+}
+
+// GetRepoStatus returns the status of the repository
+// only return the status when the path is the root of the repository
+func GetRepoStatus(repoPath RepoPath) RepoStatus {
+	if root, _ := getTopLevel(repoPath); root != repoPath {
+		return RepoStatusSkip
+	}
+
+	c := exec.Command("git", "status", "--porcelain")
+	c.Dir = repoPath
+	out, err := c.Output()
+	if err == nil {
+		if len(out) == 0 {
+			return RepoStatusClean
+		}
+		return RepoStatusDirty
+	}
+	return goRepoStatus(repoPath)
+}
+
+func goRepoStatus(repoPath RepoPath) RepoStatus {
+	r, err := git.PlainOpenWithOptions(repoPath, &git.PlainOpenOptions{DetectDotGit: true})
+	if err != nil {
+		return RepoStatusSkip
+	}
+	w, err := r.Worktree()
+	if err != nil {
+		return RepoStatusSkip
+	}
+	status, err := w.Status()
+	if err != nil {
+		return RepoStatusSkip
+	}
+	if status.IsClean() {
+		return RepoStatusClean
+	}
+	return RepoStatusDirty
 }

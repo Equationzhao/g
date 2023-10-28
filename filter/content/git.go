@@ -4,6 +4,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/Equationzhao/g/align"
 	"github.com/Equationzhao/g/filter"
 	"github.com/Equationzhao/g/git"
 	"github.com/Equationzhao/g/item"
@@ -91,4 +92,29 @@ func gitByName(status git.Status, renderer *render.Renderer) string {
 		return renderer.GitUpdatedButUnmerged("U")
 	}
 	return " "
+}
+
+const GitRepoBranch = "Branch"
+const GitRepoStatus = "Repo-status"
+
+type GitRepoEnabler struct{}
+
+func (g *GitRepoEnabler) Enable(renderer *render.Renderer) filter.ContentOption {
+	align.Register(GitRepoBranch)
+	return func(info *item.FileInfo) (string, string) {
+		// get branch name
+		return renderer.GitRepoBranch(git.GetBranch(info.FullPath)), GitRepoBranch
+	}
+}
+
+func (g *GitRepoEnabler) EnableStatus(renderer *render.Renderer) filter.ContentOption {
+	align.Register(GitRepoStatus)
+	return func(info *item.FileInfo) (string, string) {
+		// get repo status
+		return renderer.GitRepoStatus(git.GetRepoStatus(info.FullPath)), GitRepoStatus
+	}
+}
+
+func NewGitRepoEnabler() *GitRepoEnabler {
+	return &GitRepoEnabler{}
 }
