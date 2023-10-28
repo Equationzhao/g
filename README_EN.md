@@ -358,8 +358,8 @@ source ~/.g.nu
 - [x] Support Scoop
 
 The following are new features of `eza`, we may support them in the future
-- [ ] --git-repos: list each directory’s Git status, if tracked
-- [ ] --git-repos-no-status: list whether a directory is a Git repository, but not its status (faster)
+- [x] --git-repos: list each directory’s Git status, if tracked
+- [x] --git-repos-no-status: list whether a directory is a Git repository, but not its status (faster)
 
 ## CONTRIBUTING
 
