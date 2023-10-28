@@ -11,6 +11,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/Equationzhao/g/align"
 	"github.com/Equationzhao/g/config"
 	"github.com/Equationzhao/g/display"
 	"github.com/Equationzhao/g/filter"
@@ -116,6 +117,16 @@ func init() {
 			if git {
 				contentFunc = append(contentFunc, gitEnabler.Enable(r))
 			}
+
+			gitBranch := context.Bool("git-repo-branch")
+			if gitBranch {
+				contentFunc = append(contentFunc, gitRepoEnabler.Enable(r))
+			}
+			gitRepoStatus := context.Bool("git-repo-status")
+			if gitRepoStatus {
+				contentFunc = append(contentFunc, gitRepoEnabler.EnableStatus(r))
+			}
+
 			if context.Bool("no-dereference") {
 				nameToDisplay.SetNoDeference()
 			}
@@ -627,8 +638,12 @@ func init() {
 									l = display.WidthLen(content.String())
 								}
 								if l < longestEachPart[part] {
+									expand := content.SetPrefix
+									if align.IsLeft(part) {
+										expand = content.SetSuffix
+									}
 									// expand
-									content.SetPrefix(strings.Repeat(" ", longestEachPart[part]-l))
+									expand(strings.Repeat(" ", longestEachPart[part]-l))
 									it.Set(part, content)
 								}
 							}
