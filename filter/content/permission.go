@@ -1,7 +1,6 @@
 package content
 
 import (
-	"os"
 	"strconv"
 
 	"github.com/Equationzhao/g/align"
@@ -18,12 +17,9 @@ func EnableFileMode(renderer *render.Renderer) filter.ContentOption {
 	align.Register(Permissions)
 	return func(info *item.FileInfo) (string, string) {
 		perm := renderer.FileMode(info.Mode().String())
-		f, err := os.Open(info.FullPath)
-		if err == nil {
-			list, _ := xattr.FList(f)
-			if len(list) != 0 {
-				perm += "@"
-			}
+		list, _ := xattr.LList(info.FullPath)
+		if len(list) != 0 {
+			perm += "@"
 		}
 		return perm, Permissions
 	}
