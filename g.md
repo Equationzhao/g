@@ -41,6 +41,8 @@ g
 [--fuzzy|--fz|-f]
 [--gid]
 [--git-ignore|--hide-git-ignore]
+[--git-repo-branch|--branch]
+[--git-repo-status|--repo-status]
 [--git|--git-status]
 [--group]
 [--header|--title]
@@ -209,6 +211,10 @@ g [options] [path]
 **--git, --git-status**: show git status [if git is installed]
 
 **--git-ignore, --hide-git-ignore**: hide git ignored file/dir [if git is installed]
+
+**--git-repo-branch, --branch**: list root of git-tree branch [if git is installed]
+
+**--git-repo-status, --repo-status**: list root of git-tree status [if git is installed]
 
 **--group**: show group
 

@@ -159,6 +159,29 @@
         }
     },
     "git": {
+        "git-branch": {
+            "color": "yellow"
+        },
+        "git-branch-master": {
+            "color": "green",
+            "bold": true
+        },
+        "git-branch-none": {
+            "color": "BrightBlack",
+            "icon": "-"
+        },
+        "git-repo-clean": {
+            "color": "green",
+            "icon": "clean"
+        },
+        "git-repo-dirty": {
+            "color": "yellow",
+            "icon": "dirty"
+        },
+        "git-repo-skip": {
+            "color": "BrightBlack",
+            "icon": "-"
+        },
         "git_added": {
             "color": "green"
         },
@@ -319,6 +342,10 @@
             "color": "white",
             "icon": ""
         },
+        "contributing.md": {
+            "color": "white",
+            "icon": ""
+        },
         "desktop": {
             "color": "white",
             "icon": ""
@@ -407,6 +434,10 @@
         "library": {
             "color": "white",
             "icon": ""
+        },
+        "licence": {
+            "color": "[214]@256",
+            "icon": ""
         },
         "license": {
             "color": "[214]@256",
