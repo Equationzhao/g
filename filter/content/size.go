@@ -209,27 +209,8 @@ func (s *SizeEnabler) Size2String(b int64) (string, SizeUnit) {
 		res = strconv.FormatInt(int64(v*8), 10)
 	case B:
 		res = strconv.FormatInt(int64(v), 10)
-	case KB:
-		fallthrough
-	case MB:
-		fallthrough
-	case GB:
-		fallthrough
-	case TB:
-		fallthrough
-	case PB:
-		fallthrough
-	case EB:
-		fallthrough
-	case ZB:
-		fallthrough
-	case YB:
-		fallthrough
-	case BB:
-		fallthrough
-	case NB:
-		res = fmt.Sprintf("%g", v*float64(B)/float64(s.sizeUint))
-
+	case KB, MB, GB, TB, PB, EB, ZB, YB, BB, NB:
+		res = fmt.Sprintf("%.1f", v*float64(B)/float64(s.sizeUint))
 	case Auto:
 		for i := B; i <= NB; i *= 1024 {
 			if v < 1024 {
