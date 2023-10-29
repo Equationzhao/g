@@ -17,6 +17,7 @@ require (
 	github.com/mattn/go-runewidth v0.0.15
 	github.com/olekukonko/ts v0.0.0-20171002115256-78ecb04241c0
 	github.com/panjf2000/ants/v2 v2.8.2
+	github.com/pkg/xattr v0.4.9
 	github.com/saintfish/chardet v0.0.0-20230101081208-5e3ef4b5456d
 	github.com/savioxavier/termlink v1.3.0
 	github.com/shirou/gopsutil/v3 v3.23.9
@@ -27,6 +28,7 @@ require (
 	github.com/xrash/smetrics v0.0.0-20201216005158-039620a65673
 	github.com/zeebo/xxh3 v1.0.2
 	go.szostok.io/version v1.2.0
+	golang.org/x/exp v0.0.0-20231006140011-7918f672742d
 	gopkg.in/yaml.v3 v3.0.1
 )
 
@@ -89,7 +91,6 @@ require (
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/xo/terminfo v0.0.0-20220910002029-abceb7e1c41e // indirect
 	golang.org/x/crypto v0.14.0 // indirect
-	golang.org/x/exp v0.0.0-20231006140011-7918f672742d // indirect
 	golang.org/x/net v0.17.0 // indirect
 	golang.org/x/sys v0.13.0 // indirect
 	golang.org/x/xerrors v0.0.0-20231012003039-104605ab7028 // indirect
