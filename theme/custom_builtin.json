@@ -142,6 +142,9 @@
         }
     },
     "symlink": {
+        "link-num": {
+            "color": "red"
+        },
         "symlink": {
             "color": "purple",
             "icon": ""
