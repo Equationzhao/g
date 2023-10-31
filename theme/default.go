@@ -1569,6 +1569,9 @@ var Symlink = map[string]Style{
 		Color: BrightWhite,
 		Icon:  " => ",
 	},
+	"link-num": {
+		Color: Red,
+	},
 }
 
 var (

@@ -175,7 +175,7 @@ func (rd *Renderer) BlockSize(toRender string) string {
 }
 
 func (rd *Renderer) Link(toRender string) string {
-	s := rd.theme.Symlink["link"]
+	s := rd.theme.Symlink["link-num"]
 	bb := bytebufferpool.Get()
 	defer bytebufferpool.Put(bb)
 	_, _ = bb.WriteString(s.Color)
