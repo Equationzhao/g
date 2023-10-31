@@ -341,6 +341,20 @@ var viewFlag = []cli.Flag{
 		Category: "VIEW",
 	},
 	&cli.BoolFlag{
+		Name:               "H",
+		Aliases:            []string{"link"},
+		Usage:              "list each file's number of hard links",
+		DisableDefaultText: true,
+		Action: func(context *cli.Context, b bool) error {
+			if b {
+				link := filtercontent.NewLinkEnabler()
+				contentFunc = append(contentFunc, link.Enable(r))
+			}
+			return nil
+		},
+		Category: "VIEW",
+	},
+	&cli.BoolFlag{
 		Name:               "owner",
 		Aliases:            []string{"author"},
 		Usage:              "show owner",
@@ -587,20 +601,6 @@ var viewFlag = []cli.Flag{
 		Usage:              "print entry names without quoting",
 		DisableDefaultText: true,
 		Category:           "VIEW",
-	},
-	&cli.BoolFlag{
-		Name:               "H",
-		Aliases:            []string{"link"},
-		Usage:              "list each file's number of hard links",
-		DisableDefaultText: true,
-		Action: func(context *cli.Context, b bool) error {
-			if b {
-				link := filtercontent.NewLinkEnabler()
-				contentFunc = append(contentFunc, link.Enable(r))
-			}
-			return nil
-		},
-		Category: "VIEW",
 	},
 	&cli.BoolFlag{
 		Name:               "no-dereference",
