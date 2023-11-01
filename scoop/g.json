@@ -3,8 +3,8 @@
   "bin": "bin/g.exe",
   "architecture": {
     "64bit": {
-      "url": "https://github.com/Equationzhao/g/releases/download/v0.23.0/g-windows-amd64.exe",
-      "hash": "cacf190db1d0737bcf43981e9a89939db88d8d3502e3166530aa236f083dc5af",
+      "url": "https://github.com/Equationzhao/g/releases/download/v0.24.2/g-windows-amd64.exe",
+      "hash": "b78a99ca78ac3e1bf81a012c560ed1963eed227d172f7184364366f67edc266d",
       "bin": "g-windows-amd64.exe",
       "post_install": [
         "cd $scoopdir/shims",
@@ -14,8 +14,8 @@
       "shortcuts": [["g-windows-amd64.exe", "g"]]
     },
     "32bit": {
-      "url": "https://github.com/Equationzhao/g/releases/download/v0.23.0/g-windows-386.exe",
-      "hash": "753c9d8286fd065135b43c3f464d502ddcf9bf0e05ff7fd8ed1b96d9627407d1",
+      "url": "https://github.com/Equationzhao/g/releases/download/v0.24.2/g-windows-386.exe",
+      "hash": "0aea16104c4a56b54b5490af438867035cf7908bb4a2d91f52cfdddd76ed4177",
       "bin": "g-windows-386.exe",
       "post_install": [
         "cd $scoopdir/shims",
@@ -25,8 +25,8 @@
       "shortcuts": [["g-windows-386.exe", "g"]]
     },
     "arm64": {
-      "url": "https://github.com/Equationzhao/g/releases/download/v0.23.0/g-windows-arm64.exe",
-      "hash": "f59673434a361349f0004be78f070f6c123ba078684ac2877af6f6e1f79a0d1b",
+      "url": "https://github.com/Equationzhao/g/releases/download/v0.24.2/g-windows-arm64.exe",
+      "hash": "4ab8c3c316b87ee227434e64c9b69a0e2f72b65b9d868d24b012ca6fe20530bc",
       "bin": "g-windows-arm64.exe",
       "post_install": [
         "cd $scoopdir/shims",
@@ -37,5 +37,5 @@
     }
   },
   "license": "MIT",
-  "version": "v0.23.0"
+  "version": "v0.24.2"
 }
