@@ -211,7 +211,7 @@ var filteringFlag = []cli.Flag{
 		MM-dd, MM-dd HH:mm, HH:mm, YYYY-MM-dd, YYYY-MM-dd HH:mm, and the format set by --time-style`,
 		Category: "FILTERING",
 		Action: func(ctx *cli.Context, s string) error {
-			possibleTimeFormat := []string{"01-02", "01-02 15:04", "15:04", "2006-01-02", "2006-01-02 15:04", timeFormat}
+			possibleTimeFormat := []string{"01-02", "01-02 15:04", "15:04", "2006-01-02", "2006-01-02 15:04", "02.Jan'06 15:04"}
 			for _, f := range possibleTimeFormat {
 				t, err := time.ParseInLocation(f, s, time.Local)
 				if err != nil {
@@ -236,7 +236,7 @@ var filteringFlag = []cli.Flag{
 		Usage:    "show items which was modified/access/created after given time, see --before",
 		Category: "FILTERING",
 		Action: func(ctx *cli.Context, s string) error {
-			possibleTimeFormat := []string{"01-02", "01-02 15:04", "15:04", "2006-01-02", "2006-01-02 15:04", timeFormat}
+			possibleTimeFormat := []string{"01-02", "01-02 15:04", "15:04", "2006-01-02", "2006-01-02 15:04", "02.Jan'06 15:04"}
 			for _, f := range possibleTimeFormat {
 				t, err := time.ParseInLocation(f, s, time.Local)
 				if err != nil {

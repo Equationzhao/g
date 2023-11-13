@@ -25,6 +25,7 @@ import (
 	"github.com/Equationzhao/g/util"
 	"github.com/Equationzhao/pathbeautify"
 	"github.com/hako/durafmt"
+	"github.com/lestrrat-go/strftime"
 	"github.com/panjf2000/ants/v2"
 	"github.com/savioxavier/termlink"
 	"github.com/urfave/cli/v2"
@@ -42,7 +43,7 @@ var (
 	noOutputFunc    = make([]filter.NoOutputOption, 0)
 	r               = render.NewRenderer(&theme.DefaultAll)
 	p               = display.NewFitTerminal()
-	timeFormat      = "02.Jan'06 15:04"
+	timeFormat, _   = strftime.New(`%d.%b'%y %H:%M`)
 	ReturnCode      = 0
 	contentFilter   = filter.NewContentFilter()
 	sort            = sorter.NewSorter()

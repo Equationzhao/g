@@ -14,6 +14,7 @@ require (
 	github.com/hako/durafmt v0.0.0-20210608085754-5c1018a4e16b
 	github.com/jedib0t/go-pretty/v6 v6.4.8
 	github.com/junegunn/fzf v0.0.0-20230903073035-0f50dc848e58
+	github.com/lestrrat-go/strftime v1.0.6
 	github.com/mattn/go-runewidth v0.0.15
 	github.com/olekukonko/ts v0.0.0-20171002115256-78ecb04241c0
 	github.com/panjf2000/ants/v2 v2.8.2
@@ -83,6 +84,7 @@ require (
 	github.com/mitchellh/copystructure v1.2.0 // indirect
 	github.com/mitchellh/reflectwalk v1.0.2 // indirect
 	github.com/muesli/termenv v0.15.2 // indirect
+	github.com/pkg/errors v0.9.1 // indirect
 	github.com/power-devops/perfstat v0.0.0-20221212215047-62379fc7944b // indirect
 	github.com/rivo/uniseg v0.4.4 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect

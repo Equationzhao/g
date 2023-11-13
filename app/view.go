@@ -9,8 +9,8 @@ import (
 	"github.com/Equationzhao/g/display"
 	"github.com/Equationzhao/g/filter"
 	filtercontent "github.com/Equationzhao/g/filter/content"
-	"github.com/Equationzhao/g/timeparse"
 	"github.com/gabriel-vasile/mimetype"
+	"github.com/lestrrat-go/strftime"
 	"github.com/urfave/cli/v2"
 )
 
@@ -157,21 +157,24 @@ var viewFlag = []cli.Flag{
 			*/
 			if strings.HasPrefix(s, "+") {
 				s := s[1:] // remove +
-				timeFormat = timeparse.Transform(s)
+				var err error
+				timeFormat, err = strftime.New(s)
+				if err != nil {
+					return err
+				}
 				return nil
 			}
-
 			switch s {
 			case "full-iso":
-				timeFormat = "2006-01-02 15:04:05.000000000 -0700"
+				timeFormat, _ = strftime.New("%Y-%m-%d %H:%M:%S. %z") // "2006-01-02 15:04:05.000000000 -0700"
 			case "long-iso":
-				timeFormat = "2006-01-02 15:04"
+				timeFormat, _ = strftime.New("%Y-%m-%d %H:%M:%S") //"2006-01-02 15:04"
 			case "locale":
-				timeFormat = "Jan 02 15:04"
+				timeFormat, _ = strftime.New("+%b %d %H:%M") // "Jan 02 15:04"
 			case "iso":
-				timeFormat = "01-02 15:04"
+				timeFormat, _ = strftime.New("%m-%d %H:%M") // "01-02 15:04"
 			case "default":
-				timeFormat = "02.Jan'06 15:04"
+				timeFormat, _ = strftime.New("+%d.%b'%y %H:%M") // "02.Jan'06 15:04"
 			default:
 				ReturnCode = 1
 				return errors.New("invalid time-style")
@@ -186,7 +189,7 @@ var viewFlag = []cli.Flag{
 		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
 			if b {
-				timeFormat = "2006-01-02 15:04:05.000000000 -0700"
+				timeFormat, _ = strftime.New("%Y-%m-%d %H:%M:%S. %z") // todo
 			}
 			return nil
 		},

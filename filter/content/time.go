@@ -8,6 +8,7 @@ import (
 	"github.com/Equationzhao/g/item"
 	"github.com/Equationzhao/g/osbased"
 	"github.com/Equationzhao/g/render"
+	"github.com/lestrrat-go/strftime"
 )
 
 type RelativeTimeEnabler struct {
@@ -60,7 +61,7 @@ const (
 
 // EnableTime enables time
 // accepts ['mod', 'modified', 'create', 'access', 'birth']
-func EnableTime(format string, mode string, renderer *render.Renderer) filter.ContentOption {
+func EnableTime(format *strftime.Strftime, mode string, renderer *render.Renderer) filter.ContentOption {
 	return func(info *item.FileInfo) (string, string) {
 		// get mod time/ create time/ access time
 		var t time.Time
@@ -87,6 +88,6 @@ func EnableTime(format string, mode string, renderer *render.Renderer) filter.Co
 			t = osbased.ModTime(info)
 			timeType = timeModified
 		}
-		return renderer.Time(t.Format(format)), timeName + " " + timeType
+		return renderer.Time(format.FormatString(t)), timeName + " " + timeType
 	}
 }
