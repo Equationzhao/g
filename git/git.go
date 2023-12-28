@@ -97,9 +97,11 @@ func getTopLevel(path RepoPath) (string, error) {
 	c.Dir = path
 	out, err := c.Output()
 	if err == nil {
-		// 	 get the first line
-		lines := strings.Split(string(out), "\n")[0]
-		return lines, nil
+		// get the first line
+		lines := strings.Split(string(out), "\n")
+		if len(lines) > 0 {
+			return lines[0], nil
+		}
 	}
 
 	// if failed, try go-git
