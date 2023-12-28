@@ -26,7 +26,7 @@ func NewUsernameMap() *usernameMap {
 }
 
 func (m *usernameMap) Get(u Uid) Username {
-	if c, _ := user.Current(); c.Uid == u {
+	if c, err := user.Current(); err == nil && c.Uid == u {
 		return c.Username
 	}
 
