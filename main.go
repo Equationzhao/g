@@ -9,29 +9,29 @@ import (
 	"runtime/debug"
 	"slices"
 
-	. "github.com/Equationzhao/g/app"
+	"github.com/Equationzhao/g/app"
 	"github.com/Equationzhao/g/config"
 )
 
 func main() {
 	defer func() {
 		if err := recover(); err != nil {
-			fmt.Println(Version)
-			fmt.Println(MakeErrorStr(fmt.Sprint(err)))
-			fmt.Println(MakeErrorStr(string(debug.Stack())))
-			if ReturnCode == 0 {
-				ReturnCode = 2
+			fmt.Println(app.Version)
+			fmt.Println(app.MakeErrorStr(fmt.Sprint(err)))
+			fmt.Println(app.MakeErrorStr(string(debug.Stack())))
+			if app.ReturnCode == 0 {
+				app.ReturnCode = 2
 			}
 		}
-		os.Exit(ReturnCode)
+		os.Exit(app.ReturnCode)
 	}()
 
 	if doc {
 		md, _ := os.Create("g.md")
-		s, _ := G.ToMarkdown()
+		s, _ := app.G.ToMarkdown()
 		_, _ = fmt.Fprintln(md, s)
 		man, _ := os.Create(filepath.Join("man", "g.1.gz"))
-		s, _ = G.ToMan()
+		s, _ = app.G.ToMan()
 		// compress to gzip
 		manGz := gzip.NewWriter(man)
 		defer manGz.Close()
@@ -53,7 +53,7 @@ func main() {
 			} else {
 				var errReadConfig config.ErrReadConfig
 				if errors.As(err, &errReadConfig) {
-					_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(err.Error()))
+					_, _ = fmt.Fprintln(os.Stderr, app.MakeErrorStr(err.Error()))
 				}
 			}
 		} else {
@@ -63,13 +63,13 @@ func main() {
 				os.Args, match,
 			)
 		}
-		err := G.Run(os.Args)
+		err := app.G.Run(os.Args)
 		if err != nil {
-			if !errors.Is(err, Err4Exit{}) {
-				if ReturnCode == 0 {
-					ReturnCode = 1
+			if !errors.Is(err, app.Err4Exit{}) {
+				if app.ReturnCode == 0 {
+					app.ReturnCode = 1
 				}
-				_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(err.Error()))
+				_, _ = fmt.Fprintln(os.Stderr, app.MakeErrorStr(err.Error()))
 			}
 		}
 	}
