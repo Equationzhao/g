@@ -3,8 +3,8 @@ package git
 import (
 	"sync"
 
+	"github.com/Equationzhao/g/cached"
 	"github.com/Equationzhao/pathbeautify"
-	cached "github.com/alphadose/haxmap"
 	"github.com/zeebo/xxh3"
 )
 
@@ -27,7 +27,7 @@ type Cache = *cached.Map[RepoPath, *FileGits]
 func GetCache() Cache {
 	IgnoredInitOnce.Do(
 		func() {
-			ignored = cached.New[RepoPath, *FileGits](size)
+			ignored = cached.NewCacheMap[RepoPath, *FileGits](size)
 			ignored.SetHasher(hasher)
 		},
 	)
@@ -51,7 +51,7 @@ func GetTopLevel(path string) (RepoPath, error) {
 	TopLevelInitOnce.Do(
 		func() {
 			if TopLevelCache == nil {
-				TopLevelCache = cached.New[RepoPath, RepoPath](size)
+				TopLevelCache = cached.NewCacheMap[RepoPath, RepoPath](size)
 				TopLevelCache.SetHasher(hasher)
 			}
 		},

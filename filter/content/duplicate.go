@@ -9,10 +9,10 @@ import (
 	"io"
 	"os"
 
+	"github.com/Equationzhao/g/cached"
 	"github.com/Equationzhao/g/filter"
 	"github.com/Equationzhao/g/item"
 	"github.com/Equationzhao/g/util"
-	"github.com/Equationzhao/tsmap"
 )
 
 type (
@@ -22,7 +22,7 @@ type (
 
 type DuplicateDetect struct {
 	IsThrough bool
-	hashTb    *tsmap.Map[hashStr, filenameList]
+	hashTb    *cached.Map[hashStr, filenameList]
 }
 
 type DOption func(d *DuplicateDetect)
@@ -37,7 +37,7 @@ func NewDuplicateDetect(options ...DOption) *DuplicateDetect {
 	}
 
 	if d.hashTb == nil {
-		d.hashTb = tsmap.NewTSMap[hashStr, filenameList](defaultTbSize)
+		d.hashTb = cached.NewCacheMap[hashStr, filenameList](defaultTbSize)
 	}
 
 	return d
@@ -45,7 +45,7 @@ func NewDuplicateDetect(options ...DOption) *DuplicateDetect {
 
 func DuplicateWithTbSize(size int) DOption {
 	return func(d *DuplicateDetect) {
-		d.hashTb = tsmap.NewTSMap[hashStr, filenameList](size)
+		d.hashTb = cached.NewCacheMap[hashStr, filenameList](size)
 	}
 }
 
@@ -59,7 +59,7 @@ func (d *DuplicateDetect) Enable() filter.NoOutputOption {
 		if err != nil {
 			return
 		}
-		actual, _ := d.hashTb.GetOrInit(
+		actual, _ := d.hashTb.GetOrCompute(
 			afterHash, func() filenameList {
 				return util.NewSlice[string](10)
 			},
@@ -84,10 +84,10 @@ func (d *DuplicateDetect) Result() []Duplicate {
 }
 
 func (d *DuplicateDetect) Reset() {
-	filenameLists := d.hashTb.Values()
-	for _, list := range filenameLists {
-		list.Clear()
-	}
+	d.hashTb.ForEach(func(k string, v *util.Slice[string]) bool {
+		v.Clear()
+		return true
+	})
 }
 
 func (d *DuplicateDetect) Fprint(w io.Writer) {

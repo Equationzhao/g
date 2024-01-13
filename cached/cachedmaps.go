@@ -4,8 +4,6 @@ package cached
 
 import (
 	"os/user"
-
-	"github.com/Equationzhao/tsmap"
 )
 
 type (
@@ -16,12 +14,12 @@ type (
 // usernameMap is a map from Uid to Username
 // current not contained because it is cached in user.Current()
 type usernameMap struct {
-	m *tsmap.Map[Uid, Username]
+	m *Map[Uid, Username]
 }
 
 func NewUsernameMap() *usernameMap {
 	return &usernameMap{
-		m: tsmap.NewTSMap[Uid, Username](20),
+		m: NewCacheMap[Uid, Username](20),
 	}
 }
 
@@ -30,7 +28,7 @@ func (m *usernameMap) Get(u Uid) Username {
 		return c.Username
 	}
 
-	v, _ := m.m.GetOrInit(u, func() Groupname {
+	v, _ := m.m.GetOrCompute(u, func() Groupname {
 		targetUser, err := user.LookupId(u)
 		if err != nil {
 			if targetUser == nil {
@@ -50,17 +48,17 @@ type (
 
 // GroupnameMap is a map from Gid to Groupname
 type GroupnameMap struct {
-	m *tsmap.Map[Gid, Groupname]
+	m *Map[Gid, Groupname]
 }
 
 func NewGroupnameMap() *GroupnameMap {
 	return &GroupnameMap{
-		m: tsmap.NewTSMap[Gid, Groupname](20),
+		m: NewCacheMap[Gid, Groupname](20),
 	}
 }
 
 func (m *GroupnameMap) Get(g Gid) Groupname {
-	v, _ := m.m.GetOrInit(g, func() Groupname {
+	v, _ := m.m.GetOrCompute(g, func() Groupname {
 		targetGroup, err := user.LookupGroupId(g)
 		if err != nil {
 			if targetGroup == nil {

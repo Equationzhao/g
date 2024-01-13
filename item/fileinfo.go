@@ -6,14 +6,14 @@ import (
 	"path/filepath"
 	"slices"
 
-	"github.com/Equationzhao/tsmap"
+	"github.com/Equationzhao/g/cached"
 	"github.com/valyala/bytebufferpool"
 )
 
 type FileInfo struct {
 	os.FileInfo
 	FullPath string
-	Meta     *tsmap.Map[string, Item]
+	Meta     *cached.Map[string, Item]
 	Cache    map[string][]byte
 }
 
@@ -21,7 +21,7 @@ type Option = func(info *FileInfo) error
 
 func WithSize(size int) Option {
 	return func(info *FileInfo) error {
-		info.Meta = tsmap.NewTSMap[string, Item](size)
+		info.Meta = cached.NewCacheMap[string, Item](size)
 		return nil
 	}
 }
@@ -63,7 +63,7 @@ func NewFileInfoWithOption(opts ...Option) (*FileInfo, error) {
 		}
 	}
 	if f.Meta == nil {
-		f.Meta = tsmap.NewTSMap[string, Item](20)
+		f.Meta = cached.NewCacheMap[string, Item](20)
 	}
 	if f.Cache == nil {
 		f.Cache = make(map[string][]byte)
@@ -85,7 +85,7 @@ func NewFileInfo(name string) (*FileInfo, error) {
 	return &FileInfo{
 		FileInfo: info,
 		FullPath: abs,
-		Meta:     tsmap.NewTSMap[string, Item](20),
+		Meta:     cached.NewCacheMap[string, Item](20),
 		Cache:    make(map[string][]byte),
 	}, nil
 }
@@ -105,7 +105,7 @@ func (i *FileInfo) KeysByOrder() []string {
 	kNo := i.Meta.Pairs()
 
 	slices.SortFunc(
-		kNo, func(i, j tsmap.Pair[string, Item]) int {
+		kNo, func(i, j cached.Pair[string, Item]) int {
 			return i.Value().NO() - j.Value().NO()
 		},
 	)
@@ -119,7 +119,7 @@ func (i *FileInfo) KeysByOrder() []string {
 
 // Del delete content by key
 func (i *FileInfo) Del(key string) {
-	i.Meta.Remove(key)
+	i.Meta.Del(key)
 }
 
 // Get content by key
