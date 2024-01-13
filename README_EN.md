@@ -268,7 +268,7 @@ list in tree
 g -tree
 ```
 
-output in markdown, and render with [glow](github.com/charmbracelet/glow)
+output in markdown, and render with [glow](https://www.github.com/charmbracelet/glow)
 (colors are not supported in markdown )
 
 ```bash

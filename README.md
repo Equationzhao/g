@@ -272,7 +272,7 @@ g -tb
 g -tree
 ```
 
-以 markdown 格式输出, 并用 [glow](github.com/charmbracelet/glow) 渲染
+以 markdown 格式输出, 并用 [glow](https://www.github.com/charmbracelet/glow) 渲染
 ( 不支持颜色 )
 
 ```bash
