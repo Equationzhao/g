@@ -1,17 +1,11 @@
 package util
 
 import (
-	"unsafe"
-
+	constval "github.com/Equationzhao/g/const"
 	"github.com/alphadose/haxmap"
-	"golang.org/x/exp/constraints"
 )
 
-type hashable interface {
-	constraints.Integer | constraints.Float | constraints.Complex | ~string | uintptr | ~unsafe.Pointer
-}
-
-type SafeSet[T hashable] struct {
+type SafeSet[T constval.Hashable] struct {
 	internal *haxmap.Map[T, struct{}]
 }
 
@@ -24,7 +18,7 @@ func (s *SafeSet[T]) Contains(k T) bool {
 	return t
 }
 
-func NewSet[T hashable]() *SafeSet[T] {
+func NewSet[T constval.Hashable]() *SafeSet[T] {
 	return &SafeSet[T]{
 		internal: haxmap.New[T, struct{}](10),
 	}
