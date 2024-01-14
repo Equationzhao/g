@@ -1,4 +1,4 @@
-package app
+package cli
 
 import (
 	"errors"
@@ -377,9 +377,8 @@ var displayFlag = []cli.Flag{
 		Category: "DISPLAY",
 	},
 	&cli.StringFlag{
-		Name:    "theme",
-		Aliases: []string{"th"},
-		Usage:   "apply theme `path/to/theme`",
+		Name:  "theme",
+		Usage: "apply theme `path/to/theme`",
 		Action: func(context *cli.Context, s string) error {
 			err := theme.GetTheme(s)
 			if err != nil {
