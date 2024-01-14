@@ -48,7 +48,6 @@ func (m Map[k, v]) Pairs() []Pair[k, v] {
 		return true
 	})
 	return pairs
-
 }
 
 // Pair is a struct that contains two variables ptr
