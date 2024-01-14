@@ -11,21 +11,22 @@ import (
 
 	"github.com/Equationzhao/g/app"
 	"github.com/Equationzhao/g/config"
+	"github.com/Equationzhao/g/util"
 )
 
 func main() {
 	defer func() {
 		if err := recover(); err != nil {
-			fmt.Println(app.Version)
-			fmt.Println(app.MakeErrorStr(fmt.Sprint(err)))
-			fmt.Println(app.MakeErrorStr(string(debug.Stack())))
+			fmt.Printf("Version: v%s\n", app.Version)
+			fmt.Printf("Please file an issue at %s with the following panic info\n\n", util.MakeLink("https://github.com/Equationzhao/g/issues/new/choose", "Github Repo"))
+			fmt.Println(app.MakeErrorStr(fmt.Sprintf("error message:\n%v\n", err)))
+			fmt.Println(app.MakeErrorStr(fmt.Sprintf("stack trace:\n%s", debug.Stack())))
 			if app.ReturnCode == 0 {
 				app.ReturnCode = 2
 			}
 		}
 		os.Exit(app.ReturnCode)
 	}()
-
 	if doc {
 		md, _ := os.Create("g.md")
 		s, _ := app.G.ToMarkdown()
