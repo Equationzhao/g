@@ -220,17 +220,25 @@ type ErrBadColor struct {
 }
 
 func (e ErrBadColor) Error() string {
-	return fmt.Sprintf("bad color for %s:%s", e.name, e.error)
+	return fmt.Sprintf("bad color for %s: %s", e.name, e.error.Error())
+}
+
+type ErrOpenTheme struct {
+	error
+}
+
+func (e ErrOpenTheme) Error() string {
+	return fmt.Sprintf("load theme error: %s", e.error.Error())
 }
 
 func GetTheme(path string) error {
 	themeJson, err := os.ReadFile(path)
 	if err != nil {
-		return err
+		return ErrOpenTheme{err}
 	}
 	a, err, fatal := getTheme(themeJson)
 	if fatal != nil {
-		return fatal
+		return ErrOpenTheme{fatal}
 	}
 	DefaultAll = a
 	return err

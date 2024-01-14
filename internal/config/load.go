@@ -48,9 +48,9 @@ var (
 //     - ...
 
 type Config struct {
-	Args                  []string  `yaml:"Args"`
-	CustomTreeStyle       TreeStyle `yaml:"CustomTreeStyle"`
-	EnableCustomTreeStyle bool
+	Args            []string  `yaml:"Args"`
+	CustomTreeStyle TreeStyle `yaml:"CustomTreeStyle"`
+	ThemeLocation   string    `yaml:"Theme"`
 }
 
 type TreeStyle struct {
@@ -62,6 +62,10 @@ type TreeStyle struct {
 
 func (t TreeStyle) IsEmpty() bool {
 	return t.Empty == "" && t.Child == "" && t.LastChild == "" && t.Mid == ""
+}
+
+func (t TreeStyle) IsEnabled() bool {
+	return !t.IsEmpty()
 }
 
 type ErrReadConfig struct {
@@ -113,10 +117,6 @@ func Load() (*Config, error) {
 				Default.Args[i] = "--" + v
 			}
 		}
-	}
-
-	if !Default.CustomTreeStyle.IsEmpty() {
-		Default.EnableCustomTreeStyle = true
 	}
 
 	return &Default, nil
