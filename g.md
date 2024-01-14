@@ -91,7 +91,7 @@ g
 [--tb-style|--table-style]=[value]
 [--tb|--table]
 [--term-width]=[value]
-[--theme|--th]=[value]
+[--theme]=[value]
 [--time-style]=[value]
 [--time-type]=[value]
 [--time]
@@ -320,7 +320,7 @@ g [options] [path]
 
 **--term-width**="": set screen width (default: auto)
 
-**--theme, --th**="": apply theme `path/to/theme`
+**--theme**="": apply theme `path/to/theme`
 
 **--time**: show time
 
