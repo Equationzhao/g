@@ -329,7 +329,7 @@
             "icon": "",
             "underline": true
         },
-        "cmakeLists.txt": {
+        "cmakelists.txt": {
             "color": "[158]@256",
             "icon": ""
         },
