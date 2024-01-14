@@ -1275,7 +1275,7 @@ var Name = map[string]Style{
 		Color: BrightBlack,
 		Icon:  "\ue65d",
 	},
-	"cmakeLists.txt": {
+	"cmakelists.txt": {
 		Color: lang,
 		Icon:  "\uE20F",
 	},
