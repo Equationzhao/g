@@ -1044,11 +1044,9 @@ var logic = func(context *cli.Context) error {
 
 	clean:
 		if i != len(path)-1 {
-			//goland:noinspection GoPrintFunctions
-			fmt.Println("\n") //nolint:govet
+			fmt.Print("\n\n")
 			// switch back to start dir
-			_ = os.Chdir(startDir)
-			if err != nil {
+			if err = os.Chdir(startDir); err != nil {
 				seriousErr = true
 			}
 			sizeEnabler.Reset()
