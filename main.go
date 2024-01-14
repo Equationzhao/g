@@ -9,9 +9,9 @@ import (
 	"runtime/debug"
 	"slices"
 
-	"github.com/Equationzhao/g/app"
-	"github.com/Equationzhao/g/config"
-	"github.com/Equationzhao/g/util"
+	"github.com/Equationzhao/g/internal/app"
+	"github.com/Equationzhao/g/internal/config"
+	"github.com/Equationzhao/g/internal/util"
 )
 
 func main() {
