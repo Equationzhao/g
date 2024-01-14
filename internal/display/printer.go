@@ -11,6 +11,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/Equationzhao/g/internal/config"
 	"github.com/Equationzhao/g/internal/display/tree"
 	"github.com/Equationzhao/g/internal/item"
 	"github.com/Equationzhao/g/internal/theme"
@@ -720,9 +721,13 @@ func (t *TreePrinter) Print(s ...*item.FileInfo) {
 		Child = "|---- "
 		LastChild = "|---- "
 		Mid = "|     "
-		Empty = "    "
 	} else if DefaultTreeStyle == TreeRectangle {
 		LastChild = "└── "
+	} else if config.Default.EnableCustomTreeStyle {
+		Child = config.Default.CustomTreeStyle.Child
+		LastChild = config.Default.CustomTreeStyle.LastChild
+		Mid = config.Default.CustomTreeStyle.Mid
+		Empty = config.Default.CustomTreeStyle.Empty
 	}
 
 	// print

@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -47,34 +48,61 @@ var (
 //     - ...
 
 type Config struct {
-	Args []string `yaml:"Args"`
+	Args                  []string  `yaml:"Args"`
+	CustomTreeStyle       TreeStyle `yaml:"CustomTreeStyle"`
+	EnableCustomTreeStyle bool
+}
+
+type TreeStyle struct {
+	Child     string `yaml:"Child"`
+	LastChild string `yaml:"LastChild"`
+	Mid       string `yaml:"Mid"`
+	Empty     string `yaml:"Empty"`
+}
+
+func (t TreeStyle) IsEmpty() bool {
+	return t.Empty == "" && t.Child == "" && t.LastChild == "" && t.Mid == ""
 }
 
 type ErrReadConfig struct {
 	error
+	Location string
 }
+
+func (e ErrReadConfig) Error() string {
+	if e.Location != "" {
+		return fmt.Sprintf("failed to load configuration at %s: %s", e.Location, e.error.Error())
+	}
+	return fmt.Sprintf("failed to load configuration: %s", e.error.Error())
+}
+
+var Default = Config{
+	Args: make([]string, 0),
+}
+
+var emptyConfig = Config{}
 
 func Load() (*Config, error) {
 	Dir, err := GetUserConfigDir()
 	if err != nil {
-		return nil, err
+		return nil, ErrReadConfig{error: err}
 	}
 
-	content, err := os.ReadFile(filepath.Join(Dir, DefaultConfigFile))
+	location := filepath.Join(Dir, DefaultConfigFile)
+	content, err := os.ReadFile(location)
 	if err != nil {
-		return nil, err
+		return nil, ErrReadConfig{error: err, Location: location}
 	}
-	Default := Config{
-		Args: make([]string, 0),
-	}
+
 	// parse yaml
 	configErr := yaml.Unmarshal(content, &Default)
 	if configErr != nil {
-		return nil, ErrReadConfig{error: configErr}
+		return nil, ErrReadConfig{error: configErr, Location: location}
 	}
 
 	for i, v := range Default.Args {
 		if v == NoConfig {
+			Default = emptyConfig
 			return nil, nil
 		}
 		// if not prefixed with '-', add '-'
@@ -85,6 +113,10 @@ func Load() (*Config, error) {
 				Default.Args[i] = "--" + v
 			}
 		}
+	}
+
+	if !Default.CustomTreeStyle.IsEmpty() {
+		Default.EnableCustomTreeStyle = true
 	}
 
 	return &Default, nil
