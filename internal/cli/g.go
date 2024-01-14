@@ -563,6 +563,13 @@ var logic = func(context *cli.Context) error {
 	startDir, _ := os.Getwd()
 	dereference := context.Bool("dereference")
 
+	if !context.Bool("colorless") && !context.Bool("classic") && context.String("theme") == "" {
+		err := theme.GetTheme(config.Default.ThemeLocation)
+		if err != nil {
+			return err
+		}
+	}
+
 	theme.ConvertThemeColor()
 	{
 		var err error

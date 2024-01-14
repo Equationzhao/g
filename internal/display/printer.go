@@ -723,7 +723,7 @@ func (t *TreePrinter) Print(s ...*item.FileInfo) {
 		Mid = "|     "
 	} else if DefaultTreeStyle == TreeRectangle {
 		LastChild = "└── "
-	} else if config.Default.EnableCustomTreeStyle {
+	} else if config.Default.CustomTreeStyle.IsEnabled() {
 		Child = config.Default.CustomTreeStyle.Child
 		LastChild = config.Default.CustomTreeStyle.LastChild
 		Mid = config.Default.CustomTreeStyle.Mid
