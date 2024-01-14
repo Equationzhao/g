@@ -395,7 +395,6 @@ var displayFlag = []cli.Flag{
 		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
 			if b {
-				theme.RemoveAllColor()
 				theme.ColorLevel = theme.None
 			}
 			return nil
@@ -408,7 +407,7 @@ var displayFlag = []cli.Flag{
 		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
 			if b {
-				theme.RemoveAllColor()
+				theme.SetClassic()
 				theme.ColorLevel = theme.None
 				err := context.Set("no-icon", "1")
 				if err != nil {

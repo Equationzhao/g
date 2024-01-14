@@ -1,13 +1,13 @@
 package theme
 
-func RemoveAllColor() {
-	DefaultAll.Apply(resetColor)
+func SetClassic() {
+	DefaultAll.Apply(setClassic)
 	DefaultAll.InfoTheme["reset"] = Style{
 		Color: Reset,
 	}
 }
 
-func resetColor(m Theme) {
+func setClassic(m Theme) {
 	for k := range m {
 		m[k] = Style{
 			Icon:      m[k].Icon,
@@ -16,6 +16,7 @@ func resetColor(m Theme) {
 			Bold:      false,
 			Faint:     false,
 			Italics:   false,
+			Blink:     false,
 		}
 	}
 }
