@@ -177,7 +177,7 @@ func NewNameEnable() *Name {
 const NameName = "Name"
 
 func makeLink(abs string, name string) string {
-	return fmt.Sprintf("\033]8;;%s\033\\%s\033]8;;\033\\", abs, name)
+	return util.MakeLink(abs, name)
 }
 
 func checkIfEmpty(info *item.FileInfo) bool {
@@ -186,10 +186,7 @@ func checkIfEmpty(info *item.FileInfo) bool {
 		return true
 	}
 	_, err = f.Readdirnames(1)
-	if err == io.EOF {
-		return true
-	}
-	return false
+	return err == io.EOF
 }
 
 /*
