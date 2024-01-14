@@ -486,9 +486,7 @@ func (n *Name) Enable(renderer *render.Renderer) filter.ContentOption {
 		if classify == "@" {
 			_, _ = b.WriteString(classify)
 		}
-		if color != "" {
-			_, _ = b.WriteString(renderer.Colorend())
-		}
+		_, _ = b.WriteString(renderer.Colorend())
 		if classify != "" && classify != "@" {
 			_, _ = b.WriteString(classify)
 		}

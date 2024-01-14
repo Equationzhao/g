@@ -36,7 +36,7 @@ func (rd *Renderer) OctalPerm(octal string) string {
 	_, _ = bb.WriteString(s.Color)
 	checkStyle(&s, bb)
 	_, _ = bb.WriteString(octal)
-	_, _ = bb.WriteString(rd.theme.InfoTheme["reset"].Color)
+	_, _ = bb.WriteString(rd.Colorend())
 	return bb.String()
 }
 
@@ -136,7 +136,7 @@ func (rd *Renderer) FileMode(toRender string) string {
 		_, _ = bb.WriteString(string(trans(c)))
 	}
 
-	_, _ = bb.WriteString(rd.theme.InfoTheme["reset"].Color)
+	_, _ = bb.WriteString(rd.Colorend())
 	return bb.String()
 }
 
@@ -166,7 +166,7 @@ func (rd *Renderer) Size(toRender, unit string) string {
 	_, _ = bb.WriteString(s.Color)
 	checkStyle(&s, bb)
 	_, _ = bb.WriteString(toRender)
-	_, _ = bb.WriteString(rd.theme.InfoTheme["reset"].Color)
+	_, _ = bb.WriteString(rd.Colorend())
 	return bb.String()
 }
 
@@ -181,7 +181,7 @@ func (rd *Renderer) Link(toRender string) string {
 	_, _ = bb.WriteString(s.Color)
 	checkStyle(&s, bb)
 	_, _ = bb.WriteString(toRender)
-	_, _ = bb.WriteString(rd.theme.InfoTheme["reset"].Color)
+	_, _ = bb.WriteString(rd.Colorend())
 	return bb.String()
 }
 
@@ -218,7 +218,7 @@ func (rd *Renderer) Owner(toRender string) string {
 	_, _ = bb.WriteString(style.Color)
 	checkStyle(&style, bb)
 	_, _ = bb.WriteString(toRender)
-	_, _ = bb.WriteString(rd.theme.InfoTheme["reset"].Color)
+	_, _ = bb.WriteString(rd.Colorend())
 	return bb.String()
 }
 
@@ -252,7 +252,7 @@ func (rd *Renderer) Group(toRender string) string {
 	_, _ = bb.WriteString(style.Color)
 	checkStyle(&style, bb)
 	_, _ = bb.WriteString(toRender)
-	_, _ = bb.WriteString(rd.theme.InfoTheme["reset"].Color)
+	_, _ = bb.WriteString(rd.Colorend())
 	return bb.String()
 }
 
@@ -314,14 +314,14 @@ func (rd *Renderer) RTime(now, modTime time.Time) string {
 	if t > 0 {
 		dura = durafmt.Parse(t)
 		return fmt.Sprintf(
-			"%s%s ago%s", rd.calculateRTimeColor(t), dura.LimitFirstN(1).String(), rd.theme.InfoTheme["reset"].Color,
+			"%s%s ago%s", rd.calculateRTimeColor(t), dura.LimitFirstN(1).String(), rd.Colorend(),
 		)
 	} else if t == 0 {
 		return "now"
 	} else {
 		dura = durafmt.Parse(-t)
 		return fmt.Sprintf(
-			"%sin %s%s", rd.calculateRTimeColor(t), dura.LimitFirstN(1).String(), rd.theme.InfoTheme["reset"].Color,
+			"%sin %s%s", rd.calculateRTimeColor(t), dura.LimitFirstN(1).String(), rd.Colorend(),
 		)
 	}
 }
@@ -354,7 +354,7 @@ func (rd *Renderer) infoByName(toRender string, name string) string {
 	_, _ = bb.WriteString(style.Color)
 	checkStyle(&style, bb)
 	_, _ = bb.WriteString(toRender)
-	_, _ = bb.WriteString(rd.theme.InfoTheme["reset"].Color)
+	_, _ = bb.WriteString(rd.Colorend())
 	return bb.String()
 }
 
@@ -450,7 +450,7 @@ func (rd *Renderer) gitByStatus(name string, status string) string {
 	_, _ = bb.WriteString(style.Color)
 	checkStyle(&style, bb)
 	_, _ = bb.WriteString(name)
-	_, _ = bb.WriteString(rd.theme.InfoTheme["reset"].Color)
+	_, _ = bb.WriteString(rd.Colorend())
 	return bb.String()
 }
 
@@ -511,7 +511,7 @@ func (rd *Renderer) GitRepoBranch(branch string) string {
 	_, _ = bb.WriteString(style.Color)
 	checkStyle(&style, bb)
 	_, _ = bb.WriteString(branch)
-	_, _ = bb.WriteString(rd.theme.InfoTheme["reset"].Color)
+	_, _ = bb.WriteString(rd.Colorend())
 	return bb.String()
 }
 
@@ -530,7 +530,7 @@ func (rd *Renderer) GitRepoStatus(status git.RepoStatus) string {
 	bb.WriteString(style.Color)
 	checkStyle(&style, bb)
 	_, _ = bb.WriteString(style.Icon)
-	_, _ = bb.WriteString(rd.theme.InfoTheme["reset"].Color)
+	_, _ = bb.WriteString(rd.Colorend())
 	return bb.String()
 }
 
@@ -546,7 +546,7 @@ func (rd *Renderer) DirPrompt(dir string) string {
 	checkStyle(&style, bb)
 	_, _ = bb.WriteString(style.Icon)
 	_, _ = bb.WriteString(dir)
-	_, _ = bb.WriteString(rd.theme.InfoTheme["reset"].Color)
+	_, _ = bb.WriteString(rd.Colorend())
 	return bb.String()
 }
 
@@ -558,7 +558,7 @@ func (rd *Renderer) Mounts(mounts string) string {
 	checkStyle(&style, bb)
 	_, _ = bb.WriteString(style.Icon)
 	_, _ = bb.WriteString(mounts)
-	_, _ = bb.WriteString(rd.theme.InfoTheme["reset"].Color)
+	_, _ = bb.WriteString(rd.Colorend())
 	return bb.String()
 }
 

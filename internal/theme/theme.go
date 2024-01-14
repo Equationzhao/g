@@ -261,6 +261,9 @@ func getTheme(themeJson []byte) (theme All, errSum error, fatal error) {
 func ConvertThemeColor() {
 	convert := func(m Theme) {
 		for key := range m {
+			if key == "reset" {
+				continue
+			}
 			color, err := ConvertColorIfGreaterThanExpect(ColorLevel, m[key].Color)
 			if err != nil {
 				continue
