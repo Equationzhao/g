@@ -1,5 +1,13 @@
 package theme
 
+import (
+	"encoding/json"
+	"fmt"
+	"reflect"
+	"strings"
+	"sync"
+)
+
 var (
 	dir   = BrightBlue
 	pic   = BrightPurple
@@ -42,6 +50,59 @@ type All struct {
 	Ext        Theme `json:"ext,omitempty"`
 }
 
+var genOnceAllField sync.Once
+var allFieldTag []string
+var allField []string
+
+func genAllField() ([]string, []string) {
+	genOnceAllField.Do(func() {
+		// reflect on Style
+		allType := DefaultAll
+		allTypeValue := reflect.TypeOf(allType)
+		n := allTypeValue.NumField()
+		allField = make([]string, 0, n)
+		allFieldTag = make([]string, 0, n)
+		for i := 0; i < n; i++ {
+			f := allTypeValue.Field(i)
+			if j := f.Tag.Get("json"); j != "" {
+				jName, _, _ := strings.Cut(j, ",")
+				if jName != "" {
+					allFieldTag = append(allFieldTag, jName)
+					allField = append(allField, f.Name)
+				}
+			}
+		}
+	})
+	return allField, allFieldTag
+}
+
+func (a *All) UnmarshalJSON(bytes []byte) error {
+	var raw map[string]json.RawMessage
+	if err := json.Unmarshal(bytes, &raw); err != nil {
+		return err
+	}
+
+	all, allTags := genAllField()
+
+	for key := range raw {
+		index := 0
+		for ; index < len(allTags); index++ {
+			if allTags[index] == key {
+				break
+			}
+		}
+		if index == len(allTags) {
+			return fmt.Errorf("unknown field: '%s'", key)
+		}
+		m := make(Theme)
+		if err := json.Unmarshal(raw[key], &m); err != nil {
+			return fmt.Errorf("failed at key '%s': %s", key, err.Error())
+		}
+		reflect.ValueOf(a).Elem().FieldByName(all[index]).Set(reflect.ValueOf(m))
+	}
+	return nil
+}
+
 func (a *All) Apply(f func(theme Theme)) {
 	f(a.InfoTheme)
 	f(a.Permission)
@@ -53,6 +114,26 @@ func (a *All) Apply(f func(theme Theme)) {
 	f(a.Name)
 	f(a.Special)
 	f(a.Ext)
+}
+
+func (a *All) CheckLowerCase() {
+	checkLowerCase := func(theme Theme) {
+		for k := range theme {
+			if strings.ToLower(k) != k {
+				panic(fmt.Sprintf("theme key must be lowercase!: key=%s", k))
+			}
+		}
+	}
+	// key in a.Size can be UpperCase
+	checkLowerCase(a.InfoTheme)
+	checkLowerCase(a.Permission)
+	checkLowerCase(a.User)
+	checkLowerCase(a.Group)
+	checkLowerCase(a.Symlink)
+	checkLowerCase(a.Git)
+	checkLowerCase(a.Name)
+	checkLowerCase(a.Special)
+	checkLowerCase(a.Ext)
 }
 
 var InfoTheme = Theme{

@@ -5,8 +5,11 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"reflect"
+	"slices"
 	"strconv"
 	"strings"
+	"sync"
 )
 
 type Style struct {
@@ -19,6 +22,61 @@ type Style struct {
 	Faint     bool   `json:"faint,omitempty"`
 	Italics   bool   `json:"italics,omitempty"`
 	Blink     bool   `json:"blink,omitempty"`
+}
+
+type StyleForUnmarshal struct {
+	Color     string `json:"color,omitempty"`
+	Icon      string `json:"icon,omitempty"`
+	Underline bool   `json:"underline,omitempty"`
+	Bold      bool   `json:"bold,omitempty"`
+	Faint     bool   `json:"faint,omitempty"`
+	Italics   bool   `json:"italics,omitempty"`
+	Blink     bool   `json:"blink,omitempty"`
+}
+
+var genOnceStyleField sync.Once
+var styleField []string
+
+func genStyleField() []string {
+	genOnceStyleField.Do(func() {
+		// reflect on Style
+		styleType := Style{}
+		styleTypeValue := reflect.TypeOf(styleType)
+		n := styleTypeValue.NumField()
+		styleField = make([]string, 0, n)
+		for i := 0; i < n; i++ {
+			if j := styleTypeValue.Field(i).Tag.Get("json"); j != "" {
+				jName, _, _ := strings.Cut(j, ",")
+				if jName != "" {
+					styleField = append(styleField, jName)
+				}
+			}
+		}
+	})
+	return styleField
+}
+
+func (s *Style) UnmarshalJSON(bytes []byte) error {
+	var raw map[string]json.RawMessage
+	if err := json.Unmarshal(bytes, &raw); err != nil {
+		return err
+	}
+
+	// check if there is any unknown field
+	fields := genStyleField()
+	for key := range raw {
+		if !slices.Contains(fields, key) {
+			return fmt.Errorf("unknown field: '%s'", key)
+		}
+	}
+
+	sf := StyleForUnmarshal{}
+	if err := json.Unmarshal(bytes, &sf); err != nil {
+		return err
+	}
+
+	*s = Style(sf)
+	return nil
 }
 
 func (s *Style) ToReadable() Style {
@@ -37,6 +95,22 @@ func (s *Style) FromReadable() error {
 }
 
 type Theme map[string]Style
+
+func (t Theme) UnmarshalJSON(bytes []byte) error {
+	var raw map[string]json.RawMessage
+	if err := json.Unmarshal(bytes, &raw); err != nil {
+		return err
+	}
+
+	for key := range raw {
+		s := Style{}
+		if err := json.Unmarshal(raw[key], &s); err != nil {
+			return fmt.Errorf("failed at key '%s': %s", key, err.Error())
+		}
+		t[key] = s
+	}
+	return nil
+}
 
 // var info = []string{"d", "l", "b", "c", "p", "s", "r", "w", "x", "-", "time", "size", "owner", "group", "git_modified_dot", "git_renamed_dot", "git_copied_dot", "git_deleted_dot", "git_added_dot", "git_untracked_dot", "git_ignored_dot", "git_modified_sym", "git_renamed_sym", "git_copied_sym", "git_deleted_sym", "git_added_sym", "git_untracked_sym", "git_ignored_sym"}
 func color2str(color string) string {
