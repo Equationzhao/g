@@ -142,15 +142,14 @@ func (f *FitTerminal) Print(i ...*item.FileInfo) {
 	for _, v := range i {
 		s = append(s, v.OrderedContent(" "))
 	}
-	f.printColumns(&s)
+	f.printColumns(s)
 
 	if !f.disableAfter {
 		fire(f.AfterPrint, f, i...)
 	}
 }
 
-func (f *FitTerminal) printColumns(strs *[]string) {
-	stringsArray := *strs
+func (f *FitTerminal) printColumns(stringsArray []string) {
 
 	termWidth := getTermWidth()
 
@@ -294,7 +293,7 @@ func (c *CommaPrint) Print(items ...*item.FileInfo) {
 			s = append(s, v.OrderedContent(" "))
 		}
 	}
-	c.printRowWithNoSpace(&s)
+	c.printRowWithNoSpace(s)
 	if !c.disableAfter {
 		fire(c.AfterPrint, c, items...)
 	}
@@ -321,18 +320,18 @@ func (a *Across) Print(items ...*item.FileInfo) {
 	for _, v := range items {
 		s = append(s, v.OrderedContent(" "))
 	}
-	a.printRow(&s)
+	a.printRow(s)
 	if !a.disableAfter {
 		fire(a.AfterPrint, a, items...)
 	}
 }
 
-func (a *Across) printRowWithNoSpace(strs *[]string) {
+func (a *Across) printRowWithNoSpace(strs []string) {
 	defer a.Flush()
 	width := getTermWidth()
 
 	maxLength := 0
-	for _, str := range *strs {
+	for _, str := range strs {
 		maxLength += WidthLen(str)
 		if maxLength <= width {
 			_, _ = a.WriteString(str)
@@ -344,8 +343,7 @@ func (a *Across) printRowWithNoSpace(strs *[]string) {
 	_ = a.WriteByte('\n')
 }
 
-func (a *Across) printRow(strs *[]string) {
-	stringsArray := *strs
+func (a *Across) printRow(stringsArray []string) {
 
 	termWidth := getTermWidth()
 
