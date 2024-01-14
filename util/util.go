@@ -1,6 +1,7 @@
 package util
 
 import (
+	"fmt"
 	"path/filepath"
 	"strings"
 
@@ -32,4 +33,8 @@ func reverseColor(s string) string {
 // * Backslash is escaped as `\\`.
 func Escape(a string) string {
 	return escapeReplacer.Replace(a)
+}
+
+func MakeLink(abs string, name string) string {
+	return fmt.Sprintf("\033]8;;%s\033\\%s\033]8;;\033\\", abs, name)
 }
