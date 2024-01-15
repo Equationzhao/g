@@ -4,6 +4,7 @@ import (
 	"compress/gzip"
 	"errors"
 	"fmt"
+	"github.com/Equationzhao/g/internal/const/doc"
 	"os"
 	"path/filepath"
 	"runtime/debug"
@@ -27,7 +28,7 @@ func main() {
 		}
 		os.Exit(cli.ReturnCode)
 	}()
-	if doc {
+	if doc.Enable {
 		md, _ := os.Create("g.md")
 		s, _ := cli.G.ToMarkdown()
 		_, _ = fmt.Fprintln(md, s)
