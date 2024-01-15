@@ -2,13 +2,8 @@ package cached
 
 import (
 	constval "github.com/Equationzhao/g/internal/const"
-	"github.com/Equationzhao/pathbeautify"
 	"github.com/alphadose/haxmap"
 )
-
-func GetUserHomeDir() string {
-	return pathbeautify.GetUserHomeDir()
-}
 
 type Map[k constval.Hashable, v any] struct {
 	*haxmap.Map[k, v]
