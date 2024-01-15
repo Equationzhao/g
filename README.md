@@ -26,10 +26,7 @@ g 是一个 ls 替代品，拥有下面一些功能：
 
 ## 截图
 
-![image](asset/screenshot_1.png)
-![image](asset/screenshot_2.png)
 ![image](asset/screenshot_3.png)
-![image](asset/screenshot_4.png)
 
 ## 安装
 
@@ -121,161 +118,6 @@ cross-platform:
 ```bash
 g path(s)
 ```
-
-显示图标
-
-```bash
-g -icons
-```
-
-显示修改(默认)时间
-
-```bash
-g -time    
-```
-
-显示 访问/创建/修改 时间
-
-```bash
-g -time -time-type=access
-g -time -ac/cr/mod
-```
-
-显示文件权限
-
-```bash
-g -permission 
-g -octal-perm # show octal permission like 0777
-```
-
-显示用户/群组
-
-```bash
-g -owner 
-g -group 
-```
-
-显示文件大小
-
-```bash
-g -size 
-g -size -recursive-size # show size of dir recursively
-```
-
-显示所有文件，包括隐藏文件
-
-```bash
-g -sh 
-g -show-hidden
-g -a  
-```
-
-只显示目录
-
-```bash
-g -dir 
-```
-
-按行显示
-
-```bash
-g -1           
-g -oneline     
-g -single-column 
-```
-
-显示有指定拓展名的文件
-
-```bash
-g -ext=<target ext(s)> 
-# eg:
-# g -ext=go,md
-```
-
-递归显示目录
-
-```bash
-g -R     
-g -recurse 
-```
-
-限制在 树/递归 模式下的 递归深度 (默认: 无限制)
-
-```bash
-g -R -depth=<level> 
-```
-
-模糊搜索
-
-```bash
-g -f   
-g -fuzzy 
-# eg: g -f in
-# /mnt/e/Project/gverything/index
-# pathindex.go
-```
-
-禁用索引更新
-
-```bash
-g -di            
-g -no-update   
-g -disable-index 
-```
-
-禁用颜色
-
-```bash
-g -no-color  
-g -colorless 
-```
-
-设置颜色
-
-```bash
-g -color=always 
-g -color=auto    # default
-g -color=never   
-g -color=16/basic       # 16-color
-g -color=256/8bit       # 256-color
-g -color=16m/24bit/true-color   # 24-bit
-```
-
-显示校验和 (md5,sha1,sha224,sha256,sha384,sha512,crc32)
-
-```bash
-g -cs -ca=sha256 
-```
-
-显示 git status
-
-```bash
-g -git     
-g -git-status
-```
-
-表格式输出
-
-```bash
-g -tb
-```
-
-树状输出
-
-```bash
-g -tree
-```
-
-以 markdown 格式输出, 并用 [glow](https://www.github.com/charmbracelet/glow) 渲染
-( 不支持颜色 )
-
-```bash
-g -md | glow 
-```
-
-![image](https://github.com/Equationzhao/g/assets/75521101/7ec1e0d7-03cd-4968-ba48-2ec5375086fa)
-
-...
 
 ## Shell 脚本
 
@@ -377,15 +219,3 @@ created by bing
 ## Star History
 
 [![Star History Chart](https://api.star-history.com/svg?repos=Equationzhao/g&type=Date)](https://star-history.com/#Equationzhao/g&Date)
-
-
-## 查看帖子
-
-- [deepin bbs](https://bbs.deepin.org/post/261954)
-
-## [![Repography logo](https://images.repography.com/logo.svg)](https://repography.com) / Recent activity [![Time period](https://images.repography.com/35290882/Equationzhao/g/recent-activity/d06TKxKV8-Bc1zgTdodyAUFkmX-KdMR5ydV1GeE2jJY/r-OWQ7WewQlCCz2r7byT3_mCR0x8LTCx95ZyLfOY7CI_badge.svg)](https://repography.com)
-
-[![Timeline graph](https://images.repography.com/35290882/Equationzhao/g/recent-activity/d06TKxKV8-Bc1zgTdodyAUFkmX-KdMR5ydV1GeE2jJY/r-OWQ7WewQlCCz2r7byT3_mCR0x8LTCx95ZyLfOY7CI_timeline.svg)](https://github.com/Equationzhao/g/commits)
-[![Pull request status graph](https://images.repography.com/35290882/Equationzhao/g/recent-activity/d06TKxKV8-Bc1zgTdodyAUFkmX-KdMR5ydV1GeE2jJY/r-OWQ7WewQlCCz2r7byT3_mCR0x8LTCx95ZyLfOY7CI_prs.svg)](https://github.com/Equationzhao/g/pulls)
-[![Trending topics](https://images.repography.com/35290882/Equationzhao/g/recent-activity/d06TKxKV8-Bc1zgTdodyAUFkmX-KdMR5ydV1GeE2jJY/r-OWQ7WewQlCCz2r7byT3_mCR0x8LTCx95ZyLfOY7CI_words.svg)](https://github.com/Equationzhao/g/commits)
-[![Top contributors](https://images.repography.com/35290882/Equationzhao/g/recent-activity/d06TKxKV8-Bc1zgTdodyAUFkmX-KdMR5ydV1GeE2jJY/r-OWQ7WewQlCCz2r7byT3_mCR0x8LTCx95ZyLfOY7CI_users.svg)](https://github.com/Equationzhao/g/graphs/contributors)

@@ -21,10 +21,7 @@ g is a ls alternative with features:
 
 ## Screenshots
 
-![image](asset/screenshot_1.png)
-![image](asset/screenshot_2.png)
 ![image](asset/screenshot_3.png)
-![image](asset/screenshot_4.png)
 
 ## Install
 
@@ -117,161 +114,6 @@ cross-platform:
 ```bash
 g path(s)
 ```
-
-with icon
-
-```bash
-g -icons
-```
-
-with mod(default) time
-
-```bash
-g -time    
-```
-
-with access/create/mod time
-
-```bash
-g -time -time-type=access
-g -time -ac/cr/mod
-```
-
-with fileperm
-
-```bash
-g -permission 
-g -octal-perm # show octal permission like 0777
-```
-
-with owner/group
-
-```bash
-g -owner 
-g -group 
-```
-
-with size
-
-```bash
-g -size 
-g -size -recursive-size # show size of dir recursively
-```
-
-show all files, including hidden files
-
-```bash
-g -sh 
-g -show-hidden
-g -a  
-```
-
-show dir only
-
-```bash
-g -dir 
-```
-
-list by line
-
-```bash
-g -1           
-g -oneline     
-g -single-column 
-```
-
-show file only with target ext
-
-```bash
-g -ext=<target ext(s)> 
-# eg:
-# g -ext=go,md
-```
-
-recurse into directories
-
-```bash
-g -R     
-g -recurse 
-```
-
-limit depth in tree/recurse (default: no limit)
-
-```bash
-g -R -depth=<level> 
-```
-
-fuzzy search
-
-```bash
-g -f   
-g -fuzzy 
-# eg: g -f in
-# /mnt/e/Project/gverything/index
-# pathindex.go
-```
-
-disable index update
-
-```bash
-g -di            
-g -no-update   
-g -disable-index 
-```
-
-disable color
-
-```bash
-g -no-color  
-g -colorless 
-```
-
-set color
-
-```bash
-g -color=always 
-g -color=auto    # default
-g -color=never   
-g -color=16/basic       # 16-color
-g -color=256/8bit       # 256-color
-g -color=16m/24bit/true-color   # 24-bit
-```
-
-show checksum (md5,sha1,sha224,sha256,sha384,sha512,crc32)
-
-```bash
-g -cs -ca=sha256 
-```
-
-show git status
-
-```bash
-g -git     
-g -git-status
-```
-
-output in table
-
-```bash
-g -tb
-```
-
-list in tree
-
-```bash
-g -tree
-```
-
-output in markdown, and render with [glow](https://www.github.com/charmbracelet/glow)
-(colors are not supported in markdown )
-
-```bash
-g -md | glow 
-```
-
-![image](https://github.com/Equationzhao/g/assets/75521101/7ec1e0d7-03cd-4968-ba48-2ec5375086fa)
-
-...
 
 ## Shell scripts
 
@@ -374,11 +216,3 @@ this project is highly inspired by following projects that you wanna try!
 ## Star History
 
 [![Star History Chart](https://api.star-history.com/svg?repos=Equationzhao/g&type=Date)](https://star-history.com/#Equationzhao/g&Date)
-
-
-## [![Repography logo](https://images.repography.com/logo.svg)](https://repography.com) / Recent activity [![Time period](https://images.repography.com/35290882/Equationzhao/g/recent-activity/d06TKxKV8-Bc1zgTdodyAUFkmX-KdMR5ydV1GeE2jJY/r-OWQ7WewQlCCz2r7byT3_mCR0x8LTCx95ZyLfOY7CI_badge.svg)](https://repography.com)
-
-[![Timeline graph](https://images.repography.com/35290882/Equationzhao/g/recent-activity/d06TKxKV8-Bc1zgTdodyAUFkmX-KdMR5ydV1GeE2jJY/r-OWQ7WewQlCCz2r7byT3_mCR0x8LTCx95ZyLfOY7CI_timeline.svg)](https://github.com/Equationzhao/g/commits)
-[![Pull request status graph](https://images.repography.com/35290882/Equationzhao/g/recent-activity/d06TKxKV8-Bc1zgTdodyAUFkmX-KdMR5ydV1GeE2jJY/r-OWQ7WewQlCCz2r7byT3_mCR0x8LTCx95ZyLfOY7CI_prs.svg)](https://github.com/Equationzhao/g/pulls)
-[![Trending topics](https://images.repography.com/35290882/Equationzhao/g/recent-activity/d06TKxKV8-Bc1zgTdodyAUFkmX-KdMR5ydV1GeE2jJY/r-OWQ7WewQlCCz2r7byT3_mCR0x8LTCx95ZyLfOY7CI_words.svg)](https://github.com/Equationzhao/g/commits)
-[![Top contributors](https://images.repography.com/35290882/Equationzhao/g/recent-activity/d06TKxKV8-Bc1zgTdodyAUFkmX-KdMR5ydV1GeE2jJY/r-OWQ7WewQlCCz2r7byT3_mCR0x8LTCx95ZyLfOY7CI_users.svg)](https://github.com/Equationzhao/g/graphs/contributors)
