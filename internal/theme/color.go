@@ -7,41 +7,12 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/Equationzhao/g/internal/const"
+
 	colortool "github.com/gookit/color"
 )
 
 var ColorLevel = colortool.DetectColorLevel()
-
-const (
-	Black        = "\033[0;30m" // 0,0,0
-	Red          = "\033[0;31m" // 205,0,0
-	Green        = "\033[0;32m" // 0,205,0
-	Yellow       = "\033[0;33m" // 205,205,0
-	Blue         = "\033[0;34m" // 0,0,238
-	Purple       = "\033[0;35m" // 205,0,205
-	Cyan         = "\033[0;36m" // 0,205,205
-	White        = "\033[0;37m" // 229,229,229
-	BrightBlack  = "\033[0;90m" // 127,127,127
-	BrightRed    = "\033[0;91m" // 255,0,0
-	BrightGreen  = "\033[0;92m" // 0,255,0
-	BrightYellow = "\033[0;93m" // 255,255,0
-	BrightBlue   = "\033[0;94m" // 92,92,255
-	BrightPurple = "\033[0;95m" // 255,0,255
-	BrightCyan   = "\033[0;96m" // 0,255,255
-	BrightWhite  = "\033[0;97m" // 255,255,255
-	Success      = Green
-	Error        = Red
-	Warn         = Yellow
-	Bold         = "\033[1m"
-	Faint        = "\033[2m"
-	Italics      = "\033[3m"
-	Underline    = "\033[4m"
-	Blink        = "\033[5m"
-	Reverse      = "\033[7m"
-	ReverseDone  = "\033[27m"
-)
-
-const Reset = "\033[0m"
 
 const (
 	BasicFormat    = "\033[0;%dm"
@@ -103,37 +74,37 @@ func BasicTo256(b string) string {
 
 func BasicToRGBInt(basic string) (r, g, b uint8) {
 	switch basic {
-	case Black:
+	case constval.Black:
 		r, g, b = 0, 0, 0
-	case Red:
+	case constval.Red:
 		r, g, b = 205, 0, 0
-	case Green:
+	case constval.Green:
 		r, g, b = 0, 205, 0
-	case Yellow:
+	case constval.Yellow:
 		r, g, b = 205, 205, 0
-	case Blue:
+	case constval.Blue:
 		r, g, b = 0, 0, 238
-	case Purple:
+	case constval.Purple:
 		r, g, b = 205, 0, 205
-	case Cyan:
+	case constval.Cyan:
 		r, g, b = 0, 205, 205
-	case White:
+	case constval.White:
 		r, g, b = 229, 229, 229
-	case BrightBlack:
+	case constval.BrightBlack:
 		r, g, b = 127, 127, 127
-	case BrightRed:
+	case constval.BrightRed:
 		r, g, b = 255, 0, 0
-	case BrightGreen:
+	case constval.BrightGreen:
 		r, g, b = 0, 255, 0
-	case BrightYellow:
+	case constval.BrightYellow:
 		r, g, b = 255, 255, 0
-	case BrightBlue:
+	case constval.BrightBlue:
 		r, g, b = 92, 92, 255
-	case BrightPurple:
+	case constval.BrightPurple:
 		r, g, b = 255, 0, 255
-	case BrightCyan:
+	case constval.BrightCyan:
 		r, g, b = 0, 255, 255
-	case BrightWhite:
+	case constval.BrightWhite:
 		r, g, b = 255, 255, 255
 	default:
 		r, g, b = 0, 0, 0
@@ -312,22 +283,22 @@ func ConvertColor(to colortool.Level, src string) (string, error) {
 		return "", nil
 	case
 		// 1.basic
-		Reset,
-		Red,
-		Green,
-		Yellow,
-		Blue,
-		Purple,
-		Cyan,
-		White,
-		BrightBlack,
-		BrightRed,
-		BrightGreen,
-		BrightYellow,
-		BrightBlue,
-		BrightPurple,
-		BrightCyan,
-		BrightWhite:
+		constval.Reset,
+		constval.Red,
+		constval.Green,
+		constval.Yellow,
+		constval.Blue,
+		constval.Purple,
+		constval.Cyan,
+		constval.White,
+		constval.BrightBlack,
+		constval.BrightRed,
+		constval.BrightGreen,
+		constval.BrightYellow,
+		constval.BrightBlue,
+		constval.BrightPurple,
+		constval.BrightCyan,
+		constval.BrightWhite:
 		switch to {
 		case Ascii:
 			return src, nil
@@ -338,7 +309,7 @@ func ConvertColor(to colortool.Level, src string) (string, error) {
 		default:
 			return "", ErrUnknownColorType{Level: to}
 		}
-	case Underline:
+	case constval.Underline:
 		return src, nil
 	default:
 
@@ -394,25 +365,25 @@ func ConvertColorIfGreaterThanExpect(to colortool.Level, src string) (string, er
 		return "", nil
 	case
 		// 1.basic
-		Reset,
-		Black,
-		Red,
-		Green,
-		Yellow,
-		Blue,
-		Purple,
-		Cyan,
-		White,
-		BrightBlack,
-		BrightRed,
-		BrightGreen,
-		BrightYellow,
-		BrightBlue,
-		BrightPurple,
-		BrightCyan,
-		BrightWhite:
+		constval.Reset,
+		constval.Black,
+		constval.Red,
+		constval.Green,
+		constval.Yellow,
+		constval.Blue,
+		constval.Purple,
+		constval.Cyan,
+		constval.White,
+		constval.BrightBlack,
+		constval.BrightRed,
+		constval.BrightGreen,
+		constval.BrightYellow,
+		constval.BrightBlue,
+		constval.BrightPurple,
+		constval.BrightCyan,
+		constval.BrightWhite:
 		return src, nil
-	case Underline:
+	case constval.Underline:
 		return src, nil
 	default:
 

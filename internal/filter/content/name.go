@@ -12,6 +12,9 @@ import (
 	"sync/atomic"
 	"unicode"
 
+	"github.com/Equationzhao/g/internal/const"
+	"github.com/shirou/gopsutil/v3/disk"
+
 	"github.com/Equationzhao/g/internal/filter"
 	"github.com/Equationzhao/g/internal/item"
 	"github.com/Equationzhao/g/internal/render"
@@ -238,19 +241,19 @@ func (n *Name) Enable(renderer *render.Renderer) filter.ContentOption {
 				arrowStyle := renderer.SymlinkArrow()
 				_, _ = dereference.WriteString(arrowStyle.Color)
 				if arrowStyle.Underline {
-					_, _ = dereference.WriteString(theme.Underline)
+					_, _ = dereference.WriteString(constval.Underline)
 				}
 				if arrowStyle.Bold {
-					_, _ = dereference.WriteString(theme.Bold)
+					_, _ = dereference.WriteString(constval.Bold)
 				}
 				if arrowStyle.Italics {
-					_, _ = dereference.WriteString(theme.Italics)
+					_, _ = dereference.WriteString(constval.Italics)
 				}
 				if arrowStyle.Faint {
-					_, _ = dereference.WriteString(theme.Faint)
+					_, _ = dereference.WriteString(constval.Faint)
 				}
 				if arrowStyle.Blink {
-					_, _ = dereference.WriteString(theme.Blink)
+					_, _ = dereference.WriteString(constval.Blink)
 				}
 				_, _ = dereference.WriteString(arrowStyle.Icon)
 				_, _ = dereference.WriteString(renderer.Colorend())
@@ -314,19 +317,19 @@ func (n *Name) Enable(renderer *render.Renderer) filter.ContentOption {
 				}
 				_, _ = dereference.WriteString(style.Color)
 				if style.Underline {
-					_, _ = dereference.WriteString(theme.Underline)
+					_, _ = dereference.WriteString(constval.Underline)
 				}
 				if style.Bold {
-					_, _ = dereference.WriteString(theme.Bold)
+					_, _ = dereference.WriteString(constval.Bold)
 				}
 				if style.Italics {
-					_, _ = dereference.WriteString(theme.Italics)
+					_, _ = dereference.WriteString(constval.Italics)
 				}
 				if style.Faint {
-					_, _ = dereference.WriteString(theme.Faint)
+					_, _ = dereference.WriteString(constval.Faint)
 				}
 				if style.Blink {
-					_, _ = dereference.WriteString(theme.Blink)
+					_, _ = dereference.WriteString(constval.Blink)
 				}
 				// _, _ = dereference.WriteString(style.Icon)
 				hasQuote := false
@@ -423,7 +426,7 @@ func (n *Name) Enable(renderer *render.Renderer) filter.ContentOption {
 		}
 
 		if n.mounts {
-			mounts = util.MountsOn(info)
+			mounts = MountsOn(info)
 		}
 
 		if n.relativeTo != "" {
@@ -447,19 +450,19 @@ func (n *Name) Enable(renderer *render.Renderer) filter.ContentOption {
 			_ = b.WriteByte(' ')
 		}
 		if underline {
-			_, _ = b.WriteString(theme.Underline)
+			_, _ = b.WriteString(constval.Underline)
 		}
 		if bold {
-			_, _ = b.WriteString(theme.Bold)
+			_, _ = b.WriteString(constval.Bold)
 		}
 		if italics {
-			_, _ = b.WriteString(theme.Italics)
+			_, _ = b.WriteString(constval.Italics)
 		}
 		if faint {
-			_, _ = b.WriteString(theme.Faint)
+			_, _ = b.WriteString(constval.Faint)
 		}
 		if blink {
-			_, _ = b.WriteString(theme.Blink)
+			_, _ = b.WriteString(constval.Blink)
 		}
 		hasQuote := false
 		// if the name contains space and QuoteStatus >=0, add quote
@@ -504,3 +507,35 @@ func (n *Name) Enable(renderer *render.Renderer) filter.ContentOption {
 func contains(r rune) bool {
 	return unicode.IsSpace(r)
 }
+
+func MountsOn(info *item.FileInfo) string {
+	err := mountsOnce.Do(func() error {
+		mount, err := disk.Partitions(true)
+		if err != nil {
+			return err
+		}
+		mounts = mount
+		return nil
+	})
+	if err != nil {
+		return ""
+	}
+	b := bytebufferpool.Get()
+	defer bytebufferpool.Put(b)
+	for _, stat := range mounts {
+		if stat.Mountpoint == info.FullPath {
+			_ = b.WriteByte('[')
+			_, _ = b.WriteString(stat.Device)
+			_, _ = b.WriteString(" (")
+			_, _ = b.WriteString(stat.Fstype)
+			_, _ = b.WriteString(")]")
+			return b.String()
+		}
+	}
+	return ""
+}
+
+var (
+	mounts     = make([]disk.PartitionStat, 10)
+	mountsOnce = util.Once{}
+)

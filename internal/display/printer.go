@@ -11,10 +11,11 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/Equationzhao/g/internal/const"
+
 	"github.com/Equationzhao/g/internal/config"
 	"github.com/Equationzhao/g/internal/display/tree"
 	"github.com/Equationzhao/g/internal/item"
-	"github.com/Equationzhao/g/internal/theme"
 	"github.com/Equationzhao/g/internal/util"
 	"github.com/acarl005/stripansi"
 	"github.com/jedib0t/go-pretty/v6/table"
@@ -767,7 +768,7 @@ func (t *TreePrinter) Print(s ...*item.FileInfo) {
 		}
 		prefix, name := prefixAndName(node.Meta)
 		_, _ = t.WriteString(prefix)
-		_, _ = t.WriteString(theme.Faint)
+		_, _ = t.WriteString(constval.Faint)
 		for _, c := range node.Connectors {
 			if c == "" {
 				_, _ = t.WriteString(Empty)
@@ -775,7 +776,7 @@ func (t *TreePrinter) Print(s ...*item.FileInfo) {
 				_, _ = t.WriteString(c)
 			}
 		}
-		_, _ = t.WriteString(theme.Reset)
+		_, _ = t.WriteString(constval.Reset)
 		_, _ = t.WriteString(name)
 		_ = t.WriteByte('\n')
 	}

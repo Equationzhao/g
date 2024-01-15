@@ -6,24 +6,26 @@ import (
 	"reflect"
 	"strings"
 	"sync"
+
+	"github.com/Equationzhao/g/internal/const"
 )
 
 var (
-	dir   = BrightBlue
-	pic   = BrightPurple
+	dir   = constval.BrightBlue
+	pic   = constval.BrightPurple
 	video = color256(200)
 	audio = color256(199)
 	db    = color256(195)
 	lang  = color256(158)
 	text  = color256(153)
 	doc   = color256(150)
-	tar   = Red
-	pkg   = BrightYellow
-	bash  = BrightGreen
+	tar   = constval.Red
+	pkg   = constval.BrightYellow
+	bash  = constval.BrightGreen
 	lock  = color256(227)
 	vim   = color256(41)
 	key   = color256(214)
-	conf  = White
+	conf  = constval.White
 	iso   = color256(88)
 )
 
@@ -140,23 +142,23 @@ func (a *All) CheckLowerCase() {
 
 var InfoTheme = Theme{
 	"inode": Style{
-		Color: Purple,
+		Color: constval.Purple,
 	},
 	"time": Style{
-		Color: Blue,
+		Color: constval.Blue,
 	},
 	"reset": Style{
-		Color: Reset,
+		Color: constval.Reset,
 	},
 	"-": {
-		Color: White,
+		Color: constval.White,
 	},
 	"charset": {
-		Color:   White,
+		Color:   constval.White,
 		Italics: true,
 	},
 	"mime": {
-		Color:   White,
+		Color:   constval.White,
 		Italics: true,
 	},
 	"checksum": {
@@ -170,11 +172,11 @@ var Ext = Theme{
 		Icon:  "\uF306",
 	},
 	"apk": Style{
-		Color: Green,
+		Color: constval.Green,
 		Icon:  "\uF17B",
 	},
 	"app": Style{
-		Color: Green,
+		Color: constval.Green,
 		Icon:  "\ueb44",
 	},
 	"msi": Style{
@@ -190,23 +192,23 @@ var Ext = Theme{
 		Icon:  "",
 	},
 	"exe": Style{
-		Color: Green,
+		Color: constval.Green,
 		Icon:  "\uF17A",
 	},
 	"rdp": Style{
-		Color: White,
+		Color: constval.White,
 		Icon:  "\ueb39",
 	},
 	"link": Style{
-		Color: Purple,
+		Color: constval.Purple,
 		Icon:  "\ueb15",
 	},
 	"links": Style{
-		Color: Purple,
+		Color: constval.Purple,
 		Icon:  "\ueb15",
 	},
 	"lnk": Style{
-		Color: Purple,
+		Color: constval.Purple,
 		Icon:  "\ueb15",
 	},
 	"go": Style{
@@ -338,11 +340,11 @@ var Ext = Theme{
 		Icon:  "\ue71e",
 	},
 	"nix": Style{
-		Color: Yellow,
+		Color: constval.Yellow,
 		Icon:  "\uF313",
 	},
 	"asc": Style{
-		Color: BrightGreen,
+		Color: constval.BrightGreen,
 		Icon:  "\U000F099D",
 	},
 	"tf": {
@@ -350,11 +352,11 @@ var Ext = Theme{
 		Icon:  "\U000F1062",
 	},
 	"ics": {
-		Color: White,
+		Color: constval.White,
 		Icon:  "\uEAB0",
 	},
 	"env": {
-		Color: Black,
+		Color: constval.Black,
 		Icon:  "\uF462",
 	},
 	"jsx": Style{
@@ -402,23 +404,23 @@ var Ext = Theme{
 		Icon:  "\uE601",
 	},
 	"ttf": Style{
-		Color: Cyan,
+		Color: constval.Cyan,
 		Icon:  "\uf031",
 	},
 	"otf": Style{
-		Color: Cyan,
+		Color: constval.Cyan,
 		Icon:  "\uf031",
 	},
 	"woff": Style{
-		Color: Cyan,
+		Color: constval.Cyan,
 		Icon:  "\uf031",
 	},
 	"woff2": Style{
-		Color: Cyan,
+		Color: constval.Cyan,
 		Icon:  "\uf031",
 	},
 	"eot": Style{
-		Color: Cyan,
+		Color: constval.Cyan,
 		Icon:  "\uf031",
 	},
 	"properties": Style{
@@ -442,11 +444,11 @@ var Ext = Theme{
 		Icon:  "\uE600",
 	},
 	"iml": Style{
-		Color: White,
+		Color: constval.White,
 		Icon:  "\uE7B5",
 	},
 	"gv": Style{
-		Color: Cyan,
+		Color: constval.Cyan,
 		Icon:  "\uE225",
 	},
 	"hs": Style{
@@ -562,11 +564,11 @@ var Ext = Theme{
 		Icon:  "\ue764",
 	},
 	"docker": Style{
-		Color: Yellow,
+		Color: constval.Yellow,
 		Icon:  "\ue7b0",
 	},
 	"md": Style{
-		Color: BrightYellow,
+		Color: constval.BrightYellow,
 		Icon:  "\uF48A",
 	},
 	"txt": Style{
@@ -694,7 +696,7 @@ var Ext = Theme{
 		Icon:  "",
 	},
 	"ai": Style{
-		Color: Cyan,
+		Color: constval.Cyan,
 		Icon:  "\uE7B4",
 	},
 	"mp3": Style{
@@ -738,7 +740,7 @@ var Ext = Theme{
 		Icon:  "\uf1c7",
 	},
 	"pdf": Style{
-		Color: Cyan,
+		Color: constval.Cyan,
 		Icon:  "\uF1C1",
 	},
 	"pl": Style{
@@ -746,19 +748,19 @@ var Ext = Theme{
 		Icon:  "\uE67E",
 	},
 	"epub": Style{
-		Color: Cyan,
+		Color: constval.Cyan,
 		Icon:  "\uE28A",
 	},
 	"mobi": Style{
-		Color: Cyan,
+		Color: constval.Cyan,
 		Icon:  "\uF12D",
 	},
 	"azw": Style{
-		Color: Cyan,
+		Color: constval.Cyan,
 		Icon:  "\uF12D",
 	},
 	"azw3": Style{
-		Color: Cyan,
+		Color: constval.Cyan,
 		Icon:  "\uF12D",
 	},
 	"doc": Style{
@@ -818,7 +820,7 @@ var Ext = Theme{
 		Icon:  "\uf1c2",
 	},
 	"diff": Style{
-		Color: Cyan,
+		Color: constval.Cyan,
 		Icon:  "\uF440",
 	},
 	"ini": Style{
@@ -978,7 +980,7 @@ var Ext = Theme{
 		Icon:  "\uE62B",
 	},
 	"log": Style{
-		Color: White,
+		Color: constval.White,
 		Icon:  "\uF18D",
 	},
 	"lock": Style{
@@ -1018,35 +1020,35 @@ var Ext = Theme{
 		Icon:  "\uF084",
 	},
 	"passwd": Style{
-		Color: Cyan,
+		Color: constval.Cyan,
 		Icon:  "\uF023",
 	},
 	"maintainers": Style{
-		Color: Cyan,
+		Color: constval.Cyan,
 		Icon:  "\uF0C0",
 	},
 	"so": Style{
-		Color: Cyan,
+		Color: constval.Cyan,
 		Icon:  "\uF121",
 	},
 	"dll": Style{
-		Color: Cyan,
+		Color: constval.Cyan,
 		Icon:  "\uF121",
 	},
 	"patch": Style{
-		Color: White,
+		Color: constval.White,
 		Icon:  "",
 	},
 	"torrent": Style{
-		Color: Green,
+		Color: constval.Green,
 		Icon:  "\ueac2",
 	},
 	"service": Style{
-		Color: White,
+		Color: constval.White,
 		Icon:  "",
 	},
 	"swp": Style{
-		Color: White,
+		Color: constval.White,
 		Icon:  "\uebcb",
 	},
 }
@@ -1061,57 +1063,57 @@ var Special = map[string]Style{
 		Icon:  "\uF115",
 	},
 	"dir-prompt": {
-		Color: Yellow,
+		Color: constval.Yellow,
 		Icon:  "► ",
 	},
 	"pipe": {
-		Color: Cyan,
+		Color: constval.Cyan,
 		Icon:  "\uF124",
 	},
 	"socket": {
-		Color: Cyan,
+		Color: constval.Cyan,
 		Icon:  "\uF1E6",
 	},
 	"device": {
-		Color: Yellow,
+		Color: constval.Yellow,
 		Icon:  "󰜫",
 	},
 	"char": {
-		Color: Yellow,
+		Color: constval.Yellow,
 		Icon:  "",
 	},
 	"exe": {
-		Color: Green,
+		Color: constval.Green,
 		Icon:  "\uF17A",
 	},
 	"link": {
-		Color: Purple,
+		Color: constval.Purple,
 	},
 	"file": {
-		Color: White,
+		Color: constval.White,
 		Icon:  "\uF016",
 	},
 	"hidden-file": {
-		Color: White,
+		Color: constval.White,
 		Icon:  "",
 	},
 	"mounts": {
-		Color: BrightBlack,
+		Color: constval.BrightBlack,
 	},
 }
 
 var Name = map[string]Style{
 	"home": {
 		Icon:  "\ue617",
-		Color: White,
+		Color: constval.White,
 	},
 	"desktop": {
 		Icon:  "\uf108",
-		Color: White,
+		Color: constval.White,
 	},
 	"documents": {
 		Icon:  "\uF02D",
-		Color: White,
+		Color: constval.White,
 	},
 	"doc": {
 		Color: doc,
@@ -1119,79 +1121,79 @@ var Name = map[string]Style{
 	},
 	"links": {
 		Icon:  "\uf0f6",
-		Color: White,
+		Color: constval.White,
 	},
 	"downloads": {
 		Icon:  "\uf498",
-		Color: White,
+		Color: constval.White,
 	},
 	"trash": {
 		Icon:  "\uf1f8",
-		Color: BrightBlack,
+		Color: constval.BrightBlack,
 	},
 	".trash": {
 		Icon:  "\uf1f8",
-		Color: BrightBlack,
+		Color: constval.BrightBlack,
 	},
 	"searches": {
 		Icon:  "\uf422",
-		Color: White,
+		Color: constval.White,
 	},
 	"microsoft": {
 		Icon:  "\uF17A",
-		Color: White,
+		Color: constval.White,
 	},
 	"google": {
 		Icon:  "\uf1a0",
-		Color: White,
+		Color: constval.White,
 	},
 	"onedrive": {
 		Icon:  "\ue762",
-		Color: Blue,
+		Color: constval.Blue,
 	},
 	"onedrivetemp": {
 		Icon:  "\ue762",
-		Color: Blue,
+		Color: constval.Blue,
 	},
 	"favorites": {
 		Icon:  "\ue623",
-		Color: Red,
+		Color: constval.Red,
 	},
 	"saved games": {
 		Icon:  "\uf11b",
-		Color: Red,
+		Color: constval.Red,
 	},
 	".wakatime": {
 		Icon:  "\ue641",
-		Color: White,
+		Color: constval.White,
 	},
 	".azure": {
 		Icon:  "\uebd8",
-		Color: White,
+		Color: constval.White,
 	},
 	"contacts": {
 		Icon:  "\uf0c0",
-		Color: White,
+		Color: constval.White,
 	},
 	"users": {
 		Icon:  "\uf0c0",
-		Color: White,
+		Color: constval.White,
 	},
 	"lib": {
 		Icon:  "\uF121",
-		Color: White,
+		Color: constval.White,
 	},
 	"library": {
 		Icon:  "\uF121",
-		Color: White,
+		Color: constval.White,
 	},
 	"bin": {
 		Icon:  "\uE5FC",
-		Color: Green,
+		Color: constval.Green,
 	},
 	"share": {
 		Icon:  "\uf064",
-		Color: White,
+		Color: constval.White,
 	},
 	"license": {
 		Icon:  "",
@@ -1210,7 +1212,7 @@ var Name = map[string]Style{
 		Color: conf,
 	},
 	".ds_store": {
-		Color: BrightBlack,
+		Color: constval.BrightBlack,
 		Icon:  "\uf179",
 	},
 	".gitconfig": {
@@ -1227,54 +1229,54 @@ var Name = map[string]Style{
 	},
 	"applications": {
 		Icon:  "\ueb44",
-		Color: Green,
+		Color: constval.Green,
 	},
 	"android": {
 		Icon:  "\uE70E",
-		Color: White,
+		Color: constval.White,
 	},
 	".idea": {
 		Icon:  "\uE7B5",
-		Color: White,
+		Color: constval.White,
 	},
 	".github": {
 		Icon:  "\uF408",
-		Color: White,
+		Color: constval.White,
 	},
 	".vscode": {
 		Icon:  "\uE70C",
-		Color: White,
+		Color: constval.White,
 	},
 	"include": {
 		Icon:  "\ue5fc",
-		Color: White,
+		Color: constval.White,
 	},
 	".dotnet": {
 		Icon:  "\ue72e",
-		Color: White,
+		Color: constval.White,
 	},
 	"src": {
 		Icon:  "\ue796",
-		Color: White,
+		Color: constval.White,
 	},
 	"node_modules": {
 		Icon:  "\ue5fa",
-		Color: White,
+		Color: constval.White,
 	},
 	"font": {
 		Icon:  "\uf031",
-		Color: White,
+		Color: constval.White,
 	},
 	"fonts": {
 		Icon:  "\uf031",
-		Color: White,
+		Color: constval.White,
 	},
 	".git": {
-		Color: White,
+		Color: constval.White,
 		Icon:  "\uF1D3",
 	},
 	".gitignore": {
-		Color: BrightBlack,
+		Color: constval.BrightBlack,
 		Icon:  "\ue65d",
 	},
 	"cmakelists.txt": {
@@ -1291,38 +1293,38 @@ var Name = map[string]Style{
 	},
 	"history": {
 		Icon:  "\uF1DA",
-		Color: BrightBlack,
+		Color: constval.BrightBlack,
 	},
 	".history": {
 		Icon:  "\uF1DA",
-		Color: BrightBlack,
+		Color: constval.BrightBlack,
 	},
 	"recovery": {
 		Icon:  "\uF1DA",
-		Color: BrightBlack,
+		Color: constval.BrightBlack,
 	},
 	"apple": {
-		Color: BrightBlack,
+		Color: constval.BrightBlack,
 		Icon:  "\uF179",
 	},
 	"dockerfile": {
-		Color: BrightYellow,
+		Color: constval.BrightYellow,
 		Icon:  "\ue7b0",
 	},
 	"readme": {
-		Color:     Yellow,
+		Color:     constval.Yellow,
 		Icon:      "\uF48A",
 		Underline: true,
 		Bold:      true,
 	},
 	"readme.md": {
-		Color:     Yellow,
+		Color:     constval.Yellow,
 		Icon:      "\uF48A",
 		Underline: true,
 		Bold:      true,
 	},
 	"flake.nix": {
-		Color:     Yellow,
+		Color:     constval.Yellow,
 		Icon:      "\uF313",
 		Underline: true,
 		Bold:      true,
@@ -1337,27 +1339,27 @@ var Name = map[string]Style{
 	},
 	"sdk": {
 		Icon:  "\uF121",
-		Color: White,
+		Color: constval.White,
 	},
 	"pictures": {
 		Icon:  "\uF1C5",
-		Color: White,
+		Color: constval.White,
 	},
 	"videos": {
 		Icon:  "",
-		Color: White,
+		Color: constval.White,
 	},
 	"movies": {
 		Icon:  "",
-		Color: White,
+		Color: constval.White,
 	},
 	"music": {
 		Icon:  "\uF025",
-		Color: White,
+		Color: constval.White,
 	},
 	"audio": {
 		Icon:  "\uF025",
-		Color: White,
+		Color: constval.White,
 	},
 	"cargo.lock": {
 		Color:     lang,
@@ -1371,27 +1373,27 @@ var Name = map[string]Style{
 		Underline: true,
 	},
 	"known_hosts": {
-		Color: White,
+		Color: constval.White,
 		Icon:  "\uEB39",
 	},
 	"repo": {
-		Color: White,
+		Color: constval.White,
 		Icon:  "\uea62",
 	},
 	".ssh": {
 		Icon:  "\ueba9",
-		Color: White,
+		Color: constval.White,
 	},
 	"boot": {
 		Icon:  "\uf287",
-		Color: White,
+		Color: constval.White,
 	},
 	"cache": {
 		Icon:  "\uf49b",
-		Color: White,
+		Color: constval.White,
 	},
 	"passwd": {
-		Color: Cyan,
+		Color: constval.Cyan,
 		Icon:  "\uF023",
 	},
 	"vagrantfile": {
@@ -1424,11 +1426,11 @@ var Name = map[string]Style{
 		Icon:  "\uE606",
 	},
 	".cfusertextencoding": {
-		Color: BrightBlack,
+		Color: constval.BrightBlack,
 		Icon:  "\uF179",
 	},
 	"maintainers": {
-		Color: White,
+		Color: constval.White,
 		Icon:  "\uF0C0",
 	},
 	"__pycache__": {
@@ -1437,75 +1439,75 @@ var Name = map[string]Style{
 		Faint: true,
 	},
 	"requirements.txt": {
-		Color: White,
+		Color: constval.White,
 		Icon:  "\uE606",
 		Faint: true,
 	},
 	"robots.txt": {
-		Color: White,
+		Color: constval.White,
 		Icon:  "\U000F06A9",
 	},
 	"docker-compose.yml": {
-		Color: BrightYellow,
+		Color: constval.BrightYellow,
 		Icon:  "\ue7b0",
 	},
 	"contributing": {
-		Color: White,
+		Color: constval.White,
 		Icon:  "\uF0C0",
 	},
 	"contributing.md": {
-		Color: White,
+		Color: constval.White,
 		Icon:  "\uF0C0",
 	},
 }
 
 var Permission = map[string]Style{
 	"block": {
-		Color: Cyan,
+		Color: constval.Cyan,
 		Bold:  true,
 	},
 	"directory": {
-		Color: Blue,
+		Color: constval.Blue,
 		Bold:  true,
 	},
 	"link": {
-		Color: Purple,
+		Color: constval.Purple,
 		Bold:  true,
 	},
 	"char": {
-		Color: Yellow,
+		Color: constval.Yellow,
 		Bold:  true,
 	},
 	"pipe": {
-		Color: Yellow,
+		Color: constval.Yellow,
 		Bold:  true,
 	},
 	"socket": {
-		Color: Yellow,
+		Color: constval.Yellow,
 		Bold:  true,
 	},
 	"setuid": {
-		Color: Purple,
+		Color: constval.Purple,
 		Bold:  true,
 	},
 	"setgid": {
-		Color: Purple,
+		Color: constval.Purple,
 		Bold:  true,
 	},
 	"read": {
-		Color: Yellow,
+		Color: constval.Yellow,
 		Bold:  true,
 	},
 	"write": {
-		Color: Red,
+		Color: constval.Red,
 		Bold:  true,
 	},
 	"exe": {
-		Color: Green,
+		Color: constval.Green,
 		Bold:  true,
 	},
 	"-": {
-		Color: BrightBlack,
+		Color: constval.BrightBlack,
 	},
 	"octal": {
 		Color: color256(208),
@@ -1515,7 +1517,7 @@ var Permission = map[string]Style{
 
 var Size = map[string]Style{
 	"-": {
-		Color: White,
+		Color: constval.White,
 	},
 	"block": {
 		Color: rgb(20, 255, 100),
@@ -1560,100 +1562,100 @@ var Size = map[string]Style{
 
 var Git = map[string]Style{
 	"git_unmodified": {
-		Color: BrightBlack,
+		Color: constval.BrightBlack,
 	},
 	"git_modified": {
-		Color: Yellow,
+		Color: constval.Yellow,
 	},
 	"git_renamed": {
-		Color: Blue,
+		Color: constval.Blue,
 	},
 	"git_copied": {
-		Color: Purple,
+		Color: constval.Purple,
 	},
 	"git_deleted": {
-		Color: Red,
+		Color: constval.Red,
 	},
 	"git_added": {
-		Color: Green,
+		Color: constval.Green,
 	},
 	"git_untracked": {
-		Color: BrightBlack,
+		Color: constval.BrightBlack,
 	},
 	"git_ignored": {
-		Color: BrightRed,
+		Color: constval.BrightRed,
 	},
 	"git_type_changed": {
-		Color: Yellow,
+		Color: constval.Yellow,
 	},
 	"git_updated_but_unmerged": {
-		Color: BrightYellow,
+		Color: constval.BrightYellow,
 	},
 	"git-repo-skip": {
-		Color: BrightBlack,
+		Color: constval.BrightBlack,
 		Icon:  "-",
 	},
 	"git-repo-clean": {
-		Color: Green,
+		Color: constval.Green,
 		Icon:  "clean",
 	},
 	"git-repo-dirty": {
-		Color: Yellow,
+		Color: constval.Yellow,
 		Icon:  "dirty",
 	},
 	"git-branch-master": { // master and main
-		Color: Green,
+		Color: constval.Green,
 		Bold:  true,
 	},
 	"git-branch": {
-		Color: Yellow,
+		Color: constval.Yellow,
 	},
 	"git-branch-none": {
-		Color: BrightBlack,
+		Color: constval.BrightBlack,
 		Icon:  "-",
 	},
 }
 
 var Owner = map[string]Style{
 	"owner": {
-		Color: Yellow,
+		Color: constval.Yellow,
 		Bold:  true,
 	},
 	"root": {
-		Color: Red,
+		Color: constval.Red,
 		Bold:  true,
 	},
 }
 
 var Group = map[string]Style{
 	"group": {
-		Color: Yellow,
+		Color: constval.Yellow,
 		Bold:  true,
 	},
 	"root": {
-		Color: Red,
+		Color: constval.Red,
 		Bold:  true,
 	},
 }
 
 var Symlink = map[string]Style{
 	"symlink_path": {
-		Color: Green,
+		Color: constval.Green,
 	},
 	"symlink_broken_path": {
-		Color:     Red,
+		Color:     constval.Red,
 		Underline: true,
 	},
 	"symlink": {
-		Color: Purple,
+		Color: constval.Purple,
 		Icon:  "\ueb15",
 	},
 	"symlink_arrow": {
-		Color: BrightWhite,
+		Color: constval.BrightWhite,
 		Icon:  " => ",
 	},
 	"link-num": {
-		Color: Red,
+		Color: constval.Red,
 	},
 }
 
