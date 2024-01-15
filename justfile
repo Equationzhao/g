@@ -140,10 +140,11 @@ url := "https://github.com/Equationzhao/g"
 
 # update aur 
 aur: 
-    # download the latest source code from {{url}}/"archive/refs/tags/v{{latest}}.tar.gz"
+    # download the latest source code from {{url}}/"archive/refs/tags/v{{latest}}.tar.gz" if v{{latest}}.tar.gz not exists
     #!/usr/bin/env bash
-    wget -c {{url}}/archive/refs/tags/v{{latest}}.tar.gz -O v{{latest}}.tar.gz
-
+    if [ ! -f v{{latest}}.tar.gz ]; then \
+            wget -c {{url}}/archive/refs/tags/v{{latest}}.tar.gz -O v{{latest}}.tar.gz; \
+    fi \
     # update PKGBUILD
     sed -i bak "s/sha256sums=.*/sha256sums=('$(shasum -a 256 v{{latest}}.tar.gz | choose 0)')/g" ../g-ls/PKGBUILD
     sed -i bak "s/pkgver=.*/pkgver={{latest}}/g" ../g-ls/PKGBUILD
@@ -151,7 +152,7 @@ aur:
     # update .SRCINFO
     sed -i bak "s/pkgver = .*/pkgver = {{latest}}/g" ../g-ls/.SRCINFO
     sed -i bak "s/sha256sums = .*/sha256sums = '$(shasum -a 256 v{{latest}}.tar.gz | choose 0)'/g" ../g-ls/.SRCINFO
-    
+
     cd ../g-ls
     # input git commit message
     cd ../g-ls && git add -u
@@ -184,7 +185,7 @@ brew:
 scoop:
     cd scoop && sh scoop.sh
 
-all : check clean build compress deb checksum
+all: doc theme format test check clean build compress deb checksum release
 
 # clean the build directory
 clean: 
@@ -226,3 +227,6 @@ check:
 
 test:
     @sh run_test.sh
+    @go build -tags=custom .
+    @rm g
+    cd internal/theme && go test -v

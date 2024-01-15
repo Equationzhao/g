@@ -6,21 +6,22 @@ os: `macOS`
 
 software/toolchain:
 
-| name       | how to install          | remark                                                                            |
-|------------|-------------------------|-----------------------------------------------------------------------------------|
-| go >1.21.0 | `brew install go`       | or use [go.dev](https://go.dev/dl/) / [goup](https://github.com/owenthereal/goup) |
-| git        | `brew install git`      | or use xcode version                                                              |
-| upx        | `brew install upx`      |                                                                                   |
-| dpkg-deb   | `brew install dpkg`     |                                                                                   |
-| shasum     | `brew install shasum`   |                                                                                   |
-| gh         | `brew install gh`       |                                                                                   |
-| wget       | `brew install wget`     |                                                                                   |
-| gofumpt    | `brew install gofumpt`  |                                                                                   |
-| just       | `brew install just`     |                                                                                   |
-| prettier   | `brew install prettier` |                                                                                   |
+| name       | how to install             | remark                                                                            |
+|------------|----------------------------|-----------------------------------------------------------------------------------|
+| go >1.21.0 | `brew install go`          | or use [go.dev](https://go.dev/dl/) / [goup](https://github.com/owenthereal/goup) |
+| git        | `brew install git`         | or use xcode version                                                              |
+| upx        | `brew install upx`         |                                                                                   |
+| dpkg-deb   | `brew install dpkg`        |                                                                                   |
+| shasum     | `brew install shasum`      |                                                                                   |
+| gh         | `brew install gh`          |                                                                                   |
+| wget       | `brew install wget`        |                                                                                   |
+| gofumpt    | `brew install gofumpt`     |                                                                                   |
+| just       | `brew install just`        |                                                                                   |
+| prettier   | `brew install prettier`    |                                                                                   |
+| choose     | `brew install choose-rust` |                                                                                   |
 
 ```zsh
-brew install go git upx dpkg shasum gh wget gofumpt just prettier
+brew install go git upx dpkg shasum gh wget gofumpt just prettier choose-rust
 ```
 
 ## pre-check
