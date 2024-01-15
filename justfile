@@ -208,7 +208,7 @@ theme:
     rm g
 
 # check git tag and git status
-check:
+check: check-install-script
     @if [ "$(git rev-parse HEAD)" == "$(git rev-parse v{{latest}})" ]; then \
       if [ -z "$(git status --porcelain)" ]; then \
         if [ "$(grep 'Version' internal/cli/version.go | awk '{print $4}' | sed 's/"//g')" == {{latest}} ]; then \
@@ -224,6 +224,13 @@ check:
     else \
       echo "{{COLOR_RED}}latest tag v{{latest}} isn't on the current HEAD." && exit 1; \
     fi
+
+check-install-script:
+    @if [ "$(sh install.sh -v) == {{latest}}" ]; then \
+      echo "{{COLOR_GREEN}}install.go -v matches {{latest}} "; \
+    else \
+      echo "{{COLOR_RED}}install.go -v doesn't match {{latest}}"; \
+    fi;
 
 test:
     @sh run_test.sh
