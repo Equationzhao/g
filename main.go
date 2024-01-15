@@ -17,10 +17,10 @@ import (
 func main() {
 	defer func() {
 		if err := recover(); err != nil {
-			fmt.Printf("Version: v%s\n", cli.Version)
-			fmt.Printf("Please file an issue at %s with the following panic info\n\n", util.MakeLink("https://github.com/Equationzhao/g/issues/new/choose", "Github Repo"))
-			fmt.Println(cli.MakeErrorStr(fmt.Sprintf("error message:\n%v\n", err)))
-			fmt.Println(cli.MakeErrorStr(fmt.Sprintf("stack trace:\n%s", debug.Stack())))
+			_, _ = fmt.Fprintf(os.Stderr, "Version: v%s\n", cli.Version)
+			_, _ = fmt.Fprintf(os.Stderr, "Please file an issue at %s with the following panic info\n\n", util.MakeLink("https://github.com/Equationzhao/g/issues/new/choose", "Github Repo"))
+			_, _ = fmt.Fprintln(os.Stderr, cli.MakeErrorStr(fmt.Sprintf("error message:\n%v\n", err)))
+			_, _ = fmt.Fprintln(os.Stderr, cli.MakeErrorStr(fmt.Sprintf("stack trace:\n%s", debug.Stack())))
 			if cli.ReturnCode == 0 {
 				cli.ReturnCode = 2
 			}
