@@ -1,7 +1,5 @@
 # g
 
-<div style="text-align: center;"><img src="internal/logo.jpg" width="400"  alt="logo"/></div>
-
 > a powerful ls
 
 ![linux](https://img.shields.io/badge/Linux-FCC624?style=for-the-badge&logo=linux&logoColor=black)
@@ -200,10 +198,6 @@ The following are new features of `eza`, we may support them in the future
 ## CONTRIBUTING
 
 check [CONTRIBUTING](./CONTRIBUTING.md)
-
-## Logo
-
-created by bing
 
 ## Alternatives
 

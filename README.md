@@ -1,7 +1,5 @@
 # g
 
-<div style="text-align: center;"><img src="internal/logo.jpg" width="400"  alt="logo"/></div>
-
 > 一个强大的 ls 工具
 
 ![linux](https://img.shields.io/badge/Linux-FCC624?style=for-the-badge&logo=linux&logoColor=black)
@@ -204,9 +202,6 @@ source ~/.g.nu
 ## CONTRIBUTING
 
 查看 [CONTRIBUTING](./CONTRIBUTING.md)
-## Logo
-
-created by bing
 
 ## 其他选择
 
