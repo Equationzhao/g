@@ -1,7 +1,7 @@
 # Get OS and architecture
 os_type=$(uname -s | tr '[:upper:]' '[:lower:]')
 os_arch=$(uname -m)
-version="0.25.1"
+version="0.25.2"
 
 # flag
 # -v: print version
