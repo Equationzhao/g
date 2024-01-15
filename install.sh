@@ -120,6 +120,6 @@ case $os_type in
         ;;
     linux)
         echo "mv ${file_name} /usr/bin/g"
-        mv ${file_name} /usr/bin/g
+        sudo mv ${file_name} /usr/bin/g
         ;;
 esac
