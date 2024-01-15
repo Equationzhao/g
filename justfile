@@ -2,6 +2,9 @@
 latest := `git describe --abbrev=0 --tags | sed 's/v//'`
 ldflags := "-ldflags='-s -w'"
 
+COLOR_GREEN := "[0;32m"
+COLOR_RED := "[0;31m"
+
 # build binaries for all platforms
 build: 
     # build the binary in build/
@@ -207,10 +210,16 @@ theme:
 check:
     @if [ "$(git rev-parse HEAD)" == "$(git rev-parse v{{latest}})" ]; then \
       if [ -z "$(git status --porcelain)" ]; then \
-        echo "latest tag v{{latest}} is on the current HEAD and the git status is clean."; \
+        if [ "$(grep 'Version' internal/cli/version.go | awk '{print $4}' | sed 's/"//g')" == {{latest}} ]; then \
+          echo "{{COLOR_GREEN}}latest tag v{{latest}} is on the current HEAD and the git status is clean. And version matches."; \
+        else \
+          echo "{{COLOR_RED}}latest tag v{{latest}} is on the current HEAD and the git status is clean."; \
+          echo "{{COLOR_RED}}But version doesn't match. Please update the version in internal/cli/version.go."; \
+          exit 1; \
+        fi; \
       else \
-        echo "latest tag v{{latest}} is on the current HEAD but git status is dirty." && exit 1; \
+        echo "{{COLOR_RED}}latest tag v{{latest}} is on the current HEAD but git status is dirty." && exit 1; \
       fi; \
     else \
-      echo "latest tag v{{latest}} isn't on the current HEAD." && exit 1; \
+      echo "{{COLOR_RED}}latest tag v{{latest}} isn't on the current HEAD." && exit 1; \
     fi
