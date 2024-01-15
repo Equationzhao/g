@@ -223,3 +223,6 @@ check:
     else \
       echo "{{COLOR_RED}}latest tag v{{latest}} isn't on the current HEAD." && exit 1; \
     fi
+
+test:
+    @sh run_test.sh
