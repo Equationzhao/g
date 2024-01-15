@@ -34,8 +34,10 @@ type StyleForUnmarshal struct {
 	Blink     bool   `json:"blink,omitempty"`
 }
 
-var genOnceStyleField sync.Once
-var styleField []string
+var (
+	genOnceStyleField sync.Once
+	styleField        []string
+)
 
 func genStyleField() []string {
 	genOnceStyleField.Do(func() {

@@ -50,9 +50,11 @@ type All struct {
 	Ext        Theme `json:"ext,omitempty"`
 }
 
-var genOnceAllField sync.Once
-var allFieldTag []string
-var allField []string
+var (
+	genOnceAllField sync.Once
+	allFieldTag     []string
+	allField        []string
+)
 
 func genAllField() ([]string, []string) {
 	genOnceAllField.Do(func() {
