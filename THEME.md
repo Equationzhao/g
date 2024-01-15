@@ -17,3 +17,32 @@ the custom theme must be placed in the theme directory and named custom_builtin.
 ```bash
 go build -tags=custom .
 ```
+
+### 在配置文件中指定主题位置 specify theme location in config file
+在配置文件中添加 `Theme: $location`，`$location` 可以通过 `g --help` 查看
+
+add `Theme: $location` to your profile. `$location` can be found by `g --help` like this:
+```bash
+> g --help
+# ...
+CONFIG:
+  Configuration: /Users/equationzhao/Library/Application Support/g/g.yaml
+  See More at: g.equationzhao.space
+# ...
+```
+下面是一个使用自定义主题的配置文件示例
+this is an example of profile using custom theme
+```yaml
+Args:
+  - hyperlink=never
+  - icons
+  - disable-index
+
+CustomTreeStyle:
+  Child: "├── "
+  LastChild: "╰── "
+  Mid: "│   "
+  Empty: "    "
+  
+Theme: /Users/equationzhao/g/internal/theme/your_custom_theme.json
+```
