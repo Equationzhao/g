@@ -35,7 +35,7 @@ go version
 3. Make your changes!
 
 ## Commit message
-It's commended to follow the commit style below:
+It's recommended to follow the commit style below:
 ```text
 <type>[optional scope]: <description>
 
