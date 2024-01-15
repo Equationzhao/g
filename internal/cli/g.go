@@ -11,6 +11,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/Equationzhao/g/internal/const"
+
 	"github.com/Equationzhao/g/internal/align"
 	"github.com/Equationzhao/g/internal/config"
 	"github.com/Equationzhao/g/internal/display"
@@ -159,7 +161,7 @@ func init() {
 					shell.Init()
 					_, _ = G.Writer.Write(shell.NUContent)
 				default:
-					return fmt.Errorf("unsupported shell: %s \n %s[zsh|bash|fish|powershell|nushell]", s, theme.Success)
+					return fmt.Errorf("unsupported shell: %s \n %s[zsh|bash|fish|powershell|nushell]", s, constval.Success)
 				}
 				return Err4Exit{}
 			},
@@ -352,7 +354,7 @@ func initVersionHelpFlags() {
 }
 
 func MakeErrorStr(msg string) string {
-	return fmt.Sprintf("%s × %s %s", theme.Error, msg, theme.Reset)
+	return fmt.Sprintf("%s × %s %s", constval.Error, msg, constval.Reset)
 }
 
 func checkErr(err error, start string) {
@@ -980,9 +982,9 @@ var logic = func(context *cli.Context) error {
 								prettyPrinter, isPrettyPrinter := p.(display.PrettyPrinter)
 
 								expand := func(s string, no, space int) {
-									_, _ = headerFooterStrBuf.WriteString(theme.Underline)
+									_, _ = headerFooterStrBuf.WriteString(constval.Underline)
 									_, _ = headerFooterStrBuf.WriteString(s)
-									_, _ = headerFooterStrBuf.WriteString(theme.Reset)
+									_, _ = headerFooterStrBuf.WriteString(constval.Reset)
 									if no != len(allPart)-1 {
 										_, _ = headerFooterStrBuf.WriteString(strings.Repeat(" ", space))
 									}

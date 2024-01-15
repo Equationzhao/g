@@ -10,6 +10,8 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+
+	"github.com/Equationzhao/g/internal/const"
 )
 
 type Style struct {
@@ -116,41 +118,41 @@ func (t Theme) UnmarshalJSON(bytes []byte) error {
 
 func color2str(color string) string {
 	switch color {
-	case Red:
+	case constval.Red:
 		return "red"
-	case Green:
+	case constval.Green:
 		return "green"
-	case Yellow:
+	case constval.Yellow:
 		return "yellow"
-	case Blue:
+	case constval.Blue:
 		return "blue"
-	case Purple:
+	case constval.Purple:
 		return "purple"
-	case Cyan:
+	case constval.Cyan:
 		return "cyan"
-	case White:
+	case constval.White:
 		return "white"
-	case Black:
+	case constval.Black:
 		return "black"
-	case BrightRed:
+	case constval.BrightRed:
 		return "BrightPed"
-	case BrightGreen:
+	case constval.BrightGreen:
 		return "BrightPreen"
-	case BrightYellow:
+	case constval.BrightYellow:
 		return "BrightYellow"
-	case BrightBlue:
+	case constval.BrightBlue:
 		return "BrightBlue"
-	case BrightPurple:
+	case constval.BrightPurple:
 		return "BrightPurple"
-	case BrightCyan:
+	case constval.BrightCyan:
 		return "BrightCyan"
-	case BrightWhite:
+	case constval.BrightWhite:
 		return "BrightWhite"
-	case BrightBlack:
+	case constval.BrightBlack:
 		return "BrightBlack"
-	case Reset:
+	case constval.Reset:
 		return "reset"
-	case Underline:
+	case constval.Underline:
 		return "underline"
 	default:
 		// detect format:
@@ -175,8 +177,8 @@ func color2str(color string) string {
 		}
 
 		color = strings.ReplaceAll(color, " ", "")
-		if strings.HasPrefix(color, Underline) {
-			return color2str(Underline) + " + " + color2str(color[len(Underline):])
+		if strings.HasPrefix(color, constval.Underline) {
+			return color2str(constval.Underline) + " + " + color2str(color[len(constval.Underline):])
 		}
 		return ""
 	}
@@ -194,39 +196,39 @@ func str2color(str string) (string, error) {
 	case "":
 		return "", nil
 	case "black", "Black":
-		return Black, nil
+		return constval.Black, nil
 	case "red", "Red":
-		return Red, nil
+		return constval.Red, nil
 	case "green", "Green":
-		return Green, nil
+		return constval.Green, nil
 	case "yellow", "Yellow":
-		return Yellow, nil
+		return constval.Yellow, nil
 	case "blue", "Blue":
-		return Blue, nil
+		return constval.Blue, nil
 	case "purple", "Purple":
-		return Purple, nil
+		return constval.Purple, nil
 	case "cyan", "Cyan":
-		return Cyan, nil
+		return constval.Cyan, nil
 	case "white", "White":
-		return White, nil
+		return constval.White, nil
 	case "bright-red", "BrightRed":
-		return BrightRed, nil
+		return constval.BrightRed, nil
 	case "bright-green", "BrightGreen":
-		return BrightGreen, nil
+		return constval.BrightGreen, nil
 	case "bright-yellow", "BrightYellow":
-		return BrightYellow, nil
+		return constval.BrightYellow, nil
 	case "bright-blue", "BrightBlue":
-		return BrightBlue, nil
+		return constval.BrightBlue, nil
 	case "bright-purple", "BrightPurple":
-		return BrightPurple, nil
+		return constval.BrightPurple, nil
 	case "bright-cyan", "BrightCyan":
-		return BrightCyan, nil
+		return constval.BrightCyan, nil
 	case "bright-white", "BrightWhite":
-		return BrightWhite, nil
+		return constval.BrightWhite, nil
 	case "bright-black", "BrightBlack":
-		return BrightBlack, nil
+		return constval.BrightBlack, nil
 	case "reset", "Reset":
-		return Reset, nil
+		return constval.Reset, nil
 	default:
 		// remove spaces
 		str = strings.ReplaceAll(str, " ", "")
@@ -275,7 +277,7 @@ func str2color(str string) (string, error) {
 			return colorStr, nil
 		}
 
-		return Reset, nil
+		return constval.Reset, nil
 	}
 }
 

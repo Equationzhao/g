@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/Equationzhao/g/internal/theme"
+	"github.com/Equationzhao/g/internal/const"
 )
 
 func RemoveSep(s string) string {
@@ -21,7 +21,7 @@ var escapeReplacer = strings.NewReplacer(
 )
 
 func reverseColor(s string) string {
-	return theme.Reverse + s + theme.ReverseDone
+	return constval.Reverse + s + constval.ReverseDone
 }
 
 // Escape
