@@ -92,7 +92,7 @@ func init() {
 					str = fmt.Sprintf("%s, Did you mean %s?", str, suggest)
 				}
 			}
-			_, _ = fmt.Println(MakeErrorStr(str))
+			_, _ = fmt.Fprintln(os.Stderr, MakeErrorStr(str))
 			return nil
 		},
 		Flags:  make([]cli.Flag, 0, len(viewFlag)+len(filteringFlag)+len(sortingFlags)+len(displayFlag)+len(indexFlags)),
@@ -144,22 +144,18 @@ func init() {
 			Name:  "init",
 			Usage: `show the init script for shell, support zsh, bash, fish, powershell, nushell`,
 			Action: func(context *cli.Context, s string) error {
+				shell.Init()
 				switch s {
 				case "zsh":
-					shell.Init()
-					_, _ = G.Writer.Write(shell.ZSHContent)
+					_, _ = fmt.Print(shell.ZSHContent)
 				case "bash":
-					shell.Init()
-					_, _ = G.Writer.Write(shell.BASHContent)
+					_, _ = fmt.Print(shell.BASHContent)
 				case "fish":
-					shell.Init()
-					_, _ = G.Writer.Write(shell.FISHContent)
+					_, _ = fmt.Print(shell.FISHContent)
 				case "powershell", "pwsh":
-					shell.Init()
-					_, _ = G.Writer.Write(shell.PSContent)
+					_, _ = fmt.Print(shell.PSContent)
 				case "nushell", "nu":
-					shell.Init()
-					_, _ = G.Writer.Write(shell.NUContent)
+					_, _ = fmt.Print(shell.NUContent)
 				default:
 					return fmt.Errorf("unsupported shell: %s \n %s[zsh|bash|fish|powershell|nushell]", s, constval.Success)
 				}
@@ -177,7 +173,7 @@ func init() {
 			Usage:              "report bug",
 			DisableDefaultText: true,
 			Action: func(context *cli.Context, b bool) error {
-				_, _ = G.Writer.Write([]byte("please report bug to equationzhao@foxmail.com\nor file an issue at https://github.com/Equationzhao/g/issues\n"))
+				_, _ = fmt.Println([]byte("please report bug to equationzhao@foxmail.com\nor file an issue at https://github.com/Equationzhao/g/issues"))
 				return Err4Exit{}
 			},
 		},
@@ -321,7 +317,7 @@ func initVersionHelpFlags() {
  | {{ Key "Compiler"    }}        {{ .Compiler                    | Val   }}
  | {{ Key "Platform"    }}        {{ .Platform                    | Val   }}
 
- | Copyright (C) 2023 Equationzhao. MIT License
+ | Copyright (C) 2024 Equationzhao. MIT License
  | This is free software: you are free to change and redistribute it.
  | There is NO WARRANTY, to the extent permitted by law.
 `,
