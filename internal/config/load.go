@@ -95,7 +95,7 @@ func Load() (*Config, error) {
 	location := filepath.Join(Dir, DefaultConfigFile)
 	content, err := os.ReadFile(location)
 	if err != nil {
-		return nil, ErrReadConfig{error: err, Location: location}
+		return nil, err
 	}
 
 	// parse yaml
