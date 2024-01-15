@@ -1,6 +1,6 @@
 # g
 
-<div style="text-align: center;"><img src="logo.jpg" width="400"  alt="logo"/></div>
+<div style="text-align: center;"><img src="internal/logo.jpg" width="400"  alt="logo"/></div>
 
 > 一个强大的 ls 工具
 
@@ -26,10 +26,10 @@ g 是一个 ls 替代品，拥有下面一些功能：
 
 ## 截图
 
-![image](screenshot_1.png)
-![image](screenshot_2.png)
-![image](screenshot_3.png)
-![image](screenshot_4.png)
+![image](asset/screenshot_1.png)
+![image](asset/screenshot_2.png)
+![image](asset/screenshot_3.png)
+![image](asset/screenshot_4.png)
 
 ## 安装
 

@@ -1,6 +1,6 @@
 # g
 
-<div style="text-align: center;"><img src="logo.jpg" width="400"  alt="logo"/></div>
+<div style="text-align: center;"><img src="internal/logo.jpg" width="400"  alt="logo"/></div>
 
 > a powerful ls
 
@@ -21,10 +21,10 @@ g is a ls alternative with features:
 
 ## Screenshots
 
-![image](screenshot_1.png)
-![image](screenshot_2.png)
-![image](screenshot_3.png)
-![image](screenshot_4.png)
+![image](asset/screenshot_1.png)
+![image](asset/screenshot_2.png)
+![image](asset/screenshot_3.png)
+![image](asset/screenshot_4.png)
 
 ## Install
 
