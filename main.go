@@ -4,7 +4,6 @@ import (
 	"compress/gzip"
 	"errors"
 	"fmt"
-	"github.com/Equationzhao/g/internal/const/doc"
 	"os"
 	"path/filepath"
 	"runtime/debug"
@@ -12,6 +11,7 @@ import (
 
 	"github.com/Equationzhao/g/internal/cli"
 	"github.com/Equationzhao/g/internal/config"
+	"github.com/Equationzhao/g/internal/const/doc"
 	"github.com/Equationzhao/g/internal/util"
 )
 
