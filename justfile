@@ -184,7 +184,7 @@ brew:
 scoop:
     cd scoop && sh scoop.sh
 
-all : check build compress deb checksum
+all : check clean build compress deb checksum
 
 # clean the build directory
 clean: 
