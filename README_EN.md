@@ -77,6 +77,12 @@ scoop install https://raw.githubusercontent.com/Equationzhao/g/master/scoop/g.js
 
 ### Pre-built executable
 
+#### curl
+
+```sh
+bash -c "$(curl -fsSLk https://raw.githubusercontent.com/Equationzhao/g/master/install.sh)"
+```
+
 #### deb
 
 download from [release](https://github.com/Equationzhao/g/releases) page 
