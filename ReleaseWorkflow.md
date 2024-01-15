@@ -46,6 +46,7 @@ brew install go git upx dpkg shasum gh wget gofumpt just prettier choose-rust
 
 ### AUR
 
+ssh://aur@aur.archlinux.org/g-ls.git
 make sure the aur repo is at '../g-ls' and 'Already up-to-date'
 
 ```zsh
@@ -54,6 +55,7 @@ just aur
 
 ### brew-tap
 
+git@github.com:Equationzhao/homebrew-g.git
 make sure the brew-tap repo is at '../homebrew-g' and 'Already up-to-date'
 
 ```zsh
@@ -65,7 +67,6 @@ just brew-tap
 the scoop manifest is at [scoop](scoop/g.json)
 
 ```zsh
-brew scoop
 git add -u && git commit -m 'ci: :construction_worker: update scoop'
 git push
 ```
