@@ -181,7 +181,7 @@ brew:
 scoop:
     cd scoop && sh scoop.sh
 
-all : build compress deb checksum 
+all : check build compress deb checksum
 
 # clean the build directory
 clean: 
@@ -202,3 +202,15 @@ theme:
     CGO_ENABLED=0 go build -tags 'theme'
     ./g 
     rm g
+
+# check git tag and git status
+check:
+    @if [ "$(git rev-parse HEAD)" == "$(git rev-parse v{{latest}})" ]; then \
+      if [ -z "$(git status --porcelain)" ]; then \
+        echo "latest tag v{{latest}} is on the current HEAD and the git status is clean."; \
+      else \
+        echo "latest tag v{{latest}} is on the current HEAD but git status is dirty." && exit 1; \
+      fi; \
+    else \
+      echo "latest tag v{{latest}} isn't on the current HEAD." && exit 1; \
+    fi
