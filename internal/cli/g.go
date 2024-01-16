@@ -147,15 +147,15 @@ func init() {
 				shell.Init()
 				switch s {
 				case "zsh":
-					_, _ = fmt.Print(shell.ZSHContent)
+					_, _ = fmt.Print(string(shell.ZSHContent))
 				case "bash":
-					_, _ = fmt.Print(shell.BASHContent)
+					_, _ = fmt.Print(string(shell.BASHContent))
 				case "fish":
-					_, _ = fmt.Print(shell.FISHContent)
+					_, _ = fmt.Print(string(shell.FISHContent))
 				case "powershell", "pwsh":
-					_, _ = fmt.Print(shell.PSContent)
+					_, _ = fmt.Print(string(shell.PSContent))
 				case "nushell", "nu":
-					_, _ = fmt.Print(shell.NUContent)
+					_, _ = fmt.Print(string(shell.NUContent))
 				default:
 					return fmt.Errorf("unsupported shell: %s \n %s[zsh|bash|fish|powershell|nushell]", s, constval.Success)
 				}
