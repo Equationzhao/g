@@ -28,6 +28,7 @@ brew install go git upx dpkg shasum gh wget gofumpt just prettier choose-rust
 
 - [ ] check code format: `just format`
 - [ ] gen theme/doc file: `just theme doc`
+- [ ] run test: `just test`
 - [ ] check version: make sure the git tag and internal/cli/Version is the same. And git status is clean, git tag is at the current HEAD: `just check`
 
 ## build
