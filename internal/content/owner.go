@@ -3,7 +3,6 @@ package content
 import (
 	"runtime"
 
-	"github.com/Equationzhao/g/internal/filter"
 	"github.com/Equationzhao/g/internal/item"
 	"github.com/Equationzhao/g/internal/osbased"
 	"github.com/Equationzhao/g/internal/render"
@@ -31,7 +30,7 @@ func (o *OwnerEnabler) DisableNumeric() {
 	o.Numeric = false
 }
 
-func (o *OwnerEnabler) EnableOwner(renderer *render.Renderer) filter.ContentOption {
+func (o *OwnerEnabler) EnableOwner(renderer *render.Renderer) ContentOption {
 	return func(info *item.FileInfo) (string, string) {
 		name, returnFuncName := "", ""
 		if o.Numeric {

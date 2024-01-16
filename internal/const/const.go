@@ -1,3 +1,5 @@
+// Package constval contains the constants used in the project
+// this package can't depend on other packages
 package constval
 
 import (
@@ -6,6 +8,8 @@ import (
 	"golang.org/x/exp/constraints"
 )
 
+// Hashable is the type of values that may be used as map keys or set members.
+// it should be exact same as haxmap.hashable (it's unexported, so we can't use it directly)
 type Hashable interface {
 	constraints.Integer | constraints.Float | constraints.Complex | ~string | uintptr | ~unsafe.Pointer
 }
@@ -40,3 +44,5 @@ const (
 )
 
 const Reset = "\033[0m"
+
+const DefaultHookLen = 5

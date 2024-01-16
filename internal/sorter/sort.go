@@ -8,8 +8,8 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/Equationzhao/g/internal/content"
 	"github.com/Equationzhao/g/internal/filter"
-	"github.com/Equationzhao/g/internal/filter/content"
 	"github.com/Equationzhao/g/internal/item"
 	"github.com/Equationzhao/g/internal/osbased"
 	"github.com/Equationzhao/g/internal/util"

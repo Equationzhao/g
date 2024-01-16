@@ -3,7 +3,6 @@ package content
 import (
 	"strconv"
 
-	"github.com/Equationzhao/g/internal/filter"
 	"github.com/Equationzhao/g/internal/item"
 	"github.com/Equationzhao/g/internal/osbased"
 	"github.com/Equationzhao/g/internal/render"
@@ -18,7 +17,7 @@ func NewLinkEnabler() *LinkEnabler {
 
 const Link = "Link"
 
-func (l *LinkEnabler) Enable(renderer *render.Renderer) filter.ContentOption {
+func (l *LinkEnabler) Enable(renderer *render.Renderer) ContentOption {
 	return func(info *item.FileInfo) (string, string) {
 		return renderer.Link(strconv.FormatUint(osbased.LinkCount(info), 10)), Link
 	}

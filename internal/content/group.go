@@ -3,7 +3,6 @@ package content
 import (
 	"runtime"
 
-	"github.com/Equationzhao/g/internal/filter"
 	"github.com/Equationzhao/g/internal/item"
 	"github.com/Equationzhao/g/internal/osbased"
 	"github.com/Equationzhao/g/internal/render"
@@ -40,7 +39,7 @@ func (g *GroupEnabler) DisableSmartMode() {
 	g.Smart = false
 }
 
-func (g *GroupEnabler) EnableGroup(renderer *render.Renderer) filter.ContentOption {
+func (g *GroupEnabler) EnableGroup(renderer *render.Renderer) ContentOption {
 	return func(info *item.FileInfo) (string, string) {
 		name, returnFuncName := "", GroupName
 		if g.Numeric {

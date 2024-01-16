@@ -1,3 +1,5 @@
+// Package display
+// This package controls the display format, like grid/across/byline/...
 package display
 
 import (
@@ -11,9 +13,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/Equationzhao/g/internal/const"
-
 	"github.com/Equationzhao/g/internal/config"
+	"github.com/Equationzhao/g/internal/const"
 	"github.com/Equationzhao/g/internal/display/tree"
 	"github.com/Equationzhao/g/internal/item"
 	"github.com/Equationzhao/g/internal/util"
@@ -27,12 +28,17 @@ import (
 
 var Output io.Writer = os.Stdout
 
+// RawPrint used for print statistics
+// like:
+//
+//	underwent 898 microseconds
+//	statistic: 15 file(s), 5 dir(s), 0 link(s)
 func RawPrint(toPrint ...any) (n int, err error) {
 	return fmt.Fprint(Output, toPrint...)
 }
 
-// print style control
-
+// all printers contain a Hook.
+// hook implements the Hook interface
 type hook struct {
 	BeforePrint   []func(Printer, ...*item.FileInfo)
 	AfterPrint    []func(Printer, ...*item.FileInfo)
@@ -40,6 +46,7 @@ type hook struct {
 	disableAfter  bool
 }
 
+// fire fires the hook 🔥
 func fire(h []func(Printer, ...*item.FileInfo), p Printer, i ...*item.FileInfo) {
 	for _, fn := range h {
 		if fn == nil {
@@ -51,8 +58,8 @@ func fire(h []func(Printer, ...*item.FileInfo), p Printer, i ...*item.FileInfo) 
 
 func newHook() *hook {
 	return &hook{
-		BeforePrint: make([]func(Printer, ...*item.FileInfo), 0, 5),
-		AfterPrint:  make([]func(Printer, ...*item.FileInfo), 0, 5),
+		BeforePrint: make([]func(Printer, ...*item.FileInfo), 0, constval.DefaultHookLen),
+		AfterPrint:  make([]func(Printer, ...*item.FileInfo), 0, constval.DefaultHookLen),
 	}
 }
 
@@ -80,6 +87,10 @@ func (h *hook) EnablePostHook() {
 	h.disableAfter = false
 }
 
+// Hook is used to add pre-content and post-content
+// like adding a header or footer:
+//
+//	Permissions Size Owner Group Time Modified Name
 type Hook interface {
 	AddBeforePrint(...func(Printer, ...*item.FileInfo))
 	AddAfterPrint(...func(Printer, ...*item.FileInfo))
@@ -89,6 +100,8 @@ type Hook interface {
 	EnablePostHook()
 }
 
+// Printer is the interface of all printers.
+// all printers should implement this interface
 type Printer interface {
 	Print(s ...*item.FileInfo)
 	Hook
@@ -114,7 +127,7 @@ func (b *Byline) Print(i ...*item.FileInfo) {
 	defer b.Flush()
 	for _, v := range i {
 		_, _ = b.WriteString(v.OrderedContent(" "))
-		_ = b.WriteByte('\n')
+		_ = b.WriteByte('\n') // byline means a new line :)
 	}
 	if !b.disableAfter {
 		fire(b.AfterPrint, b, i...)
@@ -157,6 +170,7 @@ func (f *FitTerminal) printColumns(stringsArray []string) {
 	maxColumnWidths := 0
 	for i := 0; i < len(stringsArray); i++ {
 		width := WidthLen(stringsArray[i])
+		println(stringsArray[i], width)
 		if width > maxColumnWidths {
 			maxColumnWidths = width
 		}
@@ -408,7 +422,7 @@ func (z *Zero) Print(items ...*item.FileInfo) {
 type JsonPrinter struct {
 	*bufio.Writer
 	*hook
-	Extra []any
+	Extra []any // RawPrint can't output in json, so we need an extra field
 }
 
 func NewJsonPrinter() Printer {

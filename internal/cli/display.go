@@ -4,8 +4,8 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/Equationzhao/g/internal/content"
 	"github.com/Equationzhao/g/internal/display"
-	"github.com/Equationzhao/g/internal/filter/content"
 	"github.com/Equationzhao/g/internal/theme"
 	"github.com/urfave/cli/v2"
 )

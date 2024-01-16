@@ -13,7 +13,6 @@ import (
 	"os"
 	"strings"
 
-	"github.com/Equationzhao/g/internal/filter"
 	"github.com/Equationzhao/g/internal/item"
 	"github.com/Equationzhao/g/internal/render"
 )
@@ -35,7 +34,7 @@ const SumName = "Sum"
 type SumEnabler struct{}
 
 // todo simd
-func (s SumEnabler) EnableSum(renderer *render.Renderer, sumTypes ...SumType) filter.ContentOption {
+func (s SumEnabler) EnableSum(renderer *render.Renderer, sumTypes ...SumType) ContentOption {
 	length := 0
 	types := make([]string, 0, len(sumTypes))
 	for _, t := range sumTypes {
@@ -67,7 +66,7 @@ func (s SumEnabler) EnableSum(renderer *render.Renderer, sumTypes ...SumType) fi
 	sumName := fmt.Sprintf("%s(%s)", SumName, strings.Join(types, ","))
 	return func(info *item.FileInfo) (string, string) {
 		if info.IsDir() {
-			return filter.FillBlank("", length), sumName
+			return FillBlank("", length), sumName
 		}
 
 		var content []byte
@@ -76,11 +75,11 @@ func (s SumEnabler) EnableSum(renderer *render.Renderer, sumTypes ...SumType) fi
 		} else {
 			file, err := os.Open(info.FullPath)
 			if err != nil {
-				return filter.FillBlank("", length), sumName
+				return FillBlank("", length), sumName
 			}
 			content, err = io.ReadAll(file)
 			if err != nil {
-				return filter.FillBlank("", length), sumName
+				return FillBlank("", length), sumName
 			}
 			info.Cache["content"] = content
 			defer file.Close()
@@ -111,13 +110,13 @@ func (s SumEnabler) EnableSum(renderer *render.Renderer, sumTypes ...SumType) fi
 		}
 		multiWriter := io.MultiWriter(writers...)
 		if _, err := io.Copy(multiWriter, bytes.NewReader(content)); err != nil {
-			return filter.FillBlank("", length), sumName
+			return FillBlank("", length), sumName
 		}
 		sums := make([]string, 0, len(hashes))
 		for _, h := range hashes {
 			sums = append(sums, fmt.Sprintf("%x", h.Sum(nil)))
 		}
 		sumsStr := strings.Join(sums, " ")
-		return renderer.Checksum(filter.FillBlank(sumsStr, length)), sumName
+		return renderer.Checksum(FillBlank(sumsStr, length)), sumName
 	}
 }

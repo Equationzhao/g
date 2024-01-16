@@ -11,13 +11,12 @@ import (
 	"sync"
 	"time"
 
-	"github.com/Equationzhao/g/internal/const"
-
 	"github.com/Equationzhao/g/internal/align"
 	"github.com/Equationzhao/g/internal/config"
+	"github.com/Equationzhao/g/internal/const"
+	contents "github.com/Equationzhao/g/internal/content"
 	"github.com/Equationzhao/g/internal/display"
 	"github.com/Equationzhao/g/internal/filter"
-	filtercontent "github.com/Equationzhao/g/internal/filter/content"
 	"github.com/Equationzhao/g/internal/index"
 	"github.com/Equationzhao/g/internal/item"
 	"github.com/Equationzhao/g/internal/render"
@@ -40,8 +39,8 @@ import (
 
 var (
 	itemFilterFunc = make([]*filter.ItemFilterFunc, 0)
-	contentFunc    = make([]filter.ContentOption, 0)
-	noOutputFunc   = make([]filter.NoOutputOption, 0)
+	contentFunc    = make([]contents.ContentOption, 0)
+	noOutputFunc   = make([]contents.NoOutputOption, 0)
 	r              = render.NewRenderer(&theme.DefaultAll)
 	p              = display.NewFitTerminal()
 	timeFormat     = "02.Jan'06 15:04"
@@ -50,20 +49,20 @@ var (
 	//  1  if minor problems (e.g., cannot access subdirectory),
 	//  2  if serious trouble (e.g., cannot access command-line argument).
 	ReturnCode      = 0
-	contentFilter   = filter.NewContentFilter()
+	contentFilter   = contents.NewContentFilter()
 	sort            = sorter.NewSorter()
 	timeType        = []string{"mod"}
-	sizeUint        = filtercontent.Auto
-	sizeEnabler     = filtercontent.NewSizeEnabler()
-	blockEnabler    = filtercontent.NewBlockSizeEnabler()
-	ownerEnabler    = filtercontent.NewOwnerEnabler()
-	groupEnabler    = filtercontent.NewGroupEnabler()
-	gitEnabler      = filtercontent.NewGitEnabler()
-	gitRepoEnabler  = filtercontent.NewGitRepoEnabler()
+	sizeUint        = contents.Auto
+	sizeEnabler     = contents.NewSizeEnabler()
+	blockEnabler    = contents.NewBlockSizeEnabler()
+	ownerEnabler    = contents.NewOwnerEnabler()
+	groupEnabler    = contents.NewGroupEnabler()
+	gitEnabler      = contents.NewGitEnabler()
+	gitRepoEnabler  = contents.NewGitRepoEnabler()
 	depthLimitMap   map[string]int
 	limitOnce       = util.Once{}
 	hookOnce        = util.Once{}
-	duplicateDetect = filtercontent.NewDuplicateDetect()
+	duplicateDetect = contents.NewDuplicateDetect()
 	hookPost        = make([]func(display.Printer, ...*item.FileInfo), 0)
 	pool            *ants.Pool
 )
@@ -415,7 +414,7 @@ var logic = func(context *cli.Context) error {
 
 	path := context.Args().Slice()
 
-	nameToDisplay := filtercontent.NewNameEnable()
+	nameToDisplay := contents.NewNameEnable()
 	if !context.Bool("no-icon") && (context.Bool("icon") || context.Bool("all")) {
 		nameToDisplay.SetIcon()
 	}
@@ -524,7 +523,7 @@ var logic = func(context *cli.Context) error {
 	header := context.Bool("header")
 	footer := context.Bool("footer")
 	if context.Bool("statistic") {
-		nameToDisplay.SetStatistics(&filtercontent.Statistics{})
+		nameToDisplay.SetStatistics(&contents.Statistics{})
 	}
 
 	hyperlink := context.String("hyperlink")
@@ -587,7 +586,7 @@ var logic = func(context *cli.Context) error {
 		if err != nil {
 			panic(err)
 		}
-		filter.Pool = pool
+		contents.Pool = pool
 	}
 
 	for i := 0; i < len(path); i++ {
@@ -865,7 +864,7 @@ var logic = func(context *cli.Context) error {
 
 				if total, ok := sizeEnabler.Total(); ok {
 					s, unit := sizeEnabler.Size2String(total)
-					s = r.Size(s, filtercontent.Convert2SizeString(unit))
+					s = r.Size(s, contents.Convert2SizeString(unit))
 
 					if isJsonPrinter {
 						jp.Extra = append(
@@ -884,8 +883,8 @@ var logic = func(context *cli.Context) error {
 					if isJsonPrinter {
 						jp.Extra = append(
 							jp.Extra, struct {
-								Time      string                    `json:"underwent"`
-								Statistic *filtercontent.Statistics `json:"statistic"`
+								Time      string               `json:"underwent"`
+								Statistic *contents.Statistics `json:"statistic"`
 							}{
 								Time:      t,
 								Statistic: s,
@@ -938,7 +937,7 @@ var logic = func(context *cli.Context) error {
 				for _, part := range allPart {
 					content, _ := it.Get(part)
 					l := 0
-					if part != filtercontent.NameName {
+					if part != contents.NameName {
 						l = display.WidthNoHyperLinkLen(content.String())
 					} else {
 						l = display.WidthLen(content.String())
@@ -952,9 +951,9 @@ var logic = func(context *cli.Context) error {
 			// after the first time, expand the length of each part
 			for _, it := range infos {
 				for _, part := range allPart {
-					if part != filtercontent.NameName {
+					if part != contents.NameName {
 						content, _ := it.Get(part)
-						if part != filtercontent.NameName {
+						if part != contents.NameName {
 							l = display.WidthNoHyperLinkLen(content.String())
 						} else {
 							l = display.WidthLen(content.String())
@@ -1003,7 +1002,7 @@ var logic = func(context *cli.Context) error {
 										for _, it := range infos {
 											content, _ := it.Get(s)
 											toAddNum := 0
-											if s != filtercontent.NameName {
+											if s != contents.NameName {
 												toAddNum = len(s) - display.WidthNoHyperLinkLen(content.String())
 											} else {
 												toAddNum = len(s) - display.WidthLen(content.String())
