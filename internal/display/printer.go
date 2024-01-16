@@ -170,7 +170,6 @@ func (f *FitTerminal) printColumns(stringsArray []string) {
 	maxColumnWidths := 0
 	for i := 0; i < len(stringsArray); i++ {
 		width := WidthLen(stringsArray[i])
-		println(stringsArray[i], width)
 		if width > maxColumnWidths {
 			maxColumnWidths = width
 		}
