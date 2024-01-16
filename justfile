@@ -237,9 +237,6 @@ test:
     @go build -tags=custom .
     @rm g
     cd internal/theme && go test -v
-    @go build -tags=custom .
-    @rm g
-    cd internal/theme && go test -v
 
 newpatch:
     git add -u && git commit -m ":bookmark: new patch version"
