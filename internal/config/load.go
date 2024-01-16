@@ -89,7 +89,7 @@ var emptyConfig = Config{}
 func Load() (*Config, error) {
 	Dir, err := GetUserConfigDir()
 	if err != nil {
-		return nil, ErrReadConfig{error: err}
+		return nil, err
 	}
 
 	location := filepath.Join(Dir, DefaultConfigFile)
