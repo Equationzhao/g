@@ -64,7 +64,7 @@ var viewFlag = []cli.Flag{
 				} else if s == "all" {
 					timeType = []string{"mod", "create", "access"}
 				} else {
-					ReturnCode = 1
+					ReturnCode = 2
 					return errors.New("invalid time type")
 				}
 			}
@@ -135,7 +135,7 @@ var viewFlag = []cli.Flag{
 			}
 			sizeUint = filtercontent.ConvertFromSizeString(s)
 			if sizeUint == filtercontent.Unknown {
-				ReturnCode = 1
+				ReturnCode = 2
 				return fmt.Errorf("invalid size unit: %s", s)
 			}
 			return nil
@@ -173,7 +173,7 @@ var viewFlag = []cli.Flag{
 			case "default":
 				timeFormat = "02.Jan'06 15:04"
 			default:
-				ReturnCode = 1
+				ReturnCode = 2
 				return errors.New("invalid time-style")
 			}
 			return nil
