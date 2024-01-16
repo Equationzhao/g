@@ -39,12 +39,16 @@ import (
 )
 
 var (
-	itemFilterFunc  = make([]*filter.ItemFilterFunc, 0)
-	contentFunc     = make([]filter.ContentOption, 0)
-	noOutputFunc    = make([]filter.NoOutputOption, 0)
-	r               = render.NewRenderer(&theme.DefaultAll)
-	p               = display.NewFitTerminal()
-	timeFormat      = "02.Jan'06 15:04"
+	itemFilterFunc = make([]*filter.ItemFilterFunc, 0)
+	contentFunc    = make([]filter.ContentOption, 0)
+	noOutputFunc   = make([]filter.NoOutputOption, 0)
+	r              = render.NewRenderer(&theme.DefaultAll)
+	p              = display.NewFitTerminal()
+	timeFormat     = "02.Jan'06 15:04"
+	// ReturnCode - Exit status:
+	//  0  if OK,
+	//  1  if minor problems (e.g., cannot access subdirectory),
+	//  2  if serious trouble (e.g., cannot access command-line argument).
 	ReturnCode      = 0
 	contentFilter   = filter.NewContentFilter()
 	sort            = sorter.NewSorter()

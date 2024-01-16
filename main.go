@@ -50,7 +50,7 @@ func main() {
 		// load config if the args do not contains -no-config
 		if !slices.ContainsFunc(os.Args, match) {
 			defaultArgs, err := config.Load()
-			// if successfully load config and **the config.Args do not contains -no-config**
+			// if successfully load config and **the config.Args do not contain -no-config**
 			if err == nil && !slices.ContainsFunc(defaultArgs.Args, match) {
 				os.Args = slices.Insert(os.Args, 1, defaultArgs.Args...)
 			} else if err != nil { // if failed to load config
