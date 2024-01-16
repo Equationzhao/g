@@ -83,7 +83,7 @@ func init() {
 		HideHelpCommand:    true,
 		Suggest:            true,
 		OnUsageError: func(cCtx *cli.Context, err error, isSubcommand bool) error {
-			ReturnCode = 1
+			ReturnCode = 2
 			str := err.Error()
 			const prefix = "flag provided but not defined: "
 			if strings.HasPrefix(str, prefix) {

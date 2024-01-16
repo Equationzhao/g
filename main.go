@@ -23,9 +23,7 @@ func main() {
 			_, _ = fmt.Fprintf(os.Stderr, "Please file an issue at %s with the following panic info\n\n", util.MakeLink("https://github.com/Equationzhao/g/issues/new/choose", "Github Repo"))
 			_, _ = fmt.Fprintln(os.Stderr, cli.MakeErrorStr(fmt.Sprintf("error message:\n%v\n", err)))
 			_, _ = fmt.Fprintln(os.Stderr, cli.MakeErrorStr(fmt.Sprintf("stack trace:\n%s", debug.Stack())))
-			if cli.ReturnCode == 0 {
-				cli.ReturnCode = 2
-			}
+			cli.ReturnCode = 2
 		}
 		os.Exit(cli.ReturnCode)
 	}()
