@@ -6,8 +6,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/Equationzhao/g/internal/content"
 	"github.com/Equationzhao/g/internal/filter"
-	"github.com/Equationzhao/g/internal/filter/content"
 	"github.com/gabriel-vasile/mimetype"
 	"github.com/urfave/cli/v2"
 )

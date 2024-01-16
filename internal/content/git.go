@@ -5,7 +5,6 @@ import (
 	"strings"
 
 	"github.com/Equationzhao/g/internal/align"
-	"github.com/Equationzhao/g/internal/filter"
 	"github.com/Equationzhao/g/internal/git"
 	"github.com/Equationzhao/g/internal/item"
 	"github.com/Equationzhao/g/internal/render"
@@ -28,7 +27,7 @@ func NewGitEnabler() *GitEnabler {
 
 const GitStatus = "Git"
 
-func (g *GitEnabler) Enable(renderer *render.Renderer) filter.ContentOption {
+func (g *GitEnabler) Enable(renderer *render.Renderer) ContentOption {
 	isOrIsParentOf := func(parent, child string) bool {
 		if parent == child {
 			return true
@@ -101,7 +100,7 @@ const (
 
 type GitRepoEnabler struct{}
 
-func (g *GitRepoEnabler) Enable(renderer *render.Renderer) filter.ContentOption {
+func (g *GitRepoEnabler) Enable(renderer *render.Renderer) ContentOption {
 	align.Register(GitRepoBranch)
 	return func(info *item.FileInfo) (string, string) {
 		// get branch name
@@ -109,7 +108,7 @@ func (g *GitRepoEnabler) Enable(renderer *render.Renderer) filter.ContentOption 
 	}
 }
 
-func (g *GitRepoEnabler) EnableStatus(renderer *render.Renderer) filter.ContentOption {
+func (g *GitRepoEnabler) EnableStatus(renderer *render.Renderer) ContentOption {
 	align.Register(GitRepoStatus)
 	return func(info *item.FileInfo) (string, string) {
 		// get repo status

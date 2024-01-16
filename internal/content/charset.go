@@ -4,7 +4,6 @@ import (
 	"os"
 	"strings"
 
-	"github.com/Equationzhao/g/internal/filter"
 	"github.com/Equationzhao/g/internal/item"
 	"github.com/Equationzhao/g/internal/render"
 	"github.com/Equationzhao/g/internal/util"
@@ -22,7 +21,7 @@ const (
 	Charset = "Charset"
 )
 
-func (c *CharsetEnabler) Enable(renderer *render.Renderer) filter.ContentOption {
+func (c *CharsetEnabler) Enable(renderer *render.Renderer) ContentOption {
 	det := chardet.NewTextDetector()
 	return func(info *item.FileInfo) (string, string) {
 		res, returnName := func() (string, string) {

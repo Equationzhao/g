@@ -1,7 +1,6 @@
 package content
 
 import (
-	"github.com/Equationzhao/g/internal/filter"
 	"github.com/Equationzhao/g/internal/item"
 	"github.com/Equationzhao/g/internal/osbased"
 	"github.com/Equationzhao/g/internal/render"
@@ -15,7 +14,7 @@ func NewInodeEnabler() *InodeEnabler {
 
 const Inode = "Inode"
 
-func (i *InodeEnabler) Enable(renderer *render.Renderer) filter.ContentOption {
+func (i *InodeEnabler) Enable(renderer *render.Renderer) ContentOption {
 	return func(info *item.FileInfo) (string, string) {
 		i := ""
 		if m, ok := info.Cache[Inode]; ok {

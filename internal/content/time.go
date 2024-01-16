@@ -4,7 +4,6 @@ import (
 	"runtime"
 	"time"
 
-	"github.com/Equationzhao/g/internal/filter"
 	"github.com/Equationzhao/g/internal/item"
 	"github.com/Equationzhao/g/internal/osbased"
 	"github.com/Equationzhao/g/internal/render"
@@ -20,7 +19,7 @@ func NewRelativeTimeEnabler() *RelativeTimeEnabler {
 
 const RelativeTime = "Relative-Time"
 
-func (r *RelativeTimeEnabler) Enable(renderer *render.Renderer) filter.ContentOption {
+func (r *RelativeTimeEnabler) Enable(renderer *render.Renderer) ContentOption {
 	return func(info *item.FileInfo) (string, string) {
 		var t time.Time
 		timeType := ""
@@ -60,7 +59,7 @@ const (
 
 // EnableTime enables time
 // accepts ['mod', 'modified', 'create', 'access', 'birth']
-func EnableTime(format string, mode string, renderer *render.Renderer) filter.ContentOption {
+func EnableTime(format string, mode string, renderer *render.Renderer) ContentOption {
 	return func(info *item.FileInfo) (string, string) {
 		// get mod time/ create time/ access time
 		var t time.Time

@@ -26,7 +26,7 @@ const (
 	ParentMimeTypeName = "Parent-Mime-type"
 )
 
-func (e *MimeFileTypeEnabler) Enable(renderer *render.Renderer) filter.ContentOption {
+func (e *MimeFileTypeEnabler) Enable(renderer *render.Renderer) ContentOption {
 	return func(info *item.FileInfo) (string, string) {
 		res, returnName := func() (string, string) {
 			tn := ""

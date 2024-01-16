@@ -5,7 +5,7 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/Equationzhao/g/internal/filter/content"
+	"github.com/Equationzhao/g/internal/content"
 	"github.com/Equationzhao/g/internal/sorter"
 	"github.com/gabriel-vasile/mimetype"
 	"github.com/urfave/cli/v2"

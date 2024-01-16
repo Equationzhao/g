@@ -15,7 +15,6 @@ import (
 	"github.com/Equationzhao/g/internal/const"
 	"github.com/shirou/gopsutil/v3/disk"
 
-	"github.com/Equationzhao/g/internal/filter"
 	"github.com/Equationzhao/g/internal/item"
 	"github.com/Equationzhao/g/internal/render"
 	"github.com/Equationzhao/g/internal/theme"
@@ -197,7 +196,7 @@ Enable
 color + icon + file://quote+filename/relative-name+quote + classify + color-end + dereference + mounts
 color: filetype->filename->fileext->file
 */
-func (n *Name) Enable(renderer *render.Renderer) filter.ContentOption {
+func (n *Name) Enable(renderer *render.Renderer) ContentOption {
 	return func(info *item.FileInfo) (stringContent string, funcName string) {
 		name := info.Name()
 		color := ""

@@ -10,7 +10,6 @@ import (
 	"os"
 
 	"github.com/Equationzhao/g/internal/cached"
-	"github.com/Equationzhao/g/internal/filter"
 	"github.com/Equationzhao/g/internal/item"
 	"github.com/Equationzhao/g/internal/util"
 )
@@ -53,7 +52,7 @@ func DetectorFallthrough(d *DuplicateDetect) {
 	d.IsThrough = true
 }
 
-func (d *DuplicateDetect) Enable() filter.NoOutputOption {
+func (d *DuplicateDetect) Enable() NoOutputOption {
 	return func(info *item.FileInfo) {
 		afterHash, err := fileHash(info, d.IsThrough)
 		if err != nil {

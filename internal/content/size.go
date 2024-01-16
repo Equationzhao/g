@@ -6,7 +6,6 @@ import (
 	"strings"
 	"sync/atomic"
 
-	"github.com/Equationzhao/g/internal/filter"
 	"github.com/Equationzhao/g/internal/item"
 	"github.com/Equationzhao/g/internal/osbased"
 	"github.com/Equationzhao/g/internal/render"
@@ -221,7 +220,7 @@ func (s *SizeEnabler) Size2String(b int64) (string, SizeUnit) {
 				}
 				res += " " + Convert2SizeString(i)
 				actualUnit = i
-				return filter.FillBlank(res, 8), actualUnit
+				return FillBlank(res, 8), actualUnit
 			}
 			v /= 1024
 		}
@@ -240,7 +239,7 @@ func (s *SizeEnabler) Size2String(b int64) (string, SizeUnit) {
 
 const RecursiveSizeName = "recursive_size"
 
-func (s *SizeEnabler) EnableSize(size SizeUnit, renderer *render.Renderer) filter.ContentOption {
+func (s *SizeEnabler) EnableSize(size SizeUnit, renderer *render.Renderer) ContentOption {
 	s.sizeUint = size
 	return func(info *item.FileInfo) (string, string) {
 		var v int64
@@ -270,7 +269,7 @@ func NewBlockSizeEnabler() *BlockSizeEnabler {
 
 const BlockSizeName = "Blocks"
 
-func (b *BlockSizeEnabler) Enable(renderer *render.Renderer) filter.ContentOption {
+func (b *BlockSizeEnabler) Enable(renderer *render.Renderer) ContentOption {
 	return func(info *item.FileInfo) (string, string) {
 		res := ""
 		bs := osbased.BlockSize(info)
