@@ -190,8 +190,6 @@ func init() {
 	initVersionHelpFlags()
 }
 
-// dive
-// for generating file tree
 func dive(
 	parent string, depth, limit int, infos *util.Slice[*item.FileInfo], errSlice *util.Slice[error],
 	wg *sync.WaitGroup, itemFilter *filter.ItemFilter,
@@ -213,11 +211,9 @@ func dive(
 		}
 		nowAbs := filepath.Join(parent, f.Name())
 		info, _ := item.NewFileInfoWithOption(item.WithAbsPath(nowAbs), item.WithFileInfo(f))
-		// check filter
 		if !itemFilter.Match(info) {
 			continue
 		}
-		// store its parent and level/depth
 		info.Cache["parent"] = []byte(parent)
 		info.Cache["level"] = []byte(strconv.Itoa(depth))
 		infos.AppendTo(info)
@@ -243,8 +239,8 @@ func fuzzyUpdate(path string) error {
 	return nil
 }
 
-// fuzzyPath find the fuzzy path in index
-// if error occurs, return empty string and error
+// fuzzyPath returns the fuzzy path
+// if error, return empty string and error
 func fuzzyPath(path string) (newPath string, minorErr error) {
 	fuzzed, err := index.FuzzySearch(path)
 	if err == nil {
@@ -253,7 +249,6 @@ func fuzzyPath(path string) (newPath string, minorErr error) {
 	return "", err
 }
 
-// Err4Exit used for exiting without error print
 type Err4Exit struct{}
 
 func (c Err4Exit) Error() string {
@@ -392,8 +387,6 @@ func suggestFlag(flags []cli.Flag, provided string) string {
 		}
 	}
 
-	// one dash for short flags
-	// two dashes for long flags
 	if len(suggestion) == 1 {
 		suggestion = "-" + suggestion
 	} else if len(suggestion) > 1 {

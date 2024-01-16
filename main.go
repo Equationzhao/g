@@ -16,7 +16,6 @@ import (
 )
 
 func main() {
-	// catch panic and print stack trace and version info
 	defer func() {
 		if err := recover(); err != nil {
 			_, _ = fmt.Fprintf(os.Stderr, "Version: v%s\n", cli.Version)
@@ -27,17 +26,10 @@ func main() {
 		}
 		os.Exit(cli.ReturnCode)
 	}()
-	// when build with tag `doc`, generate md and man file
 	if doc.Enable {
-		// md
-		md, err := os.Create("g.md")
-		if err != nil {
-			panic(err)
-		}
-		defer md.Close()
+		md, _ := os.Create("g.md")
 		s, _ := cli.G.ToMarkdown()
 		_, _ = fmt.Fprintln(md, s)
-		// man
 		man, _ := os.Create(filepath.Join("man", "g.1.gz"))
 		s, _ = cli.G.ToMan()
 		// compress to gzip
@@ -46,15 +38,19 @@ func main() {
 		_, _ = manGz.Write([]byte(s))
 		_ = manGz.Flush()
 	} else {
-		// normal logic
-		// load config if the args do not contains -no-config
-		if !slices.ContainsFunc(os.Args, match) {
+		// load config
+		if !slices.ContainsFunc(
+			os.Args, match,
+		) {
 			defaultArgs, err := config.Load()
-			// if successfully load config and **the config.Args do not contains -no-config**
-			if err == nil && !slices.ContainsFunc(defaultArgs.Args, match) {
+			if err == nil && !slices.ContainsFunc(
+				defaultArgs.Args, match,
+			) {
+				os.Args = slices.DeleteFunc(
+					os.Args, match,
+				)
 				os.Args = slices.Insert(os.Args, 1, defaultArgs.Args...)
-			} else if err != nil { // if failed to load config
-				// if it's read error
+			} else {
 				var errReadConfig config.ErrReadConfig
 				if errors.As(err, &errReadConfig) {
 					_, _ = fmt.Fprintln(os.Stderr, cli.MakeErrorStr(err.Error()))
@@ -62,8 +58,10 @@ func main() {
 			}
 		} else {
 			// contains -no-config
-			// remove it before the cli.G starts
-			os.Args = slices.DeleteFunc(os.Args, match)
+			// remove it
+			os.Args = slices.DeleteFunc(
+				os.Args, match,
+			)
 		}
 		err := cli.G.Run(os.Args)
 		if err != nil {

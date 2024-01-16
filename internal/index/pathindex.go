@@ -21,6 +21,15 @@ var (
 	indexPath string
 )
 
+func SetReadOnly() {
+	db, err := getDB()
+	if err != nil {
+		return
+	}
+	_ = db.SetReadOnly()
+	return
+}
+
 func getDB() (*leveldb.DB, error) {
 	err := initOnce.Do(func() error {
 		var err error
@@ -152,12 +161,23 @@ func FuzzySearch(key string) (string, error) {
 	iter := db.NewIterator(nil, nil)
 	defer iter.Release()
 	result := key
+	// times := 0
 	highest := 0
 	for iter.Next() {
 		input := util.ToChars([]byte(strings.ToLower(string(iter.Key()))))
 		pattern := algo.NormalizeRunes([]rune(strings.ToLower(key)))
 		res, _ := algo.FuzzyMatchV2(false, true, true, &input, pattern, true, nil)
 		score := res.Score
+		// base := filepath.Base(string(iter.Key()))
+		// score := smetrics.JaroWinkler(key, base, 0.7, 4)
+		// times, err = strconv.Atoi(string(iter.Value()))
+		// if err != nil {
+		// 	continue
+		// }
+		// score *= math.Sqrt(float64(times))
+		// if smetrics.Soundex(key) == smetrics.Soundex(base) {
+		// 	score *= 1.5
+		// }
 		if score > highest {
 			highest = score
 			result = string(iter.Key())
