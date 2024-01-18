@@ -59,6 +59,7 @@ func (e *MimeFileTypeEnabler) Enable(renderer *render.Renderer) ContentOption {
 				}
 
 				file, err := os.Open(info.FullPath)
+				// nolint
 				defer file.Close()
 				if err != nil {
 					return "failed_to_read", returnName
