@@ -1,7 +1,6 @@
 package cli
 
 import (
-	"errors"
 	"fmt"
 
 	"github.com/Equationzhao/g/internal/content"
@@ -445,11 +444,8 @@ var displayFlag = []cli.Flag{
 		Usage:       "set screen width",
 		Category:    "DISPLAY",
 		Action: func(context *cli.Context, u uint) error {
-			if u >= 0 {
-				display.CustomTermSize = u
-				return nil
-			}
-			return errors.New("term size not valid")
+			display.CustomTermSize = u
+			return nil
 		},
 	},
 }

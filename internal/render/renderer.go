@@ -83,7 +83,6 @@ func (rd *Renderer) FileMode(toRender string) string {
 		case 'u': // setuid
 			if suffixBytes[2] == 'x' {
 				suffixBytes[2] = 'u'
-				c = '-'
 				firstStyle = rd.theme.Permission["-"]
 			}
 			firstByte = '-'
@@ -529,7 +528,7 @@ func (rd *Renderer) GitRepoStatus(status git.RepoStatus) string {
 	}
 	bb := bytebufferpool.Get()
 	defer bytebufferpool.Put(bb)
-	bb.WriteString(style.Color)
+	_, _ = bb.WriteString(style.Color)
 	checkStyle(&style, bb)
 	_, _ = bb.WriteString(style.Icon)
 	_, _ = bb.WriteString(rd.Colorend())
