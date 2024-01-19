@@ -3,6 +3,12 @@ os_type=$(uname -s | tr '[:upper:]' '[:lower:]')
 os_arch=$(uname -m)
 version="0.25.2"
 
+interrupt_handler() {
+    exit 1
+}
+
+trap interrupt_handler SIGINT
+
 # flag
 # -v: print version
 # -h: print help
@@ -25,7 +31,7 @@ success() {
 }
 
 warn() {
-  printf '\033[1;33m%s\033[0m\n' "$1"
+    printf '\033[1;33m%s\033[0m\n' "$1"
 }
 
 # Parse flags
@@ -48,6 +54,40 @@ while getopts "vhd" opt; do
             ;;
     esac
 done
+
+
+compare_versions() {
+    local A="$1"
+    local B="$2"
+
+    if [[ $A == $B ]]; then
+        return 0
+    fi
+
+    IFS='.' read -ra A_parts <<< "$A"
+    IFS='.' read -ra B_parts <<< "$B"
+
+    for i in "${!A_parts[@]}"; do
+        if (( ${A_parts[i]} > ${B_parts[i]} )); then
+            return 0
+        elif (( ${A_parts[i]} < ${B_parts[i]} )); then
+            return 1
+        fi
+    done
+
+}
+
+# if already has g, and g --version >= version, exit
+if command -v g &> /dev/null; then
+    g_version=$(g --version | awk 'NR==2 {print $NF}')
+    compare_versions "$g_version" "$version"
+    result=$?
+    if [ $result -eq 0 ]; then
+        echo "g version $g_version already installed"
+        exit 0
+    fi
+fi
+
 
 # Determine file architecture based on OS architecture
 case $os_arch in
@@ -98,14 +138,19 @@ url="https://github.com/Equationzhao/g/releases/download/v${version}/${file_name
 
 # Download the file using curl or wget
 if command -v curl &> /dev/null; then
-    echo "curl -LO $url"
-    curl -LO $url
+    echo "curl -fLO $url"
+    curl -fLO $url
 elif command -v wget &> /dev/null; then
     echo "wget $url"
     wget $url
 else
     error "You need to install curl or wget to download the file."
     exit 1
+fi
+
+if [ $? -ne 0 ]; then
+        error "Failed to download the file."
+        exit 1
 fi
 
 # Make the file executable for Linux or Darwin
