@@ -43,6 +43,11 @@ const (
 	ReverseDone  = "\033[27m"
 )
 
+const (
+	BoostThreshold = 0.7
+	PrefixSize     = 4
+)
+
 const Reset = "\033[0m"
 
 const DefaultHookLen = 5

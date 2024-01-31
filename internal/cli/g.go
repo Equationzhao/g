@@ -367,17 +367,12 @@ func checkErr(err error, start string) {
 // suggestFlag returns the suggested flag name
 // modified from cli.suggestFlag
 func suggestFlag(flags []cli.Flag, provided string) string {
-	const (
-		boostThreshold = 0.7
-		prefixSize     = 4
-	)
 	distance := 0.0
 	suggestion := ""
-
 	for _, flag := range flags {
 		flagNames := flag.Names()
 		for _, name := range flagNames {
-			newDistance := smetrics.JaroWinkler(name, provided, boostThreshold, prefixSize)
+			newDistance := smetrics.JaroWinkler(name, provided, constval.BoostThreshold, constval.PrefixSize)
 			if newDistance > distance {
 				distance = newDistance
 				suggestion = name
