@@ -165,7 +165,7 @@ func (f *FitTerminal) Print(i ...*item.FileInfo) {
 }
 
 func (f *FitTerminal) printColumns(stringsArray []string) {
-	termWidth := getTermWidth()
+	termWidth := getTermWidth() - 2
 
 	maxColumnWidths := 0
 	for i := 0; i < len(stringsArray); i++ {
@@ -342,7 +342,7 @@ func (a *Across) Print(items ...*item.FileInfo) {
 
 func (a *Across) printRowWithNoSpace(strs []string) {
 	defer a.Flush()
-	width := getTermWidth()
+	width := getTermWidth() - 2
 
 	maxLength := 0
 	for _, str := range strs {
@@ -358,7 +358,7 @@ func (a *Across) printRowWithNoSpace(strs []string) {
 }
 
 func (a *Across) printRow(stringsArray []string) {
-	termWidth := getTermWidth()
+	termWidth := getTermWidth() - 2
 
 	maxColumnWidths := 0
 	for i := 0; i < len(stringsArray); i++ {
