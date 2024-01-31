@@ -147,21 +147,11 @@ func init() {
 			Name:  "init",
 			Usage: `show the init script for shell, support zsh, bash, fish, powershell, nushell`,
 			Action: func(context *cli.Context, s string) error {
-				shell.Init()
-				switch s {
-				case "zsh":
-					_, _ = fmt.Print(string(shell.ZSHContent))
-				case "bash":
-					_, _ = fmt.Print(string(shell.BASHContent))
-				case "fish":
-					_, _ = fmt.Print(string(shell.FISHContent))
-				case "powershell", "pwsh":
-					_, _ = fmt.Print(string(shell.PSContent))
-				case "nushell", "nu":
-					_, _ = fmt.Print(string(shell.NUContent))
-				default:
-					return fmt.Errorf("unsupported shell: %s \n %s[zsh|bash|fish|powershell|nushell]", s, constval.Success)
+				init, err := shell.Init(s)
+				if err != nil {
+					return err
 				}
+				_, _ = fmt.Println(init)
 				return Err4Exit{}
 			},
 			Category: "SHELL",
