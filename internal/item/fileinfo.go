@@ -85,7 +85,7 @@ func NewFileInfo(name string) (*FileInfo, error) {
 	return &FileInfo{
 		FileInfo: info,
 		FullPath: abs,
-		Meta:     cached.NewCacheMap[string, Item](20),
+		Meta:     cached.NewCacheMap[string, Item](8),
 		Cache:    make(map[string][]byte),
 	}, nil
 }
