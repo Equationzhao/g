@@ -109,6 +109,7 @@ func (cf *ContentFilter) GetDisplayItems(e *[]*item.FileInfo) {
 		entry := entry
 		err := Pool.Submit(
 			func() {
+				defer wg.Done()
 				for j, option := range cf.options {
 					stringContent, funcName := option(entry)
 					content := display.ItemContent{Content: display.StringContent(stringContent), No: j}
@@ -118,7 +119,6 @@ func (cf *ContentFilter) GetDisplayItems(e *[]*item.FileInfo) {
 				for _, option := range cf.noOutputOptions {
 					option(entry)
 				}
-				wg.Done()
 			},
 		)
 		if err != nil {
