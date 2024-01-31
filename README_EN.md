@@ -1,50 +1,54 @@
 # g
 
-> a powerful ls
+---
 
-g is a ls alternative with features:
+A feature-rich, customizable, and cross-platform `ls` alternative. 
 
-1. display items with type-specific icons and colors that are easy to be customized
-2. display in various layouts ( grid/across/byline/zero/comma/table/html/json/markdown/tree )
-3. user-friendly options with many aliases
-4. check file git-status when listing entries
-5. highly customizable sort option
-6. cross-platform ( Linux/Windows/MacOS )
-7. option to fuzzy match the path like [`zoxide`](https://github.com/ajeetdsouza/zoxide) with [`fzf`](https://github.com/junegunn/fzf) algorithm
+Experience enhanced visuals with type-specific icons, various layout options, and git status integration.
+
+---
+
+## Key Features
+
+1. **Customizable Display**: Icons and colors specific to file types, easy to customize.
+2. **Multiple Layouts**: Choose from grid, across, byline, zero, comma, table, html, json, markdown, and tree layouts.
+3. **Git Status Integration**: View file git-status directly in your listings.
+4. **Advanced Sorting**: Highly customizable sorting options including version and git sorts.
+5. **Cross-Platform Compatibility**: Works seamlessly on Linux, Windows, and MacOS.
+6. **Fuzzy Path Matching**: Integrate with [`zoxide`](https://github.com/ajeetdsouza/zoxide) and [`fzf`](https://github.com/junegunn/fzf) for fuzzy path matching.
 
 ## Screenshots
 
 ![image](asset/screenshot_3.png)
 
-## Install
+## Installation Guide
 
 ### From source
 
-go version required >= 1.21
+Requires Go version >= 1.21
 
 ```bash
 go install -ldflags="-s -w"  github.com/Equationzhao/g@latest
 ```
 
-or Clone this repo (nightly build)
+Alternatively, clone the repo for a dev version:
 
 ```bash
 git clone github.com/Equationzhao/g
 cd g
-go build -ldflags="-s -w" # use -s -w to shrink size
+go build -ldflags="-s -w" 
 # then add the executable file to your `PATH`
 ```
 
 ### Via package manager
 
-![archlinux](https://img.shields.io/badge/Arch_Linux-1793D1?logo=arch-linux&logoColor=white)
-user can install `g` from AUR
+#### Arch Linux (AUR)
 
 ```bash
 yay -S g-ls
 ```
 
-homebrew:
+#### Homebrew
 
 ```bash
 brew tap equationzhao/core git@github.com:Equationzhao/homebrew-g.git
@@ -54,6 +58,9 @@ brew tap equationzhao/core git@github.com:Equationzhao/homebrew-g.git
 brew install g-ls
 ```
 
+#### Windows Scoop
+
+```powershell
 windows scoop:
 
 ```powershell
@@ -64,16 +71,11 @@ scoop install https://raw.githubusercontent.com/Equationzhao/g/master/scoop/g.js
 # upgrade
 scoop uninstall g # uninstall first
 scoop install https://raw.githubusercontent.com/Equationzhao/g/master/scoop/g.json
-# error msg like this can be ignored
-# Move-Item: 
-# Line |
-#    2 |  mv g-amd64.exe g.exe
-#      |  ~~~~~~~~~~~~~~~~~~~~
-# Move-Item: 
-# Line |
-#    3 |  mv g-amd64.shim g.shim
-#      |  ~~~~~~~~~~~~~~~~~~~~~~
 ```
+
+#### Winget
+
+TODO, see [issue](https://github.com/Equationzhao/g/issues/119)
 
 ### Pre-built executable
 
@@ -113,10 +115,9 @@ cross-platform:
 ```bash
 g path(s)
 ```
+## Shell Integration (alias)
 
-## Shell scripts
-
-generate shell scripts
+Generate initialization scripts(alias) for various shells:
 
 ```bash
 g -init bash/zsh/fish/pwsh
@@ -156,6 +157,10 @@ Invoke-Expression (& { (g --init powershell | Out-String) })
 use command `echo $profile` to find your profile path
 
 ### nushell
+
+the nushell has a nice built-in ls command, but if you wanna try `g` in nushell, you can do the following:
+
+ps: the script is not guaranteed to work, if you have any problem, please [file an issue](https://github.com/Equationzhao/g/issues/new/choose)
 
 ```nu
 # add the following to your $nu.env-path
@@ -198,11 +203,11 @@ The following are new features of `eza`, we may support them in the future
 
 ## CONTRIBUTING
 
-check [CONTRIBUTING](./CONTRIBUTING.md)
+Interested in contributing? Check out the [contributing guidelines](./CONTRIBUTING.md).
 
 ## Alternatives
 
-this project is highly inspired by following projects that you wanna try!
+`g` is highly inspired by following projects that you wanna try!
 
 - [exa](https://github.com/ogham/exa) or [eza](https://github.com/eza-community/eza)
 - [lsd](https://github.com/lsd-rs/lsd)

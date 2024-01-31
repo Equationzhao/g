@@ -11,11 +11,10 @@ g 是一个 ls 替代品，拥有下面一些功能：
 
 1. 显示带有类型特定图标和颜色的条目，并且易于更改
 2. 有丰富的输出格式  ( grid/across/byline/zero/comma/table/html/json/markdown/tree )
-3.  用户友好的选项
-4. 支持显示 git status 
-5. 丰富且可自定义的排序选项
-6. 跨平台 ( Linux/Windows/MacOS )
-7. 支持使用[`fzf`](https://github.com/junegunn/fzf) 算法，像 [`zoxide`](https://github.com/ajeetdsouza/zoxide) 一样模糊匹配路径 
+3. 支持显示 git status 
+4. 丰富且可自定义的排序选项
+5. 跨平台 ( Linux/Windows/MacOS )
+6. 支持使用[`fzf`](https://github.com/junegunn/fzf) 算法，像 [`zoxide`](https://github.com/ajeetdsouza/zoxide) 一样模糊匹配路径 
 
 ## 截图
 
@@ -42,14 +41,13 @@ go build -ldflags="-s -w" # use -s -w to shrink size
 
 ### 通过包管理器
 
-![archlinux](https://img.shields.io/badge/Arch_Linux-1793D1?logo=arch-linux&logoColor=white)
-用户可以通过 AUR 安装 `g`
+#### Arch Linux(AUR)
 
 ```bash
 yay -S g-ls
 ```
 
-homebrew:
+#### homebrew-tap
 
 ```bash
 brew tap equationzhao/core git@github.com:Equationzhao/homebrew-g.git
@@ -59,7 +57,7 @@ brew tap equationzhao/core git@github.com:Equationzhao/homebrew-g.git
 brew install g-ls
 ```
 
-windows scoop:
+#### Windows Scoop:
 
 ```powershell
 scoop install https://raw.githubusercontent.com/Equationzhao/g/master/scoop/g.json
@@ -69,16 +67,10 @@ scoop install https://raw.githubusercontent.com/Equationzhao/g/master/scoop/g.js
 # upgrade
 scoop uninstall g # uninstall first
 scoop install https://raw.githubusercontent.com/Equationzhao/g/master/scoop/g.json
-# error msg like this can be ignored
-# Move-Item: 
-# Line |
-#    2 |  mv g-amd64.exe g.exe
-#      |  ~~~~~~~~~~~~~~~~~~~~
-# Move-Item: 
-# Line |
-#    3 |  mv g-amd64.shim g.shim
-#      |  ~~~~~~~~~~~~~~~~~~~~~~
 ```
+#### Winget
+
+TODO, see [issue](https://github.com/Equationzhao/g/issues/119)
 
 ### 二进制文件
 
@@ -118,9 +110,9 @@ cross-platform:
 g path(s)
 ```
 
-## Shell 脚本
+## Shell 集成 (alias)
 
-生成 shell 脚本
+生成 shell 脚本(alias)
 
 ```bash
 g -init bash/zsh/fish/pwsh
@@ -202,7 +194,7 @@ source ~/.g.nu
 
 ## CONTRIBUTING
 
-查看 [CONTRIBUTING](./CONTRIBUTING.md)
+若您对该项目的发展感兴趣,请查看 [CONTRIBUTING](./CONTRIBUTING.md)
 
 ## 其他选择
 
