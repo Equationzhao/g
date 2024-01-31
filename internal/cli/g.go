@@ -926,14 +926,11 @@ var logic = func(context *cli.Context) error {
 			for _, it := range infos {
 				for _, part := range allPart {
 					content, _ := it.Get(part)
-					l := 0
 					if part != contents.NameName {
-						l = display.WidthNoHyperLinkLen(content.String())
-					} else {
-						l = display.WidthLen(content.String())
-					}
-					if l > longestEachPart[part] {
-						longestEachPart[part] = l
+						l := display.WidthNoHyperLinkLen(content.String())
+						if l > longestEachPart[part] {
+							longestEachPart[part] = l
+						}
 					}
 				}
 			}
@@ -943,11 +940,7 @@ var logic = func(context *cli.Context) error {
 				for _, part := range allPart {
 					if part != contents.NameName {
 						content, _ := it.Get(part)
-						if part != contents.NameName {
-							l = display.WidthNoHyperLinkLen(content.String())
-						} else {
-							l = display.WidthLen(content.String())
-						}
+						l := display.WidthNoHyperLinkLen(content.String())
 						if l < longestEachPart[part] {
 							expand := content.SetPrefix
 							if align.IsLeft(part) {
