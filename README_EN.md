@@ -11,7 +11,7 @@ Experience enhanced visuals with type-specific icons, various layout options, an
 ## Key Features
 
 1. **Customizable Display**: Icons and colors specific to file types, easy to customize.
-2. **Multiple Layouts**: Choose from grid, across, byline, zero, comma, table, html, json, markdown, and tree layouts.
+2. **Multiple Layouts**: Choose from grid, across, byline, zero, comma, table, json, markdown, and tree layouts.
 3. **Git Status Integration**: View file git-status directly in your listings.
 4. **Advanced Sorting**: Highly customizable sorting options like version-sort.
 5. **Cross-Platform Compatibility**: Works seamlessly on Linux, Windows, and MacOS.

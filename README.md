@@ -10,7 +10,7 @@
 g 是一个 ls 替代品，拥有下面一些功能：
 
 1. 显示带有类型特定图标和颜色的条目，并且易于更改
-2. 有丰富的输出格式  ( grid/across/byline/zero/comma/table/html/json/markdown/tree )
+2. 有丰富的输出格式  ( grid/across/byline/zero/comma/table/json/markdown/tree )
 3. 支持显示 git status 
 4. 丰富且可自定义的排序选项
 5. 跨平台 ( Linux/Windows/MacOS )
