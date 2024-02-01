@@ -218,23 +218,6 @@ var displayFlag = []cli.Flag{
 		Category: "DISPLAY",
 	},
 	&cli.BoolFlag{
-		Name:               "html",
-		Aliases:            []string{"HTML"},
-		Usage:              "output in HTML-table format",
-		DisableDefaultText: true,
-		Action: func(context *cli.Context, b bool) error {
-			if b {
-				if _, ok := p.(*display.HTMLPrinter); !ok {
-					p = display.NewHTMLPrinter()
-					_ = context.Set("no-color", "1")
-					_ = context.Set("no-icon", "1")
-				}
-			}
-			return nil
-		},
-		Category: "DISPLAY",
-	},
-	&cli.BoolFlag{
 		Name:               "md",
 		Aliases:            []string{"markdown", "Markdown"},
 		Usage:              "output in markdown-table format",
@@ -330,12 +313,6 @@ var displayFlag = []cli.Flag{
 			case "table", "tb":
 				if _, ok := p.(*display.TablePrinter); !ok {
 					p = display.NewTablePrinter(display.DefaultTB)
-				}
-			case "HTML", "html":
-				if _, ok := p.(*display.HTMLPrinter); !ok {
-					p = display.NewHTMLPrinter()
-					_ = context.Set("no-color", "1")
-					_ = context.Set("no-icon", "1")
 				}
 			case "Markdown", "md", "MD", "markdown":
 				if _, ok := p.(*display.MDPrinter); !ok {
