@@ -1,0 +1,148 @@
+{
+	"Content": [
+		{
+			"Permissions": "drwxr-xr-x",
+			"Size": "128.0 B",
+			"Owner": "equationzhao",
+			"Group": "staff",
+			"Time Modified": "02.Feb'24 00:17",
+			"Name": "?.dir"
+		},
+		{
+			"Permissions": "drwxr-xr-x",
+			"Size": "64.0 B",
+			"Owner": "equationzhao",
+			"Group": "staff",
+			"Time Modified": "02.Feb'24 00:16",
+			"Name": "Applications"
+		},
+		{
+			"Permissions": "-rw-r--r--",
+			"Size": "21.0 B",
+			"Owner": "equationzhao",
+			"Group": "staff",
+			"Time Modified": "02.Feb'24 00:14",
+			"Name": "'   space file '"
+		},
+		{
+			"Permissions": "-rw-r--r--",
+			"Size": "5.0 B",
+			"Owner": "equationzhao",
+			"Group": "staff",
+			"Time Modified": "16.Jan'24 15:23",
+			"Name": "1.txt"
+		},
+		{
+			"Permissions": "-rw-r--r--",
+			"Size": "7.0 B",
+			"Owner": "equationzhao",
+			"Group": "staff",
+			"Time Modified": "16.Jan'24 15:23",
+			"Name": "10.json"
+		},
+		{
+			"Permissions": "-rw-r--r--",
+			"Size": "6.0 B",
+			"Owner": "equationzhao",
+			"Group": "staff",
+			"Time Modified": "16.Jan'24 15:23",
+			"Name": "11.xml"
+		},
+		{
+			"Permissions": "-rw-r--r--",
+			"Size": "6.0 B",
+			"Owner": "equationzhao",
+			"Group": "staff",
+			"Time Modified": "16.Jan'24 15:23",
+			"Name": "12.yml"
+		},
+		{
+			"Permissions": "-rw-r--r--",
+			"Size": "5.0 B",
+			"Owner": "equationzhao",
+			"Group": "staff",
+			"Time Modified": "16.Jan'24 15:23",
+			"Name": "13.md"
+		},
+		{
+			"Permissions": "-rw-r--r--",
+			"Size": "-",
+			"Owner": "equationzhao",
+			"Group": "staff",
+			"Time Modified": "02.Feb'24 00:03",
+			"Name": "14.gif"
+		},
+		{
+			"Permissions": "-rw-r--r--",
+			"Size": "3.0 B",
+			"Owner": "equationzhao",
+			"Group": "staff",
+			"Time Modified": "16.Jan'24 15:23",
+			"Name": "2.c"
+		},
+		{
+			"Permissions": "-rw-r--r--",
+			"Size": "5.0 B",
+			"Owner": "equationzhao",
+			"Group": "staff",
+			"Time Modified": "16.Jan'24 15:23",
+			"Name": "3.cpp"
+		},
+		{
+			"Permissions": "-rw-r--r--",
+			"Size": "-",
+			"Owner": "equationzhao",
+			"Group": "staff",
+			"Time Modified": "16.Jan'24 15:23",
+			"Name": "4.py"
+		},
+		{
+			"Permissions": "-rw-r--r--",
+			"Size": "6.0 B",
+			"Owner": "equationzhao",
+			"Group": "staff",
+			"Time Modified": "16.Jan'24 15:23",
+			"Name": "5.java"
+		},
+		{
+			"Permissions": "-rw-r--r--",
+			"Size": "-",
+			"Owner": "equationzhao",
+			"Group": "staff",
+			"Time Modified": "16.Jan'24 15:23",
+			"Name": "6.sh"
+		},
+		{
+			"Permissions": "-rw-r--r--",
+			"Size": "6.0 B",
+			"Owner": "equationzhao",
+			"Group": "staff",
+			"Time Modified": "16.Jan'24 15:23",
+			"Name": "7.html"
+		},
+		{
+			"Permissions": "-rw-r--r--",
+			"Size": "5.0 B",
+			"Owner": "equationzhao",
+			"Group": "staff",
+			"Time Modified": "16.Jan'24 15:23",
+			"Name": "8.css"
+		},
+		{
+			"Permissions": "-rw-r--r--",
+			"Size": "4.0 B",
+			"Owner": "equationzhao",
+			"Group": "staff",
+			"Time Modified": "16.Jan'24 15:23",
+			"Name": "9.js"
+		},
+		{
+			"Permissions": "lrwxr-xr-x",
+			"Size": "5.0 B",
+			"Owner": "equationzhao",
+			"Group": "staff",
+			"Time Modified": "02.Feb'24 00:15",
+			"Name": "1.txt.link =\u003e /Users/equationzhao/g/tests/test_data/1.txt"
+		}
+	]
+}
