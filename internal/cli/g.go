@@ -979,17 +979,14 @@ var logic = func(context *cli.Context) error {
 										// expand the every item's content of this part
 										for _, it := range infos {
 											content, _ := it.Get(s)
-											toAddNum := 0
 											if s != contents.NameName {
-												toAddNum = len(s) - display.WidthNoHyperLinkLen(content.String())
-											} else {
-												toAddNum = len(s) - display.WidthLen(content.String())
+												toAddNum := len(s) - display.WidthNoHyperLinkLen(content.String())
+												content.AddSuffix(
+													strings.Repeat(
+														" ", toAddNum,
+													),
+												)
 											}
-											content.AddSuffix(
-												strings.Repeat(
-													" ", toAddNum,
-												),
-											)
 											it.Set(s, content)
 											longestEachPart[s] = len(s)
 										}
