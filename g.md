@@ -46,7 +46,6 @@ g
 [--git|--git-status]
 [--group]
 [--header|--title]
-[--html|--HTML]
 [--hyperlink]=[value]
 [--icon|--icons]
 [--init]=[value]
@@ -219,8 +218,6 @@ g [options] [path]
 **--group**: show group
 
 **--header, --title**: add a header row
-
-**--html, --HTML**: output in HTML-table format
 
 **--hyperlink**="": Attach hyperlink to filenames [auto|always|never] (default: auto)
 
