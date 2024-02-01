@@ -60,7 +60,6 @@ brew install g-ls
 
 #### Windows Scoop
 
-```powershell
 windows scoop:
 
 ```powershell
