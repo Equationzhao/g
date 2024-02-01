@@ -202,7 +202,7 @@ doc:
     rm g
 
 # generate the theme
-theme: 
+theme: testcustomtheme
     CGO_ENABLED=0 go build -tags 'theme'
     ./g 
     rm g
@@ -238,7 +238,10 @@ newtest:
 reproducetest:
     @sh ./script/reproduce_test_result.sh
 
-test:
+testcustomtheme:
+    @sh ./script/theme_test.sh
+
+test: theme
     cd internal/theme && go test -v
     @echo "-------- start --------"
     @sh ./script/run_test.sh
