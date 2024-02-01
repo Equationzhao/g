@@ -77,7 +77,7 @@ TODO, see [issue](https://github.com/Equationzhao/g/issues/119)
 #### curl
 
 ```sh
-bash -c "$(curl -fsSLk https://raw.githubusercontent.com/Equationzhao/g/master/install.sh)"
+bash -c "$(curl -fsSLk https://raw.githubusercontent.com/Equationzhao/g/master/script/install.sh)"
 ```
 
 #### deb
