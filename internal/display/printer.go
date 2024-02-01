@@ -616,20 +616,6 @@ func (m *MDPrinter) Print(s ...*item.FileInfo) {
 	m.PrintBase(m.w.RenderMarkdown, s...)
 }
 
-type HTMLPrinter struct {
-	*TablePrinter
-}
-
-func NewHTMLPrinter() Printer {
-	h := &HTMLPrinter{}
-	h.TablePrinter = NewTablePrinter(DefaultTB).(*TablePrinter)
-	return h
-}
-
-func (p *HTMLPrinter) Print(s ...*item.FileInfo) {
-	p.PrintBase(p.w.RenderHTML, s...)
-}
-
 type CSVPrinter struct {
 	*TablePrinter
 }
