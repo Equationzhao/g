@@ -1,12 +1,7 @@
 package theme
 
-import "github.com/Equationzhao/g/internal/const"
-
 func SetClassic() {
 	DefaultAll.Apply(setClassic)
-	DefaultAll.InfoTheme["reset"] = Style{
-		Color: constval.Reset,
-	}
 }
 
 func setClassic(m Theme) {
