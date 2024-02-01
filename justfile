@@ -232,11 +232,18 @@ check-install-script:
       echo "{{COLOR_RED}}install.go -v doesn't match {{latest}}"; \
     fi;
 
+newtest:
+    @sh ./script/new_test.sh
+
+reproducetest:
+    @sh ./script/reproduce_test_result.sh
+
 test:
-    @sh run_test.sh
+    cd internal/theme && go test -v
+    @echo "-------- start --------"
+    @sh ./script/run_test.sh
     @go build -tags=custom .
     @rm g
-    cd internal/theme && go test -v
 
 newpatch:
     git add -u && git commit -m ":bookmark: new patch version"
