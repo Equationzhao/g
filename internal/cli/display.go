@@ -361,8 +361,7 @@ var displayFlag = []cli.Flag{
 			case "json", "j":
 				if _, ok := p.(*display.JsonPrinter); !ok {
 					p = display.NewJsonPrinter()
-					_ = context.Set("no-color", "1")
-					_ = context.Set("no-icon", "1")
+					_ = context.Set("classic", "1")
 				}
 			case "tree", "T":
 				if _, ok := p.(*display.TreePrinter); !ok {
