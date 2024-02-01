@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # Reproduce the test result from the test script
 # This script will overwrite the test result in tests/*.stdout
 

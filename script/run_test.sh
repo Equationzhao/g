@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # should run in the root directory of the project
 # run all tests under tests/*.sh
 

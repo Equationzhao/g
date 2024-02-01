@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # creat a new test file in tests/*.sh and its output in tests/*.stdout
 
 error() {
