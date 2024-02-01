@@ -888,9 +888,14 @@ var logic = func(context *cli.Context) error {
 			}
 
 			// if is table printer, set title
-			prettyPrinter, isTablePrinter := p.(display.PrettyPrinter)
-			if isTablePrinter {
-				prettyPrinter.SetTitle(path[i])
+			prettyPrinter, isPrettyPrinter := p.(display.PrettyPrinter)
+			if isPrettyPrinter {
+				switch p.(type) {
+				case *display.CSVPrinter, *display.TSVPrinter:
+					break
+				default:
+					prettyPrinter.SetTitle(path[i])
+				}
 			}
 			l := len(strconv.Itoa(len(infos)))
 			if flagSharp {
@@ -931,7 +936,7 @@ var logic = func(context *cli.Context) error {
 				}
 			}
 
-			// after the first time, expand the length of each part
+			// expand the length of each part using the scan result
 			for _, it := range infos {
 				for _, part := range allPart {
 					if part != contents.NameName {
