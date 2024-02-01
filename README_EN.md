@@ -15,7 +15,7 @@ Experience enhanced visuals with type-specific icons, various layout options, an
 3. **Git Status Integration**: View file git-status directly in your listings.
 4. **Advanced Sorting**: Highly customizable sorting options like version-sort.
 5. **Cross-Platform Compatibility**: Works seamlessly on Linux, Windows, and MacOS.
-6. **Fuzzy Path Matching**: Integrate with [`zoxide`](https://github.com/ajeetdsouza/zoxide) and [`fzf`](https://github.com/junegunn/fzf) for fuzzy path matching.
+6. **Fuzzy Path Matching**: [`zoxide`](https://github.com/ajeetdsouza/zoxide) and [`fzf`](https://github.com/junegunn/fzf) like fuzzy path matching.
 
 ## Screenshots
 
