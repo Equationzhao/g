@@ -16,6 +16,14 @@ TEST_DIR="tests"
 pass_count=0
 fail_count=0
 
+# run g --help and get Configuration file path
+# backup Configuration file
+# Configuration: path (may contains space)
+config_path=$(g --help | grep "Configuration:" | cut -d ":" -f 2- | sed -e 's/^[[:space:]]*//')
+echo "disable config: $config_path"
+echo "backup config: $config_path.bak"
+mv "$config_path" "$config_path.bak"
+
 # Run tests
 for test_script in "$TEST_DIR"/*.sh; do
     # Run the script and capture the output
@@ -38,6 +46,10 @@ done
 echo
 echo "Passed: $pass_count"
 echo "Failed: $fail_count"
+
+# Restore Configuration file
+echo "restore config: $config_path"
+mv "$config_path.bak" "$config_path"
 
 if [ "$fail_count" -gt 0 ]; then
     exit 1

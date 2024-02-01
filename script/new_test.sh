@@ -32,6 +32,7 @@ if [ -z "$flag" ]; then
 fi
 
 command="g"
+forever_base="--no-update"
 base_flag="-term-width 200 --no-config --icons --permission --size --group --owner"
 
 read -p "use base_flag? [Y/n] " -n 1 -r
@@ -40,7 +41,7 @@ if [[ $REPLY =~ ^[Nn]$ ]]; then
     base_flag=""
 fi
 
-running_command="$command $base_flag $flag"
+running_command="$command $forever_base $base_flag $flag"
 
 test_script="tests/$test_name.sh"
 test_stdout="tests/$test_name.stdout"
