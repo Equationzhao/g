@@ -25,11 +25,22 @@ if [ -z "$test_name" ]; then
     exit 1
 fi
 
-read -p "running_command: " running_command
-if [ -z "$running_command" ]; then
-    error "running_command is empty"
+read -p "flag: " flag
+if [ -z "$flag" ]; then
+    error "flag is empty"
     exit 1
 fi
+
+command="g"
+base_flag="-term-width 200 --no-config --icons --permission --size --group --owner"
+
+read -p "use base_flag? [Y/n] " -n 1 -r
+echo
+if [[ $REPLY =~ ^[Nn]$ ]]; then
+    base_flag=""
+fi
+
+running_command="$command $base_flag $flag"
 
 test_script="tests/$test_name.sh"
 test_stdout="tests/$test_name.stdout"
