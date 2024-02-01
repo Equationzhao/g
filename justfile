@@ -143,7 +143,7 @@ aur:
     # download the latest source code from {{url}}/"archive/refs/tags/v{{latest}}.tar.gz" if v{{latest}}.tar.gz not exists
     #!/usr/bin/env bash
     if [ ! -f v{{latest}}.tar.gz ]; then \
-            wget -c {{url}}/archive/refs/tags/v{{latest}}.tar.gz -O v{{latest}}.tar.gz; \
+        wget -c {{url}}/archive/refs/tags/v{{latest}}.tar.gz -O v{{latest}}.tar.gz; \
     fi \
     # update PKGBUILD
     sed -i bak "s/sha256sums=.*/sha256sums=('$(shasum -a 256 v{{latest}}.tar.gz | choose 0)')/g" ../g-ls/PKGBUILD
@@ -161,8 +161,10 @@ aur:
 
 # update homebrew-tap
 brew-tap:
-    wget -c {{url}}/archive/refs/tags/v{{latest}}.tar.gz -O v{{latest}}.tar.gz
-    sed -i bak "s#url .*#url \"{{url}}/archive/refs/tags/v{{latest}}.tar.gz\", tag: \"v{{latest}}\"#g" ../homebrew-g/g-ls.rb 
+    if [ ! -f v{{latest}}.tar.gz ]; then \
+        wget -c {{url}}/archive/refs/tags/v{{latest}}.tar.gz -O v{{latest}}.tar.gz; \
+    fi \
+    sed -i bak "s#url .*#url \"{{url}}/archive/refs/tags/v{{latest}}.tar.gz\", tag: \"v{{latest}}\"#g" ../homebrew-g/g-ls.rb
     sed -i bak "s/sha256 .*/sha256 \"$(shasum -a 256 v{{latest}}.tar.gz | choose 0)\"/g" ../homebrew-g/g-ls.rb
     sed -i bak "s/assert_match .*/assert_match \"{{latest}}\", output/g" ../homebrew-g/g-ls.rb
     cd ../homebrew-g
