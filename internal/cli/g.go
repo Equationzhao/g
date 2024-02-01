@@ -916,6 +916,7 @@ var logic = func(context *cli.Context) error {
 
 			// do scan
 			// get max length for each Meta[key].Value
+			// todo optimize the KeysByOrder
 			allPart := infos[0].KeysByOrder()
 
 			for _, it := range infos {

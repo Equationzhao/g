@@ -224,7 +224,7 @@ func WidthLen(str string) int {
 		}
 	}
 	colorless := stripansi.Strip(str)
-	// len() is insufficient here, as it counts emojis as 4 characters each
+	// len() is not proper here, as it counts emojis as 4 characters each
 	length := runewidth.StringWidth(colorless)
 
 	return length
