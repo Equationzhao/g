@@ -42,23 +42,6 @@ g --tree --long path(s) # show tree layout
 
 ## Installation Guide
 
-### From source
-
-Requires Go version >= 1.21
-
-```bash
-go install -ldflags="-s -w"  github.com/Equationzhao/g@latest
-```
-
-Alternatively, clone the repo for a dev version:
-
-```bash
-git clone github.com/Equationzhao/g
-cd g
-go build -ldflags="-s -w" 
-# then add the executable file to your `PATH`
-```
-
 ### Via package manager
 
 #### Arch Linux (AUR)
@@ -114,6 +97,23 @@ sudo dpkg -i g_$version_$arch.deb
 #### tar.gz/zip
 
 just download from [release page](https://github.com/Equationzhao/g/releases), extract the gzip and add the executable file to your `PATH`
+
+### From source
+
+Requires Go version >= 1.21
+
+```bash
+go install -ldflags="-s -w"  github.com/Equationzhao/g@latest
+```
+
+Alternatively, clone the repo for a dev version:
+
+```bash
+git clone github.com/Equationzhao/g
+cd g
+go build -ldflags="-s -w" 
+# then add the executable file to your `PATH`
+```
 
 ## Recommended terminal
 
