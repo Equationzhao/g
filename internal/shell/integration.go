@@ -34,7 +34,7 @@ func Init(shell string) (string, error) {
 	case "powershell", "pwsh":
 		return string(bytes.ReplaceAll(PSContent, []byte("\r\n"), []byte("\n"))), nil
 	case "nushell", "nu":
-		return string(bytes.ReplaceAll(FISHContent, []byte("\r\n"), []byte("\n"))), nil
+		return string(bytes.ReplaceAll(NUContent, []byte("\r\n"), []byte("\n"))), nil
 		// replace os newline with unix newline
 	}
 	return "", fmt.Errorf("unsupported shell: %s \n %s[zsh|bash|fish|powershell|nushell]", shell, constval.Success)
