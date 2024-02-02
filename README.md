@@ -1,53 +1,73 @@
 # g
 
-> 一个强大的 ls 工具
+---
 
-<p align="center">
-<a href="README_EN.md">View this document in English</a>
-</p>
+A feature-rich, customizable, and cross-platform `ls` alternative.
 
+Experience enhanced visuals with type-specific icons, various layout options, and git status integration.
 
-g 是一个 ls 替代品，拥有下面一些功能：
+---
 
-1. 显示带有类型特定图标和颜色的条目，并且易于更改
-2. 有丰富的输出格式  ( grid/across/byline/zero/comma/table/json/markdown/tree )
-3. 支持显示 git status 
-4. 丰富且可自定义的排序选项
-5. 跨平台 ( Linux/Windows/MacOS )
-6. 支持使用[`fzf`](https://github.com/junegunn/fzf) 算法，像 [`zoxide`](https://github.com/ajeetdsouza/zoxide) 一样模糊匹配路径 
+## Key Features
 
-## 截图
+1. **Customizable Display**: Icons and colors specific to file types, easy to customize.
+2. **Multiple Layouts**: Choose from grid, across, byline, zero, comma, table, json, markdown, and tree layouts.
+3. **Git Integration**: View file git-status/repo-status/repo-branch directly in your listings.
+4. **Advanced Sorting**: Highly customizable sorting options like version-sort.
+5. **Cross-Platform Compatibility**: Works seamlessly on Linux, Windows, and MacOS.
+6. **Fuzzy Path Matching**: [`zoxide`](https://github.com/ajeetdsouza/zoxide) and [`fzf`](https://github.com/junegunn/fzf) like fuzzy path matching.
+7. **Hyperlink support**: Open files/directories with a single click.
+
+## Screenshots
 
 ![image](asset/screenshot_3.png)
 
-## 安装
+## Usage
 
-### 源码安装
+```bash
+g path(s)
+```
 
-要求 go version >= 1.21
+```bash
+g --icon --long path(s) # show icons and long format
+```
+
+```bash
+g --tree --long path(s) # show tree layout
+```
+
+## More options
+
+[g.md](g.md) or check [g.equationzhao.space](g.equationzhao.space)
+
+## Installation Guide
+
+### From source
+
+Requires Go version >= 1.21
 
 ```bash
 go install -ldflags="-s -w"  github.com/Equationzhao/g@latest
 ```
 
-或者 clone 这个仓库 (nightly build)
+Alternatively, clone the repo for a dev version:
 
 ```bash
 git clone github.com/Equationzhao/g
 cd g
-go build -ldflags="-s -w" # use -s -w to shrink size
+go build -ldflags="-s -w" 
 # then add the executable file to your `PATH`
 ```
 
-### 通过包管理器
+### Via package manager
 
-#### Arch Linux(AUR)
+#### Arch Linux (AUR)
 
 ```bash
 yay -S g-ls
 ```
 
-#### homebrew-tap
+#### Homebrew
 
 ```bash
 brew tap equationzhao/core git@github.com:Equationzhao/homebrew-g.git
@@ -57,7 +77,9 @@ brew tap equationzhao/core git@github.com:Equationzhao/homebrew-g.git
 brew install g-ls
 ```
 
-#### Windows Scoop:
+#### Windows Scoop
+
+windows scoop:
 
 ```powershell
 scoop install https://raw.githubusercontent.com/Equationzhao/g/master/scoop/g.json
@@ -68,11 +90,12 @@ scoop install https://raw.githubusercontent.com/Equationzhao/g/master/scoop/g.js
 scoop uninstall g # uninstall first
 scoop install https://raw.githubusercontent.com/Equationzhao/g/master/scoop/g.json
 ```
+
 #### Winget
 
 TODO, see [issue](https://github.com/Equationzhao/g/issues/119)
 
-### 二进制文件
+### Pre-built executable
 
 #### curl
 
@@ -82,16 +105,17 @@ bash -c "$(curl -fsSLk https://raw.githubusercontent.com/Equationzhao/g/master/s
 
 #### deb
 
-从 [release](https://github.com/Equationzhao/g/releases) 页下载对应deb文件后安装
+download from [release](https://github.com/Equationzhao/g/releases) page
 
 ```bash
 sudo dpkg -i g_$version_$arch.deb
 ```
 
 #### tar.gz/zip
-从 [release page](https://github.com/Equationzhao/g/releases) 下载对应平台的文件, 解压 gzip 并将可执行文件添加到 `PATH`
 
-## 推荐使用的终端
+just download from [release page](https://github.com/Equationzhao/g/releases), extract the gzip and add the executable file to your `PATH`
+
+## Recommended terminal
 
 macOS:
 - [Iterm2](https://iterm2.com/)
@@ -104,15 +128,10 @@ cross-platform:
 - [Hyper](https://hyper.is/)
 - [WezTerm](https://wezfurlong.org/wezterm/index.html)
 
-## 用法
 
-```bash
-g path(s)
-```
+## Shell Integration (alias)
 
-## Shell 集成 (alias)
-
-生成 shell 脚本(alias)
+Generate initialization scripts(alias) for various shells:
 
 ```bash
 g -init bash/zsh/fish/pwsh
@@ -149,9 +168,13 @@ g --init fish | source
 Invoke-Expression (& { (g --init powershell | Out-String) })
 ```
 
-使用 `echo $profile`命令查找配置文件路径
+use command `echo $profile` to find your profile path
 
 ### nushell
+
+the nushell has a nice built-in ls command, but if you wanna try `g` in nushell, you can do the following:
+
+ps: the script is not guaranteed to work, if you have any problem, please [file an issue](https://github.com/Equationzhao/g/issues/new/choose)
 
 ```nu
 # add the following to your $nu.env-path
@@ -172,11 +195,7 @@ source ~/.g.nu
 # alias g = ^g
 ```
 
-## 更多选项
-
-[g.md](g.md)  或查看 [主页](g.equationzhao.space)
-
-## 自定义主题
+## Custom theme
 
 [theme](THEME.md)
 
@@ -185,22 +204,21 @@ source ~/.g.nu
 - [ ] Git sort
 - [ ] Print security context
 - [x] $OLDPWD
-- [ ] Color Support for html/markdown
 - [x] Support Scoop
 
-以下是 eza 的新功能，后续计划支持
+The following are new features of `eza`, we may support them in the future
 - [x] --git-repos: list each directory’s Git status, if tracked
 - [x] --git-repos-no-status: list whether a directory is a Git repository, but not its status (faster)
 
 ## CONTRIBUTING
 
-若您对该项目的发展感兴趣,请查看 [CONTRIBUTING](./CONTRIBUTING.md)
+Interested in contributing? Check out the [contributing guidelines](./CONTRIBUTING.md).
 
-## 其他选择
+## Alternatives
 
-本项目受到以下项目的启发，你也许想试试
+`g` is highly inspired by following projects that you wanna try!
 
-- [exa](https://github.com/ogham/exa) 或者 [eza](https://github.com/eza-community/eza)
+- [exa](https://github.com/ogham/exa) or [eza](https://github.com/eza-community/eza)
 - [lsd](https://github.com/lsd-rs/lsd)
 - [ls-go](https://github.com/acarl005/ls-go)
 
