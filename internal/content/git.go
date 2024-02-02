@@ -87,7 +87,7 @@ func gitByName(status git.Status, renderer *render.Renderer) string {
 		return renderer.GitIgnored("!")
 	case git.TypeChanged:
 		return renderer.GitTypeChanged("T")
-	case git.UpdatedBuUnmerged:
+	case git.UpdatedButUnmerged:
 		return renderer.GitUpdatedButUnmerged("U")
 	}
 	return " "

@@ -123,17 +123,17 @@ func goGitTopLevel(path RepoPath) (string, error) {
 type Status uint8
 
 const (
-	Unknown           Status = iota
-	Unmodified               // -
-	Modified                 // M
-	Added                    // A
-	Deleted                  // D
-	Renamed                  // R
-	Copied                   // C
-	Untracked                // ?
-	Ignored                  // !
-	TypeChanged              // T
-	UpdatedBuUnmerged        // U
+	Unknown            Status = iota
+	Unmodified                // -
+	Modified                  // M
+	Added                     // A
+	Deleted                   // D
+	Renamed                   // R
+	Copied                    // C
+	Untracked                 // ?
+	Ignored                   // !
+	TypeChanged               // T
+	UpdatedButUnmerged        // U
 )
 
 // ParseShort parses a git status output command
@@ -196,7 +196,7 @@ func (s Status) String() string {
 		return "-"
 	case TypeChanged:
 		return "T"
-	case UpdatedBuUnmerged:
+	case UpdatedButUnmerged:
 		return "U"
 	case Unknown:
 		return "^"
@@ -225,7 +225,7 @@ func Byte2Status(c byte) Status {
 	case 'T':
 		return TypeChanged
 	case 'U':
-		return UpdatedBuUnmerged
+		return UpdatedButUnmerged
 	case '^':
 		return Unknown
 	}
