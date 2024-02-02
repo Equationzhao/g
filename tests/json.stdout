@@ -190,6 +190,13 @@
 			"Name": "9.js"
 		},
 		{
+			"Permissions": "-rw-r--r--",
+			"Size": "-",
+			"Owner": "equationzhao",
+			"Group": "staff",
+			"Name": "9.js~"
+		},
+		{
 			"Permissions": "lrwxr-xr-x",
 			"Size": "5.0 B",
 			"Owner": "equationzhao",
