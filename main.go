@@ -17,14 +17,7 @@ import (
 func main() {
 	// catch panic and print stack trace and version info
 	defer func() {
-		if err := recover(); err != nil {
-			_, _ = fmt.Fprintf(os.Stderr, "Version: v%s\n", cli.Version)
-			_, _ = fmt.Fprintf(os.Stderr, "Please file an issue at %s with the following panic info\n\n", util.MakeLink("https://github.com/Equationzhao/g/issues/new/choose", "Github Repo"))
-			_, _ = fmt.Fprintln(os.Stderr, cli.MakeErrorStr(fmt.Sprintf("error message:\n%v\n", err)))
-			_, _ = fmt.Fprintln(os.Stderr, cli.MakeErrorStr(fmt.Sprintf("stack trace:\n%s", debug.Stack())))
-			cli.ReturnCode = 1
-		}
-		os.Exit(cli.ReturnCode)
+		catchPanic()
 	}()
 	// when build with tag `doc`, generate md and man file
 	if doc.Enable {
@@ -41,6 +34,17 @@ func main() {
 			}
 		}
 	}
+}
+
+func catchPanic() {
+	if err := recover(); err != nil {
+		_, _ = fmt.Fprintf(os.Stderr, "Version: v%s\n", cli.Version)
+		_, _ = fmt.Fprintf(os.Stderr, "Please file an issue at %s with the following panic info\n\n", util.MakeLink("https://github.com/Equationzhao/g/issues/new/choose", "Github Repo"))
+		_, _ = fmt.Fprintln(os.Stderr, cli.MakeErrorStr(fmt.Sprintf("error message:\n%v\n", err)))
+		_, _ = fmt.Fprintln(os.Stderr, cli.MakeErrorStr(fmt.Sprintf("stack trace:\n%s", debug.Stack())))
+		cli.ReturnCode = 1
+	}
+	os.Exit(cli.ReturnCode)
 }
 
 func preprocessArgs() {
