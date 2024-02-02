@@ -244,7 +244,7 @@ testcustomtheme:
     @sh ./script/theme_test.sh
 
 test: theme
-    cd internal/theme && go test -v
+    go test -v ./...
     @echo "-------- start --------"
     @sh ./script/run_test.sh
     @go build -tags=custom .
