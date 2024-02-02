@@ -1,5 +1,9 @@
 # Test Workflow
 
+## requirement
+
+make sure you have `just` installed
+
 ## pass script/run_test.sh(just test)
 `just test`
 

@@ -19,6 +19,7 @@ software/toolchain:
 | just       | `brew install just`        |                                                                                   |
 | prettier   | `brew install prettier`    |                                                                                   |
 | choose     | `brew install choose-rust` |                                                                                   |
+| ripgrep    | `brew install ripgrep`     |                                                                                   |
 
 ```zsh
 brew install go git upx dpkg shasum gh wget gofumpt just prettier choose-rust
