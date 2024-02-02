@@ -2,6 +2,8 @@
 
 This Contribution Guidelines is modified from the [GitHub doc](https://github.com/github/docs/) project
 
+Feel free to ask any questions in the [Discussions QA](https://github.com/Equationzhao/g/discussions/categories/q-a)
+
 ## Issues
 
 ### Create a new issue
@@ -24,7 +26,7 @@ If you find an issue to work on, you are welcome to open a PR with a fix.
 
 ## Make changes
 
-1. Fork the repository and clone it
+1. Fork and Clone the Repository
 ```shell
 git clone git@github.com:yourname/g.git
 ```
@@ -34,7 +36,7 @@ go version
 ```
 3. Make your changes!
 
-## Commit message
+## Commit messages
 It's recommended to follow the commit style below:
 ```text
 <type>[optional scope]: <description>
@@ -57,13 +59,16 @@ test:
 ```
 Also, you can use [gitmoji](https://gitmoji.dev) in the commit message
 
-eg:
+Examples are provided to illustrate the recommended style:
 ```text
 style: :lipstick: change color for 'readme' file
     
 change from BrightYellow to Yellow
 ```
 
+## Tests
+
+Please refer to the [TestWorkflow](TestWorkflow.md)
 
 ## PR
 
@@ -72,6 +77,8 @@ Before you submit your pr, please check out the following stuffs
 
 - [ ] you have run `go mod tidy` and `gofumpt -w -l .`
 - [ ] your code has the necessary comments and documentation (if needed)
+- [ ] you have written tests for your changes (if needed)
+- [ ] Pass other tests, ***if you're breaking the tests, please explain why in the PR description***
 
 and when you're submitting your pr, make sure to:
 - Fill the "Ready for review" template so that we can review your PR. This template helps reviewers understand your changes as well as the purpose of your pull request.
