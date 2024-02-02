@@ -8,13 +8,6 @@
 			"Name": "?.dir"
 		},
 		{
-			"Permissions": "drwxr-xr-x",
-			"Size": "64.0 B",
-			"Owner": "equationzhao",
-			"Group": "staff",
-			"Name": "Applications"
-		},
-		{
 			"Permissions": "-rw-r--r--",
 			"Size": "21.0 B",
 			"Owner": "equationzhao",
