@@ -163,10 +163,10 @@ aur:
 brew-tap:
     if [ ! -f v{{latest}}.tar.gz ]; then \
         wget -c {{url}}/archive/refs/tags/v{{latest}}.tar.gz -O v{{latest}}.tar.gz; \
-    fi \
+    fi
     sed -i bak "s#url .*#url \"{{url}}/archive/refs/tags/v{{latest}}.tar.gz\", tag: \"v{{latest}}\"#g" ../homebrew-g/g-ls.rb
     sed -i bak "s/sha256 .*/sha256 \"$(shasum -a 256 v{{latest}}.tar.gz | choose 0)\"/g" ../homebrew-g/g-ls.rb
-    sed -i bak "s/assert_match .*/assert_match \"{{latest}}\", output/g" ../homebrew-g/g-ls.rb
+    sed -i bak '/assert_match/s/"[0-9.]*"/"{{latest}}"/' ../homebrew-g/g-ls.rb
     cd ../homebrew-g
     cd ../homebrew-g && git add -u
     cd ../homebrew-g && git commit
