@@ -5,6 +5,8 @@ ldflags := "-ldflags='-s -w'"
 COLOR_GREEN := "[0;32m"
 COLOR_RED := "[0;31m"
 
+gh_username := "Equationzhao"
+
 # build binaries for all platforms
 build: 
     # build the binary in build/
@@ -173,15 +175,23 @@ brew-tap:
     cd ../homebrew-g && git push
 
 # update homebrew-core
-brew: 
-    wget -c {{url}}/archive/refs/tags/v{{latest}}.tar.gz -O v{{latest}}.tar.gz
-    sed -i bak "s#url .*#url \"{{url}}/archive/refs/tags/v{{latest}}.tar.gz\", tag: \"v{{latest}}\"#g" $(brew --repository homebrew/core)/Formula/g/g-ls.rb 
-    sed -i bak "s/sha256 .*/sha256 \"$(shasum -a 256 v{{latest}}.tar.gz | choose 0)\"/g" $(brew --repository homebrew/core)/Formula/g/g-ls.rb
-    sed -i bak "s/assert_match .*/assert_match \"{{latest}}\", output/g" $(brew --repository homebrew/core)/Formula/g/g-ls.rb
-    cd $(brew --repository homebrew/core)/Formula/g && rm g-ls.rbbak
+brew:
+    #!/usr/bin/env bash
+    if [ ! -f v{{latest}}.tar.gz ]; then \
+        wget -c {{url}}/archive/refs/tags/v{{latest}}.tar.gz -O v{{latest}}.tar.gz; \
+    fi
+    sed -i bak "s#url .*#url \"{{url}}/archive/refs/tags/v{{latest}}.tar.gz\"#g" $(brew --repository homebrew/core)/Formula/g-ls.rb
+    sed -i bak "s/sha256 .*/sha256 \"$(shasum -a 256 v{{latest}}.tar.gz | choose 0)\"/g" $(brew --repository homebrew/core)/Formula/g-ls.rb
+    sed -i bak '/assert_match/s/"[0-9.]*"/"{{latest}}"/' $(brew --repository homebrew/core)/Formula/g-ls.rb
+    #    cd $(brew --repository homebrew/core)/Formula && brew tests
+    cd $(brew --repository homebrew/core)/Formula && HOMEBREW_NO_INSTALL_FROM_API=1 brew install --build-from-source g-ls.rb
+    cd $(brew --repository homebrew/core)/Formula && brew test g-ls.rb
+    cd $(brew --repository homebrew/core)/Formula && brew audit --strict --online g-ls.rb
+    cd $(brew --repository homebrew/core)/Formula && rm g-ls.rbbak
     cd $(brew --repository homebrew/core) && git add -u
-    cd $(brew --repository homebrew/core) && git commit
-    cd $(brew --repository homebrew/core) && git push
+    cd $(brew --repository homebrew/core) && git commit -m "g-ls {{latest}}"
+    cd $(brew --repository homebrew/core) && git push --set-upstream {{gh_username}} master
+    gh pr create
 
 # update scoop
 scoop:
