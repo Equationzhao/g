@@ -38,7 +38,7 @@ g --tree --long path(s) # show tree layout
 
 ## More options
 
-[g.md](g.md) or check [g.equationzhao.space](g.equationzhao.space)
+[g.md](g.md)
 
 ## Installation Guide
 
