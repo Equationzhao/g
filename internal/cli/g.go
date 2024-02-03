@@ -844,7 +844,7 @@ var logic = func(context *cli.Context) error {
 				jp, isJsonPrinter := p.(*display.JsonPrinter)
 
 				if isJsonPrinter {
-					jp.Extra = make([]any, 0, len(jp.Extra))
+					jp.Extra = make([]any, 0, 2)
 				}
 
 				if total, ok := sizeEnabler.Total(); ok {
