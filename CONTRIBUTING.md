@@ -68,7 +68,7 @@ change from BrightYellow to Yellow
 
 ## Tests
 
-Please refer to the [TestWorkflow](TestWorkflow.md)
+Please refer to the [TestWorkflow](docs/TestWorkflow.md)
 
 ## PR
 
@@ -91,4 +91,4 @@ and when you're submitting your pr, make sure to:
 
 ## Release
 
-Please refer to the [ReleaseWorkflow](ReleaseWorkflow.md)
+Please refer to the [ReleaseWorkflow](docs/ReleaseWorkflow.md)

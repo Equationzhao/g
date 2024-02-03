@@ -11,7 +11,7 @@ import (
 
 func GenMDAndMan() {
 	// md
-	md, err := os.Create("g.md")
+	md, err := os.Create(filepath.Join("docs", "g.md"))
 	if err != nil {
 		panic(err)
 	}
