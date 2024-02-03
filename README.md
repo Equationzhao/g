@@ -197,7 +197,7 @@ source ~/.g.nu
 
 ## Custom theme
 
-[theme](THEME.md)
+[theme](docs/Theme.md)
 
 ## TODO
 - [x] Version sort
