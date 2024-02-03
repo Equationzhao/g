@@ -137,7 +137,7 @@ cross-platform:
 
 ```zsh
 # install the following file to your zsh completion directory
-wget https://raw.githubusercontent.com/Equationzhao/g/feat/completion/completions/zsh/_g
+wget https://raw.githubusercontent.com/Equationzhao/g/master/completions/zsh/_g
 ```
 
 for oh-my-zsh user, you can mv the file to `~/.oh-my-zsh/completions`
