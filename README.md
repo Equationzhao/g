@@ -129,7 +129,30 @@ cross-platform:
 - [WezTerm](https://wezfurlong.org/wezterm/index.html)
 
 
-## Shell Integration (alias)
+## Shell Integration
+
+### completion
+
+> only zsh completion is supported now
+
+```zsh
+# install the following file to your zsh completion directory
+wget https://raw.githubusercontent.com/Equationzhao/g/feat/completion/completions/zsh/_g
+```
+
+for oh-my-zsh user, you can mv the file to `~/.oh-my-zsh/completions`
+
+```zsh
+mv _g ~/.oh-my-zsh/completions/_g
+```
+
+for zinit user, you can mv the file to `~/.local/share/zinit/completions:`
+
+```zsh
+mv _g ~/.local/share/zinit/completions/_g
+```
+
+### alias
 
 Generate initialization scripts(alias) for various shells:
 
@@ -137,7 +160,7 @@ Generate initialization scripts(alias) for various shells:
 g -init bash/zsh/fish/pwsh
 ```
 
-### bash
+##### bash
 
 ```.bash
 # add the following command to .bashrc
@@ -145,7 +168,7 @@ eval "$(g --init bash)"
 # then `source ~/.bashrc`
 ```
 
-### zsh
+##### zsh
 
 ```zsh
 # add the following command to .zshrc
@@ -153,7 +176,7 @@ eval "$(g --init zsh)"
 # then `source ~/.zshrc`
 ```
 
-### fish
+##### fish
 
 ```fish
 #  add to fish config:
@@ -161,7 +184,7 @@ g --init fish | source
 #  then `source ~/.config/fish/config.fish`
 ```
 
-### powershell
+##### powershell
 
 ```powershell
 # add the following line to your profile
@@ -170,7 +193,7 @@ Invoke-Expression (& { (g --init powershell | Out-String) })
 
 use command `echo $profile` to find your profile path
 
-### nushell
+##### nushell
 
 the nushell has a nice built-in ls command, but if you wanna try `g` in nushell, you can do the following:
 
