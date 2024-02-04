@@ -62,7 +62,7 @@ _g() {
         '--blocks[show block size]'
         '--charset[show charset of text file]'
         '--checksum[show checksum of file]'
-        '--checksum-algorithm[show checksum of file]:algorithm:((md5 sha1 sha224 sha256 sha384 sha512 crc32))'
+        '--checksum-algorithm[checksum algorithm]:algorithm:((md5 sha1 sha224 sha256 sha384 sha512 crc32))'
         '--created[created time]'
         '--dereference[dereference symbolic links]'
         '--detect-size[set exact size for mimetype detection]:size:'
