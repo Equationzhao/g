@@ -1,10 +1,20 @@
+#!/bin/bash
+
+# 1. check if g is installed and match the version, if not, install, else exit
+# 2.  install the binary to /usr/local/bin [darwin] or /usr/bin [linux]
+# 3. install man to /usr/local/share/man/man1
+# 4. install completion to /usr/local/share/zsh/site-functions
+#    if compinit is not in .zshrc or .zprofile, add it
+
+
 # Get OS and architecture
 os_type=$(uname -s | tr '[:upper:]' '[:lower:]')
 os_arch=$(uname -m)
 version="0.25.3"
+man_url="https://github.com/Equationzhao/g/raw/v${version}/man/g.1.gz"
 
 interrupt_handler() {
-    exit 1
+  exit 1
 }
 
 trap interrupt_handler SIGINT
@@ -20,6 +30,7 @@ help(){
     echo "  -v: print version"
     echo "  -h: print help"
     echo "  -d: download binary (default)"
+    echo "  -r: uninstall"
 }
 
 error() {
@@ -34,8 +45,81 @@ warn() {
     printf '\033[1;33m%s\033[0m\n' "$1"
 }
 
+# Download the file using curl or wget
+download_url(){
+  url_to_download=$1
+  if command -v curl &> /dev/null; then
+      echo "curl -fLO $url_to_download"
+      curl -fLO "$url_to_download"
+  elif command -v wget &> /dev/null; then
+      echo "wget $url_to_download"
+      wget "$url_to_download"
+  else
+      error "You need to install curl or wget to download the file."
+      exit 1
+  fi
+}
+
+download_completion(){
+    shell_name=$1
+    # v0.25.3 install from the master
+    url="https://github.com/Equationzhao/g/raw/master/completions/${shell_name}/_g"
+    # other version install from the release
+    if [ "$version" != "0.25.3" ]; then
+        url="https://github.com/Equationzhao/g/raw/v${version}/completions/${shell_name}/_g"
+    fi
+    download_url $url
+    if [ $? -ne 0 ]; then
+        error "Failed to download the file."
+        exit 1
+    fi
+}
+
+check_compinit(){
+    if [ -f ~/.zshrc ]; then
+        if ! grep -q "autoload -Uz compinit" ~/.zshrc; then
+            echo "autoload -Uz compinit" >> ~/.zshrc
+            echo "compinit" >> ~/.zshrc
+            success "compinit has been added to ~/.zshrc"
+        fi
+    elif [ -f ~/.zprofile ]; then
+        if ! grep -q "autoload -Uz compinit" ~/.zprofile; then
+            echo "autoload -Uz compinit" >> ~/.zprofile
+            echo "compinit" >> ~/.zprofile
+            success "compinit has been added to ~/.zprofile"
+        fi
+    fi
+}
+
+uninstall_g(){
+  case $os_type in
+      darwin)
+          installed_location="/usr/local/bin"
+          echo "rm $installed_location/g"
+          sudo rm $installed_location/g
+          installed_location="/usr/local/share/man/man1"
+          echo "rm $installed_location/g.1.gz"
+          sudo rm $installed_location/g.1.gz
+          completion_path="/usr/local/share/zsh/site-functions"
+          echo "rm $completion_path/_g"
+          sudo rm $completion_path/_g
+          ;;
+      linux)
+          installed_location="/usr/bin"
+          echo "rm $installed_location/g"
+          sudo rm $installed_location/g
+          installed_location="/usr/local/share/man/man1"
+          echo "rm $installed_location/g.1.gz"
+          sudo rm $installed_location/g.1.gz
+          completion_path="/usr/local/share/zsh/site-functions"
+          echo "rm $completion_path/_g"
+          sudo rm $completion_path/_g
+          ;;
+  esac
+}
+
 # Parse flags
-while getopts "vhd" opt; do
+while getopts "vhdr" opt; do
     case $opt in
         v)
             echo "$version"
@@ -46,6 +130,11 @@ while getopts "vhd" opt; do
             exit 0
             ;;
         d)
+            ;;
+        r)
+            uninstall_g
+            success "g has been uninstalled"
+            exit 0
             ;;
         \?)
             error "Invalid option: -$OPTARG"
@@ -136,21 +225,11 @@ url="https://github.com/Equationzhao/g/releases/download/v${version}/${file_name
 #     url="${url}.exe"
 # fi
 
-# Download the file using curl or wget
-if command -v curl &> /dev/null; then
-    echo "curl -fLO $url"
-    curl -fLO $url
-elif command -v wget &> /dev/null; then
-    echo "wget $url"
-    wget $url
-else
-    error "You need to install curl or wget to download the file."
-    exit 1
-fi
+download_url $url
 
 if [ $? -ne 0 ]; then
-        error "Failed to download the file."
-        exit 1
+    error "Failed to download the file."
+    exit 1
 fi
 
 # Make the file executable for Linux or Darwin
@@ -158,13 +237,47 @@ if [ "$file_os" = "linux" ] || [ "$file_os" = "darwin" ]; then
     chmod +x g-${file_os}-${file_arch}
 fi
 
+# executable
 case $os_type in
     darwin)
-        echo "mv ${file_name} /usr/local/bin/g"
-        sudo mv ${file_name} /usr/local/bin/g
+        installed_location="/usr/local/bin"
+        echo "mv ${file_name} $installed_location/g"
+        sudo mv ${file_name} $installed_location/g
         ;;
     linux)
-        echo "mv ${file_name} /usr/bin/g"
-        sudo mv ${file_name} /usr/bin/g
+        installed_location="/usr/bin"
+        echo "mv ${file_name} $installed_location/g"
+        sudo mv ${file_name} $installed_location/g
+        ;;
+esac
+
+success "g $version has been installed in $installed_location"
+
+# man page
+installed_location="/usr/local/share/man/man1"
+sudo mkdir -p $installed_location
+download_url $man_url
+echo "mv g.1.gz $installed_location/g.1.gz"
+sudo mv g.1.gz $installed_location/g.1.gz
+
+success "man page has been installed in $installed_location"
+
+
+# install completion
+shell_type=$(echo $SHELL | awk -F'/' '{print $NF}')
+
+completion_path="/usr/local/share/zsh/site-functions"
+case $shell_type in
+    zsh)
+        download_completion "$shell_type"
+        sudo mkdir -p $completion_path
+        echo "mv _g $completion_path/_g"
+        sudo mv _g "$completion_path/_g"
+        check_compinit
+        success "completion has been installed in $completion_path"
+        ;;
+    \?)
+        error "Unsupported shell type: $shell_type"
+        warn "skip completion installation"
         ;;
 esac
