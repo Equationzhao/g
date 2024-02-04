@@ -15,7 +15,7 @@ import (
 var filteringFlag = []cli.Flag{
 	&cli.UintFlag{
 		Name:        "n",
-		Aliases:     []string{"limitN", "limit", "topN", "top"},
+		Aliases:     []string{"limit"},
 		Usage:       "Limit display to a max of n items (n <=0 means unlimited)",
 		Value:       0,
 		DefaultText: "unlimited",
@@ -54,8 +54,7 @@ var filteringFlag = []cli.Flag{
 		Category: "FILTERING",
 	},
 	&cli.BoolFlag{
-		Name:               "show-only-hidden",
-		Aliases:            []string{"hidden"},
+		Name:               "hidden",
 		DisableDefaultText: true,
 		Usage:              "show only hidden files(overridden by --show-hidden/-a/-A)",
 		Action: func(context *cli.Context, b bool) error {
@@ -71,7 +70,7 @@ var filteringFlag = []cli.Flag{
 	},
 	&cli.BoolFlag{
 		Name:               "a",
-		Aliases:            []string{"sh", "show-hidden"},
+		Aliases:            []string{"show-hidden"},
 		DisableDefaultText: true,
 		Usage:              "show hidden files",
 		Action: func(context *cli.Context, b bool) error {
@@ -98,9 +97,8 @@ var filteringFlag = []cli.Flag{
 		Category: "FILTERING",
 	},
 	&cli.StringSliceFlag{
-		Name:    "no-ext",
-		Aliases: []string{"noext"},
-		Usage:   "show file which doesn't have target ext",
+		Name:  "no-ext",
+		Usage: "show file which doesn't have target ext",
 		Action: func(context *cli.Context, s []string) error {
 			if len(s) > 0 {
 				f := filter.RemoveByExt(s...)
@@ -112,7 +110,7 @@ var filteringFlag = []cli.Flag{
 	},
 	&cli.BoolFlag{
 		Name:               "no-dir",
-		Aliases:            []string{"nodir", "file"},
+		Aliases:            []string{"file"},
 		DisableDefaultText: true,
 		Usage:              "do not show directory",
 		Action: func(context *cli.Context, b bool) error {
@@ -125,7 +123,7 @@ var filteringFlag = []cli.Flag{
 	},
 	&cli.BoolFlag{
 		Name:               "D",
-		Aliases:            []string{"dir", "only-dir"},
+		Aliases:            []string{"dirs"},
 		DisableDefaultText: true,
 		Usage:              "show directory only",
 		Action: func(context *cli.Context, b bool) error {
@@ -199,7 +197,6 @@ var filteringFlag = []cli.Flag{
 	},
 	&cli.BoolFlag{
 		Name:               "git-ignore",
-		Aliases:            []string{"hide-git-ignore"},
 		Usage:              "hide git ignored file/dir [if git is installed]",
 		DisableDefaultText: true,
 		Category:           "FILTERING",
