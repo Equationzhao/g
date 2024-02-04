@@ -3,15 +3,13 @@
 package constval
 
 import (
-	"unsafe"
-
 	"golang.org/x/exp/constraints"
 )
 
 // Hashable is the type of values that may be used as map keys or set members.
 // it should be exact same as haxmap.hashable (it's unexported, so we can't use it directly)
 type Hashable interface {
-	constraints.Integer | constraints.Float | constraints.Complex | ~string | uintptr | ~unsafe.Pointer
+	constraints.Integer | constraints.Float | constraints.Complex | ~string | uintptr
 }
 
 const (
