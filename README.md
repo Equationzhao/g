@@ -80,10 +80,16 @@ TODO, see [issue](https://github.com/Equationzhao/g/issues/119)
 
 ### Pre-built executable
 
-#### curl
+#### install script
 
+##### install
 ```sh
 bash -c "$(curl -fsSLk https://raw.githubusercontent.com/Equationzhao/g/master/script/install.sh)"
+```
+
+##### uninstall
+```sh
+curl -fsSLk https://raw.githubusercontent.com/Equationzhao/g/master/script/install.sh | bash /dev/stdin -r     
 ```
 
 #### deb
@@ -135,21 +141,25 @@ cross-platform:
 
 > only zsh completion is supported now
 
+>> *if you install `g` through brew or the install script, the completion is usually installed already.*
+
 ```zsh
-# install the following file to your zsh completion directory
 wget https://raw.githubusercontent.com/Equationzhao/g/master/completions/zsh/_g
 ```
 
-for oh-my-zsh user, you can mv the file to `~/.oh-my-zsh/completions`
+install the file to your zsh completion directory, usually `/usr/local/share/zsh/site-functions` or `/usr/share/zsh/site-functions` (or anywhere in your $FPATH)
 
 ```zsh
-mv _g ~/.oh-my-zsh/completions/_g
+mv _g ~/.zsh/completions
 ```
 
-for zinit user, you can mv the file to `~/.local/share/zinit/completions:`
+make sure `autoload -Uz compinit` and `compinit` are in the `~/.zshrc` or `~/.zprofile`
+
+if not, add them to at least one of them.
 
 ```zsh
-mv _g ~/.local/share/zinit/completions/_g
+autoload -Uz compinit
+compinit
 ```
 
 ### alias
