@@ -160,8 +160,8 @@ var sortingFlags = []cli.Flag{
 		Category: "SORTING",
 	},
 	&cli.BoolFlag{
-		Name:               "sort-reverse",
-		Aliases:            []string{"reverse", "r"},
+		Name:               "r",
+		Aliases:            []string{"reverse"},
 		Usage:              "reverse the order of the sort",
 		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
@@ -174,7 +174,7 @@ var sortingFlags = []cli.Flag{
 	},
 	&cli.BoolFlag{
 		Name:               "df",
-		Aliases:            []string{"dir-first", "group-directories-first"},
+		Aliases:            []string{"dir-first"},
 		Usage:              "List directories before other files",
 		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
@@ -365,7 +365,7 @@ var sortingFlags = []cli.Flag{
 	},
 	&cli.BoolFlag{
 		Name:               "U",
-		Aliases:            []string{"nosort", "no-sort"},
+		Aliases:            []string{"no-sort"},
 		Usage:              "do not sort; list entries in directory order. ",
 		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
