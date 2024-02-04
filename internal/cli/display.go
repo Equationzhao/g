@@ -42,19 +42,19 @@ var displayFlag = []cli.Flag{
 		Usage:       "when to use terminal colors [always|auto|never][basic|256|24bit]",
 		Action: func(context *cli.Context, s string) error {
 			switch s {
-			case "always", "force":
+			case "always":
 				if theme.ColorLevel == theme.None {
 					theme.ColorLevel = theme.Ascii
 				}
-			case "auto", "tty":
+			case "auto":
 			// skip
-			case "never", "none", "off":
+			case "never":
 				_ = context.Set("no-color", "true")
-			case "16", "basic":
+			case "basic":
 				theme.ColorLevel = theme.Ascii
-			case "256", "8bit":
+			case "256":
 				theme.ColorLevel = theme.C256
-			case "24bit", "truecolor", "true-color", "24-bit", "16m":
+			case "24bit":
 				theme.ColorLevel = theme.TrueColor
 			default:
 				return fmt.Errorf("unknown color option:%s", s)
@@ -138,7 +138,7 @@ var displayFlag = []cli.Flag{
 	},
 	&cli.BoolFlag{
 		Name:               "x",
-		Aliases:            []string{"col", "across", "horizontal"},
+		Aliases:            []string{"across", "horizontal"},
 		Usage:              "list entries by lines instead of by columns",
 		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
@@ -186,14 +186,13 @@ var displayFlag = []cli.Flag{
 		Category: "DISPLAY",
 	},
 	&cli.StringFlag{
-		Name:    "tb-style",
-		Aliases: []string{"table-style"},
-		Usage:   "set table style [ascii(default)/unicode]",
+		Name:  "table-style",
+		Usage: "set table style [ascii(default)/unicode]",
 		Action: func(context *cli.Context, s string) error {
 			switch s {
-			case "ascii", "ASCII", "Ascii":
+			case "ascii":
 				// no action needed
-			case "unicode", "Unicode", "UNICODE":
+			case "unicode":
 				display.DefaultTBStyle = display.UNICODEStyle
 			default:
 				return fmt.Errorf("invalid table style: %s", s)
@@ -219,7 +218,7 @@ var displayFlag = []cli.Flag{
 	},
 	&cli.BoolFlag{
 		Name:               "md",
-		Aliases:            []string{"markdown", "Markdown"},
+		Aliases:            []string{"markdown"},
 		Usage:              "output in markdown-table format",
 		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
@@ -238,8 +237,7 @@ var displayFlag = []cli.Flag{
 		Category: "DISPLAY",
 	},
 	&cli.BoolFlag{
-		Name:               "CSV",
-		Aliases:            []string{"csv"},
+		Name:               "csv",
 		Usage:              "output in csv format",
 		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
@@ -255,8 +253,7 @@ var displayFlag = []cli.Flag{
 		Category: "DISPLAY",
 	},
 	&cli.BoolFlag{
-		Name:               "TSV",
-		Aliases:            []string{"tsv"},
+		Name:               "tsv",
 		Usage:              "output in tsv format",
 		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
@@ -286,7 +283,7 @@ var displayFlag = []cli.Flag{
 				if _, ok := p.(*display.CommaPrint); !ok {
 					p = display.NewCommaPrint()
 				}
-			case "long", "l", "verbose":
+			case "long", "l":
 				contentFunc = append(
 					contentFunc, content.EnableFileMode(r), sizeEnabler.EnableSize(sizeUint, r),
 				)
@@ -314,7 +311,7 @@ var displayFlag = []cli.Flag{
 				if _, ok := p.(*display.TablePrinter); !ok {
 					p = display.NewTablePrinter(display.DefaultTB)
 				}
-			case "Markdown", "md", "MD", "markdown":
+			case "md", "markdown":
 				if _, ok := p.(*display.MDPrinter); !ok {
 					p = display.NewMDPrinter()
 					_ = context.Set("no-color", "1")
@@ -323,13 +320,13 @@ var displayFlag = []cli.Flag{
 						return err
 					}
 				}
-			case "CSV", "csv":
+			case "csv":
 				if _, ok := p.(*display.CSVPrinter); !ok {
 					p = display.NewCSVPrinter()
 					_ = context.Set("no-color", "1")
 					_ = context.Set("no-icon", "1")
 				}
-			case "TSV", "tsv":
+			case "tsv":
 				if _, ok := p.(*display.TSVPrinter); !ok {
 					p = display.NewTSVPrinter()
 					_ = context.Set("no-color", "1")
@@ -365,7 +362,6 @@ var displayFlag = []cli.Flag{
 	},
 	&cli.BoolFlag{
 		Name:               "colorless",
-		Aliases:            []string{"no-color", "nocolor"},
 		Usage:              "without color",
 		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
@@ -395,7 +391,7 @@ var displayFlag = []cli.Flag{
 	},
 	&cli.BoolFlag{
 		Name:               "d",
-		Aliases:            []string{"directory", "list-dirs"},
+		Aliases:            []string{"directory"},
 		DisableDefaultText: true,
 		Usage:              "list directories themselves, not their contents",
 		Category:           "DISPLAY",
@@ -408,8 +404,7 @@ var displayFlag = []cli.Flag{
 		Category:           "DISPLAY",
 	},
 	&cli.BoolFlag{
-		Name:               "ft",
-		Aliases:            []string{"file-type"},
+		Name:               "file-typ",
 		DisableDefaultText: true,
 		Usage:              "likewise, except do not append '*'",
 		Category:           "DISPLAY",
