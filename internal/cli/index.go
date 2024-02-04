@@ -21,7 +21,7 @@ var indexFlags = []cli.Flag{
 	},
 	&cli.BoolFlag{
 		Name:               "rebuild-index",
-		Aliases:            []string{"ri", "remove-all"},
+		Aliases:            []string{"ri"},
 		Usage:              "rebuild index",
 		DisableDefaultText: true,
 		Category:           "INDEX",
@@ -37,7 +37,7 @@ var indexFlags = []cli.Flag{
 	},
 	&cli.BoolFlag{
 		Name:               "fuzzy",
-		Aliases:            []string{"fz", "f"},
+		Aliases:            []string{"fz"},
 		Usage:              "fuzzy search",
 		DisableDefaultText: true,
 		Category:           "INDEX",
@@ -99,7 +99,7 @@ var indexFlags = []cli.Flag{
 	},
 	&cli.BoolFlag{
 		Name:               "remove-current-path",
-		Aliases:            []string{"rcp", "rc", "rmc"},
+		Aliases:            []string{"rmc"},
 		Usage:              "remove current path from index",
 		Category:           "INDEX",
 		DisableDefaultText: true,
