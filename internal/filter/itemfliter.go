@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	constval "github.com/Equationzhao/g/internal/const"
 	"github.com/Equationzhao/g/internal/git"
 	"github.com/Equationzhao/g/internal/item"
 	"github.com/Equationzhao/g/internal/osbased"
@@ -202,7 +203,7 @@ func isOrIsSonOf(a, b string) bool {
 	return false
 }
 
-const MimeTypeName = "Mime-type"
+const MimeTypeName = constval.NameOfMIME
 
 func MimeTypeOnly(fileTypes ...string) ItemFilterFunc {
 	return func(e *item.FileInfo) bool {

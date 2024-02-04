@@ -51,3 +51,30 @@ const (
 const Reset = "\033[0m"
 
 const DefaultHookLen = 5
+
+const (
+	NameOfName          = "Name"
+	NameOfCharset       = "Charset"
+	NameOfMIME          = "Mime-type"
+	NameOfLink          = "Link"
+	NameOfInode         = "Inode"
+	NameOfIndex         = "#"
+	NameOfGroupName     = "Group"
+	NameOfGroupUidName  = "Group-uid"
+	NameOfGroupSID      = "Group-sid"
+	NameOfOwner         = "Owner"
+	NameOfOwnerUid      = "Owner-uid"
+	NameOfOwnerSID      = "Owner-sid"
+	NameOfSize          = "Size"
+	NameOfGitStatus     = "Git"
+	NameOfGitRepoBranch = "Branch"
+	NameOfGitRepoStatus = "Repo-status"
+	NameOfPermission    = "Permissions"
+	NameOfSum           = "Sum"
+	NameOfRelativeTime  = "Relative-Time"
+	NameOfTime          = "Time"
+	NameOfTimeModified  = "Modified"
+	NameOfTimeCreated   = "Created"
+	NameOfTimeAccessed  = "Accessed"
+	NameOfTimeBirth     = "Birth"
+)

@@ -123,7 +123,6 @@ func fileHash(fileInfo *item.FileInfo, isThorough bool) (string, error) {
 				return "", fmt.Errorf("couldn't read file: %w", fileReadErr)
 			}
 			fileInfo.Cache["content"] = bytes
-
 		}
 		if fileInfo.Size() <= thresholdFileSize {
 			prefix = "f"

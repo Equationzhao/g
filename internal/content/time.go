@@ -4,6 +4,7 @@ import (
 	"runtime"
 	"time"
 
+	constval "github.com/Equationzhao/g/internal/const"
 	"github.com/Equationzhao/g/internal/item"
 	"github.com/Equationzhao/g/internal/osbased"
 	"github.com/Equationzhao/g/internal/render"
@@ -17,7 +18,7 @@ func NewRelativeTimeEnabler() *RelativeTimeEnabler {
 	return &RelativeTimeEnabler{}
 }
 
-const RelativeTime = "Relative-Time"
+const RelativeTime = constval.NameOfRelativeTime
 
 func (r *RelativeTimeEnabler) Enable(renderer *render.Renderer) ContentOption {
 	return func(info *item.FileInfo) (string, string) {
@@ -50,11 +51,11 @@ func (r *RelativeTimeEnabler) Enable(renderer *render.Renderer) ContentOption {
 }
 
 const (
-	timeName     = "Time"
-	timeModified = "Modified"
-	timeCreated  = "Created"
-	timeAccessed = "Accessed"
-	timeBirth    = "Birth"
+	timeName     = constval.NameOfTime
+	timeModified = constval.NameOfTimeModified
+	timeCreated  = constval.NameOfTimeCreated
+	timeAccessed = constval.NameOfTimeAccessed
+	timeBirth    = constval.NameOfTimeBirth
 )
 
 // EnableTime enables time

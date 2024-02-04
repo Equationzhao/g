@@ -3,15 +3,17 @@ package content
 import (
 	"runtime"
 
+	"github.com/Equationzhao/g/internal/align"
+	constval "github.com/Equationzhao/g/internal/const"
 	"github.com/Equationzhao/g/internal/item"
 	"github.com/Equationzhao/g/internal/osbased"
 	"github.com/Equationzhao/g/internal/render"
 )
 
 const (
-	OwnerName    = "Owner"
-	OwnerUidName = "Owner-uid"
-	OwnerSID     = "Owner-sid"
+	OwnerName    = constval.NameOfOwner
+	OwnerUidName = constval.NameOfOwnerUid
+	OwnerSID     = constval.NameOfOwnerSID
 )
 
 type OwnerEnabler struct {
@@ -31,6 +33,7 @@ func (o *OwnerEnabler) DisableNumeric() {
 }
 
 func (o *OwnerEnabler) EnableOwner(renderer *render.Renderer) ContentOption {
+	align.Register(OwnerName)
 	return func(info *item.FileInfo) (string, string) {
 		name, returnFuncName := "", ""
 		if o.Numeric {

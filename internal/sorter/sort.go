@@ -8,8 +8,8 @@ import (
 	"strconv"
 	"strings"
 
+	constval "github.com/Equationzhao/g/internal/const"
 	"github.com/Equationzhao/g/internal/content"
-	"github.com/Equationzhao/g/internal/filter"
 	"github.com/Equationzhao/g/internal/item"
 	"github.com/Equationzhao/g/internal/osbased"
 	"github.com/Equationzhao/g/internal/util"
@@ -208,7 +208,7 @@ func byMimeType(a, b *item.FileInfo, ascend bool) int {
 	return cmp.Compare(mimeBstr, mimeAstr)
 }
 
-const MimeTypeName = filter.MimeTypeName
+const MimeTypeName = constval.NameOfMIME
 
 func getMimeName(a *item.FileInfo, b *item.FileInfo) (string, string) {
 	mimeAstr, mimeBstr := "", ""

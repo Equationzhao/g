@@ -3,6 +3,7 @@ package content
 import (
 	"runtime"
 
+	constval "github.com/Equationzhao/g/internal/const"
 	"github.com/Equationzhao/g/internal/item"
 	"github.com/Equationzhao/g/internal/osbased"
 	"github.com/Equationzhao/g/internal/render"
@@ -14,9 +15,9 @@ type GroupEnabler struct {
 }
 
 const (
-	GroupName    = "Group"
-	GroupUidName = "Group-uid"
-	GroupSID     = "Group-sid"
+	GroupName    = constval.NameOfGroupName
+	GroupUidName = constval.NameOfGroupUidName
+	GroupSID     = constval.NameOfGroupSID
 )
 
 func NewGroupEnabler() *GroupEnabler {

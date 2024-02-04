@@ -3,6 +3,7 @@ package content
 import (
 	"strconv"
 
+	constval "github.com/Equationzhao/g/internal/const"
 	"github.com/Equationzhao/g/internal/item"
 	"github.com/Equationzhao/g/internal/osbased"
 	"github.com/Equationzhao/g/internal/render"
@@ -15,7 +16,7 @@ func NewLinkEnabler() *LinkEnabler {
 	return &LinkEnabler{}
 }
 
-const Link = "Link"
+const Link = constval.NameOfLink
 
 func (l *LinkEnabler) Enable(renderer *render.Renderer) ContentOption {
 	return func(info *item.FileInfo) (string, string) {

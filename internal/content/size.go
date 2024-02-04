@@ -6,6 +6,7 @@ import (
 	"strings"
 	"sync/atomic"
 
+	constval "github.com/Equationzhao/g/internal/const"
 	"github.com/Equationzhao/g/internal/item"
 	"github.com/Equationzhao/g/internal/osbased"
 	"github.com/Equationzhao/g/internal/render"
@@ -30,7 +31,7 @@ const (
 	NB
 )
 
-const SizeName = "Size"
+const SizeName = constval.NameOfSize
 
 type Size struct {
 	Bytes uint64

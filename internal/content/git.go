@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/Equationzhao/g/internal/align"
+	constval "github.com/Equationzhao/g/internal/const"
 	"github.com/Equationzhao/g/internal/git"
 	"github.com/Equationzhao/g/internal/item"
 	"github.com/Equationzhao/g/internal/render"
@@ -25,7 +26,7 @@ func NewGitEnabler() *GitEnabler {
 	}
 }
 
-const GitStatus = "Git"
+const GitStatus = constval.NameOfGitStatus
 
 func (g *GitEnabler) Enable(renderer *render.Renderer) ContentOption {
 	isOrIsParentOf := func(parent, child string) bool {
@@ -94,8 +95,8 @@ func gitByName(status git.Status, renderer *render.Renderer) string {
 }
 
 const (
-	GitRepoBranch = "Branch"
-	GitRepoStatus = "Repo-status"
+	GitRepoBranch = constval.NameOfGitRepoBranch
+	GitRepoStatus = constval.NameOfGitRepoStatus
 )
 
 type GitRepoEnabler struct{}
