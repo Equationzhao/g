@@ -228,7 +228,7 @@ check: check-install-script
     fi
 
 check-install-script:
-    @if [ "$(sh ./script/install.sh -v) == {{latest}}" ]; then \
+    @if [ "$(sh ./script/install.sh -v)" == {{latest}} ]; then \
       echo "{{COLOR_GREEN}}install.go -v matches {{latest}} "; \
     else \
       echo "{{COLOR_RED}}install.go -v doesn't match {{latest}}"; \
