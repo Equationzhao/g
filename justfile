@@ -246,6 +246,7 @@ testcustomtheme:
 test: theme
     go test -v ./...
     @echo "-------- start --------"
+    go build
     @sh ./script/run_test.sh
     @go build -tags=custom .
     @rm g
