@@ -53,16 +53,16 @@ var viewFlag = []cli.Flag{
 	},
 	&cli.StringSliceFlag{
 		Name:    "time-type",
-		Usage:   "time type, mod(default), create, access, all, birth[macOS only]",
+		Usage:   "time type, mod(default), created, accessed, all, birth[macOS only]",
 		EnvVars: []string{"TIME_TYPE"},
 		Action: func(context *cli.Context, ss []string) error {
 			timeType = make([]string, 0, len(ss))
-			accepts := []string{"mod", "modified", "create", "cr", "access", "ac", "birth"}
+			accepts := []string{"modified", "created", "accessed", "birth"}
 			for _, s := range ss {
 				if slices.Contains(accepts, strings.ToLower(s)) {
 					timeType = append(timeType, s)
 				} else if s == "all" {
-					timeType = []string{"mod", "create", "access"}
+					timeType = []string{"mod", "cr", "ac"}
 				} else {
 					ReturnCode = 2
 					return errors.New("invalid time type")
@@ -73,21 +73,21 @@ var viewFlag = []cli.Flag{
 		Category: "VIEW",
 	},
 	&cli.BoolFlag{
-		Name:               "access",
-		Aliases:            []string{"ac", "accessed"},
+		Name:               "accessed",
+		Aliases:            []string{"ac"},
 		Usage:              "accessed time",
 		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
 			if b {
-				timeType = append(timeType, "access")
+				timeType = append(timeType, "ac")
 			}
 			return nil
 		},
 		Category: "VIEW",
 	},
 	&cli.BoolFlag{
-		Name:               "modify",
-		Aliases:            []string{"mod", "modified"},
+		Name:               "modified",
+		Aliases:            []string{"mod"},
 		Usage:              "modified time",
 		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
@@ -99,13 +99,13 @@ var viewFlag = []cli.Flag{
 		Category: "VIEW",
 	},
 	&cli.BoolFlag{
-		Name:               "create",
-		Aliases:            []string{"cr", "created"},
+		Name:               "created",
+		Aliases:            []string{"cr"},
 		Usage:              "created time",
 		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
 			if b {
-				timeType = append(timeType, "create")
+				timeType = append(timeType, "cr")
 			}
 			return nil
 		},
@@ -256,7 +256,6 @@ var viewFlag = []cli.Flag{
 	},
 	&cli.BoolFlag{
 		Name:               "octal-perm",
-		Aliases:            []string{"octal-permission"},
 		Usage:              "list each file's permission in octal format",
 		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
@@ -269,7 +268,6 @@ var viewFlag = []cli.Flag{
 	},
 	&cli.BoolFlag{
 		Name:               "perm",
-		Aliases:            []string{"permission"},
 		Usage:              "show permission",
 		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
@@ -306,35 +304,12 @@ var viewFlag = []cli.Flag{
 		Category: "VIEW",
 	},
 	&cli.BoolFlag{
-		Name:               "block",
-		Aliases:            []string{"blocks"},
+		Name:               "blocks",
 		Usage:              "show block size",
 		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
 			if b {
 				contentFunc = append(contentFunc, blockEnabler.Enable(r))
-			}
-			return nil
-		},
-		Category: "VIEW",
-	},
-	&cli.BoolFlag{
-		Name:               "lh",
-		Aliases:            []string{"human-readable"},
-		DisableDefaultText: true,
-		Usage:              "show human readable size",
-		Action: func(context *cli.Context, b bool) error {
-			if b {
-				contentFunc = append(
-					contentFunc, contents.EnableFileMode(r), sizeEnabler.EnableSize(sizeUint, r),
-					ownerEnabler.EnableOwner(r), groupEnabler.EnableGroup(r),
-				)
-				for _, s := range timeType {
-					contentFunc = append(contentFunc, contents.EnableTime(timeFormat, s, r))
-				}
-				if _, ok := p.(*display.Byline); !ok {
-					p = display.NewByline()
-				}
 			}
 			return nil
 		},
@@ -402,7 +377,6 @@ var viewFlag = []cli.Flag{
 	&cli.BoolFlag{
 		Name:               "no-icon",
 		Usage:              "disable icon(always override --icon)",
-		Aliases:            []string{"noicon", "ni"},
 		DisableDefaultText: true,
 		Category:           "VIEW",
 	},
@@ -416,7 +390,7 @@ var viewFlag = []cli.Flag{
 	&cli.BoolFlag{
 		Name:               "fp",
 		Usage:              "show full path",
-		Aliases:            []string{"full-path", "fullpath"},
+		Aliases:            []string{"full-path"},
 		DisableDefaultText: true,
 		Category:           "VIEW",
 	},
@@ -449,7 +423,7 @@ var viewFlag = []cli.Flag{
 	&cli.BoolFlag{
 		Name:               "mime",
 		Usage:              "show mime file type",
-		Aliases:            []string{"mime-type", "mimetype"},
+		Aliases:            []string{"mime-type"},
 		DisableDefaultText: true,
 		Category:           "VIEW",
 		Action: func(context *cli.Context, b bool) error {
@@ -471,7 +445,7 @@ var viewFlag = []cli.Flag{
 	&cli.BoolFlag{
 		Name:               "mime-parent",
 		Usage:              "show mime parent type",
-		Aliases:            []string{"mime-parent-type", "mimetype-parent"},
+		Aliases:            []string{"mime-parent-type"},
 		Category:           "VIEW",
 		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
@@ -706,7 +680,7 @@ var viewFlag = []cli.Flag{
 	},
 	&cli.BoolFlag{
 		Name:               "l",
-		Aliases:            []string{"long"},
+		Aliases:            []string{"long", "verbose"},
 		Usage:              "use a long listing format",
 		Category:           "VIEW",
 		DisableDefaultText: true,
@@ -733,7 +707,6 @@ var viewFlag = []cli.Flag{
 	},
 	&cli.BoolFlag{
 		Name:               "all",
-		Aliases:            []string{"la"},
 		Usage:              "show all info/use a long listing format",
 		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {

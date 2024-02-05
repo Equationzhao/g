@@ -65,13 +65,13 @@ func EnableTime(format string, mode string, renderer *render.Renderer) ContentOp
 		var t time.Time
 		timeType := ""
 		switch mode {
-		case "mod", "modified":
+		case "modified", "mod":
 			t = osbased.ModTime(info)
 			timeType = timeModified
-		case "create", "cr":
+		case "created", "cr":
 			t = osbased.CreateTime(info)
 			timeType = timeCreated
-		case "access", "ac":
+		case "accessed", "ac":
 			t = osbased.AccessTime(info)
 			timeType = timeAccessed
 		case "birth":
