@@ -53,6 +53,11 @@ yay -S g-ls
 #### Homebrew
 
 ```bash
+brew install g-ls
+```
+or use the homebrew tap:
+
+```bash
 brew tap equationzhao/core git@github.com:Equationzhao/homebrew-g.git
 ```
 
