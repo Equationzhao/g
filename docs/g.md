@@ -195,7 +195,7 @@ g [options] [path]
 **--footer**: add a footer row
 
 **--format**="": across  -x,  commas  -m, horizontal -x, long -l, single-column -1,
-	verbose -l, vertical -C, table -tb, HTML -html, Markdown -md, CSV -csv, TSV -tsv, json -j, tree -T (default: C)
+	verbose -l, vertical -C, table -tb, markdown -md, csv -csv, tsv -tsv, json -j, tree -T (default: C)
 
 **--fp, --full-path, --fullpath**: show full path
 
