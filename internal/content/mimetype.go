@@ -4,7 +4,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/Equationzhao/g/internal/filter"
+	constval "github.com/Equationzhao/g/internal/const"
 	"github.com/Equationzhao/g/internal/item"
 	"github.com/Equationzhao/g/internal/render"
 	"github.com/Equationzhao/g/internal/util"
@@ -22,7 +22,7 @@ func NewMimeFileTypeEnabler() *MimeFileTypeEnabler {
 }
 
 const (
-	MimeTypeName       = filter.MimeTypeName
+	MimeTypeName       = constval.NameOfMIME
 	ParentMimeTypeName = "Parent-Mime-type"
 )
 

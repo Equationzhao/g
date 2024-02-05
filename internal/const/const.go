@@ -3,15 +3,13 @@
 package constval
 
 import (
-	"unsafe"
-
 	"golang.org/x/exp/constraints"
 )
 
 // Hashable is the type of values that may be used as map keys or set members.
 // it should be exact same as haxmap.hashable (it's unexported, so we can't use it directly)
 type Hashable interface {
-	constraints.Integer | constraints.Float | constraints.Complex | ~string | uintptr | ~unsafe.Pointer
+	constraints.Integer | constraints.Float | constraints.Complex | ~string | uintptr
 }
 
 const (
@@ -51,3 +49,30 @@ const (
 const Reset = "\033[0m"
 
 const DefaultHookLen = 5
+
+const (
+	NameOfName          = "Name"
+	NameOfCharset       = "Charset"
+	NameOfMIME          = "Mime-type"
+	NameOfLink          = "Link"
+	NameOfInode         = "Inode"
+	NameOfIndex         = "#"
+	NameOfGroupName     = "Group"
+	NameOfGroupUidName  = "Group-uid"
+	NameOfGroupSID      = "Group-sid"
+	NameOfOwner         = "Owner"
+	NameOfOwnerUid      = "Owner-uid"
+	NameOfOwnerSID      = "Owner-sid"
+	NameOfSize          = "Size"
+	NameOfGitStatus     = "Git"
+	NameOfGitRepoBranch = "Branch"
+	NameOfGitRepoStatus = "Repo-status"
+	NameOfPermission    = "Permissions"
+	NameOfSum           = "Sum"
+	NameOfRelativeTime  = "Relative-Time"
+	NameOfTime          = "Time"
+	NameOfTimeModified  = "Modified"
+	NameOfTimeCreated   = "Created"
+	NameOfTimeAccessed  = "Accessed"
+	NameOfTimeBirth     = "Birth"
+)

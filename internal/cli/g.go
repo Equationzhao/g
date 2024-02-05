@@ -29,7 +29,6 @@ import (
 	"github.com/panjf2000/ants/v2"
 	"github.com/savioxavier/termlink"
 	"github.com/urfave/cli/v2"
-	"github.com/valyala/bytebufferpool"
 	"github.com/xrash/smetrics"
 	versionInfo "go.szostok.io/version"
 	vp "go.szostok.io/version/printer"
@@ -65,6 +64,7 @@ var (
 	duplicateDetect = contents.NewDuplicateDetect()
 	hookPost        = make([]func(display.Printer, ...*item.FileInfo), 0)
 	pool            *ants.Pool
+	allPart         []string
 )
 
 var G *cli.App
@@ -838,91 +838,24 @@ var logic = func(context *cli.Context) error {
 		}
 		{
 			// add total && statistics
-			{
-
-				// if -l/show-total-size is set, add total size
-				jp, isJsonPrinter := p.(*display.JsonPrinter)
-
-				if isJsonPrinter {
-					jp.Extra = make([]any, 0, 2)
-				}
-
-				if total, ok := sizeEnabler.Total(); ok {
-					s, unit := sizeEnabler.Size2String(total)
-					s = r.Size(s, contents.Convert2SizeString(unit))
-
-					if isJsonPrinter {
-						jp.Extra = append(
-							jp.Extra, struct {
-								Total string `json:"total"`
-							}{
-								Total: s,
-							},
-						)
-					} else {
-						_, _ = display.RawPrint(fmt.Sprintf("  total %s\n", s))
-					}
-				}
-				if s := nameToDisplay.Statistics(); s != nil {
-					t := r.Time(durafmt.Parse(time.Since(start)).LimitToUnit("ms").String())
-					if isJsonPrinter {
-						jp.Extra = append(
-							jp.Extra, struct {
-								Time      string               `json:"underwent"`
-								Statistic *contents.Statistics `json:"statistic"`
-							}{
-								Time:      t,
-								Statistic: s,
-							},
-						)
-					} else {
-						_, _ = display.RawPrint(
-							fmt.Sprintf(
-								"  underwent %s", t,
-							),
-						)
-						_, _ = display.RawPrint(fmt.Sprintf("\n  statistic: %s\n", s))
-					}
-					s.Reset()
-				}
-			}
+			addTotalAndStatistic(nameToDisplay, start)
 
 			// if is table printer, set title
-			prettyPrinter, isPrettyPrinter := p.(display.PrettyPrinter)
-			if isPrettyPrinter {
-				switch p.(type) {
-				case *display.CSVPrinter, *display.TSVPrinter:
-					break
-				default:
-					prettyPrinter.SetTitle(path[i])
-				}
-			}
-			l := len(strconv.Itoa(len(infos)))
+			setTitleForPrettyPrinter(path[i])
 			if flagSharp {
-				for i, info := range infos {
-					// if there is #, add No
-					var no *display.ItemContent
-					if !tree {
-						no = &display.ItemContent{
-							No:      -1,
-							Content: display.StringContent(strconv.Itoa(i)),
-						}
-						no.SetSuffix(strings.Repeat(" ", l-len(strconv.Itoa(i))))
-					} else {
-						no = &display.ItemContent{
-							No:      -1,
-							Content: display.StringContent(""),
-						}
-						no.SetSuffix(strings.Repeat(" ", l))
-					}
-					info.Set("#", no)
-				}
+				setNumber(infos, tree)
 			}
 
 			// do scan
 			// get max length for each Meta[key].Value
-			// todo optimize the KeysByOrder
-			allPart := infos[0].KeysByOrder()
+			if len(allPart) == 0 {
+				allPart = infos[0].KeysByOrder()
+			}
+
+			// make longestEachPart empty
+			for s := range longestEachPart {
+				longestEachPart[s] = 0
+			}
 
 			for _, it := range infos {
 				for _, part := range allPart {
@@ -958,78 +891,26 @@ var logic = func(context *cli.Context) error {
 			_ = hookOnce.Do(
 				func() error {
 					if header || footer {
-						headerFooter := func(isBefore bool) func(p display.Printer, items ...*item.FileInfo) {
-							return func(p display.Printer, item ...*item.FileInfo) {
-								// add header
-								if len(item) == 0 {
-									return
-								}
-
-								// add longest - len(header) * space
-								// print header
-								headerFooterStrBuf := bytebufferpool.Get()
-								defer bytebufferpool.Put(headerFooterStrBuf)
-								prettyPrinter, isPrettyPrinter := p.(display.PrettyPrinter)
-
-								expand := func(s string, no, space int) {
-									_, _ = headerFooterStrBuf.WriteString(constval.Underline)
-									_, _ = headerFooterStrBuf.WriteString(s)
-									_, _ = headerFooterStrBuf.WriteString(constval.Reset)
-									if no != len(allPart)-1 {
-										_, _ = headerFooterStrBuf.WriteString(strings.Repeat(" ", space))
-									}
-								}
-
-								for i, s := range allPart {
-									if len(s) > longestEachPart[s] {
-										// expand the every item's content of this part
-										for _, it := range infos {
-											content, _ := it.Get(s)
-											if s != contents.NameName {
-												toAddNum := len(s) - display.WidthNoHyperLinkLen(content.String())
-												content.AddSuffix(
-													strings.Repeat(
-														" ", toAddNum,
-													),
-												)
-											}
-											it.Set(s, content)
-											longestEachPart[s] = len(s)
-										}
-										expand(s, i, 1)
-									} else {
-										expand(s, i, longestEachPart[s]-len(s)+1)
-									}
-									if isPrettyPrinter && isBefore {
-										if header {
-											prettyPrinter.AddHeader(s)
-										}
-										if footer {
-											prettyPrinter.AddFooter(s)
-										}
-									}
-								}
-								res := headerFooterStrBuf.String()
-								if !isPrettyPrinter {
-									if header && isBefore {
-										_, _ = fmt.Fprintln(p, res)
-									}
-									if footer && !isBefore {
-										_, _ = fmt.Fprintln(p, res)
-									}
-								}
-							}
+						headerFooter := display.HeaderMaker{
+							AllPart:         allPart,
+							LongestEachPart: longestEachPart,
 						}
 						if header {
+							headerFooter.Header = true
+							headerFooter.IsBefore = true
 							// pre scan
-							p.AddBeforePrint(headerFooter(true))
+							p.AddBeforePrint(headerFooter.Make)
 						}
 						if footer {
+							headerFooter.Footer = true
 							if !header {
 								// pre scan
-								p.AddBeforePrint(headerFooter(true))
+								headerFooter.Header = false
+								headerFooter.IsBefore = true
+								p.AddBeforePrint(headerFooter.Make)
 							}
-							p.AddAfterPrint(headerFooter(false))
+							headerFooter.IsBefore = false
+							p.AddAfterPrint(headerFooter.Make)
 						}
 					}
 					p.AddAfterPrint(hookPost...)
@@ -1059,4 +940,89 @@ var logic = func(context *cli.Context) error {
 	}
 
 	return nil
+}
+
+func setNumber(infos []*item.FileInfo, isTree bool) {
+	l := len(strconv.Itoa(len(infos)))
+	for i, info := range infos {
+		// if there is #, add No
+		var no *display.ItemContent
+		if !isTree {
+			no = &display.ItemContent{
+				No:      -1,
+				Content: display.StringContent(strconv.Itoa(i)),
+			}
+			no.SetSuffix(strings.Repeat(" ", l-len(strconv.Itoa(i))))
+		} else {
+			no = &display.ItemContent{
+				No:      -1,
+				Content: display.StringContent(""),
+			}
+			no.SetSuffix(strings.Repeat(" ", l))
+		}
+		info.Set("#", no)
+	}
+}
+
+func setTitleForPrettyPrinter(path string) {
+	prettyPrinter, isPrettyPrinter := p.(display.PrettyPrinter)
+	if isPrettyPrinter {
+		switch p.(type) {
+		case *display.CSVPrinter, *display.TSVPrinter:
+			break
+		default:
+			prettyPrinter.SetTitle(path)
+		}
+	}
+}
+
+func addTotalAndStatistic(nameToDisplay *contents.Name, start time.Time) {
+	{
+
+		// if -l/show-total-size is set, add total size
+		jp, isJsonPrinter := p.(*display.JsonPrinter)
+
+		if isJsonPrinter {
+			jp.Extra = make([]any, 0, 2)
+		}
+
+		if total, ok := sizeEnabler.Total(); ok {
+			s, unit := sizeEnabler.Size2String(total)
+			s = r.Size(s, contents.Convert2SizeString(unit))
+
+			if isJsonPrinter {
+				jp.Extra = append(
+					jp.Extra, struct {
+						Total string `json:"total"`
+					}{
+						Total: s,
+					},
+				)
+			} else {
+				_, _ = display.RawPrint(fmt.Sprintf("  total %s\n", s))
+			}
+		}
+		if s := nameToDisplay.Statistics(); s != nil {
+			t := r.Time(durafmt.Parse(time.Since(start)).LimitToUnit("ms").String())
+			if isJsonPrinter {
+				jp.Extra = append(
+					jp.Extra, struct {
+						Time      string               `json:"underwent"`
+						Statistic *contents.Statistics `json:"statistic"`
+					}{
+						Time:      t,
+						Statistic: s,
+					},
+				)
+			} else {
+				_, _ = display.RawPrint(
+					fmt.Sprintf(
+						"  underwent %s", t,
+					),
+				)
+				_, _ = display.RawPrint(fmt.Sprintf("\n  statistic: %s\n", s))
+			}
+			s.Reset()
+		}
+	}
 }

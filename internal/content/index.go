@@ -1,6 +1,7 @@
 package content
 
 import (
+	constval "github.com/Equationzhao/g/internal/const"
 	"github.com/Equationzhao/g/internal/item"
 )
 
@@ -12,6 +13,6 @@ func NewIndexEnabler() *IndexEnabler {
 
 func (i *IndexEnabler) Enable() ContentOption {
 	return func(info *item.FileInfo) (string, string) {
-		return "", "#"
+		return "", constval.NameOfIndex
 	}
 }

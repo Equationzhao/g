@@ -1,6 +1,7 @@
 package content
 
 import (
+	constval "github.com/Equationzhao/g/internal/const"
 	"github.com/Equationzhao/g/internal/item"
 	"github.com/Equationzhao/g/internal/osbased"
 	"github.com/Equationzhao/g/internal/render"
@@ -12,7 +13,7 @@ func NewInodeEnabler() *InodeEnabler {
 	return &InodeEnabler{}
 }
 
-const Inode = "Inode"
+const Inode = constval.NameOfInode
 
 func (i *InodeEnabler) Enable(renderer *render.Renderer) ContentOption {
 	return func(info *item.FileInfo) (string, string) {

@@ -3,15 +3,16 @@ package content
 import (
 	"runtime"
 
+	constval "github.com/Equationzhao/g/internal/const"
 	"github.com/Equationzhao/g/internal/item"
 	"github.com/Equationzhao/g/internal/osbased"
 	"github.com/Equationzhao/g/internal/render"
 )
 
 const (
-	OwnerName    = "Owner"
-	OwnerUidName = "Owner-uid"
-	OwnerSID     = "Owner-sid"
+	OwnerName    = constval.NameOfOwner
+	OwnerUidName = constval.NameOfOwnerUid
+	OwnerSID     = constval.NameOfOwnerSID
 )
 
 type OwnerEnabler struct {

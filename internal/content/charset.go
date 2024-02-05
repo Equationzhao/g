@@ -4,6 +4,7 @@ import (
 	"os"
 	"strings"
 
+	constval "github.com/Equationzhao/g/internal/const"
 	"github.com/Equationzhao/g/internal/item"
 	"github.com/Equationzhao/g/internal/render"
 	"github.com/Equationzhao/g/internal/util"
@@ -18,7 +19,7 @@ func NewCharsetEnabler() *CharsetEnabler {
 }
 
 const (
-	Charset = "Charset"
+	Charset = constval.NameOfCharset
 )
 
 func (c *CharsetEnabler) Enable(renderer *render.Renderer) ContentOption {

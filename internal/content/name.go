@@ -176,7 +176,7 @@ func NewNameEnable() *Name {
 	return &Name{}
 }
 
-const NameName = "Name"
+const NameName = constval.NameOfName
 
 func makeLink(abs string, name string) string {
 	return util.MakeLink(abs, name)

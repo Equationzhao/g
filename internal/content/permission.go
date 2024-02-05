@@ -4,12 +4,13 @@ import (
 	"strconv"
 
 	"github.com/Equationzhao/g/internal/align"
+	constval "github.com/Equationzhao/g/internal/const"
 	"github.com/Equationzhao/g/internal/item"
 	"github.com/Equationzhao/g/internal/render"
 	"github.com/pkg/xattr"
 )
 
-const Permissions = "Permissions"
+const Permissions = constval.NameOfPermission
 
 // EnableFileMode return file mode like -rwxrwxrwx/drwxrwxrwx
 func EnableFileMode(renderer *render.Renderer) ContentOption {

@@ -13,6 +13,7 @@ import (
 	"os"
 	"strings"
 
+	constval "github.com/Equationzhao/g/internal/const"
 	"github.com/Equationzhao/g/internal/item"
 	"github.com/Equationzhao/g/internal/render"
 )
@@ -29,7 +30,7 @@ const (
 	SumTypeCRC32
 )
 
-const SumName = "Sum"
+const SumName = constval.NameOfSum
 
 type SumEnabler struct{}
 
