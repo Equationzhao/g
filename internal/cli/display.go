@@ -283,7 +283,7 @@ var displayFlag = []cli.Flag{
 				if _, ok := p.(*display.CommaPrint); !ok {
 					p = display.NewCommaPrint()
 				}
-			case "long", "l":
+			case "long", "l", "verbose":
 				contentFunc = append(
 					contentFunc, content.EnableFileMode(r), sizeEnabler.EnableSize(sizeUint, r),
 				)

@@ -37,7 +37,7 @@ var indexFlags = []cli.Flag{
 	},
 	&cli.BoolFlag{
 		Name:               "fuzzy",
-		Aliases:            []string{"fz"},
+		Aliases:            []string{"f"},
 		Usage:              "fuzzy search",
 		DisableDefaultText: true,
 		Category:           "INDEX",
