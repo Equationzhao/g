@@ -659,14 +659,15 @@ var logic = func(context *cli.Context) error {
 
 		if !disableIndex {
 			wgUpdateIndex.Add(1)
+			i := i
 			err := pool.Submit(
 				func() {
-					func(i int) {
+					func() {
 						if err = fuzzyUpdate(path[i]); err != nil {
 							minorErr = true
 						}
 						wgUpdateIndex.Done()
-					}(i)
+					}()
 				},
 			)
 			if err != nil {
