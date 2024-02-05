@@ -3,7 +3,6 @@ package content
 import (
 	"runtime"
 
-	"github.com/Equationzhao/g/internal/align"
 	constval "github.com/Equationzhao/g/internal/const"
 	"github.com/Equationzhao/g/internal/item"
 	"github.com/Equationzhao/g/internal/osbased"
@@ -33,7 +32,6 @@ func (o *OwnerEnabler) DisableNumeric() {
 }
 
 func (o *OwnerEnabler) EnableOwner(renderer *render.Renderer) ContentOption {
-	align.Register(OwnerName)
 	return func(info *item.FileInfo) (string, string) {
 		name, returnFuncName := "", ""
 		if o.Numeric {
