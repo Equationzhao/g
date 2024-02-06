@@ -7,12 +7,13 @@ import (
 	"crypto/sha256"
 	"crypto/sha512"
 	"fmt"
-	"github.com/Equationzhao/g/internal/align"
 	"hash"
 	"hash/crc32"
 	"io"
 	"os"
 	"strings"
+
+	"github.com/Equationzhao/g/internal/align"
 
 	constval "github.com/Equationzhao/g/internal/const"
 	"github.com/Equationzhao/g/internal/item"

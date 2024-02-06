@@ -1,12 +1,13 @@
 package main
 
 import (
-	"github.com/Equationzhao/g/internal/config"
-	"github.com/agiledragon/gomonkey/v2"
-	"github.com/zeebo/assert"
 	"io/fs"
 	"os"
 	"testing"
+
+	"github.com/Equationzhao/g/internal/config"
+	"github.com/agiledragon/gomonkey/v2"
+	"github.com/zeebo/assert"
 )
 
 func Test_catchPanic(t *testing.T) {

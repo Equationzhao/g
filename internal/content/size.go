@@ -2,10 +2,11 @@ package content
 
 import (
 	"fmt"
-	"github.com/Equationzhao/g/internal/align"
 	"strconv"
 	"strings"
 	"sync/atomic"
+
+	"github.com/Equationzhao/g/internal/align"
 
 	constval "github.com/Equationzhao/g/internal/const"
 	"github.com/Equationzhao/g/internal/item"

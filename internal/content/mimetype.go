@@ -1,9 +1,10 @@
 package content
 
 import (
-	"github.com/Equationzhao/g/internal/align"
 	"os"
 	"strings"
+
+	"github.com/Equationzhao/g/internal/align"
 
 	constval "github.com/Equationzhao/g/internal/const"
 	"github.com/Equationzhao/g/internal/item"

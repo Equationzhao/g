@@ -1,8 +1,9 @@
 package content
 
 import (
-	"github.com/Equationzhao/g/internal/align"
 	"strconv"
+
+	"github.com/Equationzhao/g/internal/align"
 
 	constval "github.com/Equationzhao/g/internal/const"
 	"github.com/Equationzhao/g/internal/item"
