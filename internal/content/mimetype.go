@@ -1,6 +1,7 @@
 package content
 
 import (
+	"github.com/Equationzhao/g/internal/align"
 	"os"
 	"strings"
 
@@ -27,6 +28,7 @@ const (
 )
 
 func (e *MimeFileTypeEnabler) Enable(renderer *render.Renderer) ContentOption {
+	align.RegisterHeaderFooter(MimeTypeName, ParentMimeTypeName)
 	return func(info *item.FileInfo) (string, string) {
 		res, returnName := func() (string, string) {
 			tn := ""

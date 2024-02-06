@@ -2,6 +2,7 @@ package content
 
 import (
 	"fmt"
+	"github.com/Equationzhao/g/internal/align"
 	"strconv"
 	"strings"
 	"sync/atomic"
@@ -242,6 +243,7 @@ const RecursiveSizeName = "recursive_size"
 
 func (s *SizeEnabler) EnableSize(size SizeUnit, renderer *render.Renderer) ContentOption {
 	s.sizeUint = size
+	align.RegisterHeaderFooter(SizeName)
 	return func(info *item.FileInfo) (string, string) {
 		var v int64
 		if s.recursive != nil {
@@ -271,6 +273,7 @@ func NewBlockSizeEnabler() *BlockSizeEnabler {
 const BlockSizeName = "Blocks"
 
 func (b *BlockSizeEnabler) Enable(renderer *render.Renderer) ContentOption {
+	align.RegisterHeaderFooter(BlockSizeName)
 	return func(info *item.FileInfo) (string, string) {
 		res := ""
 		bs := osbased.BlockSize(info)

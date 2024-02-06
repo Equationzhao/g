@@ -30,11 +30,19 @@ func (h HeaderMaker) Make(p Printer, Items ...*item.FileInfo) {
 	prettyPrinter, isPrettyPrinter := p.(PrettyPrinter)
 
 	expand := func(s string, no, space int) {
+		// left align
+		if no != len(h.AllPart)-1 && align.IsLeftHeaderFooter(s) {
+			_, _ = headerFooterStrBuf.WriteString(strings.Repeat(" ", space-1)) // remove the additional following space for right align
+		}
 		_, _ = headerFooterStrBuf.WriteString(constval.Underline)
 		_, _ = headerFooterStrBuf.WriteString(s)
 		_, _ = headerFooterStrBuf.WriteString(constval.Reset)
 		if no != len(h.AllPart)-1 {
-			_, _ = headerFooterStrBuf.WriteString(strings.Repeat(" ", space))
+			if !align.IsLeftHeaderFooter(s) {
+				_, _ = headerFooterStrBuf.WriteString(strings.Repeat(" ", space))
+			} else {
+				_, _ = headerFooterStrBuf.WriteString(strings.Repeat(" ", 1)) // still need the following space for left align
+			}
 		}
 	}
 
@@ -46,9 +54,9 @@ func (h HeaderMaker) Make(p Printer, Items ...*item.FileInfo) {
 				if s != constval.NameOfName {
 					toAddNum := len(s) - WidthNoHyperLinkLen(content.String())
 					if align.IsLeft(s) {
-						content.SetSuffix(strings.Repeat(" ", toAddNum))
+						content.AddSuffix(strings.Repeat(" ", toAddNum))
 					} else {
-						content.SetPrefix(strings.Repeat(" ", toAddNum))
+						content.AddPrefix(strings.Repeat(" ", toAddNum))
 					}
 				}
 				it.Set(s, content)
