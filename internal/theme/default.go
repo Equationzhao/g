@@ -863,6 +863,10 @@ var Ext = Theme{
 		Color: conf,
 		Icon:  "\uE615",
 	},
+	"pkl": Style{
+		Color: conf,
+		Icon:  "\uE615",
+	},
 	"db": Style{
 		Color: db,
 		Icon:  "\uF1C0",
