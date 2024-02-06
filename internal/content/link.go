@@ -1,6 +1,7 @@
 package content
 
 import (
+	"github.com/Equationzhao/g/internal/align"
 	"strconv"
 
 	constval "github.com/Equationzhao/g/internal/const"
@@ -19,6 +20,7 @@ func NewLinkEnabler() *LinkEnabler {
 const Link = constval.NameOfLink
 
 func (l *LinkEnabler) Enable(renderer *render.Renderer) ContentOption {
+	align.RegisterHeaderFooter(Link)
 	return func(info *item.FileInfo) (string, string) {
 		return renderer.Link(strconv.FormatUint(osbased.LinkCount(info), 10)), Link
 	}

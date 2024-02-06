@@ -7,6 +7,7 @@ import (
 	"crypto/sha256"
 	"crypto/sha512"
 	"fmt"
+	"github.com/Equationzhao/g/internal/align"
 	"hash"
 	"hash/crc32"
 	"io"
@@ -65,6 +66,7 @@ func (s SumEnabler) EnableSum(renderer *render.Renderer, sumTypes ...SumType) Co
 	}
 	length += len(sumTypes) - 1
 	sumName := fmt.Sprintf("%s(%s)", SumName, strings.Join(types, ","))
+	align.RegisterHeaderFooter(sumName)
 	return func(info *item.FileInfo) (string, string) {
 		if info.IsDir() {
 			return FillBlank("", length), sumName

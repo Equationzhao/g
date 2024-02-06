@@ -1,6 +1,7 @@
 package content
 
 import (
+	"github.com/Equationzhao/g/internal/align"
 	"runtime"
 
 	constval "github.com/Equationzhao/g/internal/const"
@@ -32,6 +33,7 @@ func (o *OwnerEnabler) DisableNumeric() {
 }
 
 func (o *OwnerEnabler) EnableOwner(renderer *render.Renderer) ContentOption {
+	align.RegisterHeaderFooter(OwnerName)
 	return func(info *item.FileInfo) (string, string) {
 		name, returnFuncName := "", ""
 		if o.Numeric {

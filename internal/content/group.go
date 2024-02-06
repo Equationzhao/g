@@ -1,6 +1,7 @@
 package content
 
 import (
+	"github.com/Equationzhao/g/internal/align"
 	"runtime"
 
 	constval "github.com/Equationzhao/g/internal/const"
@@ -41,6 +42,7 @@ func (g *GroupEnabler) DisableSmartMode() {
 }
 
 func (g *GroupEnabler) EnableGroup(renderer *render.Renderer) ContentOption {
+	align.RegisterHeaderFooter(GroupName)
 	return func(info *item.FileInfo) (string, string) {
 		name, returnFuncName := "", GroupName
 		if g.Numeric {
