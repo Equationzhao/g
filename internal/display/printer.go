@@ -432,6 +432,12 @@ func NewJsonPrinter() Printer {
 	}
 }
 
+var makeJsonFieldNameReplacer = strings.NewReplacer(" ", "_", "-", "_")
+
+func makeJsonFieldName(s string) string {
+	return strings.ToLower(makeJsonFieldNameReplacer.Replace(s))
+}
+
 func (j *JsonPrinter) Print(items ...*item.FileInfo) {
 	if !j.disableBefore {
 		fire(j.BeforePrint, j, items...)
@@ -453,11 +459,11 @@ func (j *JsonPrinter) Print(items ...*item.FileInfo) {
 		// sort by v.Content.No
 		for _, v := range all {
 			if name := v.Key(); name == "Name" {
-				order = append(order, orderItem{name: name, content: v.Value().String(), no: v.Value().NO()})
-			} else {
+				order = append(order, orderItem{name: makeJsonFieldName(name), content: v.Value().String(), no: v.Value().NO()})
+			} else if name != "#" {
 				// remove all leading spaces
 				order = append(
-					order, orderItem{name: name, content: strings.TrimSpace(v.Value().String()), no: v.Value().NO()},
+					order, orderItem{name: makeJsonFieldName(name), content: strings.TrimSpace(v.Value().String()), no: v.Value().NO()},
 				)
 			}
 		}
@@ -480,8 +486,8 @@ func (j *JsonPrinter) Print(items ...*item.FileInfo) {
 	}
 
 	wrap := &struct {
-		Extra   []any                                    `json:"Extra,omitempty"`
-		Content []*orderedmap.OrderedMap[string, string] `json:"Content,omitempty"`
+		Extra   []any                                    `json:"extra,omitempty"`
+		Content []*orderedmap.OrderedMap[string, string] `json:"entries,omitempty"`
 	}{
 		Extra:   j.Extra,
 		Content: list,
