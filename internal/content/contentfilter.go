@@ -2,7 +2,6 @@ package content
 
 import (
 	"slices"
-	"strings"
 	"sync"
 
 	"github.com/Equationzhao/g/internal/display"
@@ -47,16 +46,6 @@ type (
 	ContentOption  func(info *item.FileInfo) (stringContent string, funcName string)
 	NoOutputOption func(info *item.FileInfo)
 )
-
-// FillBlank
-// if s is shorter than length, fill blank from left
-// if s is longer than length, panic
-func FillBlank(s string, length int) string {
-	if len(s) >= length {
-		return s
-	}
-	return strings.Repeat(" ", length-len(s)) + s
-}
 
 type ContentFilterOption func(cf *ContentFilter)
 
