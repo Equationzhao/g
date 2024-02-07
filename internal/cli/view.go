@@ -3,6 +3,7 @@ package cli
 import (
 	"errors"
 	"fmt"
+	"runtime"
 	"slices"
 	"strings"
 
@@ -120,7 +121,11 @@ var viewFlag = []cli.Flag{
 		Usage:              "birth time[macOS only]",
 		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
+			if runtime.GOOS != "darwin" {
+				return errors.New("birth is only supported in darwin")
+			}
 			if b {
+				_ = context.Set("time", "1")
 				timeType = append(timeType, "birth")
 			}
 			return nil
