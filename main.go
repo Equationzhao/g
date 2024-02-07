@@ -9,6 +9,7 @@ import (
 
 	"github.com/Equationzhao/g/internal/cli"
 	"github.com/Equationzhao/g/internal/config"
+	debugSetting "github.com/Equationzhao/g/internal/const/debug"
 	"github.com/Equationzhao/g/internal/const/doc"
 	"github.com/Equationzhao/g/internal/util"
 	"github.com/Equationzhao/g/man"
@@ -17,7 +18,9 @@ import (
 func main() {
 	// catch panic and print stack trace and version info
 	defer func() {
-		catchPanic(recover())
+		if !debugSetting.Enable {
+			catchPanic(recover())
+		}
 	}()
 	// when build with tag `doc`, generate md and man file
 	if doc.Enable {
