@@ -458,13 +458,8 @@ func (j *JsonPrinter) Print(items ...*item.FileInfo) {
 
 		// sort by v.Content.No
 		for _, v := range all {
-			if name := v.Key(); name == "Name" {
+			if name := v.Key(); name != "#" {
 				order = append(order, orderItem{name: makeJsonFieldName(name), content: v.Value().String(), no: v.Value().NO()})
-			} else if name != "#" {
-				// remove all leading spaces
-				order = append(
-					order, orderItem{name: makeJsonFieldName(name), content: strings.TrimSpace(v.Value().String()), no: v.Value().NO()},
-				)
 			}
 		}
 
