@@ -180,8 +180,8 @@ var displayFlag = []cli.Flag{
 			}
 
 			_ = context.Set("header", "0")
-			_ = context.Set("classic", "1")
-
+			theme.SetClassic()
+			theme.ColorLevel = theme.None
 			return nil
 		},
 		Category: "DISPLAY",
@@ -341,6 +341,8 @@ var displayFlag = []cli.Flag{
 				if _, ok := p.(*display.JsonPrinter); !ok {
 					p = display.NewJsonPrinter()
 					_ = context.Set("classic", "1")
+					theme.SetClassic()
+					theme.ColorLevel = theme.None
 				}
 			case "tree", "T":
 				if _, ok := p.(*display.TreePrinter); !ok {

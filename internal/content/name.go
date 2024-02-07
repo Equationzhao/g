@@ -422,8 +422,12 @@ func (n *Name) Enable(renderer *render.Renderer) ContentOption {
 			_, _ = b.WriteString(color)
 		}
 		if icon != "" {
-			_, _ = b.WriteString(icon)
-			_ = b.WriteByte(' ')
+			if n.json {
+				info.Meta.Set("icon", &display.ItemContent{Content: display.StringContent(icon)})
+			} else {
+				_, _ = b.WriteString(icon)
+				_ = b.WriteByte(' ')
+			}
 		}
 		if underline {
 			_, _ = b.WriteString(constval.Underline)
