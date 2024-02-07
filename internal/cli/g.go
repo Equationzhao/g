@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"runtime"
 	"slices"
 	"strconv"
 	"strings"
@@ -30,9 +31,6 @@ import (
 	"github.com/savioxavier/termlink"
 	"github.com/urfave/cli/v2"
 	"github.com/xrash/smetrics"
-	versionInfo "go.szostok.io/version"
-	vp "go.szostok.io/version/printer"
-	"go.szostok.io/version/style"
 	"go.szostok.io/version/upgrade"
 )
 
@@ -289,45 +287,17 @@ GLOBAL OPTIONS:{{template "visibleFlagTemplate" .}}{{end}}
 }
 
 func initVersionHelpFlags() {
-	info := versionInfo.Get()
-	info.Version = Version
-	s := &style.Config{
-		Formatting: style.Formatting{
-			Header: style.Header{
-				Prefix: "💡 ",
-				FormatPrimitive: style.FormatPrimitive{
-					Color:   "Green",
-					Options: []string{"Bold"},
-				},
-			},
-			Key: style.Key{
-				FormatPrimitive: style.FormatPrimitive{
-					Color:      "Yellow",
-					Background: "",
-					Options:    nil,
-				},
-			},
-		},
-		Layout: style.Layout{
-			GoTemplate: `{{ Header .Meta.CLIName }}
- | {{ Key "Version"     }}        {{ .Version                     | Val   }}
- | {{ Key "Go Version"  }}        {{ .GoVersion  | trimPrefix "go"| Val   }}
- | {{ Key "Compiler"    }}        {{ .Compiler                    | Val   }}
- | {{ Key "Platform"    }}        {{ .Platform                    | Val   }}
+	cli.VersionPrinter = func(cCtx *cli.Context) {
+		_, _ = fmt.Fprintf(os.Stdout, `💡 g - a powerful ls
+ | Version                %s
+ | Go Version             %s
+ | Compiler               %s
+ | Platform               %s
 
  | Copyright (C) 2024 Equationzhao. MIT License
  | This is free software: you are free to change and redistribute it.
  | There is NO WARRANTY, to the extent permitted by law.
-`,
-		},
-	}
-
-	c := vp.New(vp.WithPrettyStyle(s))
-	cli.VersionPrinter = func(cCtx *cli.Context) {
-		info.Meta = versionInfo.Meta{
-			CLIName: cCtx.App.Name + " - " + cCtx.App.Usage,
-		}
-		_ = c.PrintInfo(os.Stdout, info)
+`, Version, runtime.Version(), runtime.Compiler, runtime.GOOS+"/"+runtime.GOARCH)
 	}
 
 	cli.VersionFlag = &cli.BoolFlag{
