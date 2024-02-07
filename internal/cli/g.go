@@ -420,14 +420,14 @@ var logic = func(context *cli.Context) error {
 		nameToDisplay.SetQuote()
 	}
 
-	if context.Bool("mounts") {
-		nameToDisplay.UnsetQuote()
-	}
-
 	// if no quote, set quote to never
 	// this will override the quote set by -Q
 	if context.Bool("N") {
 		nameToDisplay.UnsetQuote()
+	}
+
+	if context.Bool("mounts") {
+		nameToDisplay.SetMounts()
 	}
 
 	// no path transform
