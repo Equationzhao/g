@@ -441,16 +441,16 @@ func (n *Name) Enable(renderer *render.Renderer) ContentOption {
 			_, _ = b.WriteString(constval.Blink)
 		}
 		hasQuote := false
-		// if the name contains space and QuoteStatus >=0, add quote
-		if strings.ContainsFunc(name, contains) {
-			if !neverQuote(n.QuoteStatus) {
-				hasQuote = true
-				_, _ = b.WriteString(n.Quote)
-			}
-		} else {
-			// no space, but QuoteStatus == 1
-			if alwaysQuote(n.QuoteStatus) {
-				hasQuote = true
+		// when the name contains space:
+		// if json == true:
+		// 		default:no quote, alwaysQuote==true:quote
+		// if json == false:
+		//		default:quote, neverQuote==true:no quote
+		hasQuote = alwaysQuote(n.QuoteStatus) || (!n.json && strings.ContainsFunc(name, contains) && !neverQuote(n.QuoteStatus))
+		if hasQuote {
+			if n.json {
+				_, _ = dereference.WriteString(n.Quote)
+			} else {
 				_, _ = b.WriteString(n.Quote)
 			}
 		}
