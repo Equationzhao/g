@@ -380,6 +380,9 @@ var logic = func(context *cli.Context) error {
 		nameToDisplay.SetClassify()
 		nameToDisplay.SetFileType()
 	}
+	if _, ok := p.(*display.JsonPrinter); ok {
+		nameToDisplay.SetJson()
+	}
 	git := context.Bool("git")
 	if git {
 		contentFunc = append(contentFunc, gitEnabler.Enable(r))
@@ -828,32 +831,34 @@ var logic = func(context *cli.Context) error {
 				longestEachPart[s] = 0
 			}
 
-			for _, it := range infos {
-				for _, part := range allPart {
-					content, _ := it.Get(part)
-					if part != contents.NameName {
-						l := display.WidthNoHyperLinkLen(content.String())
-						if l > longestEachPart[part] {
-							longestEachPart[part] = l
+			if _, ok := p.(*display.JsonPrinter); !ok {
+				for _, it := range infos {
+					for _, part := range allPart {
+						content, ok := it.Get(part)
+						if ok && part != contents.NameName {
+							l := display.WidthNoHyperLinkLen(content.String())
+							if l > longestEachPart[part] {
+								longestEachPart[part] = l
+							}
 						}
 					}
 				}
-			}
 
-			// expand the length of each part using the scan result
-			for _, it := range infos {
-				for _, part := range allPart {
-					if part != contents.NameName {
-						content, _ := it.Get(part)
-						l := display.WidthNoHyperLinkLen(content.String())
-						if l < longestEachPart[part] {
-							expand := content.SetPrefix
-							if align.IsLeft(part) {
-								expand = content.SetSuffix
+				// expand the length of each part using the scan result
+				for _, it := range infos {
+					for _, part := range allPart {
+						if part != contents.NameName {
+							content, _ := it.Get(part)
+							l := display.WidthNoHyperLinkLen(content.String())
+							if l < longestEachPart[part] {
+								expand := content.SetPrefix
+								if align.IsLeft(part) {
+									expand = content.SetSuffix
+								}
+								// expand
+								expand(strings.Repeat(" ", longestEachPart[part]-l))
+								it.Set(part, content)
 							}
-							// expand
-							expand(strings.Repeat(" ", longestEachPart[part]-l))
-							it.Set(part, content)
 						}
 					}
 				}

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/Equationzhao/g/internal/display"
 	"io"
 	"io/fs"
 	"os"
@@ -23,11 +24,11 @@ import (
 )
 
 type Name struct {
-	icon, classify, fileType, fullPath, noDeference, hyperLink, mounts bool
-	statistics                                                         *Statistics
-	relativeTo                                                         string
-	Quote                                                              string
-	QuoteStatus                                                        int8 // >1 always quote || =0 default || <0 never quote
+	icon, classify, fileType, fullPath, noDeference, hyperLink, mounts, json bool
+	statistics                                                               *Statistics
+	relativeTo                                                               string
+	Quote                                                                    string
+	QuoteStatus                                                              int8 // >1 always quote || =0 default || <0 never quote
 }
 
 func neverQuote(qs int8) bool {
@@ -80,6 +81,16 @@ func (n *Name) SetHyperlink() *Name {
 
 func (n *Name) UnsetHyperlink() *Name {
 	n.hyperLink = false
+	return n
+}
+
+func (n *Name) SetJson() *Name {
+	n.json = true
+	return n
+}
+
+func (n *Name) UnsetJson() *Name {
+	n.json = false
 	return n
 }
 
@@ -237,119 +248,85 @@ func (n *Name) Enable(renderer *render.Renderer) ContentOption {
 			}
 			// color + arrow + color-end + color + path + color-end
 			if !n.noDeference {
-				arrowStyle := renderer.SymlinkArrow()
-				_, _ = dereference.WriteString(arrowStyle.Color)
-				if arrowStyle.Underline {
-					_, _ = dereference.WriteString(constval.Underline)
-				}
-				if arrowStyle.Bold {
-					_, _ = dereference.WriteString(constval.Bold)
-				}
-				if arrowStyle.Italics {
-					_, _ = dereference.WriteString(constval.Italics)
-				}
-				if arrowStyle.Faint {
-					_, _ = dereference.WriteString(constval.Faint)
-				}
-				if arrowStyle.Blink {
-					_, _ = dereference.WriteString(constval.Blink)
-				}
-				_, _ = dereference.WriteString(arrowStyle.Icon)
-				_, _ = dereference.WriteString(renderer.Colorend())
-				broken := false
-				symlinks, err := filepath.EvalSymlinks(info.FullPath)
-				var linkStyle theme.Style
-				if err != nil {
-					broken = true
-					var pathErr *fs.PathError
-					if errors.As(err, &pathErr) {
-						if n.relativeTo != "" {
-							symlinksRel, err := filepath.Rel(n.relativeTo, pathErr.Path)
-							if err == nil {
-								pathErr.Path = symlinksRel
-							}
-						}
-						symlinks = pathErr.Path
+				if n.json { // "dereference": "symlinks"
+					symlinks, err := filepath.EvalSymlinks(info.FullPath)
+					if err != nil {
+						info.Meta.Set("dereference_err", &display.ItemContent{Content: display.StringContent(err.Error())})
+						symlinks = n.checkDereferenceErr(err)
+					}
+					info.Meta.Set("dereference", &display.ItemContent{Content: display.StringContent(symlinks)})
+				} else { // => "symlinks"
+					arrowStyle := renderer.SymlinkArrow()
+					_, _ = dereference.WriteString(arrowStyle.Color)
+					if arrowStyle.Underline {
+						_, _ = dereference.WriteString(constval.Underline)
+					}
+					if arrowStyle.Bold {
+						_, _ = dereference.WriteString(constval.Bold)
+					}
+					if arrowStyle.Italics {
+						_, _ = dereference.WriteString(constval.Italics)
+					}
+					if arrowStyle.Faint {
+						_, _ = dereference.WriteString(constval.Faint)
+					}
+					if arrowStyle.Blink {
+						_, _ = dereference.WriteString(constval.Blink)
+					}
+					_, _ = dereference.WriteString(arrowStyle.Icon)
+					_, _ = dereference.WriteString(renderer.Colorend())
+					broken := false
+					symlinks, err := filepath.EvalSymlinks(info.FullPath)
+					var linkStyle theme.Style
+					if err != nil {
+						broken = true
+						symlinks = n.checkDereferenceErr(err)
 					} else {
-						symlinks = err.Error()
+						symlinks, linkStyle = n.getSymlink(info, symlinks, linkStyle, renderer)
 					}
-				} else {
-
-					stat, err := os.Stat(symlinks)
-					if err == nil {
-						if stat.IsDir() {
-							empty := checkIfEmpty(info)
-							linkStyle = renderer.Dir(stat.Name(), empty)
-						} else if mode := stat.Mode(); util.IsSymLinkMode(mode) {
-							linkStyle = renderer.Symlink()
-						} else if mode&os.ModeNamedPipe != 0 {
-							linkStyle = renderer.Pipe()
-						} else if mode&os.ModeSocket != 0 {
-							linkStyle = renderer.Socket()
-						} else if mode&os.ModeDevice != 0 {
-							if mode&os.ModeCharDevice != 0 {
-								linkStyle = renderer.Char()
-							} else {
-								linkStyle = renderer.Device()
-							}
-						} else if s, ok := renderer.ByName(stat.Name()); ok {
-							linkStyle = s
-						} else if s, ok = renderer.ByExt(stat.Name()); ok {
-							linkStyle = s
-						} else {
-							linkStyle = renderer.File()
+					var style theme.Style
+					if broken {
+						style = renderer.SymlinkBroken()
+					} else {
+						style = linkStyle
+					}
+					_, _ = dereference.WriteString(style.Color)
+					if style.Underline {
+						_, _ = dereference.WriteString(constval.Underline)
+					}
+					if style.Bold {
+						_, _ = dereference.WriteString(constval.Bold)
+					}
+					if style.Italics {
+						_, _ = dereference.WriteString(constval.Italics)
+					}
+					if style.Faint {
+						_, _ = dereference.WriteString(constval.Faint)
+					}
+					if style.Blink {
+						_, _ = dereference.WriteString(constval.Blink)
+					}
+					// _, _ = dereference.WriteString(style.Icon)
+					hasQuote := false
+					// if the name contains space and QuoteStatus >=0, add quote
+					if strings.ContainsFunc(symlinks, contains) {
+						if !neverQuote(n.QuoteStatus) {
+							hasQuote = true
+							_, _ = dereference.WriteString(n.Quote)
+						}
+					} else {
+						// no space, but QuoteStatus == 1
+						if alwaysQuote(n.QuoteStatus) {
+							hasQuote = true
+							_, _ = dereference.WriteString(n.Quote)
 						}
 					}
-
-					if n.relativeTo != "" {
-						symlinksRel, err := filepath.Rel(n.relativeTo, symlinks)
-						if err == nil {
-							symlinks = symlinksRel
-						}
-					}
-				}
-				var style theme.Style
-				if broken {
-					style = renderer.SymlinkBroken()
-				} else {
-					style = linkStyle
-				}
-				_, _ = dereference.WriteString(style.Color)
-				if style.Underline {
-					_, _ = dereference.WriteString(constval.Underline)
-				}
-				if style.Bold {
-					_, _ = dereference.WriteString(constval.Bold)
-				}
-				if style.Italics {
-					_, _ = dereference.WriteString(constval.Italics)
-				}
-				if style.Faint {
-					_, _ = dereference.WriteString(constval.Faint)
-				}
-				if style.Blink {
-					_, _ = dereference.WriteString(constval.Blink)
-				}
-				// _, _ = dereference.WriteString(style.Icon)
-				hasQuote := false
-				// if the name contains space and QuoteStatus >=0, add quote
-				if strings.ContainsFunc(symlinks, contains) {
-					if !neverQuote(n.QuoteStatus) {
-						hasQuote = true
+					_, _ = dereference.WriteString(symlinks)
+					if hasQuote {
 						_, _ = dereference.WriteString(n.Quote)
 					}
-				} else {
-					// no space, but QuoteStatus == 1
-					if alwaysQuote(n.QuoteStatus) {
-						hasQuote = true
-						_, _ = dereference.WriteString(n.Quote)
-					}
+					_, _ = dereference.WriteString(renderer.Colorend())
 				}
-				_, _ = dereference.WriteString(symlinks)
-				if hasQuote {
-					_, _ = dereference.WriteString(n.Quote)
-				}
-				_, _ = dereference.WriteString(renderer.Colorend())
 			}
 		} else {
 			if n.statistics != nil {
@@ -496,11 +473,68 @@ func (n *Name) Enable(renderer *render.Renderer) ContentOption {
 			_, _ = b.WriteString(d)
 		}
 		if mounts != "" {
-			_ = b.WriteByte(' ')
-			_, _ = b.WriteString(renderer.Mounts(mounts))
+			if n.json {
+				info.Meta.Set("mounts", &display.ItemContent{Content: display.StringContent(mounts)})
+			} else {
+				_ = b.WriteByte(' ')
+				_, _ = b.WriteString(renderer.Mounts(mounts))
+			}
 		}
 		return b.String(), NameName
 	}
+}
+
+func (n *Name) getSymlink(info *item.FileInfo, symlinks string, linkStyle theme.Style, renderer *render.Renderer) (string, theme.Style) {
+	stat, err := os.Stat(symlinks)
+	if err == nil {
+		if stat.IsDir() {
+			empty := checkIfEmpty(info)
+			linkStyle = renderer.Dir(stat.Name(), empty)
+		} else if mode := stat.Mode(); util.IsSymLinkMode(mode) {
+			linkStyle = renderer.Symlink()
+		} else if mode&os.ModeNamedPipe != 0 {
+			linkStyle = renderer.Pipe()
+		} else if mode&os.ModeSocket != 0 {
+			linkStyle = renderer.Socket()
+		} else if mode&os.ModeDevice != 0 {
+			if mode&os.ModeCharDevice != 0 {
+				linkStyle = renderer.Char()
+			} else {
+				linkStyle = renderer.Device()
+			}
+		} else if s, ok := renderer.ByName(stat.Name()); ok {
+			linkStyle = s
+		} else if s, ok = renderer.ByExt(stat.Name()); ok {
+			linkStyle = s
+		} else {
+			linkStyle = renderer.File()
+		}
+	}
+
+	if n.relativeTo != "" {
+		symlinksRel, err := filepath.Rel(n.relativeTo, symlinks)
+		if err == nil {
+			symlinks = symlinksRel
+		}
+	}
+	return symlinks, linkStyle
+}
+
+// checkDereferenceErr checks if the error is a *fs.PathError and if it is, it returns the path of the error. Otherwise, it returns the error message.
+// err should not be nil
+func (n *Name) checkDereferenceErr(err error) (symlinks string) {
+	var pathErr *fs.PathError
+	if errors.As(err, &pathErr) {
+		if n.relativeTo != "" {
+			if symlinksRel, err := filepath.Rel(n.relativeTo, pathErr.Path); err == nil {
+				pathErr.Path = symlinksRel
+			}
+		}
+		symlinks = pathErr.Path
+	} else {
+		symlinks = err.Error()
+	}
+	return symlinks
 }
 
 func contains(r rune) bool {
