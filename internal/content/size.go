@@ -223,7 +223,7 @@ func (s *SizeEnabler) Size2String(b int64) (string, SizeUnit) {
 				}
 				res += " " + Convert2SizeString(i)
 				actualUnit = i
-				return FillBlank(res, 8), actualUnit
+				return res, actualUnit
 			}
 			v /= 1024
 		}

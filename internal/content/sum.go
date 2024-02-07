@@ -7,93 +7,55 @@ import (
 	"crypto/sha256"
 	"crypto/sha512"
 	"fmt"
+	"github.com/Equationzhao/g/internal/align"
+	"github.com/Equationzhao/g/internal/item"
+	"github.com/Equationzhao/g/internal/render"
 	"hash"
 	"hash/crc32"
 	"io"
 	"os"
-	"strings"
-
-	"github.com/Equationzhao/g/internal/align"
-
-	constval "github.com/Equationzhao/g/internal/const"
-	"github.com/Equationzhao/g/internal/item"
-	"github.com/Equationzhao/g/internal/render"
 )
 
-type SumType int
+type SumType string
 
 const (
-	SumTypeMd5 SumType = iota + 1
-	SumTypeSha1
-	SumTypeSha224
-	SumTypeSha256
-	SumTypeSha384
-	SumTypeSha512
-	SumTypeCRC32
+	SumTypeMd5    SumType = "MD5"
+	SumTypeSha1   SumType = "SHA1"
+	SumTypeSha224 SumType = "SHA224"
+	SumTypeSha256 SumType = "SHA256"
+	SumTypeSha384 SumType = "SHA384"
+	SumTypeSha512 SumType = "SHA512"
+	SumTypeCRC32  SumType = "CRC32"
 )
-
-const SumName = constval.NameOfSum
 
 type SumEnabler struct{}
 
-// todo simd
-func (s SumEnabler) EnableSum(renderer *render.Renderer, sumTypes ...SumType) ContentOption {
-	length := 0
-	types := make([]string, 0, len(sumTypes))
-	for _, t := range sumTypes {
-		switch t {
-		case SumTypeMd5:
-			length += 32
-			types = append(types, "md5")
-		case SumTypeSha1:
-			length += 40
-			types = append(types, "sha1")
-		case SumTypeSha224:
-			length += 56
-			types = append(types, "sha224")
-		case SumTypeSha256:
-			length += 64
-			types = append(types, "sha256")
-		case SumTypeSha384:
-			length += 96
-			types = append(types, "sha384")
-		case SumTypeSha512:
-			length += 128
-			types = append(types, "sha512")
-		case SumTypeCRC32:
-			length += 8
-			types = append(types, "crc32")
-		}
-	}
-	length += len(sumTypes) - 1
-	sumName := fmt.Sprintf("%s(%s)", SumName, strings.Join(types, ","))
-	align.RegisterHeaderFooter(sumName)
-	return func(info *item.FileInfo) (string, string) {
-		if info.IsDir() {
-			return FillBlank("", length), sumName
-		}
-
-		var content []byte
-		if content_, ok := info.Cache["content"]; ok {
-			content = content_
-		} else {
-			file, err := os.Open(info.FullPath)
-			if err != nil {
-				return FillBlank("", length), sumName
+func (s SumEnabler) EnableSum(renderer *render.Renderer, sumTypes ...SumType) []ContentOption {
+	options := make([]ContentOption, 0, len(sumTypes))
+	factory := func(sumType SumType) ContentOption {
+		return func(info *item.FileInfo) (string, string) {
+			if info.IsDir() {
+				return "", string(sumType)
 			}
-			content, err = io.ReadAll(file)
-			if err != nil {
-				return FillBlank("", length), sumName
-			}
-			info.Cache["content"] = content
-			defer file.Close()
-		}
 
-		hashes := make([]hash.Hash, 0, len(sumTypes))
-		writers := make([]io.Writer, 0, len(sumTypes))
-		for _, t := range sumTypes {
+			var content []byte
+			if content_, ok := info.Cache["content"]; ok {
+				content = content_
+			} else {
+				file, err := os.Open(info.FullPath)
+				if err != nil {
+					return "", string(sumType)
+				}
+				content, err = io.ReadAll(file)
+				if err != nil {
+					return "", string(sumType)
+				}
+				info.Cache["content"] = content
+				defer file.Close()
+			}
+
 			var hashed hash.Hash
-			switch t {
+			switch sumType {
 			case SumTypeMd5:
 				hashed = md5.New()
 			case SumTypeSha1:
@@ -109,18 +71,15 @@ func (s SumEnabler) EnableSum(renderer *render.Renderer, sumTypes ...SumType) Co
 			case SumTypeCRC32:
 				hashed = crc32.NewIEEE()
 			}
-			writers = append(writers, hashed)
-			hashes = append(hashes, hashed)
+			if _, err := io.Copy(hashed, bytes.NewReader(content)); err != nil {
+				return "", string(sumType)
+			}
+			return renderer.Checksum(fmt.Sprintf("%x", hashed.Sum(nil))), string(sumType)
 		}
-		multiWriter := io.MultiWriter(writers...)
-		if _, err := io.Copy(multiWriter, bytes.NewReader(content)); err != nil {
-			return FillBlank("", length), sumName
-		}
-		sums := make([]string, 0, len(hashes))
-		for _, h := range hashes {
-			sums = append(sums, fmt.Sprintf("%x", h.Sum(nil)))
-		}
-		sumsStr := strings.Join(sums, " ")
-		return renderer.Checksum(FillBlank(sumsStr, length)), sumName
 	}
+	for _, sumType := range sumTypes {
+		align.RegisterHeaderFooter(string(sumType))
+		options = append(options, factory(sumType))
+	}
+	return options
 }

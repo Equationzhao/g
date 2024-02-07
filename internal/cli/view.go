@@ -574,7 +574,7 @@ var viewFlag = []cli.Flag{
 			}
 
 			if b {
-				contentFunc = append(contentFunc, contents.SumEnabler{}.EnableSum(r, sums...))
+				contentFunc = append(contentFunc, contents.SumEnabler{}.EnableSum(r, sums...)...)
 			}
 			return nil
 		},
