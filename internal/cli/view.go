@@ -56,6 +56,7 @@ var viewFlag = []cli.Flag{
 		Usage:   "time type, mod(default), create, access, all, birth[macOS only]",
 		EnvVars: []string{"TIME_TYPE"},
 		Action: func(context *cli.Context, ss []string) error {
+			_ = context.Set("time", "1")
 			timeType = make([]string, 0, len(ss))
 			accepts := []string{"mod", "modified", "create", "cr", "access", "ac", "birth"}
 			for _, s := range ss {
@@ -79,6 +80,7 @@ var viewFlag = []cli.Flag{
 		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
 			if b {
+				_ = context.Set("time", "1")
 				timeType = append(timeType, "access")
 			}
 			return nil
@@ -92,6 +94,7 @@ var viewFlag = []cli.Flag{
 		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
 			if b {
+				_ = context.Set("time", "1")
 				timeType = append(timeType, "mod")
 			}
 			return nil
@@ -105,6 +108,7 @@ var viewFlag = []cli.Flag{
 		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
 			if b {
+				_ = context.Set("time", "1")
 				timeType = append(timeType, "create")
 			}
 			return nil
@@ -130,6 +134,7 @@ var viewFlag = []cli.Flag{
 			bit, b, k, m, g, t, p,
 			e, z, y, bb, nb, auto`,
 		Action: func(context *cli.Context, s string) error {
+			_ = context.Set("size", "1")
 			if strings.EqualFold(s, "auto") {
 				return nil
 			}
@@ -150,6 +155,7 @@ var viewFlag = []cli.Flag{
 	(default: +%d.%b'%y %H:%M ,like 02.Jan'06 15:04)`,
 		EnvVars: []string{"TIME_STYLE"},
 		Action: func(context *cli.Context, s string) error {
+			_ = context.Set("time", "1")
 			/*
 				The TIME_STYLE argument can be full-iso, long-iso, iso, locale, or  +FORMAT.
 				FORMAT is interpreted like in date(1).
@@ -186,6 +192,7 @@ var viewFlag = []cli.Flag{
 		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
 			if b {
+				_ = context.Set("time", "1")
 				timeFormat = "2006-01-02 15:04:05.000000000 -0700"
 			}
 			return nil
@@ -298,6 +305,7 @@ var viewFlag = []cli.Flag{
 		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
 			if b {
+				_ = context.Set("size", "1")
 				n := context.Int("depth")
 				sizeEnabler.SetRecursive(contents.NewSizeRecursive(n))
 			}
@@ -433,6 +441,7 @@ var viewFlag = []cli.Flag{
 		Category:           "VIEW",
 		Action: func(context *cli.Context, b bool) error {
 			if b {
+				_ = context.Set("size", "1")
 				sizeEnabler.SetEnableTotal()
 			}
 			return nil
@@ -521,6 +530,10 @@ var viewFlag = []cli.Flag{
 		DefaultText: "sha1",
 		Value:       cli.NewStringSlice("sha1"),
 		Category:    "VIEW",
+		Action: func(context *cli.Context, i []string) error {
+			_ = context.Set("checksum", "1")
+			return nil
+		},
 	},
 	&cli.BoolFlag{
 		Name:               "checksum",

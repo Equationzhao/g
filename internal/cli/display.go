@@ -16,6 +16,7 @@ var displayFlag = []cli.Flag{
 		Usage:    "set tree style [ascii/unicode(default)/rectangle]",
 		Category: "DISPLAY",
 		Action: func(context *cli.Context, s string) error {
+			_ = context.Set("tree", "1")
 			switch s {
 			case "ascii", "ASCII", "Ascii":
 				display.DefaultTreeStyle = display.TreeASCII
@@ -190,6 +191,7 @@ var displayFlag = []cli.Flag{
 		Aliases: []string{"table-style"},
 		Usage:   "set table style [ascii(default)/unicode]",
 		Action: func(context *cli.Context, s string) error {
+			_ = context.Set("table", "1")
 			switch s {
 			case "ascii", "ASCII", "Ascii":
 				// no action needed
