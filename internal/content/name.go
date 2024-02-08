@@ -258,55 +258,23 @@ func (n *Name) Enable(renderer *render.Renderer) ContentOption {
 				} else { // => "symlinks"
 					arrowStyle := renderer.SymlinkArrow()
 					_, _ = dereference.WriteString(arrowStyle.Color)
-					if arrowStyle.Underline {
-						_, _ = dereference.WriteString(constval.Underline)
-					}
-					if arrowStyle.Bold {
-						_, _ = dereference.WriteString(constval.Bold)
-					}
-					if arrowStyle.Italics {
-						_, _ = dereference.WriteString(constval.Italics)
-					}
-					if arrowStyle.Faint {
-						_, _ = dereference.WriteString(constval.Faint)
-					}
-					if arrowStyle.Blink {
-						_, _ = dereference.WriteString(constval.Blink)
-					}
+					checkNameDisplayEffect(arrowStyle, dereference)
 					_, _ = dereference.WriteString(arrowStyle.Icon)
 					_, _ = dereference.WriteString(renderer.Colorend())
-					broken := false
 					symlinks, err := filepath.EvalSymlinks(info.FullPath)
 					var linkStyle theme.Style
+					dereferenceMounts := ""
 					if err != nil {
-						broken = true
 						symlinks = n.checkDereferenceErr(err)
+						linkStyle = renderer.SymlinkBroken()
 					} else {
 						symlinks, linkStyle = n.getSymlink(info, symlinks, linkStyle, renderer)
+						if n.mounts {
+							dereferenceMounts = MountsOn(symlinks)
+						}
 					}
-					var style theme.Style
-					if broken {
-						style = renderer.SymlinkBroken()
-					} else {
-						style = linkStyle
-					}
-					_, _ = dereference.WriteString(style.Color)
-					if style.Underline {
-						_, _ = dereference.WriteString(constval.Underline)
-					}
-					if style.Bold {
-						_, _ = dereference.WriteString(constval.Bold)
-					}
-					if style.Italics {
-						_, _ = dereference.WriteString(constval.Italics)
-					}
-					if style.Faint {
-						_, _ = dereference.WriteString(constval.Faint)
-					}
-					if style.Blink {
-						_, _ = dereference.WriteString(constval.Blink)
-					}
-					// _, _ = dereference.WriteString(style.Icon)
+					_, _ = dereference.WriteString(linkStyle.Color)
+					checkNameDisplayEffect(linkStyle, dereference)
 					hasQuote := false
 					// if the name contains space and QuoteStatus >=0, add quote
 					if strings.ContainsFunc(symlinks, contains) {
@@ -326,6 +294,14 @@ func (n *Name) Enable(renderer *render.Renderer) ContentOption {
 						_, _ = dereference.WriteString(n.Quote)
 					}
 					_, _ = dereference.WriteString(renderer.Colorend())
+					if dereferenceMounts != "" {
+						if n.json {
+							info.Meta.Set("dereference_mounts", &display.ItemContent{Content: display.StringContent(dereferenceMounts)})
+						} else {
+							_ = dereference.WriteByte(' ')
+							_, _ = dereference.WriteString(renderer.Mounts(dereferenceMounts))
+						}
+					}
 				}
 			}
 		} else {
@@ -402,7 +378,7 @@ func (n *Name) Enable(renderer *render.Renderer) ContentOption {
 		}
 
 		if n.mounts {
-			mounts = MountsOn(info)
+			mounts = MountsOn(info.FullPath)
 		}
 
 		if n.relativeTo != "" {
@@ -429,21 +405,13 @@ func (n *Name) Enable(renderer *render.Renderer) ContentOption {
 				_ = b.WriteByte(' ')
 			}
 		}
-		if underline {
-			_, _ = b.WriteString(constval.Underline)
-		}
-		if bold {
-			_, _ = b.WriteString(constval.Bold)
-		}
-		if italics {
-			_, _ = b.WriteString(constval.Italics)
-		}
-		if faint {
-			_, _ = b.WriteString(constval.Faint)
-		}
-		if blink {
-			_, _ = b.WriteString(constval.Blink)
-		}
+		checkNameDisplayEffect(theme.Style{
+			Underline: underline,
+			Bold:      bold,
+			Faint:     faint,
+			Italics:   italics,
+			Blink:     blink,
+		}, b)
 		hasQuote := false
 		// when the name contains space:
 		// if json == true:
@@ -485,6 +453,24 @@ func (n *Name) Enable(renderer *render.Renderer) ContentOption {
 			}
 		}
 		return b.String(), NameName
+	}
+}
+
+func checkNameDisplayEffect(style theme.Style, buffer *bytebufferpool.ByteBuffer) {
+	if style.Underline {
+		_, _ = buffer.WriteString(constval.Underline)
+	}
+	if style.Bold {
+		_, _ = buffer.WriteString(constval.Bold)
+	}
+	if style.Italics {
+		_, _ = buffer.WriteString(constval.Italics)
+	}
+	if style.Faint {
+		_, _ = buffer.WriteString(constval.Faint)
+	}
+	if style.Blink {
+		_, _ = buffer.WriteString(constval.Blink)
 	}
 }
 
@@ -545,7 +531,7 @@ func contains(r rune) bool {
 	return unicode.IsSpace(r)
 }
 
-func MountsOn(info *item.FileInfo) string {
+func MountsOn(path string) string {
 	err := mountsOnce.Do(func() error {
 		mount, err := disk.Partitions(true)
 		if err != nil {
@@ -560,7 +546,7 @@ func MountsOn(info *item.FileInfo) string {
 	b := bytebufferpool.Get()
 	defer bytebufferpool.Put(b)
 	for _, stat := range mounts {
-		if stat.Mountpoint == info.FullPath {
+		if stat.Mountpoint == path {
 			_ = b.WriteByte('[')
 			_, _ = b.WriteString(stat.Device)
 			_, _ = b.WriteString(" (")
