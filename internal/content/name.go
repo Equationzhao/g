@@ -497,7 +497,7 @@ func (n *Name) getSymlink(info *item.FileInfo, symlinks string, linkStyle theme.
 		} else if s, ok = renderer.ByExt(stat.Name()); ok {
 			linkStyle = s
 		} else {
-			linkStyle = renderer.File()
+			linkStyle = renderer.SymlinkDereference()
 		}
 	}
 
