@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/Equationzhao/g/internal/display"
 	"io"
 	"io/fs"
 	"os"
@@ -12,6 +11,8 @@ import (
 	"strings"
 	"sync/atomic"
 	"unicode"
+
+	"github.com/Equationzhao/g/internal/display"
 
 	"github.com/Equationzhao/g/internal/const"
 	"github.com/shirou/gopsutil/v3/disk"

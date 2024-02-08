@@ -7,13 +7,14 @@ import (
 	"crypto/sha256"
 	"crypto/sha512"
 	"fmt"
-	"github.com/Equationzhao/g/internal/align"
-	"github.com/Equationzhao/g/internal/item"
-	"github.com/Equationzhao/g/internal/render"
 	"hash"
 	"hash/crc32"
 	"io"
 	"os"
+
+	"github.com/Equationzhao/g/internal/align"
+	"github.com/Equationzhao/g/internal/item"
+	"github.com/Equationzhao/g/internal/render"
 )
 
 type SumType string
