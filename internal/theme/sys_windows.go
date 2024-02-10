@@ -3,11 +3,11 @@
 package theme
 
 func init() {
-	DefaultAll.Special["System"] = Style{
+	DefaultAll.Special["system"] = Style{
 		Icon:  "\uE70F",
 		Color: dir,
 	}
-	DefaultAll.Group["DevToolsUser"] = Style{
+	DefaultAll.Group["devtoolsuser"] = Style{
 		Color: color256(202),
 	}
 	DefaultAll.Name["program files"] = Style{
