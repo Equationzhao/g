@@ -1,2 +1,2 @@
-output="$(g --no-update -term-width 200 --no-config --icons --permission --size --group --owner --zero tests/test_data )"
+output="$(g --no-update -term-width 200 --no-config --icons --permission --size --zero tests/test_data )"
 echo "$output" | diff - tests/zero.stdout

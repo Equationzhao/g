@@ -35,7 +35,7 @@ fi
 
 command="g"
 forever_base="--no-update"
-base_flag="-term-width 200 --no-config --icons --permission --size --group --owner"
+base_flag="-term-width 200 --no-config --icons --permission --size"
 
 read -p "use base_flag? [Y/n] " -n 1 -r
 echo
