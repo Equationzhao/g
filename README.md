@@ -65,6 +65,12 @@ brew tap equationzhao/core git@github.com:Equationzhao/homebrew-g.git
 brew install g-ls
 ```
 
+#### MacPort
+
+```bash
+sudo port install g-ls
+```
+
 #### Windows Scoop
 
 windows scoop:
@@ -259,6 +265,26 @@ Interested in contributing? Check out the [contributing guidelines](./CONTRIBUTI
 - [exa](https://github.com/ogham/exa) or [eza](https://github.com/eza-community/eza)
 - [lsd](https://github.com/lsd-rs/lsd)
 - [ls-go](https://github.com/acarl005/ls-go)
+
+|              | eza                                                                                      | lsd | g                                                                                                           |
+|--------------|------------------------------------------------------------------------------------------|-----|-------------------------------------------------------------------------------------------------------------|
+| display mode | oneline,grid,across,tree,recurse                                                         |     | oneline,grid,across,zero,comma,table,json,markdown,tree,recurse                                             |
+|              | -Z: list each file’s security context,-@: list each file’s extended attributes and sizes |     | --mime: list each file's mime type, --charset: list each file's charset, --relative-to: list relative path, |
+|              |                                                                                          |     |                                                                                                             |
+|              |                                                                                          |     |                                                                                                             |
+| performance  | better                                                                                   |     | slower                                                                                                      |
+
+
+-a, --all: show hidden and 'dot' files
+-d, --list-dirs: list directories like regular files
+-L, --level=(depth): limit the depth of recursion
+-r, --reverse: reverse the sort order
+-s, --sort=(field): which field to sort by
+--group-directories-first: list directories before other files
+-D, --only-dirs: list only directories
+-f, --only-files: list only files
+--git-ignore: ignore files mentioned in .gitignore
+-I, --ignore-glob=(globs): glob patterns (pipe-separated) of files to ignore
 
 ## Star History
 
