@@ -164,7 +164,7 @@ func init() {
 			Usage:              "report bug",
 			DisableDefaultText: true,
 			Action: func(context *cli.Context, b bool) error {
-				_, _ = fmt.Println([]byte("please report bug to equationzhao@foxmail.com\nor file an issue at https://github.com/Equationzhao/g/issues"))
+				_, _ = fmt.Println("please report bug to equationzhao@foxmail.com\nor file an issue at https://github.com/Equationzhao/g/issues")
 				return Err4Exit{}
 			},
 		},
