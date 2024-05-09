@@ -102,7 +102,7 @@ func (d *DuplicateDetect) Fprint(w io.Writer) {
 	}
 }
 
-var thresholdFileSize = int64(16 * KB)
+var thresholdFileSize = int64(16 * KiB)
 
 // fileHash calculates the hash of the file provided.
 // If isThorough is true, then it uses SHA256 of the entire file.

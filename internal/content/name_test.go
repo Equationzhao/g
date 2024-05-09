@@ -48,55 +48,55 @@ func TestName_checkDereferenceErr(t *testing.T) {
 }
 
 // TODO gomonkey seems not working ?
-//func TestMountsOn(t *testing.T) {
-//	patch := gomonkey.NewPatches()
-//	defer patch.Reset()
-//	patch.ApplyFunc(disk.Partitions, func(all bool) ([]disk.PartitionStat, error) {
-//		return []disk.PartitionStat{
-//			{
-//				Device:     "/dev/sda1",
-//				Mountpoint: "/",
-//				Fstype:     "apfs",
-//				Opts:       []string{"rw", "relatime"},
-//			},
-//			{
-//				Device:     "/devfs",
-//				Mountpoint: "/dev",
-//				Fstype:     "apfs",
-//				Opts:       []string{"rw", "relatime"},
-//			},
-//		}, nil
-//	})
-//	tests := []struct {
-//		name string
-//		path string
-//		want string
-//	}{
+// func TestMountsOn(t *testing.T) {
+// 	patch := gomonkey.NewPatches()
+// 	defer patch.Reset()
+// 	patch.ApplyFunc(disk.Partitions, func(all bool) ([]disk.PartitionStat, error) {
+// 		return []disk.PartitionStat{
+// 			{
+// 				Device:     "/dev/sda1",
+// 				Mountpoint: "/",
+// 				Fstype:     "apfs",
+// 				Opts:       []string{"rw", "relatime"},
+// 			},
+// 			{
+// 				Device:     "/devfs",
+// 				Mountpoint: "/dev",
+// 				Fstype:     "apfs",
+// 				Opts:       []string{"rw", "relatime"},
+// 			},
+// 		}, nil
+// 	})
+// 	tests := []struct {
+// 		name string
+// 		path string
+// 		want string
+// 	}{
 //
-//		{
-//			name: "root",
-//			path: "/",
-//			want: "[/dev/disk3s1s1 (apfs)]",
-//		},
-//		{
-//			name: "dev",
-//			path: "/dev",
-//			want: "[devfs (devfs)]",
-//		},
-//		{
-//			"not found",
-//			"/notfound",
-//			"",
-//		},
-//	}
-//	for _, tt := range tests {
-//		t.Run(tt.name, func(t *testing.T) {
-//			if got := MountsOn(tt.path); got != tt.want {
-//				t.Errorf("MountsOn() = %v, want %v", got, tt.want)
-//			}
-//		})
-//	}
-//}
+// 		{
+// 			name: "root",
+// 			path: "/",
+// 			want: "[/dev/disk3s1s1 (apfs)]",
+// 		},
+// 		{
+// 			name: "dev",
+// 			path: "/dev",
+// 			want: "[devfs (devfs)]",
+// 		},
+// 		{
+// 			"not found",
+// 			"/notfound",
+// 			"",
+// 		},
+// 	}
+// 	for _, tt := range tests {
+// 		t.Run(tt.name, func(t *testing.T) {
+// 			if got := MountsOn(tt.path); got != tt.want {
+// 				t.Errorf("MountsOn() = %v, want %v", got, tt.want)
+// 			}
+// 		})
+// 	}
+// }
 
 func TestStatistics_MarshalJSON(t *testing.T) {
 	type fields struct {
