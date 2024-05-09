@@ -65,3 +65,89 @@ func TestSplitNumberAndUnit(t *testing.T) {
 		})
 	}
 }
+
+func TestMakeLink(t *testing.T) {
+	link := MakeLink("abs", "name")
+	if link != "\033]8;;abs\033\\name\033]8;;\033\\" {
+		t.Errorf("MakeLink failed")
+	}
+}
+
+func TestRemoveSep(t *testing.T) {
+	sep := RemoveSep("a/b/c")
+	if sep != "a/b/c" {
+		t.Errorf("RemoveSep failed")
+	}
+	sep = RemoveSep("a/b/c/")
+	if sep != "a/b/c" {
+		t.Errorf("RemoveSep failed")
+	}
+}
+
+func TestEscape(t *testing.T) {
+	type args struct {
+		a string
+	}
+	tests := []struct {
+		name string
+		args args
+		want string
+	}{
+		{
+			name: "tab",
+			args: args{
+				a: "\t",
+			},
+			want: "\x1b[7m\\t\x1b[27m",
+		},
+		{
+			name: "carriage return",
+			args: args{
+				a: "\r",
+			},
+			want: "\x1b[7m\\r\x1b[27m",
+		},
+		{
+			name: "line feed",
+			args: args{
+				a: "\n",
+			},
+			want: "\x1b[7m\\n\x1b[27m",
+		},
+		{
+			name: "double quote",
+			args: args{
+				a: "\"",
+			},
+			want: "\x1b[7m\\\"\x1b[27m",
+		},
+		{
+			name: "backslash",
+			args: args{
+				a: "\\",
+			},
+			want: "\x1b[7m\\\\\x1b[27m",
+		},
+		{
+			name: "single quote",
+			args: args{
+				a: "'",
+			},
+			want: "'",
+		},
+		{
+			name: "normal",
+			args: args{
+				a: "normal",
+			},
+			want: "normal",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := Escape(tt.args.a); got != tt.want {
+				t.Errorf("Escape() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
