@@ -132,18 +132,30 @@ var viewFlag = []cli.Flag{
 		},
 		Category: "VIEW",
 	},
+	&cli.BoolFlag{
+		Name: "si",
+		Usage: `use powers of 1000 not 1024 for size format
+		eg: 1K = 1000 bytes`,
+		EnvVars: []string{"SI"},
+		Action: func(context *cli.Context, b bool) error {
+			if b {
+				sizeEnabler.SetSI()
+			}
+			return nil
+		},
+	},
 	&cli.StringFlag{
 		Name:    "size-unit",
 		Aliases: []string{"su", "block-size"},
 		Usage: `size unit:
-			bit, b, k, m, g, t, p,
-			e, z, y, bb, nb, auto`,
+			bit, b, k, m, g, t, auto`,
 		Action: func(context *cli.Context, s string) error {
 			_ = context.Set("size", "1")
 			if strings.EqualFold(s, "auto") {
 				return nil
 			}
-			sizeUint = contents.ConvertFromSizeString(s)
+			si := context.Bool("si")
+			sizeUint = contents.ConvertFromSizeString(s, si)
 			if sizeUint == contents.Unknown {
 				ReturnCode = 2
 				return fmt.Errorf("invalid size unit: %s", s)

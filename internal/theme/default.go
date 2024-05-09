@@ -1535,32 +1535,26 @@ var Size = map[string]Style{
 	"KB": {
 		Color: rgb(20, 207, 100),
 	},
+	"KiB": {
+		Color: rgb(20, 207, 100),
+	},
 	"MB": {
+		Color: rgb(20, 188, 100),
+	},
+	"MiB": {
 		Color: rgb(20, 188, 100),
 	},
 	"GB": {
 		Color: rgb(20, 170, 100),
 	},
+	"GiB": {
+		Color: rgb(20, 170, 100),
+	},
 	"TB": {
 		Color: rgb(20, 153, 100),
 	},
-	"PB": {
-		Color: rgb(20, 138, 100),
-	},
-	"EB": {
-		Color: rgb(20, 125, 100),
-	},
-	"ZB": {
-		Color: rgb(20, 112, 100),
-	},
-	"YB": {
-		Color: rgb(20, 100, 100),
-	},
-	"BB": {
-		Color: rgb(20, 90, 100),
-	},
-	"NB": {
-		Color: rgb(20, 70, 100),
+	"TiB": {
+		Color: rgb(20, 153, 100),
 	},
 }
 

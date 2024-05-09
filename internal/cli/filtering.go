@@ -6,9 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Equationzhao/g/internal/content"
 	"github.com/Equationzhao/g/internal/filter"
-	"github.com/gabriel-vasile/mimetype"
 	"github.com/urfave/cli/v2"
 )
 
@@ -173,19 +171,7 @@ var filteringFlag = []cli.Flag{
 			if len(i) > 0 {
 				err := limitOnce.Do(
 					func() error {
-						size := context.String("detect-size")
-						var bytes uint64 = 1024 * 1024
-						if size == "0" || size == "infinity" {
-							bytes = 0
-						} else if size != "" {
-							sizeUint, err := content.ParseSize(size)
-							if err != nil {
-								return err
-							}
-							bytes = sizeUint.Bytes
-						}
-						mimetype.SetLimit(uint32(bytes))
-						return nil
+						return setLimit(context)
 					},
 				)
 				if err != nil {

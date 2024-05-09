@@ -3,7 +3,6 @@ package content
 import (
 	"fmt"
 	"strconv"
-	"strings"
 	"sync/atomic"
 
 	"github.com/Equationzhao/g/internal/align"
@@ -20,17 +19,19 @@ const Unknown SizeUnit = -1
 const (
 	Auto SizeUnit = iota
 	Bit  SizeUnit = 1.0 << (10 * iota)
-	B
-	KB
-	MB
-	GB
-	TB
-	PB
-	EB
-	ZB
-	YB
-	BB
-	NB
+	Byte
+	KiB
+	MiB
+	GiB
+	TiB
+)
+
+// SI units
+const (
+	KB = 1000 * Byte
+	MB = 1000 * KB
+	GB = 1000 * MB
+	TB = 1000 * GB
 )
 
 const SizeName = constval.NameOfSize
@@ -39,38 +40,20 @@ type Size struct {
 	Bytes uint64
 }
 
-var allSizeUnits = []SizeUnit{
-	Bit,
-	B,
-	KB,
-	MB,
-	GB,
-	TB,
-	PB,
-	EB,
-	ZB,
-	YB,
-	BB,
-	NB,
+func CountBytes(size SizeUnit) uint64 {
+	return uint64(size / Byte)
 }
 
 func ParseSize(size string) (Size, error) {
-	for _, sizeUint := range allSizeUnits {
-		sets := sizeStringSets(sizeUint)
-		for _, sizeString := range sets {
-			if strings.HasSuffix(size, sizeString) {
-				size = strings.TrimSuffix(size, sizeString)
-				sizeFloat, err := strconv.ParseFloat(size, 64)
-				if err != nil {
-					continue
-				}
-				return Size{
-					Bytes: uint64(sizeFloat * float64(sizeUint)),
-				}, nil
-			}
-		}
+	sizeFloat, unit := util.SplitNumberAndUnit(size)
+	if sizeFloat < 0 {
+		return Size{}, fmt.Errorf("size can't be negative")
 	}
-	return Size{}, fmt.Errorf("unknown size unit")
+	sizeUnit := string2SizeUnit(unit)
+	if sizeUnit <= Bit {
+		return Size{}, fmt.Errorf("invalid size unit: %s", unit)
+	}
+	return Size{Bytes: uint64(sizeFloat * float64(CountBytes(sizeUnit)))}, nil
 }
 
 type SizeUnit float64
@@ -83,63 +66,93 @@ func sizeStringSets(size SizeUnit) []string {
 		return []string{""}
 	case Bit:
 		return []string{"bit", "Bit"}
-	case B:
-		return []string{"B", "b", "byte", "Byte", "BYTE"}
+	case Byte:
+		return []string{"B", "b", "byte", "Byte"}
 	case KB:
 		return []string{"KB", "kb", "K", "k"}
+	case KiB:
+		return []string{"KiB"}
 	case MB:
 		return []string{"MB", "mb", "M", "m"}
+	case MiB:
+		return []string{"MiB"}
 	case GB:
 		return []string{"GB", "gb", "G", "g"}
+	case GiB:
+		return []string{"GiB"}
 	case TB:
 		return []string{"TB", "tb", "T", "t"}
-	case PB:
-		return []string{"PB", "pb", "P", "p"}
-	case EB:
-		return []string{"EB", "eb", "E", "e"}
-	case ZB:
-		return []string{"ZB", "zb", "Z", "z"}
-	case YB:
-		return []string{"YB", "yb", "Y", "y"}
-	case BB:
-		return []string{"BB", "bb"}
-	case NB:
-		return []string{"NB", "nb", "N", "n"}
+	case TiB:
+		return []string{"TiB"}
 	default:
 		return []string{"unknown"}
 	}
+}
+
+var string2SizeUnitMap = map[string]SizeUnit{
+	"bit":  Bit,
+	"Bit":  Bit,
+	"byte": Byte,
+	"Byte": Byte,
+	"KB":   KB,
+	"KiB":  KiB,
+	"kb":   KB,
+	"K":    KB,
+	"k":    KB,
+	"MB":   MB,
+	"MiB":  MiB,
+	"mb":   MB,
+	"M":    MB,
+	"m":    MB,
+	"GB":   GB,
+	"GiB":  GiB,
+	"gb":   GB,
+	"G":    GB,
+	"g":    GB,
+	"TB":   TB,
+	"TiB":  TiB,
+	"tb":   TB,
+	"T":    TB,
+	"t":    TB,
+}
+
+func string2SizeUnit(size string) SizeUnit {
+	if unit, ok := string2SizeUnitMap[size]; ok {
+		return unit
+	}
+	return Unknown
 }
 
 func Convert2SizeString(size SizeUnit) string {
 	return sizeStringSets(size)[0]
 }
 
-func ConvertFromSizeString(size string) SizeUnit {
+func ConvertFromSizeString(size string, isSI bool) SizeUnit {
 	switch size {
 	case "bit", "Bit", "BIT":
 		return Bit
 	case "B", "b", "byte", "Byte", "BYTE":
-		return B
+		return Byte
 	case "KB", "kb", "Kb", "k":
-		return KB
+		if isSI {
+			return KB
+		}
+		return KiB
 	case "MB", "mb", "Mb", "M", "m":
-		return MB
+		if isSI {
+			return MB
+		}
+		return MiB
 	case "GB", "gb", "Gb", "G", "g":
-		return GB
+		if isSI {
+			return GB
+		}
+		return GiB
 	case "TB", "tb", "Tb", "T", "t":
-		return TB
-	case "PB", "pb", "Pb", "P", "p":
-		return PB
-	case "EB", "eb", "Eb", "E", "e":
-		return EB
-	case "ZB", "zb", "Zb", "Z", "z":
-		return ZB
-	case "YB", "yb", "Yb", "Y", "y":
-		return YB
-	case "BB", "bb", "Bb":
-		return BB
-	case "NB", "nb", "Nb", "N", "n":
-		return NB
+		if isSI {
+			return TB
+		}
+		return TiB
 	default:
 		return Unknown
 	}
@@ -150,6 +163,7 @@ type SizeEnabler struct {
 	enableTotal bool
 	sizeUint    SizeUnit
 	recursive   *SizeRecursive
+	isSi        bool
 }
 
 func (s *SizeEnabler) Recursive() *SizeRecursive {
@@ -158,6 +172,11 @@ func (s *SizeEnabler) Recursive() *SizeRecursive {
 
 func (s *SizeEnabler) SetRecursive(sr *SizeRecursive) {
 	s.recursive = sr
+}
+
+func (s *SizeEnabler) SetSI() *SizeEnabler {
+	s.isSi = true
+	return s
 }
 
 type SizeRecursive struct {
@@ -209,13 +228,17 @@ func (s *SizeEnabler) Size2String(b int64) (string, SizeUnit) {
 	switch s.sizeUint {
 	case Bit:
 		res = strconv.FormatInt(int64(v*8), 10)
-	case B:
+	case Byte:
 		res = strconv.FormatInt(int64(v), 10)
-	case KB, MB, GB, TB, PB, EB, ZB, YB, BB, NB:
-		res = fmt.Sprintf("%.1f", v*float64(B)/float64(s.sizeUint))
+	case KiB, MiB, GiB, TiB, KB, MB, GB, TB:
+		res = fmt.Sprintf("%.1f", v*float64(Byte)/float64(s.sizeUint))
 	case Auto:
-		for i := B; i <= NB; i *= 1024 {
-			if v < 1024 {
+		maxUnit, gap := TiB, SizeUnit(1024)
+		if s.isSi {
+			maxUnit, gap = TB, SizeUnit(1000)
+		}
+		for i := Byte; i <= maxUnit; i *= gap {
+			if v < float64(gap) {
 				res = strconv.FormatFloat(v, 'f', 1, 64)
 				if res == "0.0" {
 					// make align
@@ -225,7 +248,7 @@ func (s *SizeEnabler) Size2String(b int64) (string, SizeUnit) {
 				actualUnit = i
 				return res, actualUnit
 			}
-			v /= 1024
+			v /= float64(gap)
 		}
 		panic("too large")
 	default:

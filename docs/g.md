@@ -77,6 +77,7 @@ g
 [--remove-invalid-path|--rip]
 [--rt|--relative-time]
 [--show-only-hidden|--hidden]
+[--si]
 [--size-unit|--su|--block-size]=[value]
 [--size]
 [--smart-group]
@@ -282,11 +283,13 @@ g [options] [path]
 
 **--show-only-hidden, --hidden**: show only hidden files(overridden by --show-hidden/-a/-A)
 
+**--si**: use powers of 1000 not 1024 for size format
+		eg: 1K = 1000 bytes
+
 **--size**: show file/dir size
 
 **--size-unit, --su, --block-size**="": size unit:
-			bit, b, k, m, g, t, p,
-			e, z, y, bb, nb, auto
+			bit, b, k, m, g, t, auto
 
 **--smart-group**: only show group if it has a different name from owner
 

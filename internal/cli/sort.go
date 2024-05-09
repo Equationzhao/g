@@ -3,11 +3,8 @@ package cli
 import (
 	"fmt"
 	"slices"
-	"strings"
 
-	"github.com/Equationzhao/g/internal/content"
 	"github.com/Equationzhao/g/internal/sorter"
-	"github.com/gabriel-vasile/mimetype"
 	"github.com/urfave/cli/v2"
 )
 
@@ -98,21 +95,7 @@ var sortingFlags = []cli.Flag{
 				case "mime", "mimetype", "Mime", "Mimetype":
 					err := limitOnce.Do(
 						func() error {
-							size := context.String("detect-size")
-							var bytes uint64 = 1024 * 1024
-							if size == "0" || strings.EqualFold(size, "infinity") || strings.EqualFold(
-								size, "nolimit",
-							) {
-								bytes = 0
-							} else if size != "" {
-								sizeUint, err := content.ParseSize(size)
-								if err != nil {
-									return err
-								}
-								bytes = sizeUint.Bytes
-							}
-							mimetype.SetLimit(uint32(bytes))
-							return nil
+							return setLimit(context)
 						},
 					)
 					if err != nil {
@@ -122,21 +105,7 @@ var sortingFlags = []cli.Flag{
 				case "mime-descend", "mimetype-descend", "Mime-descend", "Mimetype-descend":
 					err := limitOnce.Do(
 						func() error {
-							size := context.String("detect-size")
-							var bytes uint64 = 1024 * 1024
-							if size == "0" || strings.EqualFold(size, "infinity") || strings.EqualFold(
-								size, "nolimit",
-							) {
-								bytes = 0
-							} else if size != "" {
-								sizeUint, err := content.ParseSize(size)
-								if err != nil {
-									return err
-								}
-								bytes = sizeUint.Bytes
-							}
-							mimetype.SetLimit(uint32(bytes))
-							return nil
+							return setLimit(context)
 						},
 					)
 					if err != nil {
@@ -230,19 +199,7 @@ var sortingFlags = []cli.Flag{
 		Action: func(context *cli.Context, b bool) error {
 			err := limitOnce.Do(
 				func() error {
-					size := context.String("detect-size")
-					var bytes uint64 = 1024 * 1024
-					if size == "0" || strings.EqualFold(size, "infinity") || strings.EqualFold(size, "nolimit") {
-						bytes = 0
-					} else if size != "" {
-						sizeUint, err := content.ParseSize(size)
-						if err != nil {
-							return err
-						}
-						bytes = sizeUint.Bytes
-					}
-					mimetype.SetLimit(uint32(bytes))
-					return nil
+					return setLimit(context)
 				},
 			)
 			if err != nil {
@@ -262,19 +219,7 @@ var sortingFlags = []cli.Flag{
 			if b {
 				err := limitOnce.Do(
 					func() error {
-						size := context.String("detect-size")
-						var bytes uint64 = 1024 * 1024
-						if size == "0" || strings.EqualFold(size, "infinity") || strings.EqualFold(size, "nolimit") {
-							bytes = 0
-						} else if size != "" {
-							sizeUint, err := content.ParseSize(size)
-							if err != nil {
-								return err
-							}
-							bytes = sizeUint.Bytes
-						}
-						mimetype.SetLimit(uint32(bytes))
-						return nil
+						return setLimit(context)
 					},
 				)
 				if err != nil {
@@ -295,19 +240,7 @@ var sortingFlags = []cli.Flag{
 			if b {
 				err := limitOnce.Do(
 					func() error {
-						size := context.String("detect-size")
-						var bytes uint64 = 1024 * 1024
-						if size == "0" || strings.EqualFold(size, "infinity") || strings.EqualFold(size, "nolimit") {
-							bytes = 0
-						} else if size != "" {
-							sizeUint, err := content.ParseSize(size)
-							if err != nil {
-								return err
-							}
-							bytes = sizeUint.Bytes
-						}
-						mimetype.SetLimit(uint32(bytes))
-						return nil
+						return setLimit(context)
 					},
 				)
 				if err != nil {
@@ -328,19 +261,7 @@ var sortingFlags = []cli.Flag{
 			if b {
 				err := limitOnce.Do(
 					func() error {
-						size := context.String("detect-size")
-						var bytes uint64 = 1024 * 1024
-						if size == "0" || strings.EqualFold(size, "infinity") || strings.EqualFold(size, "nolimit") {
-							bytes = 0
-						} else if size != "" {
-							sizeUint, err := content.ParseSize(size)
-							if err != nil {
-								return err
-							}
-							bytes = sizeUint.Bytes
-						}
-						mimetype.SetLimit(uint32(bytes))
-						return nil
+						return setLimit(context)
 					},
 				)
 				if err != nil {
