@@ -18,7 +18,7 @@ var escapeReplacer = strings.NewReplacer(
 	"\r", reverseColor(`\r`),
 	"\n", reverseColor(`\n`),
 	"\"", reverseColor(`\"`),
-	"\\", reverseColor(`\`),
+	"\\", reverseColor(`\\`),
 )
 
 func reverseColor(s string) string {
