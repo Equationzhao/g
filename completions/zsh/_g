@@ -51,6 +51,7 @@ _g() {
         '-r[reverse the order of the sort]'
         '--versionsort[sort by version numbers]'
         '-S[sort by file size]'
+        '--si[use powers of 1000 not 1024 for size format]'
         '--sizesort[sort by file size]'
         '-U[do not sort]'
         '--no-sort[do not sort]'
