@@ -79,6 +79,12 @@
 			"name": "10.json"
 		},
 		{
+			"icon": "",
+			"permissions": "-rw-r--r--",
+			"size": "100.0 KB",
+			"name": "100KiB"
+		},
+		{
 			"icon": "",
 			"permissions": "-rw-r--r--",
 			"size": "6.0 B",

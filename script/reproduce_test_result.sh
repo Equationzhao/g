@@ -13,7 +13,7 @@ check_input(){
 # PRINT WARNING
 printf '\033[1;33mThis script will overwrite the test result in tests/*.stdout\033[0m\n'
 
-read -p "Are you sure?$ (y/N) " -n 1 -r
+read -p "Are you sure? (y/N) " -n 1 -r
 check_input
 read -p "Are you sure?? (y/N) " -n 1 -r
 check_input
