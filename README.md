@@ -71,7 +71,7 @@ brew install g-ls
 sudo port install g-ls
 ```
 
-#### Windows Scoop
+#### Windows
 
 windows scoop:
 
