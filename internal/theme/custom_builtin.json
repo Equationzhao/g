@@ -343,6 +343,34 @@
             "color": "white",
             "icon": ""
         },
+        "cron.d": {
+            "color": "white",
+            "icon": ""
+        },
+        "cron.daily": {
+            "color": "white",
+            "icon": ""
+        },
+        "cron.hourly": {
+            "color": "white",
+            "icon": ""
+        },
+        "cron.minutely": {
+            "color": "white",
+            "icon": ""
+        },
+        "cron.mouthly": {
+            "color": "white",
+            "icon": ""
+        },
+        "cron.weekly": {
+            "color": "white",
+            "icon": ""
+        },
+        "crontab": {
+            "color": "white",
+            "icon": "\uE615"
+        },
         "desktop": {
             "color": "white",
             "icon": ""
@@ -351,11 +379,19 @@
             "color": "[150]@256",
             "icon": ""
         },
+        "docker-compose.yaml": {
+            "color": "BrightYellow",
+            "icon": ""
+        },
         "docker-compose.yml": {
             "color": "BrightYellow",
             "icon": ""
         },
         "dockerfile": {
+            "color": "BrightYellow",
+            "icon": ""
+        },
+        "dockerignore": {
             "color": "BrightYellow",
             "icon": ""
         },
@@ -916,6 +952,10 @@
         "gpg": {
             "color": "[214]@256",
             "icon": ""
+        },
+        "graphql": {
+            "color": "white",
+            "icon": ""
         },
         "groovy": {
             "color": "[158]@256",
