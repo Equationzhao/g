@@ -174,14 +174,7 @@ brew-tap:
 
 # update homebrew-core
 brew: 
-    wget -c {{url}}/archive/refs/tags/v{{latest}}.tar.gz -O v{{latest}}.tar.gz
-    sed -i bak "s#url .*#url \"{{url}}/archive/refs/tags/v{{latest}}.tar.gz\", tag: \"v{{latest}}\"#g" $(brew --repository homebrew/core)/Formula/g/g-ls.rb 
-    sed -i bak "s/sha256 .*/sha256 \"$(shasum -a 256 v{{latest}}.tar.gz | choose 0)\"/g" $(brew --repository homebrew/core)/Formula/g/g-ls.rb
-    sed -i bak "s/assert_match .*/assert_match \"{{latest}}\", output/g" $(brew --repository homebrew/core)/Formula/g/g-ls.rb
-    cd $(brew --repository homebrew/core)/Formula/g && rm g-ls.rbbak
-    cd $(brew --repository homebrew/core) && git add -u
-    cd $(brew --repository homebrew/core) && git commit
-    cd $(brew --repository homebrew/core) && git push
+    brew bump-formula-pr --strict --online g-ls
 
 # update scoop
 scoop:
