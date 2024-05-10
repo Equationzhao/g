@@ -2,7 +2,13 @@
 
 ## requirement
 
-make sure you have `just` installed
+the tests directory should be updated with `git submodule update --remote`.
+
+> ⚠️ there are some test files whose name contains invalid characters in Windows, so the tests can't be updated in Windows.
+
+the test data contains a series of testfile/dir(under test_data dir), scripts(*.sh), and expected outputs(*.stdout). The scripts are used to generate the outputs, and the expected outputs are used to compare with the outputs.
+
+make sure you have `just` installed.
 
 ## pass script/run_test.sh(just test)
 `just test`
