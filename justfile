@@ -242,7 +242,7 @@ testcustomtheme:
     @sh ./script/theme_test.sh
 
 test: theme
-    go test -v ./...
+    go test -cover -gcflags=all=-l -v ./...
     @echo "-------- start --------"
     go build
     @sh ./script/run_test.sh

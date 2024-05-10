@@ -46,18 +46,18 @@ type (
 	Groupname = string
 )
 
-// GroupnameMap is a map from Gid to Groupname
-type GroupnameMap struct {
+// groupnameMap is a map from Gid to Groupname
+type groupnameMap struct {
 	m *Map[Gid, Groupname]
 }
 
-func NewGroupnameMap() *GroupnameMap {
-	return &GroupnameMap{
+func NewGroupnameMap() *groupnameMap {
+	return &groupnameMap{
 		m: NewCacheMap[Gid, Groupname](20),
 	}
 }
 
-func (m *GroupnameMap) Get(g Gid) Groupname {
+func (m *groupnameMap) Get(g Gid) Groupname {
 	v, _ := m.m.GetOrCompute(g, func() Groupname {
 		targetGroup, err := user.LookupGroupId(g)
 		if err != nil {

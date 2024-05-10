@@ -38,3 +38,50 @@ CustomTreeStyle:
 		Empty:     "    ",
 	})
 }
+
+func TestTreeStyle_IsEnabled(t1 *testing.T) {
+	type fields struct {
+		Child     string
+		LastChild string
+		Mid       string
+		Empty     string
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		want   bool
+	}{
+		{
+			name: "test",
+			fields: fields{
+				Child:     "├── ",
+				LastChild: "╰── ",
+				Mid:       "│   ",
+				Empty:     "    ",
+			},
+			want: true,
+		},
+		{
+			name: "test",
+			fields: fields{
+				Child:     "",
+				LastChild: "",
+				Mid:       "",
+				Empty:     "",
+			},
+		},
+	}
+	for _, tt := range tests {
+		t1.Run(tt.name, func(t1 *testing.T) {
+			ts := TreeStyle{
+				Child:     tt.fields.Child,
+				LastChild: tt.fields.LastChild,
+				Mid:       tt.fields.Mid,
+				Empty:     tt.fields.Empty,
+			}
+			if got := ts.IsEnabled(); got != tt.want {
+				t1.Errorf("IsEnabled() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
