@@ -210,7 +210,9 @@ theme: testcustomtheme
     rm g
 
 # check git tag and git status
-check: check-install-script
+check: check-install-script check-git-status
+
+check-git-status:
     @if [ "$(git rev-parse HEAD)" == "$(git rev-parse v{{latest}})" ]; then \
       if [ -z "$(git status --porcelain)" ]; then \
         if [ "$(grep 'Version' internal/cli/version.go | awk '{print $4}' | sed 's/"//g')" == {{latest}} ]; then \
@@ -225,7 +227,8 @@ check: check-install-script
       fi; \
     else \
       echo "{{COLOR_RED}}latest tag v{{latest}} isn't on the current HEAD." && exit 1; \
-    fi
+    fi;
+
 
 check-install-script:
     @echo "git tag: v{{latest}}"
