@@ -70,6 +70,10 @@ just brew-tap
 
 ### scoop
 
+```zsh
+just scoop
+```
+
 the scoop manifest is at [scoop](scoop/g.json)
 
 ```zsh
