@@ -1055,6 +1055,10 @@ var Ext = Theme{
 		Color: constval.White,
 		Icon:  "\uebcb",
 	},
+	"graphql": Style{
+		Color: constval.White,
+		Icon:  "\uE662",
+	},
 }
 
 var Special = map[string]Style{
@@ -1315,6 +1319,10 @@ var Name = map[string]Style{
 		Color: constval.BrightYellow,
 		Icon:  "\ue7b0",
 	},
+	"dockerignore": {
+		Color: constval.BrightYellow,
+		Icon:  "\ue7b0",
+	},
 	"readme": {
 		Color:     constval.Yellow,
 		Icon:      "\uF48A",
@@ -1455,6 +1463,10 @@ var Name = map[string]Style{
 		Color: constval.BrightYellow,
 		Icon:  "\ue7b0",
 	},
+	"docker-compose.yaml": {
+		Color: constval.BrightYellow,
+		Icon:  "\ue7b0",
+	},
 	"contributing": {
 		Color: constval.White,
 		Icon:  "\uF0C0",
@@ -1462,6 +1474,34 @@ var Name = map[string]Style{
 	"contributing.md": {
 		Color: constval.White,
 		Icon:  "\uF0C0",
+	},
+	"cron.minutely": {
+		Color: constval.White,
+		Icon:  "\uE5FC",
+	},
+	"cron.d": {
+		Color: constval.White,
+		Icon:  "\uE5FC",
+	},
+	"cron.daily": {
+		Color: constval.White,
+		Icon:  "\uE5FC",
+	},
+	"cron.hourly": {
+		Color: constval.White,
+		Icon:  "\uE5FC",
+	},
+	"cron.mouthly": {
+		Color: constval.White,
+		Icon:  "\uE5FC",
+	},
+	"cron.weekly": {
+		Color: constval.White,
+		Icon:  "\uE5FC",
+	},
+	"crontab": {
+		Color: constval.White,
+		Icon:  "\uE5FC",
 	},
 }
 
