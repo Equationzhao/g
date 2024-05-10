@@ -68,13 +68,21 @@ make sure the brew-tap repo is at '../homebrew-g' and 'Already up-to-date'
 just brew-tap
 ```
 
+### brew-core
+
+usually brew-core will be automatically updated by the brew bot, but if you want to update it manually, you can try the following command
+
+```zsh
+just brew-core
+```
+
 ### scoop
 
 ```zsh
 just scoop
 ```
 
-the scoop manifest is at [scoop](scoop/g.json)
+the scoop manifest is at [scoop](../scoop/g.json)
 
 ```zsh
 git add -u && git commit -m 'ci: :construction_worker: update scoop'
