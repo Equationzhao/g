@@ -231,15 +231,31 @@
             "color": "white",
             "icon": ""
         },
+        ".gitattributes": {
+            "color": "BrightBlack",
+            "icon": ""
+        },
         ".gitconfig": {
-            "color": "white",
-            "icon": ""
+            "color": "BrightBlack",
+            "icon": ""
         },
         ".github": {
             "color": "white",
             "icon": ""
         },
         ".gitignore": {
+            "color": "BrightBlack",
+            "icon": ""
+        },
+        ".gitignore_global": {
+            "color": "BrightBlack",
+            "icon": ""
+        },
+        ".gitlab-ci.yml": {
+            "color": "white",
+            "icon": ""
+        },
+        ".gitmodules": {
             "color": "BrightBlack",
             "icon": ""
         },
