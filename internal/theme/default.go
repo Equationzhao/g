@@ -1223,10 +1223,6 @@ var Name = map[string]Style{
 		Color: constval.BrightBlack,
 		Icon:  "\uf179",
 	},
-	".gitconfig": {
-		Color: conf,
-		Icon:  "\uf1d3",
-	},
 	"pkgbuild": {
 		Color: pkg,
 		Icon:  "\uf303",
@@ -1250,6 +1246,18 @@ var Name = map[string]Style{
 	".github": {
 		Icon:  "\uF408",
 		Color: constval.White,
+	},
+	".gitattributes": {
+		Icon:  "\uE65D",
+		Color: constval.BrightBlack,
+	},
+	".gitmodules": {
+		Icon:  "\uE65D",
+		Color: constval.BrightBlack,
+	},
+	".gitconfig": {
+		Icon:  "\uE65D",
+		Color: constval.BrightBlack,
 	},
 	".vscode": {
 		Icon:  "\uE70C",
@@ -1286,6 +1294,14 @@ var Name = map[string]Style{
 	".gitignore": {
 		Color: constval.BrightBlack,
 		Icon:  "\ue65d",
+	},
+	".gitignore_global": {
+		Color: constval.BrightBlack,
+		Icon:  "\ue65d",
+	},
+	".gitlab-ci.yml": {
+		Color: constval.White,
+		Icon:  "\uF296",
 	},
 	"cmakelists.txt": {
 		Color: lang,
