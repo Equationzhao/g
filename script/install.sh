@@ -10,7 +10,7 @@
 # Get OS and architecture
 os_type=$(uname -s | tr '[:upper:]' '[:lower:]')
 os_arch=$(uname -m)
-version="0.26.0"
+version="0.27.0"
 man_url="https://github.com/Equationzhao/g/raw/v${version}/man/g.1.gz"
 
 interrupt_handler() {
