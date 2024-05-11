@@ -26,16 +26,6 @@ type Style struct {
 	Blink     bool   `json:"blink,omitempty"`
 }
 
-type StyleForUnmarshal struct {
-	Color     string `json:"color,omitempty"`
-	Icon      string `json:"icon,omitempty"`
-	Underline bool   `json:"underline,omitempty"`
-	Bold      bool   `json:"bold,omitempty"`
-	Faint     bool   `json:"faint,omitempty"`
-	Italics   bool   `json:"italics,omitempty"`
-	Blink     bool   `json:"blink,omitempty"`
-}
-
 var (
 	genOnceStyleField sync.Once
 	styleField        []string
@@ -61,6 +51,8 @@ func genStyleField() []string {
 }
 
 func (s *Style) UnmarshalJSON(bytes []byte) error {
+	type styleAlias Style // avoid recursion during JSON unmarshalling.
+	var alias styleAlias
 	var raw map[string]json.RawMessage
 	if err := json.Unmarshal(bytes, &raw); err != nil {
 		return err
@@ -74,12 +66,11 @@ func (s *Style) UnmarshalJSON(bytes []byte) error {
 		}
 	}
 
-	sf := StyleForUnmarshal{}
-	if err := json.Unmarshal(bytes, &sf); err != nil {
+	if err := json.Unmarshal(bytes, &alias); err != nil {
 		return err
 	}
 
-	*s = Style(sf)
+	*s = Style(alias)
 	return nil
 }
 
