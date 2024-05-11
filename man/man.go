@@ -3,6 +3,7 @@ package man
 import (
 	"compress/gzip"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 
@@ -11,13 +12,18 @@ import (
 
 func GenMDAndMan() {
 	// md
-	md, err := os.Create(filepath.Join("docs", "g.md"))
+	g, err := os.Create(filepath.Join("docs", "g.md"))
+	if err != nil {
+		panic(err)
+	}
+	defer g.Close()
+	md, err := os.Create(filepath.Join("docs", "man.md"))
 	if err != nil {
 		panic(err)
 	}
 	defer md.Close()
 	s, _ := cli.G.ToMarkdown()
-	_, _ = fmt.Fprintln(md, s)
+	_, _ = fmt.Fprintln(io.MultiWriter(md, g), s)
 	// man
 	man, _ := os.Create(filepath.Join("man", "g.1.gz"))
 	s, _ = cli.G.ToMan()
