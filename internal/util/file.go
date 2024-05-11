@@ -3,6 +3,7 @@ package util
 import (
 	"os"
 	"path/filepath"
+	"time"
 )
 
 func IsSymLink(file os.FileInfo) bool {
@@ -77,4 +78,40 @@ func RecursivelySizeOf(info os.FileInfo, depth int) int64 {
 		return totalSize
 	}
 	return info.Size()
+}
+
+type MockFileInfo struct {
+	size    int64
+	isDir   bool
+	name    string
+	mode    os.FileMode
+	modTime time.Time
+}
+
+func NewMockFileInfo(size int64, isDir bool, name string, mode os.FileMode, modTime time.Time) *MockFileInfo {
+	return &MockFileInfo{size: size, isDir: isDir, name: name, mode: mode, modTime: modTime}
+}
+
+func (m *MockFileInfo) Size() int64 {
+	return m.size
+}
+
+func (m *MockFileInfo) IsDir() bool {
+	return m.isDir
+}
+
+func (m *MockFileInfo) Mode() os.FileMode {
+	return m.mode
+}
+
+func (m *MockFileInfo) ModTime() time.Time {
+	return m.modTime
+}
+
+func (m *MockFileInfo) Name() string {
+	return m.name
+}
+
+func (m *MockFileInfo) Sys() any {
+	return nil
 }

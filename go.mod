@@ -3,6 +3,7 @@ module github.com/Equationzhao/g
 go 1.21
 
 require (
+	bou.ke/monkey v1.0.2
 	github.com/Equationzhao/pathbeautify v0.0.7
 	github.com/acarl005/stripansi v0.0.0-20180116102854-5a71ef0e047d
 	github.com/agiledragon/gomonkey/v2 v2.11.0
