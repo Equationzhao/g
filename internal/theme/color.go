@@ -196,19 +196,19 @@ func RGBMultiply(rgbStr string, radio float64) string {
 	var r, g, b uint8 = 0, 0, 0
 	_, _ = fmt.Fscanf(strings.NewReader(rgbStr), RGBFormat, &r, &g, &b)
 
-	r = uint8(math.Ceil(float64(r) * radio))
-	g = uint8(math.Ceil(float64(g) * radio))
-	b = uint8(math.Ceil(float64(b) * radio))
-	if r > 255 {
-		r = 255
+	rf := math.Ceil(float64(r) * radio)
+	gf := math.Ceil(float64(g) * radio)
+	bf := math.Ceil(float64(b) * radio)
+	if rf > 255 {
+		rf = 255
 	}
-	if g > 255 {
-		g = 255
+	if gf > 255 {
+		gf = 255
 	}
-	if b > 255 {
-		b = 255
+	if bf > 255 {
+		bf = 255
 	}
-	return rgb(r, g, b)
+	return rgb(uint8(rf), uint8(gf), uint8(bf))
 }
 
 const (
