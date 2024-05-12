@@ -8,20 +8,21 @@ for linux system, you can install the following dependencies through other pkg m
 
 software/toolchain:
 
-| name       | how to install             | remark                                                                            |
-|------------|----------------------------|-----------------------------------------------------------------------------------|
-| go >1.21.0 | `brew install go`          | or use [go.dev](https://go.dev/dl/) / [goup](https://github.com/owenthereal/goup) |
-| git        | `brew install git`         | or use xcode version                                                              |
-| upx        | `brew install upx`         |                                                                                   |
-| dpkg-deb   | `brew install dpkg`        |                                                                                   |
-| gh         | `brew install gh`          |                                                                                   |
-| wget       | `brew install wget`        |                                                                                   |
-| gofumpt    | `brew install gofumpt`     |                                                                                   |
-| just       | `brew install just`        |                                                                                   |
-| prettier   | `brew install prettier`    |                                                                                   |
-| choose     | `brew install choose-rust` |                                                                                   |
-| ripgrep    | `brew install ripgrep`     |                                                                                   |
-| shasum     |                            |                                                                                   |
+| name          | how to install               | remark                                                                            |
+|---------------|------------------------------|-----------------------------------------------------------------------------------|
+| go >1.21.0    | `brew install go`            | or use [go.dev](https://go.dev/dl/) / [goup](https://github.com/owenthereal/goup) |
+| git           | `brew install git`           | or use xcode version                                                              |
+| upx           | `brew install upx`           |                                                                                   |
+| dpkg-deb      | `brew install dpkg`          |                                                                                   |
+| gh            | `brew install gh`            |                                                                                   |
+| wget          | `brew install wget`          |                                                                                   |
+| gofumpt       | `brew install gofumpt`       |                                                                                   |
+| just          | `brew install just`          |                                                                                   |
+| prettier      | `brew install prettier`      |                                                                                   |
+| choose        | `brew install choose-rust`   |                                                                                   |
+| ripgrep       | `brew install ripgrep`       |                                                                                   |
+| shasum        |                              |                                                                                   |
+| golangci-lint | `brew install golangci-lint` |                                                                                   |
 
 
 run the [script](../script/install_dev_requirement.sh) in the [script](../script) dir to install the dev requirement
@@ -31,13 +32,16 @@ run the [script](../script/install_dev_requirement.sh) in the [script](../script
 
 ## pre-check
 
-- [ ] check code format: `just format`
-- [ ] gen theme/doc file: `just theme doc`
+- [ ] check code format and lint: `just precheck`
+- [ ] gen theme/doc file: `just gendocs`
 - [ ] run test: `just test`
 - [ ] check version: make sure the git tag and internal/cli/Version is the same. And git status is clean, git tag is at the current HEAD: `just check`
 
 ## build
 
+- [ ] generate release file: `just genrelease`
+
+or by steps:
 - [ ] cleanup: `just clean`
 - [ ] build: `just build`
 - [ ] compress: `just compress`

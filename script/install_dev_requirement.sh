@@ -12,6 +12,7 @@ lists=(
   "prettier"
   "choose-rust"
   "ripgrep"
+  "golangci-lint"
 )
 
 command=(
@@ -25,6 +26,7 @@ command=(
   "prettier"
   "choose"
   "rg"
+  "golangci-lint"
 )
 
 error() {

@@ -132,6 +132,9 @@ deb:
 checksum: 
     shasum -a 256 build/* > build/checksum.txt
 
+# build executables and compress and deb and checksum
+genrelease: build compress deb checksum
+
 # release to github
 release: 
     gh release create v{{latest}} build/*
@@ -180,15 +183,20 @@ brew:
 scoop:
     cd scoop && sh scoop.sh
 
-all: doc theme format test check clean build compress deb checksum release
-
 # clean the build directory
 clean: 
     rm -rf build
 
+# golangci-lint
+lint:
+    golangci-lint run ./...
+
 # format the code
-format: 
+format:
     gofumpt -w -l .
+
+# precheck the code(format and lint)
+precheck: format lint
 
 # generate the documentation
 doc: 
@@ -196,14 +204,17 @@ doc:
     ./g 
     rm g
 
+testcustomtheme:
+    @sh ./script/theme_test.sh
+
 # generate the theme
 theme: testcustomtheme
     CGO_ENABLED=0 go build -tags 'theme'
     ./g 
     rm g
 
-# check git tag and git status
-check: check-install-script check-git-status
+# generate the docs(doc and theme)
+gendocs: doc theme
 
 check-git-status:
     @if [ "$(git rev-parse HEAD)" == "$(git rev-parse v{{latest}})" ]; then \
@@ -232,16 +243,16 @@ check-install-script:
       echo "{{COLOR_RED}}script version doesn't match {{latest}}"; \
     fi;
 
+# check git tag and git status
+check: check-install-script check-git-status
+
 newtest:
     @sh ./script/new_test.sh
 
 reproducetest:
     @sh ./script/reproduce_test_result.sh
 
-testcustomtheme:
-    @sh ./script/theme_test.sh
-
-test: theme
+test:
     go test -cover -gcflags=all=-l -v ./...
     @echo "-------- start --------"
     go build
@@ -257,3 +268,5 @@ newminor:
 
 newmajor:
     git add -u && git commit -m ":bookmark: new major version"
+
+all: precheck gendocs test check clean genrelease release
