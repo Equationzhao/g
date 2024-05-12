@@ -161,7 +161,6 @@ func color2str(color string) string {
 		return color2str(constval.Underline) + " + " + color2str(color[len(constval.Underline):])
 	}
 	return ""
-
 }
 
 // str2color convert string to color
