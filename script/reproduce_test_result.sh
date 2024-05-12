@@ -15,16 +15,17 @@ warn() {
     printf '\033[1;33m%s\033[0m\n' "$1"
 }
 
-check_input(){
-  echo
-  if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-      exit 1
-  fi
-}
-
 bye(){
   echo "Bye👋"
   exit 0
+}
+
+check_input(){
+  echo
+  if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+      bye
+      exit 1
+  fi
 }
 
 # PRINT WARNING
@@ -62,16 +63,20 @@ if [ "$REPLY" == "none" ]; then
 fi
 
 # split the input by comma
-
 IFS=',' read -r -a test_names <<< "$REPLY"
+
+# check if the test script exists
 for test_name in "${test_names[@]}"; do
     sh_file="tests/$test_name.sh"
-    echo "Reproducing $sh_file..."
     if [ ! -f "$sh_file" ]; then
-        error "Test script not found.😭"
+        error "$sh_file does not exist.😭"
         exit 1
     fi
+done
 
+# reproduce the test results
+for test_name in "${test_names[@]}"; do
+    echo "Reproducing $sh_file..."
     name="${sh_file%.*}"
     first_line=$(head -n 1 "$sh_file")
     eval "$first_line"

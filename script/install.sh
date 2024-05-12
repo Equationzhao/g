@@ -6,6 +6,8 @@
 # 4. install completion to /usr/local/share/zsh/site-functions
 #    if compinit is not in .zshrc or .zprofile, add it
 
+# load base.sh
+source "$(dirname "$0")/base.sh"
 
 # Get OS and architecture
 os_type=$(uname -s | tr '[:upper:]' '[:lower:]')
@@ -29,20 +31,8 @@ help(){
     echo "Usage: install.sh [-v|-h|-d]"
     echo "  -v: print version"
     echo "  -h: print help"
-    echo "  -d: download binary (default)"
+    echo "  -d: install the latest version (default)"
     echo "  -r: uninstall"
-}
-
-error() {
-    printf '\033[1;31m%s\033[0m\n' "$1"
-}
-
-success() {
-    printf '\033[1;32m%s\033[0m\n' "$1"
-}
-
-warn() {
-    printf '\033[1;33m%s\033[0m\n' "$1"
 }
 
 # Download the file using curl or wget
@@ -89,6 +79,26 @@ check_compinit(){
             success "compinit has been added to ~/.zprofile"
         fi
     fi
+}
+
+compare_versions() {
+    local A="$1"
+    local B="$2"
+
+    if [[ $A == $B ]]; then
+        return 0
+    fi
+
+    IFS='.' read -ra A_parts <<< "$A"
+    IFS='.' read -ra B_parts <<< "$B"
+
+    for i in "${!A_parts[@]}"; do
+        if (( ${A_parts[i]} > ${B_parts[i]} )); then
+            return 0
+        elif (( ${A_parts[i]} < ${B_parts[i]} )); then
+            return 1
+        fi
+    done
 }
 
 uninstall_g(){
@@ -143,28 +153,6 @@ while getopts "vhdr" opt; do
             ;;
     esac
 done
-
-
-compare_versions() {
-    local A="$1"
-    local B="$2"
-
-    if [[ $A == $B ]]; then
-        return 0
-    fi
-
-    IFS='.' read -ra A_parts <<< "$A"
-    IFS='.' read -ra B_parts <<< "$B"
-
-    for i in "${!A_parts[@]}"; do
-        if (( ${A_parts[i]} > ${B_parts[i]} )); then
-            return 0
-        elif (( ${A_parts[i]} < ${B_parts[i]} )); then
-            return 1
-        fi
-    done
-
-}
 
 # if already has g, and g --version >= version, exit
 if command -v g &> /dev/null; then

@@ -2,17 +2,8 @@
 
 # creat a new test file in tests/*.sh and its output in tests/*.stdout
 
-error() {
-    printf '\033[1;31m%s\033[0m\n' "$1"
-}
-
-success() {
-    printf '\033[1;32m%s\033[0m\n' "$1"
-}
-
-warn() {
-    printf '\033[1;33m%s\033[0m\n' "$1"
-}
+# load base.sh
+source "$(dirname "$0")/base.sh"
 
 if [ ! -f "script/run_test.sh" ]; then
     error "Please run the script in the root directory of the project"

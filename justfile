@@ -208,9 +208,9 @@ testcustomtheme:
     @sh ./script/theme_test.sh
 
 # generate the theme
-theme: testcustomtheme
+theme:
     CGO_ENABLED=0 go build -tags 'theme'
-    ./g 
+    ./g
     rm g
 
 # generate the docs(doc and theme)
@@ -252,12 +252,11 @@ newtest:
 reproducetest:
     @sh ./script/reproduce_test_result.sh
 
-test:
+test: testcustomtheme
     go test -cover -gcflags=all=-l -v ./...
     @echo "-------- start --------"
     go build
     @sh ./script/run_test.sh
-    @go build -tags=custom .
     @rm g
 
 newpatch:
