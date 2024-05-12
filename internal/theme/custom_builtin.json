@@ -189,7 +189,7 @@
             "color": "red"
         },
         "git_ignored": {
-            "color": "BrightPed"
+            "color": "BrightRed"
         },
         "git_modified": {
             "color": "yellow"
@@ -591,7 +591,7 @@
             "icon": ""
         },
         "shell": {
-            "color": "BrightPreen",
+            "color": "BrightGreen",
             "icon": ""
         },
         "src": {
@@ -670,7 +670,7 @@
     },
     "ext": {
         ".profile": {
-            "color": "BrightPreen",
+            "color": "BrightGreen",
             "icon": ""
         },
         "7z": {
@@ -706,7 +706,7 @@
             "icon": ""
         },
         "asc": {
-            "color": "BrightPreen",
+            "color": "BrightGreen",
             "icon": "󰦝"
         },
         "asm": {
@@ -742,23 +742,23 @@
             "icon": ""
         },
         "bash": {
-            "color": "BrightPreen",
+            "color": "BrightGreen",
             "icon": ""
         },
         "bash_history": {
-            "color": "BrightPreen",
+            "color": "BrightGreen",
             "icon": ""
         },
         "bash_profile": {
-            "color": "BrightPreen",
+            "color": "BrightGreen",
             "icon": ""
         },
         "bashrc": {
-            "color": "BrightPreen",
+            "color": "BrightGreen",
             "icon": ""
         },
         "bat": {
-            "color": "BrightPreen",
+            "color": "BrightGreen",
             "icon": ""
         },
         "bmp": {
@@ -834,7 +834,7 @@
             "icon": "󰌛"
         },
         "csh": {
-            "color": "BrightPreen",
+            "color": "BrightGreen",
             "icon": ""
         },
         "cson": {
@@ -942,7 +942,7 @@
             "icon": ""
         },
         "fish": {
-            "color": "BrightPreen",
+            "color": "BrightGreen",
             "icon": ""
         },
         "flac": {
@@ -1106,7 +1106,7 @@
             "icon": ""
         },
         "ksh": {
-            "color": "BrightPreen",
+            "color": "BrightGreen",
             "icon": ""
         },
         "kt": {
@@ -1214,7 +1214,7 @@
             "icon": ""
         },
         "nu": {
-            "color": "BrightPreen",
+            "color": "BrightGreen",
             "icon": ""
         },
         "numbers": {
@@ -1298,7 +1298,7 @@
             "icon": ""
         },
         "ps1": {
-            "color": "BrightPreen",
+            "color": "BrightGreen",
             "icon": ""
         },
         "psd": {
@@ -1374,7 +1374,7 @@
             "icon": ""
         },
         "sh": {
-            "color": "BrightPreen",
+            "color": "BrightGreen",
             "icon": ""
         },
         "sitx": {
@@ -1546,15 +1546,15 @@
             "icon": ""
         },
         "zsh": {
-            "color": "BrightPreen",
+            "color": "BrightGreen",
             "icon": ""
         },
         "zsh_history": {
-            "color": "BrightPreen",
+            "color": "BrightGreen",
             "icon": ""
         },
         "zshrc": {
-            "color": "BrightPreen",
+            "color": "BrightGreen",
             "icon": ""
         },
         "zst": {

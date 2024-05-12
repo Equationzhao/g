@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"reflect"
+	"regexp"
 	"slices"
 	"strconv"
 	"strings"
@@ -107,72 +108,60 @@ func (t Theme) UnmarshalJSON(bytes []byte) error {
 	return nil
 }
 
+var basicColor2str = map[string]string{
+	constval.Black:        "black",
+	constval.Red:          "red",
+	constval.Green:        "green",
+	constval.Yellow:       "yellow",
+	constval.Blue:         "blue",
+	constval.Purple:       "purple",
+	constval.Cyan:         "cyan",
+	constval.White:        "white",
+	constval.BrightRed:    "BrightRed",
+	constval.BrightGreen:  "BrightGreen",
+	constval.BrightYellow: "BrightYellow",
+	constval.BrightBlue:   "BrightBlue",
+	constval.BrightPurple: "BrightPurple",
+	constval.BrightCyan:   "BrightCyan",
+	constval.BrightWhite:  "BrightWhite",
+	constval.BrightBlack:  "BrightBlack",
+	constval.Reset:        "reset",
+	constval.Underline:    "underline",
+}
+
 func color2str(color string) string {
-	switch color {
-	case constval.Red:
-		return "red"
-	case constval.Green:
-		return "green"
-	case constval.Yellow:
-		return "yellow"
-	case constval.Blue:
-		return "blue"
-	case constval.Purple:
-		return "purple"
-	case constval.Cyan:
-		return "cyan"
-	case constval.White:
-		return "white"
-	case constval.Black:
-		return "black"
-	case constval.BrightRed:
-		return "BrightPed"
-	case constval.BrightGreen:
-		return "BrightPreen"
-	case constval.BrightYellow:
-		return "BrightYellow"
-	case constval.BrightBlue:
-		return "BrightBlue"
-	case constval.BrightPurple:
-		return "BrightPurple"
-	case constval.BrightCyan:
-		return "BrightCyan"
-	case constval.BrightWhite:
-		return "BrightWhite"
-	case constval.BrightBlack:
-		return "BrightBlack"
-	case constval.Reset:
-		return "reset"
-	case constval.Underline:
-		return "underline"
-	default:
-		// detect format:
-		strReader := strings.NewReader(color)
-
-		// 1.8bit/256 color
-		var c uint8
-		_, err := fmt.Fscanf(strReader, Color256Format, &c)
-		if err == nil {
-			return fmt.Sprintf("[%d]@256", c)
-		}
-		// 2.rgb
-		var (
-			r uint8 = 0
-			g uint8 = 0
-			b uint8 = 0
-		)
-		strReader = strings.NewReader(color)
-		_, err = fmt.Fscanf(strReader, RGBFormat, &r, &g, &b)
-		if err == nil {
-			return fmt.Sprintf("[%d,%d,%d]@rgb", r, g, b)
-		}
-
-		color = strings.ReplaceAll(color, " ", "")
-		if strings.HasPrefix(color, constval.Underline) {
-			return color2str(constval.Underline) + " + " + color2str(color[len(constval.Underline):])
-		}
-		return ""
+	// basic colors
+	if str, ok := basicColor2str[color]; ok {
+		return str
 	}
+
+	// detect format:
+	strReader := strings.NewReader(color)
+
+	// 1.8bit/256 color
+	var c uint8
+	_, err := fmt.Fscanf(strReader, Color256Format, &c)
+	if err == nil {
+		return fmt.Sprintf("[%d]@256", c)
+	}
+	// 2.rgb
+	var (
+		r uint8 = 0
+		g uint8 = 0
+		b uint8 = 0
+	)
+	strReader = strings.NewReader(color)
+	_, err = fmt.Fscanf(strReader, RGBFormat, &r, &g, &b)
+	if err == nil {
+		return fmt.Sprintf("[%d,%d,%d]@rgb", r, g, b)
+	}
+
+	color = strings.ReplaceAll(color, " ", "")
+	if strings.HasPrefix(color, constval.Underline) {
+		return color2str(constval.Underline) + " + " + color2str(color[len(constval.Underline):])
+	}
+	return ""
+
 }
 
 // str2color convert string to color
@@ -260,6 +249,9 @@ func str2color(str string) (string, error) {
 		// hex
 		if strings.HasSuffix(str, "@hex") {
 			code := strings.Trim(str[:len(str)-4], "[]")
+			if !IsValidHexColor(code) {
+				return "", errors.New("invalid hex color")
+			}
 			rgb := HexToRgb(code)
 			colorStr, err := RGB(rgb[0], rgb[1], rgb[2])
 			if err != nil {
@@ -270,6 +262,11 @@ func str2color(str string) (string, error) {
 
 		return constval.Reset, nil
 	}
+}
+
+func IsValidHexColor(color string) bool {
+	match, _ := regexp.MatchString("^(#0x|#|0x)?([0-9a-fA-F]{3}){1,2}$", color)
+	return match
 }
 
 /*

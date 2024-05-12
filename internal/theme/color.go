@@ -36,32 +36,7 @@ func rgb(r, g, b uint8) string {
 }
 
 func RGB(r, g, b uint8) (string, error) {
-	err := checkRGB(
-		r, g, b, func(v uint8) error {
-			if v > 255 {
-				return errors.New("color must between 0 and 255")
-			}
-			return nil
-		},
-	)
-	if err != nil {
-		return "", err
-	}
-
 	return rgb(r, g, b), nil
-}
-
-func checkRGB(r, g, b uint8, check func(v uint8) error) error {
-	if err := check(r); err != nil {
-		return err
-	}
-	if err := check(g); err != nil {
-		return err
-	}
-	if err := check(b); err != nil {
-		return err
-	}
-	return nil
 }
 
 // BasicTo256 convert basic color to 256 color
@@ -125,19 +100,8 @@ func RGBTo256Int(r, g, b uint8) int {
 }
 
 // RGBTo256 convert rgb color to 256 color
-func RGBTo256(r, g, b uint8) (string, error) {
-	err := checkRGB(
-		r, g, b, func(v uint8) error {
-			if v > 255 {
-				return errors.New("color must between 0 and 255")
-			}
-			return nil
-		},
-	)
-	if err != nil {
-		return "", err
-	}
-	return fmt.Sprintf(Color256Format, RGBTo256Int(r, g, b)), nil
+func RGBTo256(r, g, b uint8) string {
+	return fmt.Sprintf(Color256Format, RGBTo256Int(r, g, b))
 }
 
 func RGBToBasicInt(r, g, b uint8) string {
@@ -145,19 +109,8 @@ func RGBToBasicInt(r, g, b uint8) string {
 }
 
 // RGBToBasic convert rgb color to basic color
-func RGBToBasic(r, g, b uint8) (string, error) {
-	err := checkRGB(
-		r, g, b, func(v uint8) error {
-			if v > 255 {
-				return errors.New("color must between 0 and 255")
-			}
-			return nil
-		},
-	)
-	if err != nil {
-		return "", err
-	}
-	return RGBToBasicInt(r, g, b), nil
+func RGBToBasic(r, g, b uint8) string {
+	return RGBToBasicInt(r, g, b)
 }
 
 // Color256ToRGB convert 256 color to RGB color
@@ -168,13 +121,13 @@ func Color256ToRGB(str256 string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return c256ToRGB(v)
+	return c256ToRGB(v), nil
 }
 
-func c256ToRGB(v uint8) (string, error) {
+func c256ToRGB(v uint8) string {
 	c256ToRgb := colortool.C256ToRgb(v)
 	r, g, b := c256ToRgb[0], c256ToRgb[1], c256ToRgb[2]
-	return rgb(r, g, b), nil
+	return rgb(r, g, b)
 }
 
 // Color256ToBasic convert 256 color to basic color
@@ -184,13 +137,13 @@ func Color256ToBasic(str256 string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return c256ToBasic(v)
+	return c256ToBasic(v), nil
 }
 
-func c256ToBasic(v uint8) (string, error) {
+func c256ToBasic(v uint8) string {
 	c256ToRgb := colortool.C256ToRgb(v)
 	r, g, b := c256ToRgb[0], c256ToRgb[1], c256ToRgb[2]
-	return RGBToBasicInt(r, g, b), nil
+	return RGBToBasicInt(r, g, b)
 }
 
 // HexToRgb convert hex color to rgb color
@@ -243,19 +196,19 @@ func RGBMultiply(rgbStr string, radio float64) string {
 	var r, g, b uint8 = 0, 0, 0
 	_, _ = fmt.Fscanf(strings.NewReader(rgbStr), RGBFormat, &r, &g, &b)
 
-	r = uint8(math.Ceil(float64(r) * radio))
-	g = uint8(math.Ceil(float64(g) * radio))
-	b = uint8(math.Ceil(float64(b) * radio))
-	if r > 255 {
-		r = 255
+	rf := math.Ceil(float64(r) * radio)
+	gf := math.Ceil(float64(g) * radio)
+	bf := math.Ceil(float64(b) * radio)
+	if rf > 255 {
+		rf = 255
 	}
-	if g > 255 {
-		g = 255
+	if gf > 255 {
+		gf = 255
 	}
-	if b > 255 {
-		b = 255
+	if bf > 255 {
+		bf = 255
 	}
-	return rgb(r, g, b)
+	return rgb(uint8(rf), uint8(gf), uint8(bf))
 }
 
 const (
@@ -271,88 +224,6 @@ type ErrUnknownColorType struct {
 
 func (e ErrUnknownColorType) Error() string {
 	return fmt.Sprintf("unknown color type:%d", e.Level)
-}
-
-func ConvertColor(to colortool.Level, src string) (string, error) {
-	if to == None {
-		return "", nil
-	}
-
-	switch src {
-	case "":
-		return "", nil
-	case
-		// 1.basic
-		constval.Reset,
-		constval.Red,
-		constval.Green,
-		constval.Yellow,
-		constval.Blue,
-		constval.Purple,
-		constval.Cyan,
-		constval.White,
-		constval.BrightBlack,
-		constval.BrightRed,
-		constval.BrightGreen,
-		constval.BrightYellow,
-		constval.BrightBlue,
-		constval.BrightPurple,
-		constval.BrightCyan,
-		constval.BrightWhite:
-		switch to {
-		case Ascii:
-			return src, nil
-		case C256:
-			return BasicTo256(src), nil
-		case TrueColor:
-			return BasicToRGB(src), nil
-		default:
-			return "", ErrUnknownColorType{Level: to}
-		}
-	case constval.Underline:
-		return src, nil
-	default:
-
-		strReader := strings.NewReader(src)
-
-		// 2.8bit/256 color
-		var c uint8
-		_, err := fmt.Fscanf(strReader, Color256Format, &c)
-		if err == nil {
-			switch to {
-			case Ascii:
-				return c256ToBasic(c)
-			case C256:
-				return src, nil
-			case TrueColor:
-				return c256ToRGB(c)
-			default:
-				return "", ErrUnknownColorType{Level: to}
-			}
-		}
-
-		// 3.rgb
-		var (
-			r uint8 = 0
-			g uint8 = 0
-			b uint8 = 0
-		)
-		strReader = strings.NewReader(src)
-		_, err = fmt.Fscanf(strReader, RGBFormat, &r, &g, &b)
-		if err == nil {
-			switch to {
-			case Ascii:
-				return RGBToBasic(r, g, b)
-			case C256:
-				return RGBTo256(r, g, b)
-			case TrueColor:
-				return src, nil
-			default:
-				return "", ErrUnknownColorType{Level: to}
-			}
-		}
-		return "", errors.New("unknown color type")
-	}
 }
 
 func ConvertColorIfGreaterThanExpect(to colortool.Level, src string) (string, error) {
@@ -381,9 +252,8 @@ func ConvertColorIfGreaterThanExpect(to colortool.Level, src string) (string, er
 		constval.BrightBlue,
 		constval.BrightPurple,
 		constval.BrightCyan,
-		constval.BrightWhite:
-		return src, nil
-	case constval.Underline:
+		constval.BrightWhite,
+		constval.Underline:
 		return src, nil
 	default:
 
@@ -395,7 +265,7 @@ func ConvertColorIfGreaterThanExpect(to colortool.Level, src string) (string, er
 		if err == nil {
 			switch to {
 			case Ascii:
-				return c256ToBasic(c)
+				return c256ToBasic(c), nil
 			case C256:
 				return src, nil
 			case TrueColor:
@@ -417,9 +287,9 @@ func ConvertColorIfGreaterThanExpect(to colortool.Level, src string) (string, er
 		if err == nil {
 			switch to {
 			case Ascii:
-				return RGBToBasic(r, g, b)
+				return RGBToBasic(r, g, b), nil
 			case C256:
-				return RGBTo256(r, g, b)
+				return RGBTo256(r, g, b), nil
 			case TrueColor:
 				return src, nil
 			default:
