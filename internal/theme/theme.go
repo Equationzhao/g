@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"reflect"
+	"regexp"
 	"slices"
 	"strconv"
 	"strings"
@@ -248,6 +249,9 @@ func str2color(str string) (string, error) {
 		// hex
 		if strings.HasSuffix(str, "@hex") {
 			code := strings.Trim(str[:len(str)-4], "[]")
+			if !IsValidHexColor(code) {
+				return "", errors.New("invalid hex color")
+			}
 			rgb := HexToRgb(code)
 			colorStr, err := RGB(rgb[0], rgb[1], rgb[2])
 			if err != nil {
@@ -258,6 +262,11 @@ func str2color(str string) (string, error) {
 
 		return constval.Reset, nil
 	}
+}
+
+func IsValidHexColor(color string) bool {
+	match, _ := regexp.MatchString("^(#0x|#|0x)?([0-9a-fA-F]{3}){1,2}$", color)
+	return match
 }
 
 /*

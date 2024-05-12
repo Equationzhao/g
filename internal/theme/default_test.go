@@ -52,3 +52,18 @@ func TestAll_UnmarshalJSON(t *testing.T) {
 func TestAll_CheckLowerCase(t *testing.T) {
 	DefaultAll.CheckLowerCase()
 }
+
+func TestAll_CheckLowerCase1(t *testing.T) {
+	defer func() {
+		if r := recover(); r == nil {
+			t.Errorf("The code should panic")
+		} else {
+			t.Logf("Recovered from panic: %v", r)
+		}
+	}()
+
+	a := All{
+		InfoTheme: Theme{"Info": {}},
+	}
+	a.CheckLowerCase()
+}
