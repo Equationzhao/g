@@ -1,6 +1,6 @@
 ## create custom theme 
 
-example: [default theme](internal/theme/default.json)
+example: [default theme](../internal/theme/default.json)
 
 ## apply your theme
 
