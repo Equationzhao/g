@@ -2,6 +2,7 @@ package util
 
 import (
 	"io/fs"
+	"math/rand/v2"
 	"os"
 	"path/filepath"
 	"time"
@@ -25,6 +26,28 @@ func IsExecutable(file os.FileInfo) bool {
 
 func IsExecutableMode(mode os.FileMode) bool {
 	return mode&0o111 != 0
+}
+
+func GenRandomData(n int) []byte {
+	const (
+		letterIdxBits = 6
+		letterIdxMask = 1<<letterIdxBits - 1
+		letterIdxMax  = 63 / letterIdxBits
+	)
+	var set = []byte{'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'}
+	b := make([]byte, n)
+	for i, cache, remain := n-1, rand.Int64(), letterIdxMax; i >= 0; {
+		if remain == 0 {
+			cache, remain = rand.Int64(), letterIdxMax
+		}
+		if idx := int(cache & letterIdxMask); idx < len(set) {
+			b[i] = set[idx]
+			i--
+		}
+		cache >>= letterIdxBits
+		remain--
+	}
+	return b
 }
 
 // RecursivelySizeOf returns the size of the file or directory
