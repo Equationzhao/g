@@ -4,7 +4,7 @@ import (
 	"os"
 	"strings"
 
-	constval "github.com/Equationzhao/g/internal/const"
+	constval "github.com/Equationzhao/g/internal/global"
 	"github.com/Equationzhao/g/internal/item"
 	"github.com/Equationzhao/g/internal/render"
 	"github.com/Equationzhao/g/internal/util"

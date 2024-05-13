@@ -1,6 +1,6 @@
-// Package constval contains the constants used in the project
+// Package global contains the global variables used in the project
 // this package can't depend on other packages
-package constval
+package global
 
 import (
 	"golang.org/x/exp/constraints"

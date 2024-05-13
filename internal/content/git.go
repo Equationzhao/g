@@ -5,8 +5,8 @@ import (
 	"strings"
 
 	"github.com/Equationzhao/g/internal/align"
-	constval "github.com/Equationzhao/g/internal/const"
 	"github.com/Equationzhao/g/internal/git"
+	constval "github.com/Equationzhao/g/internal/global"
 	"github.com/Equationzhao/g/internal/item"
 	"github.com/Equationzhao/g/internal/render"
 )

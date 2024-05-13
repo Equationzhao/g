@@ -14,10 +14,10 @@ import (
 
 	"github.com/Equationzhao/g/internal/align"
 	"github.com/Equationzhao/g/internal/config"
-	"github.com/Equationzhao/g/internal/const"
 	contents "github.com/Equationzhao/g/internal/content"
 	"github.com/Equationzhao/g/internal/display"
 	"github.com/Equationzhao/g/internal/filter"
+	"github.com/Equationzhao/g/internal/global"
 	"github.com/Equationzhao/g/internal/index"
 	"github.com/Equationzhao/g/internal/item"
 	"github.com/Equationzhao/g/internal/render"
@@ -318,7 +318,7 @@ func initVersionHelpFlags() {
 }
 
 func MakeErrorStr(msg string) string {
-	return fmt.Sprintf("%s × %s %s", constval.Error, msg, constval.Reset)
+	return fmt.Sprintf("%s × %s %s", global.Error, msg, global.Reset)
 }
 
 func checkErr(err error, start string) {
@@ -342,7 +342,7 @@ func suggestFlag(flags []cli.Flag, provided string) string {
 	for _, flag := range flags {
 		flagNames := flag.Names()
 		for _, name := range flagNames {
-			newDistance := smetrics.JaroWinkler(name, provided, constval.BoostThreshold, constval.PrefixSize)
+			newDistance := smetrics.JaroWinkler(name, provided, global.BoostThreshold, global.PrefixSize)
 			if newDistance > distance {
 				distance = newDistance
 				suggestion = name

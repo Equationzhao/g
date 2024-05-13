@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/Equationzhao/g/internal/const"
+	"github.com/Equationzhao/g/internal/global"
 )
 
 func RemoveSep(s string) string {
@@ -22,7 +22,7 @@ var escapeReplacer = strings.NewReplacer(
 )
 
 func reverseColor(s string) string {
-	return constval.Reverse + s + constval.ReverseDone
+	return global.Reverse + s + global.ReverseDone
 }
 
 // Escape

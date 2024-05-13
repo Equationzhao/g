@@ -1,9 +1,14 @@
 package util
 
 import (
+	"io/fs"
 	"os"
 	"path/filepath"
 	"time"
+
+	"github.com/Equationzhao/g/internal/global"
+	"github.com/Equationzhao/g/internal/item"
+	"github.com/spf13/afero"
 )
 
 func IsSymLink(file os.FileInfo) bool {
@@ -24,31 +29,26 @@ func IsExecutableMode(mode os.FileMode) bool {
 
 // RecursivelySizeOf returns the size of the file or directory
 // depth < 0 means no limit
-func RecursivelySizeOf(info os.FileInfo, depth int) int64 {
-	currentDepth := 0
-	if info.IsDir() {
-		totalSize := info.Size()
-		if depth < 0 {
-			// -1 means no limit
-			_ = filepath.WalkDir(
-				info.Name(), func(path string, dir os.DirEntry, err error) error {
+func RecursivelySizeOf(info *item.FileInfo, depth int) int64 {
+	return RecursivelySizeOfGenerator(global.Fs)(info, depth)
+}
+
+func RecursivelySizeOfGenerator(afs afero.Fs) func(info *item.FileInfo, depth int) int64 {
+	return func(info *item.FileInfo, depth int) int64 {
+		currentDepth := 0
+		if info.IsDir() {
+			totalSize := int64(0)
+			if depth < 0 {
+				// -1 means no limit
+				_ = afero.Walk(afs, info.FullPath, func(path string, dir fs.FileInfo, err error) error {
 					if err != nil {
 						return err
 					}
-
-					if !dir.IsDir() {
-						info, err := dir.Info()
-						if err == nil {
-							totalSize += info.Size()
-						}
-					}
-
+					totalSize += dir.Size()
 					return nil
-				},
-			)
-		} else {
-			_ = filepath.WalkDir(
-				info.Name(), func(path string, dir os.DirEntry, err error) error {
+				})
+			} else {
+				_ = afero.Walk(afs, info.FullPath, func(path string, dir fs.FileInfo, err error) error {
 					if err != nil {
 						return err
 					}
@@ -58,26 +58,17 @@ func RecursivelySizeOf(info os.FileInfo, depth int) int64 {
 						}
 						return nil
 					}
-
-					if !dir.IsDir() {
-						info, err := dir.Info()
-						if err == nil {
-							totalSize += info.Size()
-						}
-					}
-
+					totalSize += dir.Size()
 					if dir.IsDir() {
 						currentDepth++
 					}
-
 					return nil
-				},
-			)
+				})
+			}
+			return totalSize
 		}
-
-		return totalSize
+		return info.Size()
 	}
-	return info.Size()
 }
 
 type MockFileInfo struct {
