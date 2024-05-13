@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/Equationzhao/g/internal/const"
+	"github.com/Equationzhao/g/internal/global"
 
 	colortool "github.com/gookit/color"
 )
@@ -49,37 +49,37 @@ func BasicTo256(b string) string {
 
 func BasicToRGBInt(basic string) (r, g, b uint8) {
 	switch basic {
-	case constval.Black:
+	case global.Black:
 		r, g, b = 0, 0, 0
-	case constval.Red:
+	case global.Red:
 		r, g, b = 205, 0, 0
-	case constval.Green:
+	case global.Green:
 		r, g, b = 0, 205, 0
-	case constval.Yellow:
+	case global.Yellow:
 		r, g, b = 205, 205, 0
-	case constval.Blue:
+	case global.Blue:
 		r, g, b = 0, 0, 238
-	case constval.Purple:
+	case global.Purple:
 		r, g, b = 205, 0, 205
-	case constval.Cyan:
+	case global.Cyan:
 		r, g, b = 0, 205, 205
-	case constval.White:
+	case global.White:
 		r, g, b = 229, 229, 229
-	case constval.BrightBlack:
+	case global.BrightBlack:
 		r, g, b = 127, 127, 127
-	case constval.BrightRed:
+	case global.BrightRed:
 		r, g, b = 255, 0, 0
-	case constval.BrightGreen:
+	case global.BrightGreen:
 		r, g, b = 0, 255, 0
-	case constval.BrightYellow:
+	case global.BrightYellow:
 		r, g, b = 255, 255, 0
-	case constval.BrightBlue:
+	case global.BrightBlue:
 		r, g, b = 92, 92, 255
-	case constval.BrightPurple:
+	case global.BrightPurple:
 		r, g, b = 255, 0, 255
-	case constval.BrightCyan:
+	case global.BrightCyan:
 		r, g, b = 0, 255, 255
-	case constval.BrightWhite:
+	case global.BrightWhite:
 		r, g, b = 255, 255, 255
 	default:
 		r, g, b = 0, 0, 0
@@ -236,24 +236,24 @@ func ConvertColorIfGreaterThanExpect(to colortool.Level, src string) (string, er
 		return "", nil
 	case
 		// 1.basic
-		constval.Reset,
-		constval.Black,
-		constval.Red,
-		constval.Green,
-		constval.Yellow,
-		constval.Blue,
-		constval.Purple,
-		constval.Cyan,
-		constval.White,
-		constval.BrightBlack,
-		constval.BrightRed,
-		constval.BrightGreen,
-		constval.BrightYellow,
-		constval.BrightBlue,
-		constval.BrightPurple,
-		constval.BrightCyan,
-		constval.BrightWhite,
-		constval.Underline:
+		global.Reset,
+		global.Black,
+		global.Red,
+		global.Green,
+		global.Yellow,
+		global.Blue,
+		global.Purple,
+		global.Cyan,
+		global.White,
+		global.BrightBlack,
+		global.BrightRed,
+		global.BrightGreen,
+		global.BrightYellow,
+		global.BrightBlue,
+		global.BrightPurple,
+		global.BrightCyan,
+		global.BrightWhite,
+		global.Underline:
 		return src, nil
 	default:
 

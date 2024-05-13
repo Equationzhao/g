@@ -4,7 +4,7 @@ import (
 	"runtime"
 	"time"
 
-	constval "github.com/Equationzhao/g/internal/const"
+	constval "github.com/Equationzhao/g/internal/global"
 	"github.com/Equationzhao/g/internal/item"
 	"github.com/Equationzhao/g/internal/osbased"
 	"github.com/Equationzhao/g/internal/render"

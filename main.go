@@ -9,8 +9,9 @@ import (
 
 	"github.com/Equationzhao/g/internal/cli"
 	"github.com/Equationzhao/g/internal/config"
-	debugSetting "github.com/Equationzhao/g/internal/const/debug"
-	"github.com/Equationzhao/g/internal/const/doc"
+	"github.com/Equationzhao/g/internal/global"
+	debugSetting "github.com/Equationzhao/g/internal/global/debug"
+	"github.com/Equationzhao/g/internal/global/doc"
 	"github.com/Equationzhao/g/internal/util"
 	"github.com/Equationzhao/g/man"
 )
@@ -24,7 +25,7 @@ func main() {
 	}()
 	// when build with tag `doc`, generate md and man file
 	if doc.Enable {
-		man.GenMDAndMan()
+		man.GenMDAndMan(global.Fs)
 	} else {
 		preprocessArgs()
 		err := cli.G.Run(os.Args)

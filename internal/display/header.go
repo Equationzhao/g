@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/Equationzhao/g/internal/align"
-	constval "github.com/Equationzhao/g/internal/const"
+	constval "github.com/Equationzhao/g/internal/global"
 	"github.com/Equationzhao/g/internal/item"
 	"github.com/valyala/bytebufferpool"
 )

@@ -14,7 +14,7 @@ import (
 
 	"github.com/Equationzhao/g/internal/display"
 
-	"github.com/Equationzhao/g/internal/const"
+	"github.com/Equationzhao/g/internal/global"
 	"github.com/shirou/gopsutil/v3/disk"
 
 	"github.com/Equationzhao/g/internal/item"
@@ -188,7 +188,7 @@ func NewNameEnable() *Name {
 	return &Name{}
 }
 
-const NameName = constval.NameOfName
+const NameName = global.NameOfName
 
 func makeLink(abs string, name string) string {
 	return util.MakeLink(abs, name)
@@ -459,19 +459,19 @@ func (n *Name) Enable(renderer *render.Renderer) ContentOption {
 
 func checkNameDisplayEffect(style theme.Style, buffer *bytebufferpool.ByteBuffer) {
 	if style.Underline {
-		_, _ = buffer.WriteString(constval.Underline)
+		_, _ = buffer.WriteString(global.Underline)
 	}
 	if style.Bold {
-		_, _ = buffer.WriteString(constval.Bold)
+		_, _ = buffer.WriteString(global.Bold)
 	}
 	if style.Italics {
-		_, _ = buffer.WriteString(constval.Italics)
+		_, _ = buffer.WriteString(global.Italics)
 	}
 	if style.Faint {
-		_, _ = buffer.WriteString(constval.Faint)
+		_, _ = buffer.WriteString(global.Faint)
 	}
 	if style.Blink {
-		_, _ = buffer.WriteString(constval.Blink)
+		_, _ = buffer.WriteString(global.Blink)
 	}
 }
 

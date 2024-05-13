@@ -7,7 +7,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/Equationzhao/g/internal/const"
+	"github.com/Equationzhao/g/internal/global"
 	"github.com/agiledragon/gomonkey/v2"
 
 	colortool "github.com/gookit/color"
@@ -18,7 +18,7 @@ func TestAll(t *testing.T) {
 	ConvertThemeColor()
 	pl := func(m map[string]Style) {
 		for key := range m {
-			t.Logf("%s %s %s %s", m[key].Color, m[key].Icon, key, constval.Reset)
+			t.Logf("%s %s %s %s", m[key].Color, m[key].Icon, key, global.Reset)
 		}
 	}
 	pl(DefaultAll.InfoTheme)
@@ -34,8 +34,8 @@ func TestAll(t *testing.T) {
 }
 
 func TestColor(t *testing.T) {
-	println(constval.Green + "\uF48A " + constval.Underline + constval.Bold + "hello" + constval.Red + " hello" + constval.Reset)
-	println(constval.Green + "\uF48A " + constval.Underline + "hello" + constval.Red + " hello" + constval.Reset)
+	println(global.Green + "\uF48A " + global.Underline + global.Bold + "hello" + global.Red + " hello" + global.Reset)
+	println(global.Green + "\uF48A " + global.Underline + "hello" + global.Red + " hello" + global.Reset)
 }
 
 func Test_genStyleField(t *testing.T) {
@@ -74,7 +74,7 @@ func TestStyle_ToReadable(t *testing.T) {
 		{
 			name: "TestStyle_ToReadable",
 			before: Style{
-				Color: constval.BrightBlue,
+				Color: global.BrightBlue,
 			},
 			want: Style{
 				Color: "BrightBlue",
@@ -114,7 +114,7 @@ func TestStyle_FromReadable(t *testing.T) {
 				Color: "BrightBlue",
 			},
 			wantErr:   false,
-			wantColor: constval.BrightBlue,
+			wantColor: global.BrightBlue,
 		},
 		{
 			name: "8bit",
@@ -261,9 +261,9 @@ func Test_color2str(t *testing.T) {
 		{
 			name: "underline",
 			args: args{
-				color: constval.Underline + constval.Green,
+				color: global.Underline + global.Green,
 			},
-			want: color2str(constval.Underline) + " + " + color2str(constval.Green),
+			want: color2str(global.Underline) + " + " + color2str(global.Green),
 		},
 	}
 
@@ -291,126 +291,126 @@ func Test_str2color(t *testing.T) {
 			args: args{
 				str: "black",
 			},
-			want: constval.Black,
+			want: global.Black,
 		},
 		{
 			name: "red",
 			args: args{
 				str: "red",
 			},
-			want: constval.Red,
+			want: global.Red,
 		},
 		{
 			name: "green",
 			args: args{
 				str: "green",
 			},
-			want: constval.Green,
+			want: global.Green,
 		},
 		{
 			name: "yellow",
 			args: args{
 				str: "yellow",
 			},
-			want: constval.Yellow,
+			want: global.Yellow,
 		},
 		{
 			name: "blue",
 			args: args{
 				str: "blue",
 			},
-			want: constval.Blue,
+			want: global.Blue,
 		},
 		{
 			name: "purple",
 			args: args{
 				str: "purple",
 			},
-			want: constval.Purple,
+			want: global.Purple,
 		},
 		{
 			name: "cyan",
 			args: args{
 				str: "cyan",
 			},
-			want: constval.Cyan,
+			want: global.Cyan,
 		},
 		{
 			name: "white",
 			args: args{
 				str: "white",
 			},
-			want: constval.White,
+			want: global.White,
 		},
 		{
 			name: "reset",
 			args: args{
 				str: "reset",
 			},
-			want: constval.Reset,
+			want: global.Reset,
 		},
 		{
 			name: "bright-red",
 			args: args{
 				str: "bright-red",
 			},
-			want: constval.BrightRed,
+			want: global.BrightRed,
 		},
 		{
 			name: "bright-black",
 			args: args{
 				str: "bright-black",
 			},
-			want: constval.BrightBlack,
+			want: global.BrightBlack,
 		},
 		{
 			name: "bright-red",
 			args: args{
 				str: "bright-red",
 			},
-			want: constval.BrightRed,
+			want: global.BrightRed,
 		},
 		{
 			name: "bright-green",
 			args: args{
 				str: "bright-green",
 			},
-			want: constval.BrightGreen,
+			want: global.BrightGreen,
 		},
 		{
 			name: "bright-yellow",
 			args: args{
 				str: "bright-yellow",
 			},
-			want: constval.BrightYellow,
+			want: global.BrightYellow,
 		},
 		{
 			name: "bright-blue",
 			args: args{
 				str: "bright-blue",
 			},
-			want: constval.BrightBlue,
+			want: global.BrightBlue,
 		},
 		{
 			name: "bright-purple",
 			args: args{
 				str: "bright-purple",
 			},
-			want: constval.BrightPurple,
+			want: global.BrightPurple,
 		},
 		{
 			name: "bright-cyan",
 			args: args{
 				str: "bright-cyan",
 			},
-			want: constval.BrightCyan,
+			want: global.BrightCyan,
 		},
 		{
 			name: "bright-white",
 			args: args{
 				str: "bright-white",
 			},
-			want: constval.BrightWhite,
+			want: global.BrightWhite,
 		},
 		{
 			name: "empty",

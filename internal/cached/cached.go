@@ -1,7 +1,7 @@
 package cached
 
 import (
-	constval "github.com/Equationzhao/g/internal/const"
+	constval "github.com/Equationzhao/g/internal/global"
 	"github.com/alphadose/haxmap"
 )
 

@@ -5,7 +5,7 @@ import (
 	_ "embed"
 	"fmt"
 
-	constval "github.com/Equationzhao/g/internal/const"
+	constval "github.com/Equationzhao/g/internal/global"
 )
 
 //go:embed g.ps1

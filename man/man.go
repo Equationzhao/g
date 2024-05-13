@@ -4,20 +4,20 @@ import (
 	"compress/gzip"
 	"fmt"
 	"io"
-	"os"
 	"path/filepath"
 
 	"github.com/Equationzhao/g/internal/cli"
+	"github.com/spf13/afero"
 )
 
-func GenMDAndMan() {
+func GenMDAndMan(fs afero.Fs) {
 	// md
-	g, err := os.Create(filepath.Join("docs", "g.md"))
+	g, err := fs.Create(filepath.Join("docs", "g.md"))
 	if err != nil {
 		panic(err)
 	}
 	defer g.Close()
-	md, err := os.Create(filepath.Join("docs", "man.md"))
+	md, err := fs.Create(filepath.Join("docs", "man.md"))
 	if err != nil {
 		panic(err)
 	}
@@ -25,7 +25,7 @@ func GenMDAndMan() {
 	s, _ := cli.G.ToMarkdown()
 	_, _ = fmt.Fprintln(io.MultiWriter(md, g), s)
 	// man
-	man, _ := os.Create(filepath.Join("man", "g.1.gz"))
+	man, _ := fs.Create(filepath.Join("man", "g.1.gz"))
 	s, _ = cli.G.ToMan()
 	// compress to gzip
 	manGz := gzip.NewWriter(man)

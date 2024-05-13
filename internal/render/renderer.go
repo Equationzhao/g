@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Equationzhao/g/internal/const"
+	"github.com/Equationzhao/g/internal/global"
 
 	"github.com/Equationzhao/g/internal/git"
 	"github.com/Equationzhao/g/internal/theme"
@@ -569,18 +569,18 @@ func (rd *Renderer) Colorend() string {
 
 func checkStyle(style *theme.Style, bb *bytebufferpool.ByteBuffer) {
 	if style.Underline {
-		_, _ = bb.WriteString(constval.Underline)
+		_, _ = bb.WriteString(global.Underline)
 	}
 	if style.Bold {
-		_, _ = bb.WriteString(constval.Bold)
+		_, _ = bb.WriteString(global.Bold)
 	}
 	if style.Italics {
-		_, _ = bb.WriteString(constval.Italics)
+		_, _ = bb.WriteString(global.Italics)
 	}
 	if style.Faint {
-		_, _ = bb.WriteString(constval.Faint)
+		_, _ = bb.WriteString(global.Faint)
 	}
 	if style.Blink {
-		_, _ = bb.WriteString(constval.Blink)
+		_, _ = bb.WriteString(global.Blink)
 	}
 }

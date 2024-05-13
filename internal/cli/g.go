@@ -14,10 +14,10 @@ import (
 
 	"github.com/Equationzhao/g/internal/align"
 	"github.com/Equationzhao/g/internal/config"
-	"github.com/Equationzhao/g/internal/const"
 	contents "github.com/Equationzhao/g/internal/content"
 	"github.com/Equationzhao/g/internal/display"
 	"github.com/Equationzhao/g/internal/filter"
+	"github.com/Equationzhao/g/internal/global"
 	"github.com/Equationzhao/g/internal/index"
 	"github.com/Equationzhao/g/internal/item"
 	"github.com/Equationzhao/g/internal/render"
@@ -29,6 +29,7 @@ import (
 	"github.com/hako/durafmt"
 	"github.com/panjf2000/ants/v2"
 	"github.com/savioxavier/termlink"
+	"github.com/spf13/afero"
 	"github.com/urfave/cli/v2"
 	"github.com/xrash/smetrics"
 	"go.szostok.io/version/upgrade"
@@ -185,23 +186,18 @@ func init() {
 // for generating file tree
 func dive(
 	parent string, depth, limit int, infos *util.Slice[*item.FileInfo], errSlice *util.Slice[error],
-	wg *sync.WaitGroup, itemFilter *filter.ItemFilter,
+	wg *sync.WaitGroup, itemFilter *filter.ItemFilter, fs afero.Fs,
 ) {
 	defer wg.Done()
 	if limit > 0 && depth > limit {
 		return
 	}
-	dir, err := os.ReadDir(parent)
+	dir, err := afero.ReadDir(fs, parent)
 	if err != nil {
 		errSlice.AppendTo(err)
 		return
 	}
-	for _, entry := range dir {
-		f, err := entry.Info()
-		if err != nil {
-			errSlice.AppendTo(err)
-			continue
-		}
+	for _, f := range dir {
 		nowAbs := filepath.Join(parent, f.Name())
 		info, _ := item.NewFileInfoWithOption(item.WithAbsPath(nowAbs), item.WithFileInfo(f))
 		// check filter
@@ -212,11 +208,11 @@ func dive(
 		info.Cache["parent"] = []byte(parent)
 		info.Cache["level"] = []byte(strconv.Itoa(depth))
 		infos.AppendTo(info)
-		if entry.IsDir() {
+		if f.IsDir() {
 			wg.Add(1)
 			err := pool.Submit(
 				func() {
-					dive(info.FullPath, depth+1, limit, infos, errSlice, wg, itemFilter)
+					dive(info.FullPath, depth+1, limit, infos, errSlice, wg, itemFilter, fs)
 				},
 			)
 			if err != nil {
@@ -318,7 +314,7 @@ func initVersionHelpFlags() {
 }
 
 func MakeErrorStr(msg string) string {
-	return fmt.Sprintf("%s × %s %s", constval.Error, msg, constval.Reset)
+	return fmt.Sprintf("%s × %s %s", global.Error, msg, global.Reset)
 }
 
 func checkErr(err error, start string) {
@@ -342,7 +338,7 @@ func suggestFlag(flags []cli.Flag, provided string) string {
 	for _, flag := range flags {
 		flagNames := flag.Names()
 		for _, name := range flagNames {
-			newDistance := smetrics.JaroWinkler(name, provided, constval.BoostThreshold, constval.PrefixSize)
+			newDistance := smetrics.JaroWinkler(name, provided, global.BoostThreshold, global.PrefixSize)
 			if newDistance > distance {
 				distance = newDistance
 				suggestion = name
@@ -679,7 +675,7 @@ var logic = func(context *cli.Context) error {
 				pool.Tune(ants.DefaultAntsPoolSize)
 				dive(
 					path[i], 1, depth, infoSlice, errSlice, &wg,
-					itemFilter,
+					itemFilter, global.Fs,
 				)
 				wg.Wait()
 				infos = append(infos, *infoSlice.GetRaw()...)

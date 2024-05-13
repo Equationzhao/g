@@ -14,8 +14,8 @@ import (
 	"strings"
 
 	"github.com/Equationzhao/g/internal/config"
-	"github.com/Equationzhao/g/internal/const"
 	"github.com/Equationzhao/g/internal/display/tree"
+	"github.com/Equationzhao/g/internal/global"
 	"github.com/Equationzhao/g/internal/item"
 	"github.com/Equationzhao/g/internal/util"
 	"github.com/acarl005/stripansi"
@@ -58,8 +58,8 @@ func fire(h []func(Printer, ...*item.FileInfo), p Printer, i ...*item.FileInfo) 
 
 func newHook() *hook {
 	return &hook{
-		BeforePrint: make([]func(Printer, ...*item.FileInfo), 0, constval.DefaultHookLen),
-		AfterPrint:  make([]func(Printer, ...*item.FileInfo), 0, constval.DefaultHookLen),
+		BeforePrint: make([]func(Printer, ...*item.FileInfo), 0, global.DefaultHookLen),
+		AfterPrint:  make([]func(Printer, ...*item.FileInfo), 0, global.DefaultHookLen),
 	}
 }
 
@@ -768,7 +768,7 @@ func (t *TreePrinter) Print(s ...*item.FileInfo) {
 		}
 		prefix, name := prefixAndName(node.Meta)
 		_, _ = t.WriteString(prefix)
-		_, _ = t.WriteString(constval.Faint)
+		_, _ = t.WriteString(global.Faint)
 		for _, c := range node.Connectors {
 			if c == "" {
 				_, _ = t.WriteString(Empty)
@@ -776,7 +776,7 @@ func (t *TreePrinter) Print(s ...*item.FileInfo) {
 				_, _ = t.WriteString(c)
 			}
 		}
-		_, _ = t.WriteString(constval.Reset)
+		_, _ = t.WriteString(global.Reset)
 		_, _ = t.WriteString(name)
 		_ = t.WriteByte('\n')
 	}

@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"testing"
 
-	constval "github.com/Equationzhao/g/internal/const"
+	constval "github.com/Equationzhao/g/internal/global"
 	"github.com/gookit/color"
 )
 
