@@ -199,6 +199,7 @@ func checkIfEmpty(info *item.FileInfo) bool {
 	if err == io.EOF {
 		return true
 	}
+	// meth Readdirnames contains nil check
 	_, err = f.Readdirnames(1)
 	return err == io.EOF
 }
@@ -210,13 +211,9 @@ color: filetype->filename->fileext->file
 */
 func (n *Name) Enable(renderer *render.Renderer) ContentOption {
 	return func(info *item.FileInfo) (stringContent string, funcName string) {
-		name := info.Name()
-		color := ""
-		icon := ""
-		classify := ""
+		name, color, icon, classify, mounts := info.Name(), "", "", "", ""
 		dereference := bytebufferpool.Get()
 		defer bytebufferpool.Put(dereference)
-		mounts := ""
 		mode := info.Mode()
 		underline, bold, italics, faint, blink := false, false, false, false, false
 

@@ -2,9 +2,15 @@ package content
 
 import (
 	"errors"
+	"io"
 	"io/fs"
+	"os"
 	"reflect"
 	"testing"
+
+	"github.com/Equationzhao/g/internal/item"
+	"github.com/agiledragon/gomonkey/v2"
+	"github.com/zeebo/assert"
 )
 
 func TestName_checkDereferenceErr(t *testing.T) {
@@ -72,16 +78,15 @@ func TestName_checkDereferenceErr(t *testing.T) {
 // 		path string
 // 		want string
 // 	}{
-//
 // 		{
 // 			name: "root",
 // 			path: "/",
-// 			want: "[/dev/disk3s1s1 (apfs)]",
+// 			want: "[/dev/sda1 (apfs)]",
 // 		},
 // 		{
 // 			name: "dev",
 // 			path: "/dev",
-// 			want: "[devfs (devfs)]",
+// 			want: "[/devfs (apfs)]",
 // 		},
 // 		{
 // 			"not found",
@@ -137,4 +142,17 @@ func TestStatistics_MarshalJSON(t *testing.T) {
 			}
 		})
 	}
+}
+
+func Test_checkIfEmpty(t *testing.T) {
+	patch := gomonkey.ApplyFuncReturn(os.Open, nil, io.EOF)
+	defer patch.Reset()
+
+	i := item.FileInfo{
+		FullPath: "test",
+	}
+	assert.True(t, checkIfEmpty(&i))
+
+	patch.ApplyFuncReturn(os.Open, nil, io.ErrUnexpectedEOF)
+	assert.True(t, checkIfEmpty(&i))
 }
