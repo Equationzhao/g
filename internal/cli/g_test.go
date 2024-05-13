@@ -15,13 +15,13 @@ import (
 func Test_dive(t *testing.T) {
 	afs := afero.NewMemMapFs()
 	// create files and dirs
-	_ = afs.MkdirAll("a/b/c", 0755)
-	_ = afero.WriteFile(afs, "a/b/c/d", util.GenRandomData(10), 0644)
-	_ = afero.WriteFile(afs, "a/b/e", util.GenRandomData(10), 0644)
-	_ = afero.WriteFile(afs, "a/f", util.GenRandomData(10), 0644)
-	_ = afero.WriteFile(afs, "a/g", util.GenRandomData(10), 0644)
-	_ = afero.WriteFile(afs, "a/h", util.GenRandomData(10), 0644)
-	_ = afero.WriteFile(afs, "i", util.GenRandomData(10), 0644)
+	_ = afs.MkdirAll("a/b/c", 0o755)
+	_ = afero.WriteFile(afs, "a/b/c/d", util.GenRandomData(10), 0o644)
+	_ = afero.WriteFile(afs, "a/b/e", util.GenRandomData(10), 0o644)
+	_ = afero.WriteFile(afs, "a/f", util.GenRandomData(10), 0o644)
+	_ = afero.WriteFile(afs, "a/g", util.GenRandomData(10), 0o644)
+	_ = afero.WriteFile(afs, "a/h", util.GenRandomData(10), 0o644)
+	_ = afero.WriteFile(afs, "i", util.GenRandomData(10), 0o644)
 
 	var err error
 	pool, err = ants.NewPool(ants.DefaultAntsPoolSize)

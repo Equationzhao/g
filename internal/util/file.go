@@ -34,7 +34,7 @@ func GenRandomData(n int) []byte {
 		letterIdxMask = 1<<letterIdxBits - 1
 		letterIdxMax  = 63 / letterIdxBits
 	)
-	var set = []byte{'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'}
+	set := []byte{'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'}
 	b := make([]byte, n)
 	for i, cache, remain := n-1, rand.Int64(), letterIdxMax; i >= 0; {
 		if remain == 0 {

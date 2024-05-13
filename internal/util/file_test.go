@@ -102,12 +102,12 @@ func TestRecursivelySizeOf(t *testing.T) {
 	// create a new fs using afero.NewMemMapFs
 	afs := afero.NewMemMapFs()
 	// create some files and dir
-	_ = afs.Mkdir("dir", 0755)
-	_ = afero.WriteFile(afs, "dir/file1-100bytes", GenRandomData(100), 0644)
-	_ = afero.WriteFile(afs, "dir/file2-1000bytes", GenRandomData(1000), 0644)
-	_ = afero.WriteFile(afs, "dir/file3-10000bytes", GenRandomData(10000), 0644)
-	_ = afs.Mkdir("dir/subdir", 0755)
-	_ = afero.WriteFile(afs, "dir/subdir/file4-100000bytes", GenRandomData(100000), 0644)
+	_ = afs.Mkdir("dir", 0o755)
+	_ = afero.WriteFile(afs, "dir/file1-100bytes", GenRandomData(100), 0o644)
+	_ = afero.WriteFile(afs, "dir/file2-1000bytes", GenRandomData(1000), 0o644)
+	_ = afero.WriteFile(afs, "dir/file3-10000bytes", GenRandomData(10000), 0o644)
+	_ = afs.Mkdir("dir/subdir", 0o755)
+	_ = afero.WriteFile(afs, "dir/subdir/file4-100000bytes", GenRandomData(100000), 0o644)
 	// get the size of the dir
 	err := afero.Walk(afs, "dir", func(path string, info os.FileInfo, err error) error {
 		t.Logf("%s: %d", path, info.Size())
