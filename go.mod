@@ -1,6 +1,6 @@
 module github.com/Equationzhao/g
 
-go 1.21
+go 1.22
 
 require (
 	bou.ke/monkey v1.0.2
