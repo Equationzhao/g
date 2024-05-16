@@ -38,7 +38,7 @@ g --tree --long path(s) # show tree layout
 
 ## More options
 
-[g.md](docs/g.md)
+[man.md](docs/man.md)
 
 ## Installation Guide
 
