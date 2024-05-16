@@ -3,12 +3,11 @@ module github.com/Equationzhao/g
 go 1.22
 
 require (
-	bou.ke/monkey v1.0.2
 	github.com/Equationzhao/pathbeautify v0.0.7
 	github.com/acarl005/stripansi v0.0.0-20180116102854-5a71ef0e047d
 	github.com/agiledragon/gomonkey/v2 v2.11.0
 	github.com/alphadose/haxmap v1.4.0
-	github.com/gabriel-vasile/mimetype v1.4.3
+	github.com/gabriel-vasile/mimetype v1.4.4
 	github.com/go-git/go-git/v5 v5.12.0
 	github.com/gobwas/glob v0.2.3
 	github.com/gookit/color v1.5.4
@@ -22,6 +21,7 @@ require (
 	github.com/saintfish/chardet v0.0.0-20230101081208-5e3ef4b5456d
 	github.com/savioxavier/termlink v1.3.0
 	github.com/shirou/gopsutil/v3 v3.24.4
+	github.com/spf13/afero v1.11.0
 	github.com/syndtr/goleveldb v1.0.0
 	github.com/urfave/cli/v2 v2.27.2
 	github.com/valyala/bytebufferpool v1.0.0
@@ -68,7 +68,7 @@ require (
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/google/uuid v1.6.0 // indirect
-	github.com/hashicorp/go-version v1.6.0 // indirect
+	github.com/hashicorp/go-version v1.7.0 // indirect
 	github.com/huandu/xstrings v1.4.0 // indirect
 	github.com/imdario/mergo v0.3.16 // indirect
 	github.com/lucasb-eyer/go-colorful v1.2.0 // indirect
@@ -81,7 +81,6 @@ require (
 	github.com/rivo/uniseg v0.4.7 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/shopspring/decimal v1.4.0 // indirect
-	github.com/spf13/afero v1.11.0 // indirect
 	github.com/spf13/cast v1.6.0 // indirect
 	github.com/xo/terminfo v0.0.0-20220910002029-abceb7e1c41e // indirect
 	golang.org/x/crypto v0.23.0 // indirect
