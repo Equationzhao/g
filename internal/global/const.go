@@ -48,8 +48,10 @@ const (
 
 const Reset = "\033[0m"
 
-const DefaultHookLen = 5
-const Space = 2
+const (
+	DefaultHookLen = 5
+	Space          = 2
+)
 
 const (
 	NameOfName          = "Name"

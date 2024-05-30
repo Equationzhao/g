@@ -381,7 +381,6 @@ func (a *Across) printRowWithNoSpace(strs []string) {
 }
 
 func (a *Across) printRow(stringsArray []string, space int) {
-
 	termWidth := getTermWidth() - 2
 	n := len(stringsArray)
 
