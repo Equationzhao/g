@@ -150,10 +150,9 @@ cross-platform:
 
 ### completion
 
-> only zsh completion is supported now
-
 >> *if you install `g` through brew or the install script, the completion is usually installed already.*
 
+#### zsh
 ```zsh
 wget https://raw.githubusercontent.com/Equationzhao/g/master/completions/zsh/_g
 ```
@@ -171,6 +170,36 @@ if not, add them to at least one of them.
 ```zsh
 autoload -Uz compinit
 compinit
+```
+
+#### bash
+
+```bash
+wget https://raw.githubusercontent.com/Equationzhao/g/master/completions/bash/g-completion.bash
+```
+
+add the following lines to your ~/.bashrc file:
+
+```bash
+source /path/to/g-completion.bash
+```
+
+#### fish
+
+```fish
+wget https://raw.githubusercontent.com/Equationzhao/g/master/completions/fish/g.fish
+```
+
+Install the file to your fish completion directory, usually ~/.config/fish/completions
+
+```fish
+mv g.fish ~/.config/fish/completions
+```
+
+Restart your terminal session or run the following command to immediately enable the completion functionality:
+
+```fish
+source ~/.config/fish/config.fish
 ```
 
 ### alias
