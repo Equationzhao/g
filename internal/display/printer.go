@@ -157,46 +157,69 @@ func (f *FitTerminal) Print(i ...*item.FileInfo) {
 	for _, v := range i {
 		s = append(s, v.OrderedContent(" "))
 	}
-	f.printColumns(s)
+	f.printColumns(s, global.Space)
 
 	if !f.disableAfter {
 		fire(f.AfterPrint, f, i...)
 	}
 }
 
-func (f *FitTerminal) printColumns(stringsArray []string) {
+func (f *FitTerminal) printColumns(stringsArray []string, space int) {
 	termWidth := getTermWidth() - 2
+	n := len(stringsArray)
 
-	maxColumnWidths := 0
-	for i := 0; i < len(stringsArray); i++ {
-		width := WidthLen(stringsArray[i])
-		if width > maxColumnWidths {
-			maxColumnWidths = width
+	// Calculate the maximum width of each string
+	maxWidth := 0
+	widths := make([]int, n)
+	for i, s := range stringsArray {
+		width := WidthLen(s)
+		widths[i] = width
+		if width > maxWidth {
+			maxWidth = width
 		}
 	}
 
-	columnSpacing := 2
-
-	maxTotalWidth := 0
-	maxTotalWidth += maxColumnWidths
-	numColumns := (termWidth + columnSpacing) / (maxTotalWidth + columnSpacing)
-	if numColumns < 1 {
-		numColumns = 1
+	// Determine the number of columns
+	numColumns := 1
+	for col := 1; col <= n; col++ {
+		totalWidth := -space
+		for i := 0; i < col; i++ {
+			colMaxWidth := 0
+			for j := i; j < n; j += col {
+				if widths[j] > colMaxWidth {
+					colMaxWidth = widths[j]
+				}
+			}
+			totalWidth += colMaxWidth + space
+		}
+		if totalWidth <= termWidth {
+			numColumns = col
+		} else {
+			break
+		}
 	}
 
-	numRows := (len(stringsArray) + numColumns - 1) / numColumns
+	numRows := (n + numColumns - 1) / numColumns
 
 	for i := 0; i < numRows; i++ {
 		for j := 0; j < numColumns; j++ {
 			index := j*numRows + i
-			if index >= len(stringsArray) {
+			if index >= n {
 				break
 			}
 			s := stringsArray[index]
-			width := WidthLen(s)
+			width := widths[index]
 			_, _ = f.WriteString(s)
-			padding := maxColumnWidths - width + columnSpacing
-			_, _ = f.WriteString(strings.Repeat(" ", padding))
+			if j < numColumns-1 { // Avoid adding spaces after the last column
+				maxColWidth := 0
+				for k := j * numRows; k < (j+1)*numRows && k < n; k++ {
+					if widths[k] > maxColWidth {
+						maxColWidth = widths[k]
+					}
+				}
+				padding := maxColWidth - width + space
+				_, _ = f.WriteString(strings.Repeat(" ", padding))
+			}
 		}
 		_ = f.WriteByte('\n')
 	}
@@ -334,7 +357,7 @@ func (a *Across) Print(items ...*item.FileInfo) {
 	for _, v := range items {
 		s = append(s, v.OrderedContent(" "))
 	}
-	a.printRow(s)
+	a.printRow(s, global.Space)
 	if !a.disableAfter {
 		fire(a.AfterPrint, a, items...)
 	}
@@ -357,24 +380,40 @@ func (a *Across) printRowWithNoSpace(strs []string) {
 	_ = a.WriteByte('\n')
 }
 
-func (a *Across) printRow(stringsArray []string) {
-	termWidth := getTermWidth() - 2
+func (a *Across) printRow(stringsArray []string, space int) {
 
-	maxColumnWidths := 0
-	for i := 0; i < len(stringsArray); i++ {
-		width := WidthLen(stringsArray[i])
-		if width > maxColumnWidths {
-			maxColumnWidths = width
+	termWidth := getTermWidth() - 2
+	n := len(stringsArray)
+
+	// Calculate the maximum width of each string
+	maxWidth := 0
+	widths := make([]int, n)
+	for i, s := range stringsArray {
+		width := WidthLen(s)
+		widths[i] = width
+		if width > maxWidth {
+			maxWidth = width
 		}
 	}
 
-	columnSpacing := 2
-
-	maxTotalWidth := 0
-	maxTotalWidth += maxColumnWidths
-	numColumns := (termWidth + columnSpacing) / (maxTotalWidth + columnSpacing)
-	if numColumns < 1 {
-		numColumns = 1
+	// Determine the number of columns
+	numColumns := 1
+	for col := 1; col <= n; col++ {
+		totalWidth := -space
+		for i := 0; i < col; i++ {
+			colMaxWidth := 0
+			for j := i; j < n; j += col {
+				if widths[j] > colMaxWidth {
+					colMaxWidth = widths[j]
+				}
+			}
+			totalWidth += colMaxWidth + space
+		}
+		if totalWidth <= termWidth {
+			numColumns = col
+		} else {
+			break
+		}
 	}
 
 	for i := 0; i < len(stringsArray); i += numColumns {
@@ -383,11 +422,19 @@ func (a *Across) printRow(stringsArray []string) {
 				break
 			}
 			s := stringsArray[i+j]
-			width := WidthLen(s)
+			width := widths[i+j]
 			_, _ = a.WriteString(s)
 
-			padding := maxColumnWidths - width + columnSpacing
-			_, _ = a.WriteString(strings.Repeat(" ", padding))
+			if j < numColumns-1 { // Avoid adding spaces after the last column
+				maxColWidth := 0
+				for k := j; k < len(stringsArray); k += numColumns {
+					if widths[k] > maxColWidth {
+						maxColWidth = widths[k]
+					}
+				}
+				padding := maxColWidth - width + space
+				_, _ = a.WriteString(strings.Repeat(" ", padding))
+			}
 		}
 		_ = a.WriteByte('\n')
 	}
