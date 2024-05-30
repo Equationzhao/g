@@ -77,7 +77,7 @@ just brew-tap
 usually brew-core will be automatically updated by the brew bot, but if you want to update it manually, you can try the following command
 
 ```zsh
-just brew-core
+just brew
 ```
 
 ### scoop
