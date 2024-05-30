@@ -14,6 +14,7 @@ os_type=$(uname -s | tr '[:upper:]' '[:lower:]')
 os_arch=$(uname -m)
 version="0.27.0"
 man_url="https://github.com/Equationzhao/g/raw/v${version}/man/g.1.gz"
+shell_type=$(echo $SHELL | awk -F'/' '{print $NF}')
 
 interrupt_handler() {
   exit 1
@@ -52,12 +53,32 @@ download_url(){
 
 download_completion(){
     shell_name=$1
-    # v0.25.3 install from the master
-    url="https://github.com/Equationzhao/g/raw/master/completions/${shell_name}/_g"
-    # other version install from the release
-    if [ "$version" != "0.25.3" ]; then
-        url="https://github.com/Equationzhao/g/raw/v${version}/completions/${shell_name}/_g"
-    fi
+    case $shell_name in
+        zsh)
+            url="https://github.com/Equationzhao/g/raw/v${version}/completions/zsh/_g"
+            if [ "$version" == "0.25.3" ]; then
+                url="https://github.com/Equationzhao/g/raw/v0.25.4/completions/zsh/_g"
+            fi
+            ;;
+        bash)
+            # version < 0.28.0, skip
+            if [ "$version" == "0.27.0" ]; then
+                return
+            fi
+            url="https://github.com/Equationzhao/g/raw/v${version}/completions/bash/g-completion.bash"
+            ;;
+        fish)
+            # version < 0.28.0, skip
+            if [ "$version" == "0.27.0" ]; then
+                return
+            fi
+            url="https://github.com/Equationzhao/g/raw/v${version}/completions/fish/g.fish"
+            ;;
+        *)
+            error "Unsupported shell type: $shell_name"
+            exit 1
+            ;;
+    esac
     download_url $url
     if [ $? -ne 0 ]; then
         error "Failed to download the file."
@@ -77,6 +98,15 @@ check_compinit(){
             echo "autoload -Uz compinit" >> ~/.zprofile
             echo "compinit" >> ~/.zprofile
             success "compinit has been added to ~/.zprofile"
+        fi
+    fi
+}
+
+check_bash_completion(){
+    if [ -f ~/.bashrc ]; then
+        if ! grep -q "source /usr/local/share/bash-completion/completions/g" ~/.bashrc; then
+            echo "source /usr/local/share/bash-completion/completions/g" >> ~/.bashrc
+            success "bash completion has been added to ~/.bashrc"
         fi
     fi
 }
@@ -102,30 +132,50 @@ compare_versions() {
 }
 
 uninstall_g(){
-  case $os_type in
-      darwin)
-          installed_location="/usr/local/bin"
-          echo "rm $installed_location/g"
-          sudo rm $installed_location/g
-          installed_location="/usr/local/share/man/man1"
-          echo "rm $installed_location/g.1.gz"
-          sudo rm $installed_location/g.1.gz
-          completion_path="/usr/local/share/zsh/site-functions"
-          echo "rm $completion_path/_g"
-          sudo rm $completion_path/_g
-          ;;
-      linux)
-          installed_location="/usr/bin"
-          echo "rm $installed_location/g"
-          sudo rm $installed_location/g
-          installed_location="/usr/local/share/man/man1"
-          echo "rm $installed_location/g.1.gz"
-          sudo rm $installed_location/g.1.gz
-          completion_path="/usr/local/share/zsh/site-functions"
-          echo "rm $completion_path/_g"
-          sudo rm $completion_path/_g
-          ;;
-  esac
+    case $os_type in
+        darwin)
+            installed_location="/usr/local/bin"
+            echo "rm $installed_location/g"
+            sudo rm $installed_location/g
+            installed_location="/usr/local/share/man/man1"
+            echo "rm $installed_location/g.1.gz"
+            sudo rm $installed_location/g.1.gz
+            ;;
+        linux)
+            installed_location="/usr/bin"
+            echo "rm $installed_location/g"
+            sudo rm $installed_location/g
+            installed_location="/usr/local/share/man/man1"
+            echo "rm $installed_location/g.1.gz"
+            sudo rm $installed_location/g.1.gz
+            ;;
+    esac
+
+    case $shell_type in
+        zsh)
+            completion_path="/usr/local/share/zsh/site-functions/_g"
+            echo "rm $completion_path"
+            sudo rm $completion_path
+            ;;
+        bash)
+            completion_path="/usr/local/share/bash-completion/completions/g"
+            echo "rm $completion_path"
+            sudo rm $completion_path
+            if [ -f ~/.bashrc ]; then
+                sed -i '' '/source \/usr\/local\/share\/bash-completion\/completions\/g/d' ~/.bashrc
+                success "Removed source line from ~/.bashrc"
+            fi
+            ;;
+        fish)
+            completion_path="$HOME/.config/fish/completions/g.fish"
+            echo "rm $completion_path"
+            sudo rm $completion_path
+            ;;
+        *)
+            error "Unsupported shell type: $shell_type"
+            warn "skip completion uninstallation"
+            ;;
+    esac
 }
 
 # Parse flags
@@ -252,20 +302,38 @@ success "man page has been installed in $installed_location"
 
 
 # install completion
-shell_type=$(echo $SHELL | awk -F'/' '{print $NF}')
-
-completion_path="/usr/local/share/zsh/site-functions"
+completion_path="/usr/local/share"
 case $shell_type in
     zsh)
         download_completion "$shell_type"
+        completion_path="$completion_path/zsh/site-functions"
         sudo mkdir -p $completion_path
         echo "mv _g $completion_path/_g"
         sudo mv _g "$completion_path/_g"
         check_compinit
-        success "completion has been installed in $completion_path"
+        success "zsh completion has been installed in $completion_path"
+        ;;
+    bash)
+        download_completion "$shell_type"
+        completion_path="$completion_path/bash-completion/completions"
+        sudo mkdir -p $completion_path
+        echo "mv g-completion.bash $completion_path/g"
+        sudo mv g-completion.bash "$completion_path/g"
+        check_bash_completion
+        success "bash completion has been installed in $completion_path"
+        ;;
+    fish)
+        download_completion "$shell_type"
+        completion_path="$HOME/.config/fish/completions"
+        sudo mkdir -p $completion_path
+        echo "mv g.fish $completion_path/g.fish"
+        sudo mv g.fish "$completion_path/g.fish"
+        success "fish completion has been installed in $completion_path"
         ;;
     \?)
         error "Unsupported shell type: $shell_type"
         warn "skip completion installation"
         ;;
 esac
+
+warn "you can uninstall g by running 'install.sh -r'"
