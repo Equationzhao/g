@@ -268,4 +268,7 @@ newminor:
 newmajor:
     git add -u && git commit -m ":bookmark: new major version"
 
+boostrap:
+    sh script/install_dev_requirement.sh
+
 all: precheck gendocs test check clean genrelease release
