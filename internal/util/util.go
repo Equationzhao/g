@@ -3,8 +3,12 @@ package util
 import (
 	"fmt"
 	"path/filepath"
+	"regexp"
 	"strconv"
 	"strings"
+
+	"github.com/acarl005/stripansi"
+	"github.com/mattn/go-runewidth"
 
 	"github.com/Equationzhao/g/internal/global"
 )
@@ -64,4 +68,37 @@ func SplitNumberAndUnit(input string) (float64, string) {
 	unit = input[i:]
 
 	return number, unit
+}
+
+func parseLink(link string) (name, other string, ok bool) {
+	re := regexp.MustCompile(`\033]8;;(.*?)\033\\(.*?)\033]8;;\033\\`)
+	matches := re.FindStringSubmatch(link)
+
+	if len(matches) == 3 {
+		// if matches, get the other content and the link
+		other = strings.Replace(link, matches[0], "", 1)
+		return matches[2], other, true
+	}
+	return "", "", false
+}
+
+func WidthLen(str string) int {
+	if global.IncludeHyperlink {
+		name, other, ok := parseLink(str)
+		if ok {
+			str = other + name
+		}
+	}
+	colorless := stripansi.Strip(str)
+	// len() is not proper here, as it counts emojis as 4 characters each
+	length := runewidth.StringWidth(colorless)
+
+	return length
+}
+
+func WidthNoHyperLinkLen(str string) int {
+	colorless := stripansi.Strip(str)
+	// len() is insufficient here, as it counts emojis as 4 characters each
+	length := runewidth.StringWidth(colorless)
+	return length
 }

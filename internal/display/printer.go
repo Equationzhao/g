@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"regexp"
 	"slices"
 	"strconv"
 	"strings"
@@ -18,9 +17,7 @@ import (
 	"github.com/Equationzhao/g/internal/global"
 	"github.com/Equationzhao/g/internal/item"
 	"github.com/Equationzhao/g/internal/util"
-	"github.com/acarl005/stripansi"
 	"github.com/jedib0t/go-pretty/v6/table"
-	"github.com/mattn/go-runewidth"
 	"github.com/olekukonko/ts"
 	"github.com/valyala/bytebufferpool"
 	orderedmap "github.com/wk8/go-ordered-map/v2"
@@ -128,6 +125,19 @@ func (b *Byline) Print(i ...*item.FileInfo) {
 	for _, v := range i {
 		_, _ = b.WriteString(v.OrderedContent(" "))
 		_ = b.WriteByte('\n') // byline means a new line :)
+		if len(v.AfterLines) != 0 {
+			items := v.ValuesByOrdered()
+			res := bytebufferpool.Get()
+			for j, it := range items[:len(items)-1] {
+				_, _ = res.WriteString(it.String())
+				if j != len(items)-1 {
+					_, _ = res.WriteString(" ")
+				}
+			}
+			space := util.WidthNoHyperLinkLen(res.String())
+			bytebufferpool.Put(res)
+			_, _ = b.WriteString(strings.Join(append(v.Extended(space), ""), "\n"))
+		}
 	}
 	if !b.disableAfter {
 		fire(b.AfterPrint, b, i...)
@@ -172,7 +182,7 @@ func (f *FitTerminal) printColumns(stringsArray []string, space int) {
 	maxWidth := 0
 	widths := make([]int, n)
 	for i, s := range stringsArray {
-		width := WidthLen(s)
+		width := util.WidthLen(s)
 		widths[i] = width
 		if width > maxWidth {
 			maxWidth = width
@@ -223,42 +233,6 @@ func (f *FitTerminal) printColumns(stringsArray []string, space int) {
 		}
 		_ = f.WriteByte('\n')
 	}
-}
-
-var IncludeHyperlink = false
-
-func parseLink(link string) (name, other string, ok bool) {
-	re := regexp.MustCompile(`\033]8;;(.*?)\033\\(.*?)\033]8;;\033\\`)
-	matches := re.FindStringSubmatch(link)
-
-	if len(matches) == 3 {
-		// if matches, get the other content and the link
-		other = strings.Replace(link, matches[0], "", 1)
-		return matches[2], other, true
-	}
-	return "", "", false
-}
-
-func WidthLen(str string) int {
-	if IncludeHyperlink {
-		name, other, ok := parseLink(str)
-		if ok {
-			str = other + name
-		}
-	}
-	colorless := stripansi.Strip(str)
-	// len() is not proper here, as it counts emojis as 4 characters each
-	length := runewidth.StringWidth(colorless)
-
-	return length
-}
-
-func WidthNoHyperLinkLen(str string) int {
-	colorless := stripansi.Strip(str)
-	// len() is insufficient here, as it counts emojis as 4 characters each
-	length := runewidth.StringWidth(colorless)
-
-	return length
 }
 
 var (
@@ -369,12 +343,12 @@ func (a *Across) printRowWithNoSpace(strs []string) {
 
 	maxLength := 0
 	for _, str := range strs {
-		maxLength += WidthLen(str)
+		maxLength += util.WidthLen(str)
 		if maxLength <= width {
 			_, _ = a.WriteString(str)
 		} else {
 			_, _ = a.WriteString("\n" + str)
-			maxLength = WidthLen(str)
+			maxLength = util.WidthLen(str)
 		}
 	}
 	_ = a.WriteByte('\n')
@@ -388,7 +362,7 @@ func (a *Across) printRow(stringsArray []string, space int) {
 	maxWidth := 0
 	widths := make([]int, n)
 	for i, s := range stringsArray {
-		width := WidthLen(s)
+		width := util.WidthLen(s)
 		widths[i] = width
 		if width > maxWidth {
 			maxWidth = width
@@ -716,9 +690,9 @@ func (t *TreePrinter) Print(s ...*item.FileInfo) {
 	total := len(s)
 
 	buildTree := tree.NewTree(tree.WithCap(total / 2))
-	level := make(map[string][]*item.FileInfo)
+	level := make(map[int][]*item.FileInfo)
 	for _, v := range s {
-		level[string(v.Cache["level"])] = append(level[string(v.Cache["level"])], v)
+		level[(v.Cache["level"].(int))] = append(level[(v.Cache["level"].(int))], v)
 	}
 
 	prefixAndName := func(info *item.FileInfo) (prefix string, name string) {
@@ -740,13 +714,13 @@ func (t *TreePrinter) Print(s ...*item.FileInfo) {
 	l := len(level)
 	nodeMap := make(map[string]*tree.Node, l)
 
-	root := level["0"][0]
+	root := level[0][0]
 	buildTree.Root.Meta = root
 	nodeMap[root.FullPath] = buildTree.Root
 
 	for i := 1; i < l; i++ {
-		for _, v := range level[strconv.Itoa(i)] {
-			node := nodeMap[string(v.Cache["parent"])]
+		for _, v := range level[i] {
+			node := nodeMap[v.Cache["parent"].(string)]
 			c := &tree.Node{
 				Parent:     node,
 				Child:      make([]*tree.Node, 0, 10),

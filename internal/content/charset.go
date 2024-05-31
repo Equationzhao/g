@@ -27,7 +27,7 @@ func (c *CharsetEnabler) Enable(renderer *render.Renderer) ContentOption {
 	return func(info *item.FileInfo) (string, string) {
 		res, returnName := func() (string, string) {
 			if c, ok := info.Cache[Charset]; ok {
-				return string(c), Charset
+				return c.(string), Charset
 			}
 			// only text file has charset
 			if info.IsDir() {
@@ -63,7 +63,7 @@ func (c *CharsetEnabler) Enable(renderer *render.Renderer) ContentOption {
 						return "failed_to_detect", Charset
 					}
 					charset = best.Charset
-					info.Cache[Charset] = []byte(charset)
+					info.Cache[Charset] = charset
 				}
 				return charset, Charset
 			}

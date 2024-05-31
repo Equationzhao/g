@@ -213,7 +213,7 @@ const MimeTypeName = constval.NameOfMIME
 func getMimeName(a *item.FileInfo, b *item.FileInfo) (string, string) {
 	mimeAstr, mimeBstr := "", ""
 	if c, ok := a.Cache[MimeTypeName]; ok {
-		mimeAstr = string(c)
+		mimeAstr = c.(string)
 	} else {
 		mimeA, err := mt.DetectFile(a.FullPath)
 		if err != nil {
@@ -229,11 +229,11 @@ func getMimeName(a *item.FileInfo, b *item.FileInfo) (string, string) {
 		} else {
 			mimeAstr = mimeA.String()
 		}
-		a.Cache[MimeTypeName] = []byte(mimeAstr)
+		a.Cache[MimeTypeName] = mimeAstr
 	}
 
 	if c, ok := b.Cache[MimeTypeName]; ok {
-		mimeBstr = string(c)
+		mimeBstr = c.(string)
 	} else {
 		mimeB, err := mt.DetectFile(b.FullPath)
 		if err != nil {
@@ -274,23 +274,21 @@ func byMimeTypeParent(a, b *item.FileInfo, ascend bool) int {
 const RecursiveSizeName = content.RecursiveSizeName
 
 func byRecursiveSize(a, b *item.FileInfo, depth int, ascend bool) int {
-	var sa []byte
-	var sb []byte
+	var sa any
+	var sb any
 	exist := false
 	sai, sbi := int64(0), int64(0)
 	if sa, exist = a.Cache[RecursiveSizeName]; !exist {
 		sai = util.RecursivelySizeOf(a, depth)
-		sa = []byte(strconv.FormatInt(sai, 10))
-		a.Cache[RecursiveSizeName] = sa
+		a.Cache[RecursiveSizeName] = sai
 	} else {
-		sai, _ = strconv.ParseInt(string(sa), 10, 64)
+		sai = sa.(int64)
 	}
 	if sb, exist = b.Cache[RecursiveSizeName]; !exist {
 		sbi = util.RecursivelySizeOf(b, depth)
-		sb = []byte(strconv.FormatInt(sbi, 10))
-		b.Cache[RecursiveSizeName] = sb
+		b.Cache[RecursiveSizeName] = sbi
 	} else {
-		sbi, _ = strconv.ParseInt(string(sb), 10, 64)
+		sbi = sb.(int64)
 	}
 
 	if ascend {

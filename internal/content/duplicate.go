@@ -116,7 +116,7 @@ func fileHash(fileInfo *item.FileInfo, isThorough bool) (string, error) {
 	var fileReadErr error
 	if isThorough || fileInfo.Size() <= thresholdFileSize {
 		if content, ok := fileInfo.Cache["content"]; ok {
-			bytes = content
+			bytes = content.([]byte)
 		} else {
 			bytes, fileReadErr = os.ReadFile(fileInfo.FullPath)
 			if fileReadErr != nil {

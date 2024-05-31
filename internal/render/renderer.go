@@ -567,6 +567,18 @@ func (rd *Renderer) Colorend() string {
 	return rd.theme.InfoTheme["reset"].Color
 }
 
+func (rd *Renderer) Extended(extended string) string {
+	bb := bytebufferpool.Get()
+	defer bytebufferpool.Put(bb)
+	style := rd.theme.Special["extended"]
+	_, _ = bb.WriteString(style.Color)
+	checkStyle(&style, bb)
+	_, _ = bb.WriteString(style.Icon)
+	_, _ = bb.WriteString(extended)
+	_, _ = bb.WriteString(rd.Colorend())
+	return bb.String()
+}
+
 func checkStyle(style *theme.Style, bb *bytebufferpool.ByteBuffer) {
 	if style.Underline {
 		_, _ = bb.WriteString(global.Underline)

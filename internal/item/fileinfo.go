@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"slices"
+	"strings"
 
 	"github.com/Equationzhao/g/internal/cached"
 	"github.com/valyala/bytebufferpool"
@@ -12,9 +13,10 @@ import (
 
 type FileInfo struct {
 	os.FileInfo
-	FullPath string
-	Meta     *cached.Map[string, Item]
-	Cache    map[string][]byte
+	FullPath   string
+	Meta       *cached.Map[string, Item]
+	Cache      map[string]any
+	AfterLines []string
 }
 
 type Option = func(info *FileInfo) error
@@ -66,7 +68,7 @@ func NewFileInfoWithOption(opts ...Option) (*FileInfo, error) {
 		f.Meta = cached.NewCacheMap[string, Item](20)
 	}
 	if f.Cache == nil {
-		f.Cache = make(map[string][]byte)
+		f.Cache = make(map[string]any)
 	}
 	return f, errSum
 }
@@ -86,7 +88,7 @@ func NewFileInfo(name string) (*FileInfo, error) {
 		FileInfo: info,
 		FullPath: abs,
 		Meta:     cached.NewCacheMap[string, Item](8),
-		Cache:    make(map[string][]byte),
+		Cache:    make(map[string]any),
 	}, nil
 }
 
@@ -159,4 +161,14 @@ func (i *FileInfo) OrderedContent(delimiter string) string {
 		}
 	}
 	return res.String()
+}
+
+func (i *FileInfo) Extended(space int) []string {
+	res := make([]string, 0, len(i.AfterLines))
+	// space is the length of sum i.Meta
+	for _, line := range i.AfterLines {
+		// add spaces to both
+		res = append(res, strings.Repeat(" ", space)+(line))
+	}
+	return res
 }

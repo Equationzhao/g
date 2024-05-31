@@ -1108,6 +1108,9 @@ var Special = map[string]Style{
 	"mounts": {
 		Color: global.BrightBlack,
 	},
+	"extended": {
+		Color: global.BrightBlack,
+	},
 }
 
 var Name = map[string]Style{
