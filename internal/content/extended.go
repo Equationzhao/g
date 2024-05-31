@@ -3,6 +3,7 @@ package content
 import (
 	"encoding/xml"
 	"fmt"
+	"github.com/valyala/bytebufferpool"
 
 	"github.com/Equationzhao/g/internal/global"
 	"github.com/Equationzhao/g/internal/item"
@@ -16,15 +17,17 @@ type ExtendedEnabler struct{}
 const Extended = global.NameOfExtended
 
 func formatBytes(bytes []byte) string {
-	result := "["
+	res := bytebufferpool.Get()
+	defer bytebufferpool.Put(res)
+	_ = res.WriteByte('[')
 	for i, b := range bytes {
 		if i > 0 {
-			result += ", "
+			_, _ = res.WriteString(", ")
 		}
-		result += fmt.Sprintf("%02x", b)
+		_, _ = res.WriteString(fmt.Sprintf("%02x", b))
 	}
-	result += "]"
-	return result
+	_ = res.WriteByte(']')
+	return res.String()
 }
 
 // formatXattrValue attempts to parse the xattr value and returns a human-readable string.
