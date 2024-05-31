@@ -3,12 +3,11 @@ package content
 import (
 	"encoding/xml"
 	"fmt"
-	"github.com/valyala/bytebufferpool"
-
 	"github.com/Equationzhao/g/internal/global"
 	"github.com/Equationzhao/g/internal/item"
 	"github.com/Equationzhao/g/internal/render"
 	"github.com/pkg/xattr"
+	"github.com/valyala/bytebufferpool"
 	"howett.net/plist"
 )
 
@@ -32,6 +31,10 @@ func formatBytes(bytes []byte) string {
 
 // formatXattrValue attempts to parse the xattr value and returns a human-readable string.
 func formatXattrValue(value []byte) string {
+	if len(value) == 0 {
+		return "<empty>"
+	}
+
 	// Check if the value is a binary plist
 	var plistData any
 	if _, err := plist.Unmarshal(value, &plistData); err == nil {
