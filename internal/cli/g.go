@@ -682,18 +682,11 @@ var logic = func(context *cli.Context) error {
 	}
 
 	if len(path) != 0 && context.Bool("stdin") {
-		scanner := bufio.NewScanner(os.Stdin)
-		var args []string
-		for scanner.Scan() {
-			line := scanner.Text()
-			if len(line) > 0 {
-				args = append(args, line)
-			}
-		}
-		if err := scanner.Err(); err != nil {
+		newPath, err := getStdin()
+		if err != nil {
 			return err
 		}
-		path = args
+		path = newPath
 	}
 
 	for i := 0; i < len(path); i++ {
@@ -1065,6 +1058,21 @@ var logic = func(context *cli.Context) error {
 	}
 
 	return nil
+}
+
+func getStdin() ([]string, error) {
+	scanner := bufio.NewScanner(os.Stdin)
+	var args []string
+	for scanner.Scan() {
+		line := scanner.Text()
+		if len(line) > 0 {
+			args = append(args, line)
+		}
+	}
+	if err := scanner.Err(); err != nil {
+		return nil, err
+	}
+	return args, nil
 }
 
 func setNumber(infos []*item.FileInfo, isTree bool) {
