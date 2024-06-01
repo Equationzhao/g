@@ -86,6 +86,7 @@ _g() {
     --block-size
     --smart-group
     --statistic
+    --stdin
     --time
     --time-style
     --time-type
