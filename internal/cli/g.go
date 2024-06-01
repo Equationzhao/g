@@ -58,6 +58,8 @@ var (
 	groupEnabler    = contents.NewGroupEnabler()
 	gitEnabler      = contents.NewGitEnabler()
 	gitRepoEnabler  = contents.NewGitRepoEnabler()
+	nameToDisplay   = contents.NewNameEnabler()
+	flagsEnabler    = contents.NewFlagsEnabler()
 	depthLimitMap   map[string]int
 	limitOnce       = util.Once{}
 	hookOnce        = util.Once{}
@@ -503,7 +505,6 @@ var logic = func(context *cli.Context) error {
 
 	path := context.Args().Slice()
 
-	nameToDisplay := contents.NewNameEnable()
 	if !context.Bool("no-icon") && (context.Bool("icon") || context.Bool("all")) {
 		nameToDisplay.SetIcon()
 	}
@@ -529,6 +530,10 @@ var logic = func(context *cli.Context) error {
 	gitRepoStatus := context.Bool("git-repo-status")
 	if gitRepoStatus {
 		contentFunc = append(contentFunc, gitRepoEnabler.EnableStatus(r))
+	}
+
+	if context.Bool("flags") {
+		contentFunc = append(contentFunc, flagsEnabler.Enable())
 	}
 
 	if context.Bool("no-dereference") {
@@ -588,20 +593,11 @@ var logic = func(context *cli.Context) error {
 	if gitignore {
 		itemFilter.AppendTo(removeGitIgnore)
 	}
-
-	// set sort func
-	if sort.Len() == 0 {
-		sort.AddOption(sorter.Default)
-	}
-	contentFilter.SetSortFunc(sort.Build())
-	contentFilter.SetOptions(contentFunc...)
-	contentFilter.SetNoOutputOptions(noOutputFunc...)
-
 	// if no path, use the current path
 	if len(path) == 0 {
 		path = append(path, ".")
 	}
-	contentFilter.SetOptions(contentFunc...)
+
 	depth := context.Int("depth")
 
 	// flag: if d is set, display directory them self
@@ -689,6 +685,13 @@ var logic = func(context *cli.Context) error {
 		path = newPath
 	}
 
+	// set sort func
+	if sort.Len() == 0 {
+		sort.AddOption(sorter.Default)
+	}
+	contentFilter.SetSortFunc(sort.Build())
+	contentFilter.SetOptions(contentFunc...)
+	contentFilter.SetNoOutputOptions(noOutputFunc...)
 	for i := 0; i < len(path); i++ {
 		start := time.Now()
 
