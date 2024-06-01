@@ -831,6 +831,12 @@ var viewFlag = []cli.Flag{
 		DisableDefaultText: true,
 		Category:           "VIEW",
 	},
+	&cli.BoolFlag{
+		Name:               "flags",
+		Usage:              "list file flags[macOS only]",
+		DisableDefaultText: true,
+		Category:           "VIEW",
+	},
 }
 
 func setLimit(context *cli.Context) error {
