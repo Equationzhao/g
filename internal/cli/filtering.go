@@ -14,7 +14,7 @@ var filteringFlag = []cli.Flag{
 	&cli.UintFlag{
 		Name:        "n",
 		Aliases:     []string{"limitN", "limit", "topN", "top"},
-		Usage:       "Limit display to a max of n items (n <=0 means unlimited)",
+		Usage:       "limit display to a max of n items (n <=0 means unlimited)",
 		Value:       0,
 		DefaultText: "unlimited",
 		Category:    "FILTERING",

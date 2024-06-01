@@ -167,7 +167,7 @@ var viewFlag = []cli.Flag{
 	&cli.StringFlag{
 		Name: "time-style",
 		Usage: `time/date format with -l, 
-	Valid timestamp styles are default, iso, long-iso, full-iso, locale, 
+	valid timestamp styles are default, iso, long-iso, full-iso, locale, 
 	custom +FORMAT like date(1). 
 	(default: +%d.%b'%y %H:%M ,like 02.Jan'06 15:04)`,
 		EnvVars: []string{"TIME_STYLE"},
@@ -267,7 +267,7 @@ var viewFlag = []cli.Flag{
 	&cli.BoolFlag{
 		Name:               "numeric",
 		Aliases:            []string{"numeric-uid-gid"},
-		Usage:              " List numeric user and group IDs instead of name [sid in windows]",
+		Usage:              "list numeric user and group IDs instead of name [sid in windows]",
 		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
 			if b {
@@ -646,7 +646,7 @@ var viewFlag = []cli.Flag{
 	},
 	&cli.StringFlag{
 		Name:        "hyperlink",
-		Usage:       "Attach hyperlink to filenames [auto|always|never]",
+		Usage:       "attach hyperlink to filenames [auto|always|never]",
 		Category:    "VIEW",
 		DefaultText: "auto",
 		Action: func(context *cli.Context, s string) error {
