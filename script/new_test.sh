@@ -51,7 +51,8 @@ fi
 output="$($running_command tests/test_data)"
 
 echo "$output" > $test_stdout
-echo "output=\"\$($running_command tests/test_data )\"" > "$test_script"
+echo "#!/bin/bash" > "$test_script"
+echo "output=\"\$($running_command tests/test_data )\"" >> "$test_script"
 echo "echo \"\$output\" | diff - $test_stdout" >> "$test_script"
 
 chmod +x "$test_script"
