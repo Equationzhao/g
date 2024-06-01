@@ -70,6 +70,7 @@ _g() {
         '--footer[add a footer row]'
         '--full-path[show full path]'
         '--full-time[like -all/l --time-style=full-iso]:time-style:((default iso long-iso full-iso locale +FORMAT))'
+        '--flags[list file flags]'
         '--gid[show gid instead of groupname]'
         '--git[show git status]'
         '--git-status[show git status]'

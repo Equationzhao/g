@@ -53,6 +53,7 @@ _g() {
     --footer
     --full-path
     --full-time
+    --flags
     --gid
     --git
     --git-status
