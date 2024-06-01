@@ -196,7 +196,7 @@ func makeLink(abs string, name string) string {
 
 func checkIfEmpty(info *item.FileInfo) bool {
 	f, err := os.Open(info.FullPath)
-	if err == io.EOF {
+	if err == io.EOF || f == nil {
 		return true
 	}
 	// meth Readdirnames contains nil check

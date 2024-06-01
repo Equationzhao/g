@@ -90,8 +90,9 @@ func gitByName(status git.Status, renderer *render.Renderer) string {
 		return renderer.GitTypeChanged("T")
 	case git.UpdatedButUnmerged:
 		return renderer.GitUpdatedButUnmerged("U")
+	default:
+		return ""
 	}
-	return " "
 }
 
 const (
