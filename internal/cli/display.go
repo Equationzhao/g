@@ -382,7 +382,7 @@ var displayFlag = []cli.Flag{
 	},
 	&cli.BoolFlag{
 		Name:               "classic",
-		Usage:              "Enable classic mode (no colors or icons)",
+		Usage:              "enable classic mode (no colors or icons)",
 		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
 			if b {
@@ -415,7 +415,7 @@ var displayFlag = []cli.Flag{
 		Name:               "ft",
 		Aliases:            []string{"file-type"},
 		DisableDefaultText: true,
-		Usage:              "likewise, except do not append '*'",
+		Usage:              "like classify, except do not append '*'",
 		Category:           "DISPLAY",
 	},
 	&cli.UintFlag{

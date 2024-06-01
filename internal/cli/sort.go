@@ -144,7 +144,7 @@ var sortingFlags = []cli.Flag{
 	&cli.BoolFlag{
 		Name:               "df",
 		Aliases:            []string{"dir-first", "group-directories-first"},
-		Usage:              "List directories before other files",
+		Usage:              "list directories before other files",
 		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
 			if b {
