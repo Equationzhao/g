@@ -88,6 +88,7 @@ g
 [--sort-reverse|--reverse|-r]
 [--sort|--SORT_FIELD]=[value]
 [--statistic]
+[--stdin]
 [--tb-style|--table-style]=[value]
 [--tb|--table]
 [--term-width]=[value]
@@ -170,7 +171,7 @@ g [options] [path]
 **--checksum-algorithm, --ca**="": show checksum of file with algorithm: 
 	md5, sha1, sha224, sha256, sha384, sha512, crc32 (default: sha1)
 
-**--classic**: Enable classic mode (no colors or icons)
+**--classic**: enable classic mode (no colors or icons)
 
 **--color**="": when to use terminal colors [always|auto|never][basic|256|24bit] (default: auto)
 
@@ -185,7 +186,7 @@ g [options] [path]
 **--detect-size**="": set exact size for mimetype detection 
 			eg:1M/nolimit/infinity (default: 1M)
 
-**--df, --dir-first, --group-directories-first**: List directories before other files
+**--df, --dir-first, --group-directories-first**: list directories before other files
 
 **--disable-index, --di, --no-update**: disable updating index
 
@@ -200,7 +201,7 @@ g [options] [path]
 
 **--fp, --full-path, --fullpath**: show full path
 
-**--ft, --file-type**: likewise, except do not append '*'
+**--ft, --file-type**: like classify, except do not append '*'
 
 **--full-time**: like -all/l --time-style=full-iso
 
@@ -220,7 +221,7 @@ g [options] [path]
 
 **--header, --title**: add a header row
 
-**--hyperlink**="": Attach hyperlink to filenames [auto|always|never] (default: auto)
+**--hyperlink**="": attach hyperlink to filenames [auto|always|never] (default: auto)
 
 **--icon, --icons**: show icon
 
@@ -257,7 +258,7 @@ g [options] [path]
 
 **--no-total-size**: disable total size(always override --total-size)
 
-**--numeric, --numeric-uid-gid**:  List numeric user and group IDs instead of name [sid in windows]
+**--numeric, --numeric-uid-gid**: list numeric user and group IDs instead of name [sid in windows]
 
 **--octal-perm, --octal-permission**: list each file's permission in octal format
 
@@ -314,6 +315,8 @@ g [options] [path]
 
 **--statistic**: show statistic info
 
+**--stdin**: read path from stdin, split by newline
+
 **--tb, --table**: output in table format
 
 **--tb-style, --table-style**="": set table style [ascii(default)/unicode]
@@ -325,7 +328,7 @@ g [options] [path]
 **--time**: show time
 
 **--time-style**="": time/date format with -l, 
-	Valid timestamp styles are default, iso, long-iso, full-iso, locale, 
+	valid timestamp styles are default, iso, long-iso, full-iso, locale, 
 	custom +FORMAT like date(1). 
 	(default: +%d.%b'%y %H:%M ,like 02.Jan'06 15:04)
 
@@ -389,7 +392,7 @@ g [options] [path]
 
 **-m, --comma**: fill width with a comma separated list of entries
 
-**-n, --limitN, --limit, --topN, --top**="": Limit display to a max of n items (n <=0 means unlimited) (default: unlimited)
+**-n, --limitN, --limit, --topN, --top**="": limit display to a max of n items (n <=0 means unlimited) (default: unlimited)
 
 **-o**: like -all, but do not list group information
 
