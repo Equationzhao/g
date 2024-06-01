@@ -104,6 +104,7 @@ _g() {
         '--block-size[set size unit]:unit:((bit "bit" b "byte" k m g t p e z y bb nb auto))'
         '--smart-group[only show group if different from owner]'
         '--statistic[show statistic info]'
+        '--stdin[read path from stdin, split by newline]'
         '--time[show time]'
         '--time-style[set time/date format]:format:'
         '--time-type[set time type]:type:((mod "modified" create access all birth))'

@@ -86,6 +86,7 @@ complete -c g -l size -d "show file/dir size"
 complete -c g -l size-unit -l block-size -d "set size unit" -a "bit \"bit\" b \"byte\" k m g t p e z y bb nb auto"
 complete -c g -l smart-group -d "only show group if different from owner"
 complete -c g -l statistic -d "show statistic info"
+complete -c g -l stdin -d "read path from stdin, split by newline"
 complete -c g -l time -d "show time"
 complete -c g -l time-style -d "set time/date format" -r -f
 complete -c g -l time-type -d "set time type" -a "mod \"modified\" create access all birth"
