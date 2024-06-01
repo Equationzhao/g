@@ -78,4 +78,5 @@ const (
 	NameOfTimeCreated   = "Created"
 	NameOfTimeAccessed  = "Accessed"
 	NameOfTimeBirth     = "Birth"
+	NameOfFlags         = "Flags"
 )

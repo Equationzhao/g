@@ -184,7 +184,7 @@ func (n *Name) UnsetMounts() *Name {
 	return n
 }
 
-func NewNameEnable() *Name {
+func NewNameEnabler() *Name {
 	return &Name{}
 }
 
