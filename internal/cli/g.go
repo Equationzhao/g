@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"bufio"
 	"errors"
 	"fmt"
 	"os"
@@ -400,6 +401,7 @@ VIEW
    --size-unit value, --block-size value   size unit: bit, b, k, m, g, t, auto
    --smart-group                           only show group if it has a different name from owner
    --statistic                             show statistic info
+   --stdin                                 read path from stdin, split by newline
    --time                                  show time
    --time-style TIME_TYPE                  time/date format with -l,
                                            valid TIME_TYPE are :
@@ -677,6 +679,21 @@ var logic = func(context *cli.Context) error {
 			panic(err)
 		}
 		contents.Pool = pool
+	}
+
+	if len(path) != 0 && context.Bool("stdin") {
+		scanner := bufio.NewScanner(os.Stdin)
+		var args []string
+		for scanner.Scan() {
+			line := scanner.Text()
+			if len(line) > 0 {
+				args = append(args, line)
+			}
+		}
+		if err := scanner.Err(); err != nil {
+			return err
+		}
+		path = args
 	}
 
 	for i := 0; i < len(path); i++ {
