@@ -19,7 +19,7 @@ complete -c g -l colorless -d "without color"
 complete -c g -l depth -d "limit recursive/tree depth" -r -f
 complete -c g -l format -d "set output format" -a "across commas horizontal long single-column verbose vertical table markdown csv tsv json tree"
 complete -c g -l file-type -d "do not append indicator to file types"
-complete -c g -l md -d "output in markdown-table format"?
+complete -c g -l md -d "output in markdown-table format"
 complete -c g -l markdown -d "output in markdown-table format"
 complete -c g -l table -d "output in table format"
 complete -c g -l table-style -d "set table style" -a "ascii unicode"
