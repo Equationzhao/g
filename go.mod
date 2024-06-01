@@ -20,7 +20,7 @@ require (
 	github.com/pkg/xattr v0.4.9
 	github.com/saintfish/chardet v0.0.0-20230101081208-5e3ef4b5456d
 	github.com/savioxavier/termlink v1.3.0
-	github.com/shirou/gopsutil/v3 v3.24.4
+	github.com/shirou/gopsutil/v3 v3.24.5
 	github.com/spf13/afero v1.11.0
 	github.com/syndtr/goleveldb v1.0.0
 	github.com/urfave/cli/v2 v2.27.2
@@ -30,7 +30,7 @@ require (
 	github.com/zeebo/assert v1.3.1
 	github.com/zeebo/xxh3 v1.0.2
 	go.szostok.io/version v1.2.0
-	golang.org/x/exp v0.0.0-20240506185415-9bf2ced13842
+	golang.org/x/exp v0.0.0-20240531132922-fd00a4e0eefc
 	gopkg.in/yaml.v3 v3.0.1
 )
 
