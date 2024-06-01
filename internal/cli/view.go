@@ -825,6 +825,12 @@ var viewFlag = []cli.Flag{
 		},
 		Category: "VIEW",
 	},
+	&cli.BoolFlag{
+		Name:               "stdin",
+		Usage:              "read path from stdin, split by newline",
+		DisableDefaultText: true,
+		Category:           "VIEW",
+	},
 }
 
 func setLimit(context *cli.Context) error {
