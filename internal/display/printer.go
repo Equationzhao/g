@@ -165,7 +165,7 @@ func (f *FitTerminal) Print(i ...*item.FileInfo) {
 }
 
 func (f *FitTerminal) printColumns(stringsArray []string, space int) {
-	termWidth := getTermWidth() - 2
+	termWidth := getTermWidth() - 5
 	n := len(stringsArray)
 
 	// Calculate the maximum width of each string
@@ -365,7 +365,7 @@ func (a *Across) Print(items ...*item.FileInfo) {
 
 func (a *Across) printRowWithNoSpace(strs []string) {
 	defer a.Flush()
-	width := getTermWidth() - 2
+	width := getTermWidth() - 5
 
 	maxLength := 0
 	for _, str := range strs {
