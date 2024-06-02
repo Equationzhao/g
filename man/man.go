@@ -8,7 +8,7 @@ import (
 	"github.com/spf13/afero"
 )
 
-func GenMDAndMan(fs afero.Fs) {
+func GenMan(fs afero.Fs) {
 	// man
 	man, _ := fs.Create(filepath.Join("man", "g.1.gz"))
 	s, _ := cli.G.ToMan()
