@@ -1,0 +1,15 @@
+default:
+  close:
+    comment: '⚠️ This has been marked $LABEL and will be closed in $DELAY.'
+    delay: '15 days'
+
+labels:
+  duplicate: close
+  wontfix: close
+  invalid: close
+  'merge when passing': merge
+  'squash when passing': merge
+  'rebase when passing': merge
+
+merges:
+  - action: delete_branch
