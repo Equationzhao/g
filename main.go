@@ -25,7 +25,7 @@ func main() {
 	}()
 	// when build with tag `doc`, generate md and man file
 	if doc.Enable {
-		man.GenMDAndMan(global.Fs)
+		man.GenMan(global.Fs)
 	} else {
 		preprocessArgs()
 		err := cli.G.Run(os.Args)

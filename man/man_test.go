@@ -7,5 +7,5 @@ import (
 )
 
 func TestGenMDAndMan(t *testing.T) {
-	GenMDAndMan(afero.NewMemMapFs())
+	GenMan(afero.NewMemMapFs())
 }
