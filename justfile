@@ -11,10 +11,11 @@ build:
     # Linux macOS Windows
     # 386 amd64 arm arm64
     mkdir -p build
-    CGO_ENABLED=0 GOOS=linux GOARCH=386     go build {{ldflags}} -o build/g-linux-386
-    CGO_ENABLED=0 GOOS=linux GOARCH=amd64   go build {{ldflags}} -o build/g-linux-amd64
-    CGO_ENABLED=0 GOOS=linux GOARCH=arm     go build {{ldflags}} -o build/g-linux-arm
-    CGO_ENABLED=0 GOOS=linux GOARCH=arm64   go build {{ldflags}} -o build/g-linux-arm64
+    CGO_ENABLED=0 GOOS=linux GOARCH=386       go build {{ldflags}} -o build/g-linux-386
+    CGO_ENABLED=0 GOOS=linux GOARCH=amd64     go build {{ldflags}} -o build/g-linux-amd64
+    CGO_ENABLED=0 GOOS=linux GOARCH=arm       go build {{ldflags}} -o build/g-linux-arm
+    CGO_ENABLED=0 GOOS=linux GOARCH=arm64     go build {{ldflags}} -o build/g-linux-arm64
+    CGO_ENABLED=0 GOOS=linux GOARCH=loong64   go build {{ldflags}} -o build/g-linux-loong64
 
     CGO_ENABLED=0 GOOS=darwin GOARCH=amd64  go build {{ldflags}} -o build/g-darwin-amd64
     CGO_ENABLED=0 GOOS=darwin GOARCH=arm64  go build {{ldflags}} -o build/g-darwin-arm64
@@ -31,6 +32,11 @@ build:
     upx build/g-darwin-amd64
     upx build/g-windows-amd64.exe
     upx build/g-windows-386.exe
+#    upx doesn't support darwin-arm64, linux-loong64, windows-arm64, windows-arm
+#    upx build/g-darwin-arm64
+#    upx build/g-linux-loong64
+#    upx build/g-windows-arm64.exe
+#    upx build/g-windows-arm.exe
 
 # compress the binaries for all platforms
 compress: 
@@ -39,6 +45,7 @@ compress:
     tar -zcvf build/g-Linux-amd64.tar.gz build/g-linux-amd64
     tar -zcvf build/g-Linux-arm.tar.gz build/g-linux-arm
     tar -zcvf build/g-Linux-arm64.tar.gz build/g-linux-arm64
+    tar -zcvf build/g-Linux-loong64.tar.gz build/g-linux-loong64
 
     tar -zcvf build/g-Darwin-amd64.tar.gz build/g-darwin-amd64
     tar -zcvf build/g-Darwin-arm64.tar.gz build/g-darwin-arm64
@@ -127,6 +134,22 @@ deb:
 
     dpkg-deb -b build/g_{{latest}}_arm
     rm -rf build/g_{{latest}}_arm
+
+    # loong64
+    mkdir -vp build/g_{{latest}}_loong64/DEBIAN
+    mkdir -vp build/g_{{latest}}_loong64/usr/local/bin
+    mkdir -vp build/g_{{latest}}_loong64/usr/local/share/man/man1
+    cp build/g-linux-loong64 build/g_{{latest}}_loong64/usr
+    cp man/g.1.gz build/g_{{latest}}_loong64/usr/local/share/man/man1/g.1.gz
+
+    echo "Package: g" > build/g_{{latest}}_loong64/DEBIAN/control
+    echo "Version: {{latest}}" >> build/g_{{latest}}_loong64/DEBIAN/control
+    echo "Architecture: loong64" >> build/g_{{latest}}_loong64/DEBIAN/control
+    echo "Maintainer: Equationzhao <equationzhao at foxmail.com>" >> build/g_{{latest}}_loong64/DEBIAN/control
+    echo "Description: a powerful ls tool" >> build/g_{{latest}}_loong64/DEBIAN/control
+
+    dpkg-deb -b build/g_{{latest}}_loong64
+    rm -rf build/g_{{latest}}_loong64
 
 # generate the checksum file for all build files
 checksum: 
