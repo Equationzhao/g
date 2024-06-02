@@ -1,401 +1,285 @@
-# NAME
-
-g - a powerful ls
-
-# SYNOPSIS
-
-g
-
-```
-[-#]
-[--CSV|--csv]
-[--TSV|--tsv]
-[--access|--ac|--accessed]
-[--after]=[value]
-[--all|--la]
-[--before]=[value]
-[--birth]
-[--block|--blocks]
-[--bug]
-[--byline|-1|--oneline|--single-column]
-[--charset]
-[--check-new-version]
-[--checksum-algorithm|--ca]=[value]
-[--checksum|--cs]
-[--classic]
-[--color]=[value]
-[--colorless|--no-color|--nocolor]
-[--create|--cr|--created]
-[--depth|--level]=[value]
-[--dereference]
-[--detect-size]=[value]
-[--df|--dir-first|--group-directories-first]
-[--disable-index|--di|--no-update]
-[--duplicate|--dup]
-[--ext]=[value]
-[--footer]
-[--format]=[value]
-[--fp|--full-path|--fullpath]
-[--ft|--file-type]
-[--full-time]
-[--fuzzy|--fz|-f]
-[--gid]
-[--git-ignore|--hide-git-ignore]
-[--git-repo-branch|--branch]
-[--git-repo-status|--repo-status]
-[--git|--git-status]
-[--group]
-[--header|--title]
-[--hyperlink]=[value]
-[--icon|--icons]
-[--init]=[value]
-[--inode|-i]
-[--lh|--human-readable]
-[--list-index|--li]
-[--md|--markdown|--Markdown]
-[--mime-parent|--mime-parent-type|--mimetype-parent]
-[--mime|--mime-type|--mimetype]
-[--modify|--mod|--modified]
-[--mounts]
-[--no-config]
-[--no-dereference]
-[--no-dir|--nodir|--file]
-[--no-ext|--noext]=[value]
-[--no-icon|--noicon|--ni]
-[--no-path-transform|--np]
-[--no-total-size]
-[--numeric|--numeric-uid-gid]
-[--octal-perm|--octal-permission]
-[--only-mime]=[value]
-[--owner|--author]
-[--perm|--permission]
-[--rebuild-index|--ri|--remove-all]
-[--recursive-size]
-[--relative-to]=[value]
-[--remove-current-path|--rcp|--rc|--rmc]
-[--remove-index|--rm]=[value]
-[--remove-invalid-path|--rip]
-[--rt|--relative-time]
-[--show-only-hidden|--hidden]
-[--si]
-[--size-unit|--su|--block-size]=[value]
-[--size]
-[--smart-group]
-[--sort-by-mime-descend]
-[--sort-by-mime-parent-descend]
-[--sort-by-mime-parent]
-[--sort-by-mime]
-[--sort-reverse|--reverse|-r]
-[--sort|--SORT_FIELD]=[value]
-[--statistic]
-[--stdin]
-[--tb-style|--table-style]=[value]
-[--tb|--table]
-[--term-width]=[value]
-[--theme]=[value]
-[--time-style]=[value]
-[--time-type]=[value]
-[--time]
-[--total-size]
-[--tree-style]=[value]
-[--uid]
-[--versionsort|--sort-by-version]
-[--width]
-[--zero|-0]
-[-A|--almost-all]
-[-B|--ignore-backups]
-[-C|--vertical]
-[-D|--dir|--only-dir]
-[-F|--classify]
-[-G|--no-group]
-[-H|--link]
-[-I|--ignore]=[value]
-[-M|--match]=[value]
-[-N|--literal]
-[-O|--no-owner]
-[-Q|--quote-name]
-[-R|--recurse]
-[-S|--sort-by-size|--sizesort]
-[-T|--tree]
-[-U|--nosort|--no-sort]
-[-X|--sort-by-ext]
-[-a|--sh|--show-hidden]
-[-d|--directory|--list-dirs]
-[-g]
-[-j|--json]
-[-l|--long]
-[-m|--comma]
-[-n|--limitN|--limit|--topN|--top]=[value]
-[-o]
-[-x|--col|--across|--horizontal]
-```
+## USAGE:
+g [options] [files...]
 
-**Usage**:
+## VERSION:
+0.28.2
 
-```
-g [options] [path]
-```
+## GLOBAL OPTIONS
+--bug                      report bug
 
-# GLOBAL OPTIONS
+--duplicate, --dup         show duplicate files
 
-**-#**: print entry Number for each entry
+--no-config                do not load config file
 
-**--CSV, --csv**: output in csv format
+--no-path-transform, --np  By default, .../a/b/c will be transformed to ../../a/b/c, and ~ will be replaced by homedir,
+                           using this flag to disable this feature
 
-**--TSV, --tsv**: output in tsv format
+--si                       use powers of 1000 for size format(default: false)
 
-**--access, --ac, --accessed**: accessed time
+## META
+--check-new-version  check if there's new release
 
-**--after**="": show items which was modified/access/created after given time, see --before
+--help, -h, -?       show help
 
-**--all, --la**: show all info/use a long listing format
+--version, -v        print the version
 
-**--before**="": show items which was modified/access/created before given time, the time field is determined by --time-type,
-	the time will be parsed using format:
-		MM-dd, MM-dd HH:mm, HH:mm, YYYY-MM-dd, YYYY-MM-dd HH:mm, and the format set by --time-style
+## DISPLAY
+-#                                 print entry Number for each entry
 
-**--birth**: birth time[macOS only]
+--CSV, --csv                       output in csv format
 
-**--block, --blocks**: show block size
+--TSV, --tsv                       output in tsv format
 
-**--bug**: report bug
+--byline, -1, --oneline            print by line
 
-**--byline, -1, --oneline, --single-column**: print by line
+--classic                          enable classic mode(no colors or icons)
 
-**--charset**: show charset of text file in mime type field
+--color WHEN/LEVEL                 set terminal colors [always|auto|never][basic|256|24bit](default: auto)
 
-**--check-new-version**: check if there's new release
+--colorless, --no-color            without color
 
-**--checksum, --cs**: show checksum of file with algorithm, see --checksum-algorithm
+--depth NUM                        limit recursive/tree depth, negative -> infinity(default: infinity)
 
-**--checksum-algorithm, --ca**="": show checksum of file with algorithm: 
-	md5, sha1, sha224, sha256, sha384, sha512, crc32 (default: sha1)
+--format FORMAT                    across  -x,  commas  -m, horizontal -x, long -l, single-column -1,
+								   verbose -l, vertical -C, table -tb, markdown -md, csv -csv, tsv -tsv, json -j, tree -T(default: C)
 
-**--classic**: enable classic mode (no colors or icons)
 
-**--color**="": when to use terminal colors [always|auto|never][basic|256|24bit] (default: auto)
+--file-type                        like --classify, except do not append '*'
 
-**--colorless, --no-color, --nocolor**: without color
+--md, --markdown                   output in markdown-table format
 
-**--create, --cr, --created**: created time
+--tb, --table                      output in table format
 
-**--depth, --level**="": limit recursive/tree depth, negative -> infinity (default: infinity)
+--table-style STYLE                set table style [ascii(default)/unicode]
 
-**--dereference**: dereference symbolic links
+--term-width COLS                  set screen width (default: auto)
 
-**--detect-size**="": set exact size for mimetype detection 
-			eg:1M/nolimit/infinity (default: 1M)
+--theme path/to/theme              apply theme path/to/theme
 
-**--df, --dir-first, --group-directories-first**: list directories before other files
+--tree-style STYLE                 set tree style [ascii/unicode(default)/rectangle]
 
-**--disable-index, --di, --no-update**: disable updating index
+--zero, -0                         end each output line with NUL, not newline
 
-**--duplicate, --dup**: show duplicate files
+-C, --vertical                     list entries by columns(default)
 
-**--ext**="": show file which has target ext, eg: --ext=go,java
+-F, --classify                     append indicator (one of */=@|) to entries
 
-**--footer**: add a footer row
+-R, --recurse                      recurse into directories
 
-**--format**="": across  -x,  commas  -m, horizontal -x, long -l, single-column -1,
-	verbose -l, vertical -C, table -tb, markdown -md, csv -csv, tsv -tsv, json -j, tree -T (default: C)
+-T, --tree                         recursively list in tree
 
-**--fp, --full-path, --fullpath**: show full path
+-d, --directory,                   list directories themselves, not their contents
 
-**--ft, --file-type**: like classify, except do not append '*'
+-j, --json                         output in json format
 
-**--full-time**: like -all/l --time-style=full-iso
+-m, --comma                        fill width with a comma separated list of entries
 
-**--fuzzy, --fz, -f**: fuzzy search
+-x, --col, --across, --horizontal  list entries by lines instead of by columns
 
-**--gid**: show gid instead of groupname [sid in windows]
+## FILTERING
+--after TIME                  show items which was modified/access/created after given time, see --before
 
-**--git, --git-status**: show git status [if git is installed]
+--before TIME                 show items which was modified/access/created before given time, the time field is determined by --time-type,
+								the time will be parsed using format:
+								MM-dd, MM-dd HH:mm, HH:mm, YYYY-MM-dd, YYYY-MM-dd HH:mm, and the format set by --time-style
 
-**--git-ignore, --hide-git-ignore**: hide git ignored file/dir [if git is installed]
 
-**--git-repo-branch, --branch**: list root of git-tree branch [if git is installed]
+--ext value                   show file which has target ext, eg: --ext=go,java
 
-**--git-repo-status, --repo-status**: list root of git-tree status [if git is installed]
+--git-ignore                  hide git ignored file/dir [if git is installed]
 
-**--group**: show group
+--no-dir, --file              do not show directory
 
-**--header, --title**: add a header row
+--no-ext value                show file which doesn't have target ext
 
-**--hyperlink**="": attach hyperlink to filenames [auto|always|never] (default: auto)
+--only-mime value             only show file with given mime type
 
-**--icon, --icons**: show icon
+--show-only-hidden, --hidden  show only hidden files(overridden by --show-hidden/-a/-A)
 
-**--init**="": show the init script for shell, support zsh, bash, fish, powershell, nushell
+-A, --almost-all              do not list implied . and ..
 
-**--inode, -i**: show inode[linux/darwin only]
+-B, --ignore-backups          do not list implied entries ending with ~
 
-**--lh, --human-readable**: show human readable size
+-D, --dir, --only-dir         show directory only
 
-**--list-index, --li**: list index
+-I GLOBS, --ignore GLOBS      ignore Glob patterns
 
-**--md, --markdown, --Markdown**: output in markdown-table format
+-M GLOBS, --match GLOBS       match Glob patterns
 
-**--mime, --mime-type, --mimetype**: show mime file type
+-a, --show-hidden             show hidden files
 
-**--mime-parent, --mime-parent-type, --mimetype-parent**: show mime parent type
+-n NUM, --limit NUM           limit display to a max of n items(n <=0 means unlimited)(default: unlimited)
 
-**--modify, --mod, --modified**: modified time
+## INDEX
+--disable-index, --no-update      disable updating index
 
-**--mounts**: show mount details
+--fuzzy, -f                       fuzzy search
 
-**--no-config**: do not load config file
+--list-index,                     list index
 
-**--no-dereference**: do not follow symbolic links
+--rebuild-index                   rebuild index
 
-**--no-dir, --nodir, --file**: do not show directory
+--remove-current-path             remove current path from index
 
-**--no-ext, --noext**="": show file which doesn't have target ext
+--remove-index value, --rm value  remove paths from index
 
-**--no-icon, --noicon, --ni**: disable icon(always override --icon)
+--remove-invalid-path, --rip      remove invalid paths from index
 
-**--no-path-transform, --np**: By default, .../a/b/c will be transformed to ../../a/b/c, and ~ will be replaced by homedir, 
-	using this flag to disable this feature
 
-**--no-total-size**: disable total size(always override --total-size)
+## SHELL
+--init value  show the init script for shell, support zsh, bash, fish, powershell, nushell
 
-**--numeric, --numeric-uid-gid**: list numeric user and group IDs instead of name [sid in windows]
+## SORTING
+--sort SORT_FIELD                       sort by field, default: ascending and case-insensitive,
 
-**--octal-perm, --octal-permission**: list each file's permission in octal format
+available fields:                       nature(default),none(nosort),
+										name,.name(sorts by name without a leading dot),
+										size,time,owner,group,extension,inode,width,mime.
+										append '-descend' to sort descending
+										field beginning with an Uppercase letter is case-sensitive
 
-**--only-mime**="": only show file with given mime type
 
-**--owner, --author**: show owner
+--dir-first, --group-directories-first  list directories before other files
 
-**--perm, --permission**: show permission
+--sort-by-mime                          sort by mimetype
 
-**--rebuild-index, --ri, --remove-all**: rebuild index
+--sort-by-mime-descend                  sort by mimetype, descending
 
-**--recursive-size**: show recursive size of dir, only work with --size
+--sort-by-mime-parent                   sort by mimetype parent
 
-**--relative-to**="": show relative path to the given path (default: current directory)
+--sort-by-mime-parent-descend           sort by mimetype parent
 
-**--remove-current-path, --rcp, --rc, --rmc**: remove current path from index
+--sort-reverse, --reverse, -r           reverse the order of the sort
 
-**--remove-index, --rm**="": remove paths from index
+--versionsort, --sort-by-version        sort by version numbers, ascending(default: false)
 
-**--remove-invalid-path, --rip**: remove invalid paths from index
+--width                                 sort by entry name width
 
-**--rt, --relative-time**: show relative time
+-S, --sort-by-size, --sizesort          sort by file size, largest first(descending)
 
-**--show-only-hidden, --hidden**: show only hidden files(overridden by --show-hidden/-a/-A)
+-U, --nosort, --no-sort                 do not sort; list entries in directory order.
 
-**--si**: use powers of 1000 not 1024 for size format
-		eg: 1K = 1000 bytes
+-X, --sort-by-ext                       sort alphabetically by entry extension
 
-**--size**: show file/dir size
 
-**--size-unit, --su, --block-size**="": size unit:
-			bit, b, k, m, g, t, auto
+## VIEW
+--access, --ac, --accessed              accessed time
 
-**--smart-group**: only show group if it has a different name from owner
+--all                                   show all info/use a long listing format
 
-**--sort, --SORT_FIELD**="": sort by field, default: 
-	ascending and case insensitive, 
-	field beginning with Uppercase is case sensitive,	
-	available fields: 	
-	   nature(default),none(nosort),
-	   name,.name(sorts by name without a leading dot),	
-	   size,time,owner,group,extension,inode,width,mime. 	
-	   following '-descend' to sort descending
+--birth                                 birth time[macOS only]
 
-**--sort-by-mime**: sort by mimetype
+--block, --blocks                       show block size
 
-**--sort-by-mime-descend**: sort by mimetype, descending
+--charset                               show charset of text file in mime type field
 
-**--sort-by-mime-parent**: sort by mimetype parent
+--checksum, --cs                        show checksum of file with algorithm, see --checksum-algorithm
 
-**--sort-by-mime-parent-descend**: sort by mimetype parent
+--checksum-algorithm value, --ca value  show checksum of file with algorithm:
+											md5, sha1, sha224, sha256, sha384, sha512, crc32(default: sha1)
 
-**--sort-reverse, --reverse, -r**: reverse the order of the sort
 
-**--statistic**: show statistic info
+--create, --cr, --created               created time
 
-**--stdin**: read path from stdin, split by newline
+--dereference                           dereference symbolic links
 
-**--tb, --table**: output in table format
+--detect-size value                     set exact size for mimetype detection
+											eg:1M/nolimit/infinity(default: 1M)
 
-**--tb-style, --table-style**="": set table style [ascii(default)/unicode]
 
-**--term-width**="": set screen width (default: auto)
+--footer                                add a footer row
 
-**--theme**="": apply theme `path/to/theme`
+--fp, --full-path, --fullpath           show full path
 
-**--time**: show time
+--full-time                             like -all/l --time-style=full-iso
 
-**--time-style**="": time/date format with -l, 
-	valid timestamp styles are default, iso, long-iso, full-iso, locale, 
-	custom +FORMAT like date(1). 
-	(default: +%d.%b'%y %H:%M ,like 02.Jan'06 15:04)
+--gid                                   show gid instead of groupname [sid in windows]
 
-**--time-type**="": time type, mod(default), create, access, all, birth[macOS only]
+--git, --git-status                     show git status [if git is installed]
 
-**--total-size**: show total size
+--git-repo-branch, --branch             list root of git-tree branch [if git is installed]
 
-**--tree-style**="": set tree style [ascii/unicode(default)/rectangle]
+--git-repo-status, --repo-status        list root of git-tree status [if git is installed]
 
-**--uid**: show uid instead of username [sid in windows]
+--group                                 show group
 
-**--versionsort, --sort-by-version**: sort by version numbers, ascending
+--header, --title                       add a header row
 
-**--width**: sort by entry name width
+--hyperlink value                       attach hyperlink to filenames [auto|always|never](default: auto)
 
-**--zero, -0**: end each output line with NUL, not newline
+--icon, --icons                         show icon
 
-**-A, --almost-all**: do not list implied . and ..
+--inode, -i                             show inode[linux/darwin only]
 
-**-B, --ignore-backups**: do not list implied entries ending with ~
+--lh, --human-readable                  show human readable size
 
-**-C, --vertical**: list entries by columns (default)
+--mime, --mime-type, --mimetype         show mime file type
 
-**-D, --dir, --only-dir**: show directory only
+--mime-parent, --mime-parent-type       show mime parent type
 
-**-F, --classify**: append indicator (one of */=@|) to entries
+--modify, --mod, --modified             modified time
 
-**-G, --no-group**: in a long listing, don't print group names
+--mounts                                show mount details
 
-**-H, --link**: list each file's number of hard links
+--no-dereference                        do not follow symbolic links
 
-**-I, --ignore**="": ignore Glob patterns
+--no-icon, --noicon, --ni               disable icon(always override --icon)
 
-**-M, --match**="": match Glob patterns
+--no-total-size                         disable total size(always override --total-size)
 
-**-N, --literal**: print entry names without quoting
+--numeric, --numeric-uid-gid            list numeric user and group IDs instead of name [sid in windows]
 
-**-O, --no-owner**: in a long listing, don't print owner names
+--octal-perm, --octal-permission        list each file's permission in octal format
 
-**-Q, --quote-name**: enclose entry names in double quotes(overridden by --literal)
+--owner, --author                       show owner
 
-**-R, --recurse**: recurse into directories
+--perm, --permission                    show permission
 
-**-S, --sort-by-size, --sizesort**: sort by file size, largest first(descending)
+--recursive-size                        show recursive size of dir, only work with --size
 
-**-T, --tree**: recursively list in tree
+--relative-to value                     show relative path to the given path (default: current directory)
 
-**-U, --nosort, --no-sort**: do not sort; list entries in directory order. 
+--rt, --relative-time                   show relative time
 
-**-X, --sort-by-ext**: sort alphabetically by entry extension
+--size                                  show file/dir size
 
-**-a, --sh, --show-hidden**: show hidden files
+--size-unit value, --block-size value   size unit: bit, b, k, m, g, t, auto
 
-**-d, --directory, --list-dirs**: list directories themselves, not their contents
+--smart-group                           only show group if it has a different name from owner
 
-**-g**: like -all, but do not list owner
+--statistic                             show statistic info
 
-**-j, --json**: output in json format
+--stdin                                 read path from stdin, split by newline
 
-**-l, --long**: use a long listing format
+--time                                  show time
 
-**-m, --comma**: fill width with a comma separated list of entries
+--time-style TIME_TYPE                  time/date format with -l,
 
-**-n, --limitN, --limit, --topN, --top**="": limit display to a max of n items (n <=0 means unlimited) (default: unlimited)
+valid TIME_TYPE are :
+										default, iso, long-iso, full-iso, locale,
+										and custom +FORMAT like date(1).
+										(default: +%%d.%%b'%%y %%H:%%M ,like 02.Jan'06 15:04)
 
-**-o**: like -all, but do not list group information
 
-**-x, --col, --across, --horizontal**: list entries by lines instead of by columns
+--time-type value                       time type, mod(default), create, access, all, birth[macOS only]
 
+--total-size                            show total size
+
+--uid                                   show uid instead of username [sid in windows]
+
+-G, --no-group                          in a long listing, don't print group names
+
+-H, --link                              list each file's number of hard links
+
+-N, --literal                           print entry names without quoting
+
+-O, --no-owner                          in a long listing, don't print owner names
+
+-Q, --quote-name                        enclose entry names in double quotes(overridden by --literal)
+
+-g                                      like -all, but do not list owner
+
+-l, --long                              use a long listing format
+
+-o                                      like -all, but do not list group information
 
