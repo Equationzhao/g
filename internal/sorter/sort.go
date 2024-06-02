@@ -9,7 +9,7 @@ import (
 	"strings"
 
 	"github.com/Equationzhao/g/internal/content"
-	constval "github.com/Equationzhao/g/internal/global"
+	"github.com/Equationzhao/g/internal/global"
 	"github.com/Equationzhao/g/internal/item"
 	"github.com/Equationzhao/g/internal/osbased"
 	"github.com/Equationzhao/g/internal/util"
@@ -63,8 +63,8 @@ func ByNameWithoutALeadingDotCaseSensitiveAscend(a, b *item.FileInfo) int {
 func byInode(a *item.FileInfo, b *item.FileInfo) (int, int) {
 	inodeA, _ := strconv.Atoi(osbased.Inode(a))
 	inodeB, _ := strconv.Atoi(osbased.Inode(b))
-	a.Cache["Inode"] = []byte(strconv.Itoa(inodeA))
-	b.Cache["Inode"] = []byte(strconv.Itoa(inodeB))
+	a.Cache[global.NameOfInode] = []byte(strconv.Itoa(inodeA))
+	b.Cache[global.NameOfInode] = []byte(strconv.Itoa(inodeB))
 	return inodeA, inodeB
 }
 
@@ -208,7 +208,7 @@ func byMimeType(a, b *item.FileInfo, ascend bool) int {
 	return cmp.Compare(mimeBstr, mimeAstr)
 }
 
-const MimeTypeName = constval.NameOfMIME
+const MimeTypeName = global.NameOfMIME
 
 func getMimeName(a *item.FileInfo, b *item.FileInfo) (string, string) {
 	mimeAstr, mimeBstr := "", ""
