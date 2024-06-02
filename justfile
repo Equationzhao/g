@@ -154,7 +154,8 @@ aur:
 
     # update .SRCINFO
     sed -i bak "s/pkgver = .*/pkgver = {{latest}}/g" ../g-ls/.SRCINFO
-    sed -i bak "s/sha256sums = .*/sha256sums = '$(shasum -a 256 v{{latest}}.tar.gz | choose 0)'/g" ../g-ls/.SRCINFO
+    sed -i.bak "s/sha256sums = .*/sha256sums = '$(shasum -a 256 v{{latest}}.tar.gz | awk '{print $1}')'/g" ../g-ls/.SRCINFO
+    sed -i.bak "s|source = g-.*::.*|source = g-{{latest}}.tar.gz::{{url}}/archive/refs/tags/v{{latest}}.tar.gz|g" ../g-ls/.SRCINFO
 
     cd ../g-ls
     # input git commit message
