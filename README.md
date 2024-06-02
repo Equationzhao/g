@@ -272,17 +272,6 @@ source ~/.g.nu
 
 [theme](docs/Theme.md)
 
-## TODO
-- [x] Version sort
-- [ ] Git sort
-- [ ] Print security context
-- [x] $OLDPWD
-- [x] Support Scoop
-
-The following are new features of `eza`, we may support them in the future
-- [x] --git-repos: list each directory’s Git status, if tracked
-- [x] --git-repos-no-status: list whether a directory is a Git repository, but not its status (faster)
-
 ## CONTRIBUTING
 
 Interested in contributing? Check out the [contributing guidelines](./CONTRIBUTING.md).
