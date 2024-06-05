@@ -278,17 +278,17 @@ Interested in contributing? Check out the [contributing guidelines](./CONTRIBUTI
 
 ## Alternatives
 
-`g` is highly inspired by following projects that you wanna try!
+`g` is highly inspired by following projects that you may wanna try!
 
 - [exa](https://github.com/ogham/exa) or [eza](https://github.com/eza-community/eza)
 - [lsd](https://github.com/lsd-rs/lsd)
 - [ls-go](https://github.com/acarl005/ls-go)
 
-|                | eza                                                                                           | g                                                                                                              |
-|----------------|-----------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------|
-| display mode   | oneline,grid,across,tree,recurse                                                              | oneline,grid,across,zero,comma,table,json,markdown,tree,recurse                                                |
-| unique feature | -Z: list each file’s security context,-@: list each file’s extended attributes and sizes ...  | --mime: list each file's mime type, --charset: list each file's charset, --relative-to: list relative path ... |
-| performance    | better                                                                                        | slower                                                                                                         |
+|                | eza                                                                                           | g                                                                            |
+|----------------|-----------------------------------------------------------------------------------------------|------------------------------------------------------------------------------|
+| display mode   | oneline,grid,across,tree,recurse                                                              | oneline,grid,across,zero,comma,table,json,markdown,tree,recurse              |
+| unique feature | -Z: list each file’s security context,-@: list each file’s extended attributes and sizes ...  | --mime: list each file's mime type, --charset: list each file's charset  ... |
+| performance    | better                                                                                        | slower                                                                       |
 
 ## Star History
 
