@@ -278,7 +278,7 @@ Interested in contributing? Check out the [contributing guidelines](./CONTRIBUTI
 
 ## Alternatives
 
-`g` is highly inspired by following projects that you wanna try!
+`g` is highly inspired by following projects that you may wanna try!
 
 - [exa](https://github.com/ogham/exa) or [eza](https://github.com/eza-community/eza)
 - [lsd](https://github.com/lsd-rs/lsd)
