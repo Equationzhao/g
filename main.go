@@ -6,6 +6,7 @@ import (
 	"os"
 	"runtime/debug"
 	"slices"
+	"strings"
 
 	"github.com/Equationzhao/g/internal/cli"
 	"github.com/Equationzhao/g/internal/config"
@@ -52,24 +53,61 @@ func catchPanic(err any) {
 }
 
 func preprocessArgs() {
+	rearrangeArgs()
+
+	if slices.ContainsFunc(os.Args, hasNoConfig) {
+		os.Args = slices.DeleteFunc(os.Args, hasNoConfig)
+		return
+	}
+
 	// normal logic
 	// load config if the args do not contains -no-config
-	if !slices.ContainsFunc(os.Args, hasNoConfig) {
-		defaultArgs, err := config.Load()
-		// if successfully load config and **the config.Args do not contain -no-config**
-		if err == nil && !slices.ContainsFunc(defaultArgs.Args, hasNoConfig) {
-			os.Args = slices.Insert(os.Args, 1, defaultArgs.Args...)
-		} else if err != nil { // if failed to load config
-			// if it's read error
-			var errReadConfig config.ErrReadConfig
-			if errors.As(err, &errReadConfig) {
-				_, _ = fmt.Fprintln(os.Stderr, cli.MakeErrorStr(err.Error()))
-			}
+	defaultArgs, err := config.Load()
+	if err != nil {
+		handleConfigLoadError(err)
+		return
+	}
+
+	// if successfully load config and the config.Args do not contain -no-config
+	if !slices.ContainsFunc(defaultArgs.Args, hasNoConfig) {
+		os.Args = slices.Insert(os.Args, 1, defaultArgs.Args...)
+	}
+}
+
+func rearrangeArgs() {
+	if len(os.Args) <= 2 {
+		return
+	}
+
+	flags, paths := separateArgs(os.Args[1:])
+	newArgs := append([]string{os.Args[0]}, append(flags, paths...)...)
+	os.Args = newArgs
+}
+
+func separateArgs(args []string) ([]string, []string) {
+	var flags, paths []string
+	seenDoubleDash := false
+
+	for _, arg := range args {
+		if arg == "--" {
+			seenDoubleDash = true
+			continue
 		}
-	} else {
-		// contains -no-config
-		// remove it before the cli.G starts
-		os.Args = slices.DeleteFunc(os.Args, hasNoConfig)
+
+		if seenDoubleDash || !strings.HasPrefix(arg, "-") {
+			paths = append(paths, arg)
+			seenDoubleDash = false
+		} else {
+			flags = append(flags, arg)
+		}
+	}
+	return flags, paths
+}
+
+func handleConfigLoadError(err error) {
+	var errReadConfig config.ErrReadConfig
+	if errors.As(err, &errReadConfig) {
+		_, _ = fmt.Fprintln(os.Stderr, cli.MakeErrorStr(err.Error()))
 	}
 }
 
