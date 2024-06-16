@@ -68,3 +68,9 @@ func Test_preprocessArgs(t *testing.T) {
 	preprocessArgs()
 	assert.Equal(t, 2, len(os.Args))
 }
+
+func Test_rearrangeArgs(t *testing.T) {
+	os.Args = []string{"g", "internal", "-a", "util", "--", "-a", "--icon", "docs"}
+	rearrangeArgs()
+	assert.DeepEqual(t, os.Args, []string{"g", "-a", "--icon", "internal", "util", "-a", "docs"})
+}
