@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/Equationzhao/g/internal/util"
+
 	"github.com/Equationzhao/g/internal/align"
 	constval "github.com/Equationzhao/g/internal/global"
 	"github.com/Equationzhao/g/internal/item"
@@ -52,7 +54,7 @@ func (h HeaderMaker) Make(p Printer, Items ...*item.FileInfo) {
 			for _, it := range Items {
 				content, _ := it.Get(s)
 				if s != constval.NameOfName {
-					toAddNum := len(s) - WidthNoHyperLinkLen(content.String())
+					toAddNum := len(s) - util.WidthNoHyperLinkLen(content.String())
 					if align.IsLeft(s) {
 						content.AddSuffix(strings.Repeat(" ", toAddNum))
 					} else {

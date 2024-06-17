@@ -98,7 +98,8 @@ _g() {
     --literal -O
     --no-owner -Q
     --quote-name -g -l
-    --long -o"
+    --long -o
+    --extended -@"
 
     COMPREPLY=($(compgen -W "${opts}" -- ${cur}))
     return 0

@@ -38,7 +38,7 @@ func (e *MimeFileTypeEnabler) Enable(renderer *render.Renderer) ContentOption {
 				returnName = ParentMimeTypeName
 			}
 			if c, ok := info.Cache[MimeTypeName]; ok {
-				tn = string(c)
+				tn = c.(string)
 			} else {
 				if info.IsDir() {
 					tn = "directory"
@@ -58,7 +58,7 @@ func (e *MimeFileTypeEnabler) Enable(renderer *render.Renderer) ContentOption {
 				}
 				if m, ok := info.Cache[MimeTypeName]; ok {
 					info.Cache[Charset] = m
-					return string(m), returnName
+					return m.(string), returnName
 				}
 
 				file, err := os.Open(info.FullPath)
@@ -83,7 +83,7 @@ func (e *MimeFileTypeEnabler) Enable(renderer *render.Renderer) ContentOption {
 				s := strings.SplitN(tn, ";", 2)
 				tn = s[0]
 				charset := strings.SplitN(s[1], "=", 2)[1]
-				info.Cache[Charset] = []byte(charset)
+				info.Cache[Charset] = charset
 			}
 
 			return tn, returnName

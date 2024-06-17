@@ -225,7 +225,7 @@ func MimeTypeOnly(fileTypes ...string) ItemFilterFunc {
 				s = strings.SplitN(s, ";", 2)[0]
 			}
 			if isOrIsSonOf(s, fileTypes[i]) {
-				e.Cache[MimeTypeName] = []byte(s)
+				e.Cache[MimeTypeName] = s
 				return keep
 			}
 		}

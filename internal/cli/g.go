@@ -58,6 +58,7 @@ var (
 	groupEnabler    = contents.NewGroupEnabler()
 	gitEnabler      = contents.NewGitEnabler()
 	gitRepoEnabler  = contents.NewGitRepoEnabler()
+	extendedEnabler = contents.ExtendedEnabler{}
 	nameToDisplay   = contents.NewNameEnabler()
 	flagsEnabler    = contents.NewFlagsEnabler()
 	depthLimitMap   map[string]int
@@ -202,8 +203,8 @@ func dive(
 			continue
 		}
 		// store its parent and level/depth
-		info.Cache["parent"] = []byte(parent)
-		info.Cache["level"] = []byte(strconv.Itoa(depth))
+		info.Cache["parent"] = parent
+		info.Cache["level"] = depth
 		infos.AppendTo(info)
 		if f.IsDir() {
 			wg.Add(1)
@@ -523,6 +524,11 @@ var logic = func(context *cli.Context) error {
 		contentFunc = append(contentFunc, gitEnabler.Enable(r))
 	}
 
+	extended := context.Bool("extended")
+	if extended {
+		noOutputFunc = append(noOutputFunc, extendedEnabler.Enable(r))
+	}
+
 	gitBranch := context.Bool("git-repo-branch")
 	if gitBranch {
 		contentFunc = append(contentFunc, gitRepoEnabler.Enable(r))
@@ -619,7 +625,7 @@ var logic = func(context *cli.Context) error {
 	case "never":
 	case "always":
 		nameToDisplay.SetHyperlink()
-		display.IncludeHyperlink = true
+		global.IncludeHyperlink = true
 	default:
 		fallthrough
 	case "auto":
@@ -629,7 +635,7 @@ var logic = func(context *cli.Context) error {
 			case *display.JsonPrinter:
 			default:
 				nameToDisplay.SetHyperlink()
-				display.IncludeHyperlink = true
+				global.IncludeHyperlink = true
 			}
 		}
 	}
@@ -800,7 +806,7 @@ var logic = func(context *cli.Context) error {
 			infos = itemFilter.Filter(infos...)
 
 			if tree {
-				infos[0].Cache["level"] = []byte("0")
+				infos[0].Cache["level"] = 0
 			}
 			goto final
 		}
@@ -815,7 +821,7 @@ var logic = func(context *cli.Context) error {
 			infos = append(
 				infos, info,
 			)
-			infos[0].Cache["level"] = []byte("0")
+			infos[0].Cache["level"] = 0
 			if depth >= 1 || depth < 0 {
 				wg := sync.WaitGroup{}
 				infoSlice := util.NewSlice[*item.FileInfo](10)
@@ -981,7 +987,7 @@ var logic = func(context *cli.Context) error {
 					for _, part := range allPart {
 						content, ok := it.Get(part)
 						if ok && part != contents.NameName {
-							l := display.WidthNoHyperLinkLen(content.String())
+							l := util.WidthNoHyperLinkLen(content.String())
 							if l > longestEachPart[part] {
 								longestEachPart[part] = l
 							}
@@ -994,7 +1000,7 @@ var logic = func(context *cli.Context) error {
 					for _, part := range allPart {
 						if part != contents.NameName {
 							content, _ := it.Get(part)
-							l := display.WidthNoHyperLinkLen(content.String())
+							l := util.WidthNoHyperLinkLen(content.String())
 							if l < longestEachPart[part] {
 								expand := content.SetPrefix
 								if align.IsLeft(part) {

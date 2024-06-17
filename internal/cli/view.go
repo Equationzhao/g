@@ -837,6 +837,13 @@ var viewFlag = []cli.Flag{
 		DisableDefaultText: true,
 		Category:           "VIEW",
 	},
+	&cli.BoolFlag{
+		Name:               "extended",
+		Aliases:            []string{"@"},
+		Usage:              `list each file's extended attributes and sizes in long listing`,
+		DisableDefaultText: true,
+		Category:           "VIEW",
+	},
 }
 
 func setLimit(context *cli.Context) error {
