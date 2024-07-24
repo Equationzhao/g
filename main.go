@@ -6,6 +6,7 @@ import (
 	"os"
 	"runtime/debug"
 	"slices"
+	"strings"
 
 	"github.com/Equationzhao/g/internal/cli"
 	"github.com/Equationzhao/g/internal/config"
@@ -14,6 +15,7 @@ import (
 	"github.com/Equationzhao/g/internal/global/doc"
 	"github.com/Equationzhao/g/internal/util"
 	"github.com/Equationzhao/g/man"
+	ucli "github.com/urfave/cli/v2"
 )
 
 func main() {
@@ -52,6 +54,7 @@ func catchPanic(err any) {
 }
 
 func preprocessArgs() {
+	rearrangeArgs()
 	// normal logic
 	// load config if the args do not contains -no-config
 	if !slices.ContainsFunc(os.Args, hasNoConfig) {
@@ -71,6 +74,92 @@ func preprocessArgs() {
 		// remove it before the cli.G starts
 		os.Args = slices.DeleteFunc(os.Args, hasNoConfig)
 	}
+}
+
+func rearrangeArgs() {
+	if len(os.Args) <= 2 {
+		return
+	}
+	flags, paths := separateArgs(os.Args[1:])
+	newArgs := append([]string{os.Args[0]}, append(flags, paths...)...)
+	os.Args = newArgs
+}
+
+func separateArgs(args []string) ([]string, []string) {
+	flagsWithArgs := buildFlagsWithArgsMap()
+	var flags, paths []string
+	seenDoubleDash := false
+	expectValue := false
+
+	for i := 0; i < len(args); i++ {
+		arg := args[i]
+		if seenDoubleDash {
+			paths = append(paths, arg)
+			continue
+		}
+
+		switch {
+		case arg == "--":
+			seenDoubleDash = true
+			flags = append(flags, arg)
+		case expectValue:
+			flags = append(flags, arg)
+			expectValue = false
+		case strings.HasPrefix(arg, "--"):
+			i = handleLongFlag(arg, args, i, &flags, &expectValue, flagsWithArgs)
+		case strings.HasPrefix(arg, "-"):
+			i = handleShortFlag(arg, args, i, &flags, &expectValue, flagsWithArgs)
+		default:
+			paths = append(paths, arg)
+		}
+	}
+	return flags, paths
+}
+
+func buildFlagsWithArgsMap() map[string]bool {
+	flagsWithArgs := make(map[string]bool)
+	for _, flag := range cli.G.Flags {
+		switch flag.(type) {
+		case *ucli.BoolFlag:
+			for _, s := range flag.Names() {
+				flagsWithArgs[s] = false
+			}
+		default:
+			for _, s := range flag.Names() {
+				flagsWithArgs[s] = true
+			}
+		}
+	}
+	return flagsWithArgs
+}
+
+func handleLongFlag(arg string, args []string, i int, flags *[]string, expectValue *bool, flagsWithArgs map[string]bool) int {
+	parts := strings.SplitN(arg, "=", 2)
+	flagName := strings.TrimPrefix(parts[0], "--")
+	*flags = append(*flags, arg)
+
+	if len(parts) == 2 || !flagsWithArgs[flagName] {
+		return i
+	}
+
+	if i+1 < len(args) && !strings.HasPrefix(args[i+1], "-") {
+		*expectValue = true
+	}
+	return i
+}
+
+func handleShortFlag(arg string, args []string, i int, flags *[]string, expectValue *bool, flagsWithArgs map[string]bool) int {
+	flagName := strings.TrimPrefix(arg, "-")
+	*flags = append(*flags, arg)
+
+	if !flagsWithArgs[flagName] {
+		return i
+	}
+
+	if i+1 < len(args) && !strings.HasPrefix(args[i+1], "-") {
+		*expectValue = true
+	}
+	return i
 }
 
 func hasNoConfig(s string) bool {
