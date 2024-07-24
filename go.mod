@@ -22,6 +22,7 @@ require (
 	github.com/savioxavier/termlink v1.3.0
 	github.com/shirou/gopsutil/v3 v3.24.5
 	github.com/spf13/afero v1.11.0
+	github.com/stretchr/testify v1.9.0
 	github.com/syndtr/goleveldb v1.0.0
 	github.com/urfave/cli/v2 v2.27.2
 	github.com/valyala/bytebufferpool v1.0.0
@@ -31,6 +32,7 @@ require (
 	github.com/zeebo/xxh3 v1.0.2
 	go.szostok.io/version v1.2.0
 	golang.org/x/exp v0.0.0-20240531132922-fd00a4e0eefc
+	golang.org/x/sys v0.20.0
 	gopkg.in/yaml.v3 v3.0.1
 )
 
@@ -65,6 +67,7 @@ require (
 	github.com/bahlo/generic-list-go v0.2.0 // indirect
 	github.com/buger/jsonparser v1.1.1 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.4 // indirect
+	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/google/uuid v1.6.0 // indirect
@@ -77,6 +80,7 @@ require (
 	github.com/mitchellh/copystructure v1.2.0 // indirect
 	github.com/mitchellh/reflectwalk v1.0.2 // indirect
 	github.com/muesli/termenv v0.15.2 // indirect
+	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/power-devops/perfstat v0.0.0-20240221224432-82ca36839d55 // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
@@ -85,6 +89,5 @@ require (
 	github.com/xo/terminfo v0.0.0-20220910002029-abceb7e1c41e // indirect
 	golang.org/x/crypto v0.23.0 // indirect
 	golang.org/x/net v0.25.0 // indirect
-	golang.org/x/sys v0.20.0 // indirect
 	golang.org/x/text v0.15.0 // indirect
 )
