@@ -83,35 +83,37 @@ func rearrangeArgs() {
 	flags, paths := separateArgs(os.Args[1:])
 	newArgs := append([]string{os.Args[0]}, append(flags, paths...)...)
 	os.Args = newArgs
+	fmt.Println(os.Args)
 }
 
-func separateArgs(args []string) ([]string, []string) {
+func separateArgs(args []string) (flags []string, paths []string) {
 	flagsWithArgs := buildFlagsWithArgsMap()
-	var flags, paths []string
-	seenDoubleDash := false
-	expectValue := false
-
+	expectValue, hasDoubleDash := false, false
 	for i := 0; i < len(args); i++ {
 		arg := args[i]
-		if seenDoubleDash {
-			paths = append(paths, arg)
+		if arg == "--" {
+			hasDoubleDash = true
+			if i+1 < len(args) {
+				paths = append(paths, args[i+1])
+				i++
+			}
 			continue
 		}
-
-		switch {
-		case arg == "--":
-			seenDoubleDash = true
-			flags = append(flags, arg)
-		case expectValue:
-			flags = append(flags, arg)
-			expectValue = false
-		case strings.HasPrefix(arg, "--"):
+		if strings.HasPrefix(arg, "--") {
 			i = handleLongFlag(arg, args, i, &flags, &expectValue, flagsWithArgs)
-		case strings.HasPrefix(arg, "-"):
+		} else if strings.HasPrefix(arg, "-") {
 			i = handleShortFlag(arg, args, i, &flags, &expectValue, flagsWithArgs)
-		default:
-			paths = append(paths, arg)
+		} else {
+			if expectValue {
+				flags = append(flags, arg)
+				expectValue = false
+			} else {
+				paths = append(paths, arg)
+			}
 		}
+	}
+	if hasDoubleDash {
+		flags = append(flags, "--")
 	}
 	return flags, paths
 }
@@ -149,19 +151,17 @@ func handleLongFlag(arg string, args []string, i int, flags *[]string, expectVal
 }
 
 func handleShortFlag(arg string, args []string, i int, flags *[]string, expectValue *bool, flagsWithArgs map[string]bool) int {
-	flagName := strings.TrimPrefix(arg, "-")
+	parts := strings.SplitN(arg, "=", 2)
+	flagName := strings.TrimPrefix(parts[0], "-")
 	*flags = append(*flags, arg)
-
-	if !flagsWithArgs[flagName] {
+	if len(parts) == 2 || !flagsWithArgs[flagName] {
 		return i
 	}
-
 	if i+1 < len(args) && !strings.HasPrefix(args[i+1], "-") {
 		*expectValue = true
 	}
 	return i
 }
-
 func hasNoConfig(s string) bool {
 	if s == "-no-config" || s == "--no-config" {
 		return true

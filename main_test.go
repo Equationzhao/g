@@ -129,6 +129,12 @@ func TestSeparateArgs(t *testing.T) {
 			expectedFlags: []string{"--all", "--term-width", "100", "-s", "name", "--"},
 			expectedPaths: []string{"dir1", "--fake-flag", "dir2"},
 		},
+		{
+			name:          "Complex case with double dash",
+			args:          []string{"--all", "dir1", "--term-width", "100", "-s", "name", "--", "-a", "-a", "-l", "dir2", "--", "--fake-flag"},
+			expectedFlags: []string{"--all", "--term-width", "100", "-s", "name", "-a", "-l", "--"},
+			expectedPaths: []string{"dir1", "-a", "dir2", "--fake-flag"},
+		},
 	}
 
 	for _, tt := range tests {
