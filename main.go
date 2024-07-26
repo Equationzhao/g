@@ -161,6 +161,7 @@ func handleShortFlag(arg string, args []string, i int, flags *[]string, expectVa
 	}
 	return i
 }
+
 func hasNoConfig(s string) bool {
 	if s == "-no-config" || s == "--no-config" {
 		return true
