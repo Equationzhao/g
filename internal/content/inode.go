@@ -21,7 +21,7 @@ func (i *InodeEnabler) Enable(renderer *render.Renderer) ContentOption {
 	return func(info *item.FileInfo) (string, string) {
 		i := ""
 		if m, ok := info.Cache[Inode]; ok {
-			i = string(m)
+			i = m.(string)
 		} else {
 			i = osbased.Inode(info)
 		}

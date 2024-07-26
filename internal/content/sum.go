@@ -41,7 +41,7 @@ func (s SumEnabler) EnableSum(renderer *render.Renderer, sumTypes ...SumType) []
 
 			var content []byte
 			if content_, ok := info.Cache["content"]; ok {
-				content = content_
+				content = content_.([]byte)
 			} else {
 				file, err := os.Open(info.FullPath)
 				if err != nil {

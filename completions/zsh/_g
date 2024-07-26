@@ -125,6 +125,8 @@ _g() {
         '-l[use a long listing format]'
         '--long[use a long listing format]'
         '-o[like -all, but do not list group information]'
+        '-@[list each file's extended attributes and sizes in long listing]'
+        '--extended[list each file's extended attributes and sizes in long listing]'
         '*:filename:_files'
     )
 

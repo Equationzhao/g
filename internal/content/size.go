@@ -273,7 +273,7 @@ func (s *SizeEnabler) EnableSize(size SizeUnit, renderer *render.Renderer) Conte
 		if s.recursive != nil {
 			if r, ok := info.Cache[RecursiveSizeName]; ok {
 				// convert []byte to int64
-				v, _ = strconv.ParseInt(string(r), 10, 64)
+				v = r.(int64)
 			} else {
 				v = util.RecursivelySizeOf(info, s.recursive.depth)
 			}

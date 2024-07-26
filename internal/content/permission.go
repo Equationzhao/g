@@ -4,20 +4,24 @@ import (
 	"strconv"
 
 	"github.com/Equationzhao/g/internal/align"
-	constval "github.com/Equationzhao/g/internal/global"
+	"github.com/Equationzhao/g/internal/global"
 	"github.com/Equationzhao/g/internal/item"
 	"github.com/Equationzhao/g/internal/render"
 	"github.com/pkg/xattr"
 )
 
-const Permissions = constval.NameOfPermission
+const Permissions = global.NameOfPermission
 
 // EnableFileMode return file mode like -rwxrwxrwx/drwxrwxrwx
 func EnableFileMode(renderer *render.Renderer) ContentOption {
 	align.Register(Permissions)
 	return func(info *item.FileInfo) (string, string) {
 		perm := renderer.FileMode(info.Mode().String())
+		if info.Cache[Extended] != nil {
+			perm += "@"
+		}
 		list, _ := xattr.LList(info.FullPath)
+		info.Cache[Extended] = list
 		if len(list) != 0 {
 			perm += "@"
 		}
