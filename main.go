@@ -83,7 +83,6 @@ func rearrangeArgs() {
 	flags, paths := separateArgs(os.Args[1:])
 	newArgs := append([]string{os.Args[0]}, append(flags, paths...)...)
 	os.Args = newArgs
-	fmt.Println(os.Args)
 }
 
 func separateArgs(args []string) (flags []string, paths []string) {
