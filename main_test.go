@@ -14,7 +14,8 @@ import (
 )
 
 func Test_catchPanic(t *testing.T) {
-	gomonkey.ApplyFunc(os.Exit, func(int) {})
+	patch := gomonkey.ApplyFunc(os.Exit, func(int) {})
+	defer patch.Reset()
 	tests := []struct {
 		name string
 		err  any
