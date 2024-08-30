@@ -82,14 +82,12 @@ func NewContentFilter(options ...ContentFilterOption) *ContentFilter {
 
 func (cf *ContentFilter) GetDisplayItems(e *[]*item.FileInfo) {
 	if cf.sortFunc != nil {
-		slices.SortFunc(
-			*e, cf.sortFunc,
-		)
+		slices.SortFunc(*e, cf.sortFunc)
 	}
 
 	// limit number of entries
 	// 0 means no limit
-	if cf.LimitN != 0 && len(*e) > int(cf.LimitN) {
+	if cf.LimitN > 0 && len(*e) > int(cf.LimitN) {
 		*e = (*e)[:cf.LimitN]
 	}
 	wg := sync.WaitGroup{}
@@ -99,15 +97,7 @@ func (cf *ContentFilter) GetDisplayItems(e *[]*item.FileInfo) {
 		err := Pool.Submit(
 			func() {
 				defer wg.Done()
-				for j, option := range cf.options {
-					stringContent, funcName := option(entry)
-					content := display.ItemContent{Content: display.StringContent(stringContent), No: j}
-					entry.Set(funcName, &content)
-				}
-
-				for _, option := range cf.noOutputOptions {
-					option(entry)
-				}
+				cf.processEntry(entry)
 			},
 		)
 		if err != nil {
@@ -115,4 +105,17 @@ func (cf *ContentFilter) GetDisplayItems(e *[]*item.FileInfo) {
 		}
 	}
 	wg.Wait()
+}
+
+func (cf *ContentFilter) processEntry(entry *item.FileInfo) error {
+	for j, option := range cf.options {
+		stringContent, funcName := option(entry)
+		content := display.ItemContent{Content: display.StringContent(stringContent), No: j}
+		entry.Set(funcName, &content)
+	}
+
+	for _, option := range cf.noOutputOptions {
+		option(entry)
+	}
+	return nil
 }
