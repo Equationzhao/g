@@ -1,6 +1,7 @@
 # ide 
 .vscode/
 .idea/
+.fleet/
 
 # system
 .DS_Store
@@ -11,6 +12,9 @@ g.exe
 g-git
 g-git.exe
 build/
+
+# temp file
+*.swp
 
 # compress
 *.gz
