@@ -29,10 +29,10 @@ build:
     upx build/g-linux-amd64
     upx build/g-linux-arm
     upx build/g-linux-arm64
-    upx build/g-darwin-amd64
     upx build/g-windows-amd64.exe
     upx build/g-windows-386.exe
-#    upx doesn't support darwin-arm64, linux-loong64, windows-arm64, windows-arm
+#    upx doesn't support darwin-amd64, darwin-arm64, linux-loong64, windows-arm64, windows-arm
+#    upx build/g-darwin-amd64
 #    upx build/g-darwin-arm64
 #    upx build/g-linux-loong64
 #    upx build/g-windows-arm64.exe
