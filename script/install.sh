@@ -6,8 +6,17 @@
 # 4. install completion to /usr/local/share/zsh/site-functions
 #    if compinit is not in .zshrc or .zprofile, add it
 
-# load base.sh
-source "$(dirname "$0")/base.sh"
+error() {
+    printf '\033[1;31m%s\033[0m\n' "$1"
+}
+
+success() {
+    printf '\033[1;32m%s\033[0m\n' "$1"
+}
+
+warn() {
+    printf '\033[1;33m%s\033[0m\n' "$1"
+}
 
 # Get OS and architecture
 os_type=$(uname -s | tr '[:upper:]' '[:lower:]')
