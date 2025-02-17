@@ -117,7 +117,7 @@ just download from [release page](https://github.com/Equationzhao/g/releases), e
 
 ### From source
 
-Requires Go version >= 1.21
+Requires Go version >= 1.24
 
 ```bash
 go install -ldflags="-s -w"  github.com/Equationzhao/g@latest
