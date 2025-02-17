@@ -51,12 +51,12 @@ char *resolveAlias(const char *path) {
 }
 */
 import "C"
+
 import (
 	"fmt"
 	"os"
 	"strconv"
 	"syscall"
-
 	"unsafe"
 )
 
