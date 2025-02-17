@@ -747,15 +747,15 @@
         },
         "bash_history": {
             "color": "BrightGreen",
-            "icon": ""
+            "icon": "󱆃"
         },
         "bash_profile": {
             "color": "BrightGreen",
-            "icon": ""
+            "icon": "󱆃"
         },
         "bashrc": {
             "color": "BrightGreen",
-            "icon": ""
+            "icon": "󱆃"
         },
         "bat": {
             "color": "BrightGreen",
@@ -1551,11 +1551,15 @@
         },
         "zsh_history": {
             "color": "BrightGreen",
-            "icon": ""
+            "icon": "󱆃"
         },
         "zshrc": {
             "color": "BrightGreen",
-            "icon": ""
+            "icon": "󱆃"
+        },
+        "zprofile":{
+            "color": "BrightGreen",
+            "icon": "󱆃"
         },
         "zst": {
             "color": "red",
