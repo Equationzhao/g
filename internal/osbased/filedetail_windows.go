@@ -77,3 +77,13 @@ func LinkCount(info *item.FileInfo) uint64 {
 func BlockSize(info os.FileInfo) int64 {
 	return 0
 }
+
+// always false on Windows
+func IsMacOSAlias(_ string) bool {
+	return false
+}
+
+// ResolveAlias is a no-op on Windows.
+func ResolveAlias(_ string) (string, error) {
+	return "", nil
+}

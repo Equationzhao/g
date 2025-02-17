@@ -1,6 +1,7 @@
 package util
 
 import (
+	"fmt"
 	"io/fs"
 	"math/rand/v2"
 	"os"
@@ -9,8 +10,27 @@ import (
 
 	"github.com/Equationzhao/g/internal/global"
 	"github.com/Equationzhao/g/internal/item"
+	"github.com/Equationzhao/g/internal/osbased"
 	"github.com/spf13/afero"
 )
+
+func Evallinks(fullPath string) (string, error) {
+	// support symlinks and macOS Alias
+	if osbased.IsMacOSAlias(fullPath) {
+		for {
+			if osbased.IsMacOSAlias(fullPath) {
+				aliasTarget, err := osbased.ResolveAlias(fullPath)
+				if err != nil {
+					return "", fmt.Errorf("alias resolution failed: %w", err)
+				}
+				fullPath = aliasTarget
+			} else {
+				break
+			}
+		}
+	}
+	return filepath.EvalSymlinks(fullPath)
+}
 
 func IsSymLink(file os.FileInfo) bool {
 	return file.Mode()&os.ModeSymlink != 0
