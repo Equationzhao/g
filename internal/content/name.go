@@ -13,6 +13,7 @@ import (
 	"unicode"
 
 	"github.com/Equationzhao/g/internal/display"
+	"github.com/Equationzhao/g/internal/osbased"
 
 	"github.com/Equationzhao/g/internal/global"
 	"github.com/shirou/gopsutil/v3/disk"
@@ -232,7 +233,7 @@ func (n *Name) Enable(renderer *render.Renderer) ContentOption {
 				classify = "/"
 			}
 			color, underline, bold, italics, faint, blink = style.Color, style.Underline, style.Bold, style.Italics, style.Faint, style.Blink
-		} else if util.IsSymLinkMode(mode) {
+		} else if util.IsSymLinkMode(mode) || osbased.IsMacOSAlias(info.FullPath) {
 			if n.statistics != nil {
 				n.statistics.link.Add(1)
 			}
@@ -247,7 +248,7 @@ func (n *Name) Enable(renderer *render.Renderer) ContentOption {
 			// color + arrow + color-end + color + path + color-end
 			if !n.noDeference {
 				if n.json { // "dereference": "symlinks"
-					symlinks, err := filepath.EvalSymlinks(info.FullPath)
+					symlinks, err := util.Evallinks(info.FullPath)
 					if err != nil {
 						info.Meta.Set("dereference_err", &display.ItemContent{Content: display.StringContent(err.Error())})
 						symlinks = n.checkDereferenceErr(err)
@@ -259,7 +260,7 @@ func (n *Name) Enable(renderer *render.Renderer) ContentOption {
 					checkNameDisplayEffect(arrowStyle, dereference)
 					_, _ = dereference.WriteString(arrowStyle.Icon)
 					_, _ = dereference.WriteString(renderer.Colorend())
-					symlinks, err := filepath.EvalSymlinks(info.FullPath)
+					symlinks, err := util.Evallinks(info.FullPath)
 					var linkStyle theme.Style
 					dereferenceMounts := ""
 					if err != nil {

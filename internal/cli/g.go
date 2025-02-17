@@ -21,6 +21,7 @@ import (
 	"github.com/Equationzhao/g/internal/global"
 	"github.com/Equationzhao/g/internal/index"
 	"github.com/Equationzhao/g/internal/item"
+	"github.com/Equationzhao/g/internal/osbased"
 	"github.com/Equationzhao/g/internal/render"
 	"github.com/Equationzhao/g/internal/shell"
 	"github.com/Equationzhao/g/internal/sorter"
@@ -893,8 +894,8 @@ var logic = func(context *cli.Context) error {
 		// dereference
 		if dereference {
 			for i := range infos {
-				if util.IsSymLink(infos[i]) {
-					symlinks, err := filepath.EvalSymlinks(infos[i].FullPath)
+				if util.IsSymLink(infos[i]) || osbased.IsMacOSAlias(infos[i].FullPath) {
+					symlinks, err := util.Evallinks(infos[i].FullPath)
 					if err != nil {
 						continue
 					}

@@ -32,3 +32,13 @@ func BlockSize(info os.FileInfo) int64 {
 
 	return stat.Blocks
 }
+
+// always false on Linux
+func IsMacOSAlias(_ string) bool {
+	return false
+}
+
+// ResolveAlias is a no-op on Linux.
+func ResolveAlias(_ string) (string, error) {
+	return "", nil
+}
