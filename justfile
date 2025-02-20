@@ -217,7 +217,7 @@ lint:
 
 # format the code
 format:
-    gofumpt -w -l .
+    gofumpt --extra -w -l .
 
 # precheck the code(format and lint)
 precheck: format lint

@@ -75,7 +75,7 @@ Please refer to the [TestWorkflow](docs/TestWorkflow.md)
 When you're finished with the changes, create a pull request, also known as a PR.\
 Before you submit your pr, please check out the following stuffs
 
-- [ ] you have run `go mod tidy` and `gofumpt -w -l .`
+- [ ] you have run `go mod tidy` and `gofumpt --extra -w -l .`
 - [ ] your code has the necessary comments and documentation (if needed)
 - [ ] you have written tests for your changes (if needed)
 - [ ] Pass other tests, ***if you're breaking the tests, please explain why in the PR description***
