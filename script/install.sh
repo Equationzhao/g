@@ -21,7 +21,7 @@ warn() {
 # Get OS and architecture
 os_type=$(uname -s | tr '[:upper:]' '[:lower:]')
 os_arch=$(uname -m)
-version="0.29.1"
+version="0.29.2"
 man_url="https://github.com/Equationzhao/g/raw/v${version}/man/g.1.gz"
 shell_type=$(echo $SHELL | awk -F'/' '{print $NF}')
 
