@@ -348,7 +348,7 @@ func (rd *Renderer) ByName(toRender string) (s theme.Style, found bool) {
 	return style, true
 }
 
-func (rd *Renderer) infoByName(toRender string, name string) string {
+func (rd *Renderer) infoByName(toRender, name string) string {
 	bb := bytebufferpool.Get()
 	defer bytebufferpool.Put(bb)
 	style := rd.theme.InfoTheme[name]
@@ -441,7 +441,7 @@ func (rd *Renderer) HiddenFile() theme.Style {
 	return rd.theme.Special["hidden-file"]
 }
 
-func (rd *Renderer) gitByStatus(name string, status string) string {
+func (rd *Renderer) gitByStatus(name, status string) string {
 	style, ok := rd.theme.Git[status]
 	if !ok {
 		panic("no such git status:" + status)

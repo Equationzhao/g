@@ -308,7 +308,7 @@ func GetTheme(path string) error {
 	return err
 }
 
-func getTheme(themeJson []byte) (theme All, errSum error, fatal error) {
+func getTheme(themeJson []byte) (theme All, errSum, fatal error) {
 	err := json.Unmarshal(themeJson, &theme)
 	if err != nil {
 		return All{}, nil, err
