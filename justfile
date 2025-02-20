@@ -17,8 +17,8 @@ build:
     CGO_ENABLED=0 GOOS=linux GOARCH=arm64     go build {{ldflags}} -o build/g-linux-arm64
     CGO_ENABLED=0 GOOS=linux GOARCH=loong64   go build {{ldflags}} -o build/g-linux-loong64
 
-    GOOS=darwin GOARCH=amd64  go build {{ldflags}} -o build/g-darwin-amd64
-    GOOS=darwin GOARCH=arm64  go build {{ldflags}} -o build/g-darwin-arm64
+    CGO_ENABLED=1 GOOS=darwin GOARCH=amd64  go build {{ldflags}} -o build/g-darwin-amd64
+    CGO_ENABLED=1 GOOS=darwin GOARCH=arm64  go build {{ldflags}} -o build/g-darwin-arm64
 
     CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build {{ldflags}} -o build/g-windows-amd64.exe
     CGO_ENABLED=0 GOOS=windows GOARCH=386   go build {{ldflags}} -o build/g-windows-386.exe
