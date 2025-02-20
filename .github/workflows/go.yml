@@ -32,11 +32,11 @@ jobs:
     - name: Build linux loong64
       run: CGO_ENABLED=0 GOOS=linux GOARCH=loong64 go build
     - name: Build darwin amd64
-      run: CGO_ENABLED=0 GOOS=darwin GOARCH=amd64  go build
+      run:               GOOS=darwin GOARCH=amd64  go build
     - name: Build darwin arm64
       run:               GOOS=darwin GOARCH=arm64  go build
     - name: Build windows 386
-      run:               GOOS=windows GOARCH=386   go build
+      run:  CGO_ENABLED=0 GOOS=windows GOARCH=386   go build
     - name: Build windows amd64
       run: CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build
     - name: Build windows arm64
