@@ -17,16 +17,6 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version: 1.24.0
-      - name: Install Just
-        run: |
-            curl -sSL https://github.com/casey/just/releases/download/1.39.0/just-1.39.0-x86_64-unknown-linux-musl.tar.gz -o just.tar.gz
-            tar -xzf just.tar.gz
-            chmod +x just
-            mv just /usr/local/bin/just
-            just --version
-      - name: Install golangci-lint
-        uses: golangci/golangci-lint-action@v6
+      - uses: golangci/golangci-lint-action@v6
         with:
-           install-mode: "goinstall"
-      - name: Run Lint
-        run: just lint
+          install-mode: "binary"
