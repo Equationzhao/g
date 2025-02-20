@@ -933,7 +933,11 @@ var Ext = Theme{
 	},
 	"zshrc": Style{
 		Color: bash,
-		Icon:  "\uF489",
+		Icon:  "󱆃",
+	},
+	"zprofile": Style{
+		Color: bash,
+		Icon:  "󱆃",
 	},
 	"bash": Style{
 		Color: bash,
@@ -941,7 +945,7 @@ var Ext = Theme{
 	},
 	"bashrc": Style{
 		Color: bash,
-		Icon:  "\uF489",
+		Icon:  "󱆃",
 	},
 	"bash_history": Style{
 		Color: bash,
@@ -949,11 +953,11 @@ var Ext = Theme{
 	},
 	"bash_profile": Style{
 		Color: bash,
-		Icon:  "\uF489",
+		Icon:  "󱆃",
 	},
 	".profile": Style{
 		Color: bash,
-		Icon:  "\uF489",
+		Icon:  "󱆃",
 	},
 	"nu": Style{
 		Color: bash,
