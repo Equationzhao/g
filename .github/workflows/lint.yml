@@ -1,9 +1,12 @@
-name: golangci-lint
+name: golangci-lint check
+
 on:
   push:
     branches:
       - master
   pull_request:
+    branches:
+      - master
 
 permissions:
   contents: read
