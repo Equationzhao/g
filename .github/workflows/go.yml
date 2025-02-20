@@ -13,15 +13,6 @@ jobs:
   build-macos-latest:
     runs-on: macos-latest
     steps:
-    - uses: actions/cache@v4
-      with:
-        path: |
-          ~/Library/Caches/go-build
-          ~/go/pkg/mod
-        key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-        restore-keys: |
-          ${{ runner.os }}-go-
-
     - uses: actions/checkout@v4
 
     - name: Set up Go
@@ -57,15 +48,6 @@ jobs:
   build-macos-13:
     runs-on: macos-latest
     steps:
-    - uses: actions/cache@v4
-      with:
-        path: |
-          ~/Library/Caches/go-build
-          ~/go/pkg/mod
-        key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-        restore-keys: |
-          ${{ runner.os }}-go-
-
     - uses: actions/checkout@v4
 
     - name: Set up Go
@@ -101,15 +83,6 @@ jobs:
   windows-latest:
     runs-on: windows-latest
     steps:
-    - uses: actions/cache@v4
-      with:
-        path: |
-          ~\AppData\Local\go-build
-          ~\go\pkg\mod
-        key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-        restore-keys: |
-          ${{ runner.os }}-go-
-
     - uses: actions/checkout@v4
 
     - name: Set up Go
@@ -125,15 +98,6 @@ jobs:
   ubuntu-latest-latest:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/cache@v4
-      with:
-        path: |
-          ~/.cache/go-build
-          ~/go/pkg/mod
-        key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-        restore-keys: |
-          ${{ runner.os }}-go-
-            
     - uses: actions/checkout@v4
 
     - name: Set up Go
