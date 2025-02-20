@@ -24,5 +24,9 @@ jobs:
             chmod +x just
             mv just /usr/local/bin/just
             just --version
+      - name: Install golangci-lint
+        uses: golangci/golangci-lint-action@v6
+        with:
+           install-mode: "goinstall"
       - name: Run Lint
         run: just lint
