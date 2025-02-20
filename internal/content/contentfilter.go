@@ -97,7 +97,7 @@ func (cf *ContentFilter) GetDisplayItems(e *[]*item.FileInfo) {
 		err := Pool.Submit(
 			func() {
 				defer wg.Done()
-				cf.processEntry(entry)
+				_ = cf.processEntry(entry)
 			},
 		)
 		if err != nil {
