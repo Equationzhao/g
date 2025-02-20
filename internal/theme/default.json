@@ -26,7 +26,7 @@
     },
     "permission": {
         "-": {
-            "color": "BrightBlack"
+            "color": "bright-black"
         },
         "block": {
             "color": "cyan",
@@ -144,7 +144,7 @@
             "icon": ""
         },
         "symlink_arrow": {
-            "color": "BrightWhite",
+            "color": "bright-white",
             "icon": " =\u003e "
         },
         "symlink_broken_path": {
@@ -164,7 +164,7 @@
             "bold": true
         },
         "git-branch-none": {
-            "color": "BrightBlack",
+            "color": "bright-black",
             "icon": "-"
         },
         "git-repo-clean": {
@@ -176,7 +176,7 @@
             "icon": "dirty"
         },
         "git-repo-skip": {
-            "color": "BrightBlack",
+            "color": "bright-black",
             "icon": "-"
         },
         "git_added": {
@@ -189,7 +189,7 @@
             "color": "red"
         },
         "git_ignored": {
-            "color": "BrightRed"
+            "color": "bright-red"
         },
         "git_modified": {
             "color": "yellow"
@@ -201,13 +201,13 @@
             "color": "yellow"
         },
         "git_unmodified": {
-            "color": "BrightBlack"
+            "color": "bright-black"
         },
         "git_untracked": {
-            "color": "BrightBlack"
+            "color": "bright-black"
         },
         "git_updated_but_unmerged": {
-            "color": "BrightYellow"
+            "color": "bright-yellow"
         }
     },
     "name": {
@@ -216,7 +216,7 @@
             "icon": ""
         },
         ".cfusertextencoding": {
-            "color": "BrightBlack",
+            "color": "bright-black",
             "icon": ""
         },
         ".dotnet": {
@@ -224,7 +224,7 @@
             "icon": ""
         },
         ".ds_store": {
-            "color": "BrightBlack",
+            "color": "bright-black",
             "icon": ""
         },
         ".git": {
@@ -232,11 +232,11 @@
             "icon": ""
         },
         ".gitattributes": {
-            "color": "BrightBlack",
+            "color": "bright-black",
             "icon": ""
         },
         ".gitconfig": {
-            "color": "BrightBlack",
+            "color": "bright-black",
             "icon": ""
         },
         ".github": {
@@ -244,11 +244,11 @@
             "icon": ""
         },
         ".gitignore": {
-            "color": "BrightBlack",
+            "color": "bright-black",
             "icon": ""
         },
         ".gitignore_global": {
-            "color": "BrightBlack",
+            "color": "bright-black",
             "icon": ""
         },
         ".gitlab-ci.yml": {
@@ -256,11 +256,11 @@
             "icon": ""
         },
         ".gitmodules": {
-            "color": "BrightBlack",
+            "color": "bright-black",
             "icon": ""
         },
         ".history": {
-            "color": "BrightBlack",
+            "color": "bright-black",
             "icon": ""
         },
         ".idea": {
@@ -272,7 +272,7 @@
             "icon": ""
         },
         ".srcinfo": {
-            "color": "BrightYellow",
+            "color": "bright-yellow",
             "icon": ""
         },
         ".ssh": {
@@ -280,7 +280,7 @@
             "icon": ""
         },
         ".trash": {
-            "color": "BrightBlack",
+            "color": "bright-black",
             "icon": ""
         },
         ".vscode": {
@@ -301,7 +301,7 @@
             "icon": ""
         },
         "apple": {
-            "color": "BrightBlack",
+            "color": "bright-black",
             "icon": ""
         },
         "applications": {
@@ -396,19 +396,19 @@
             "icon": ""
         },
         "docker-compose.yaml": {
-            "color": "BrightYellow",
+            "color": "bright-yellow",
             "icon": ""
         },
         "docker-compose.yml": {
-            "color": "BrightYellow",
+            "color": "bright-yellow",
             "icon": ""
         },
         "dockerfile": {
-            "color": "BrightYellow",
+            "color": "bright-yellow",
             "icon": ""
         },
         "dockerignore": {
-            "color": "BrightYellow",
+            "color": "bright-yellow",
             "icon": ""
         },
         "documents": {
@@ -453,7 +453,7 @@
             "icon": ""
         },
         "history": {
-            "color": "BrightBlack",
+            "color": "bright-black",
             "icon": ""
         },
         "home": {
@@ -542,7 +542,7 @@
             "icon": ""
         },
         "pkgbuild": {
-            "color": "BrightYellow",
+            "color": "bright-yellow",
             "icon": ""
         },
         "readme": {
@@ -558,7 +558,7 @@
             "bold": true
         },
         "recovery": {
-            "color": "BrightBlack",
+            "color": "bright-black",
             "icon": ""
         },
         "repo": {
@@ -591,7 +591,7 @@
             "icon": ""
         },
         "shell": {
-            "color": "BrightGreen",
+            "color": "bright-green",
             "icon": ""
         },
         "src": {
@@ -599,7 +599,7 @@
             "icon": ""
         },
         "trash": {
-            "color": "BrightBlack",
+            "color": "bright-black",
             "icon": ""
         },
         "tsconfig.json": {
@@ -630,7 +630,7 @@
             "icon": "󰜫"
         },
         "dir": {
-            "color": "BrightBlue",
+            "color": "bright-blue",
             "icon": ""
         },
         "dir-prompt": {
@@ -638,7 +638,7 @@
             "icon": "► "
         },
         "empty-dir": {
-            "color": "BrightBlue",
+            "color": "bright-blue",
             "icon": ""
         },
         "exe": {
@@ -657,7 +657,7 @@
             "color": "purple"
         },
         "mounts": {
-            "color": "BrightBlack"
+            "color": "bright-black"
         },
         "pipe": {
             "color": "cyan",
@@ -670,8 +670,8 @@
     },
     "ext": {
         ".profile": {
-            "color": "BrightGreen",
-            "icon": ""
+            "color": "bright-green",
+            "icon": "󱆃"
         },
         "7z": {
             "color": "red",
@@ -706,7 +706,7 @@
             "icon": ""
         },
         "asc": {
-            "color": "BrightGreen",
+            "color": "bright-green",
             "icon": "󰦝"
         },
         "asm": {
@@ -726,7 +726,7 @@
             "icon": ""
         },
         "avif": {
-            "color": "BrightPurple",
+            "color": "bright-purple",
             "icon": ""
         },
         "avro": {
@@ -742,27 +742,27 @@
             "icon": ""
         },
         "bash": {
-            "color": "BrightGreen",
+            "color": "bright-green",
             "icon": ""
         },
         "bash_history": {
-            "color": "BrightGreen",
-            "icon": "󱆃"
+            "color": "bright-green",
+            "icon": ""
         },
         "bash_profile": {
-            "color": "BrightGreen",
+            "color": "bright-green",
             "icon": "󱆃"
         },
         "bashrc": {
-            "color": "BrightGreen",
+            "color": "bright-green",
             "icon": "󱆃"
         },
         "bat": {
-            "color": "BrightGreen",
+            "color": "bright-green",
             "icon": ""
         },
         "bmp": {
-            "color": "BrightPurple",
+            "color": "bright-purple",
             "icon": ""
         },
         "bzl": {
@@ -834,7 +834,7 @@
             "icon": "󰌛"
         },
         "csh": {
-            "color": "BrightGreen",
+            "color": "bright-green",
             "icon": ""
         },
         "cson": {
@@ -870,7 +870,7 @@
             "icon": ""
         },
         "deb": {
-            "color": "BrightYellow",
+            "color": "bright-yellow",
             "icon": ""
         },
         "diff": {
@@ -910,7 +910,7 @@
             "icon": ""
         },
         "dpkg": {
-            "color": "BrightYellow",
+            "color": "bright-yellow",
             "icon": ""
         },
         "env": {
@@ -942,7 +942,7 @@
             "icon": ""
         },
         "fish": {
-            "color": "BrightGreen",
+            "color": "bright-green",
             "icon": ""
         },
         "flac": {
@@ -958,7 +958,7 @@
             "icon": ""
         },
         "gif": {
-            "color": "BrightPurple",
+            "color": "bright-purple",
             "icon": ""
         },
         "go": {
@@ -1074,11 +1074,11 @@
             "icon": ""
         },
         "jpeg": {
-            "color": "BrightPurple",
+            "color": "bright-purple",
             "icon": ""
         },
         "jpg": {
-            "color": "BrightPurple",
+            "color": "bright-purple",
             "icon": ""
         },
         "js": {
@@ -1106,7 +1106,7 @@
             "icon": ""
         },
         "ksh": {
-            "color": "BrightGreen",
+            "color": "bright-green",
             "icon": ""
         },
         "kt": {
@@ -1158,7 +1158,7 @@
             "icon": ""
         },
         "md": {
-            "color": "BrightYellow",
+            "color": "bright-yellow",
             "icon": ""
         },
         "mid": {
@@ -1198,7 +1198,7 @@
             "icon": ""
         },
         "msi": {
-            "color": "BrightYellow",
+            "color": "bright-yellow",
             "icon": ""
         },
         "mustache": {
@@ -1214,7 +1214,7 @@
             "icon": ""
         },
         "nu": {
-            "color": "BrightGreen",
+            "color": "bright-green",
             "icon": ""
         },
         "numbers": {
@@ -1250,7 +1250,7 @@
             "icon": ""
         },
         "pcx": {
-            "color": "BrightPurple",
+            "color": "bright-purple",
             "icon": ""
         },
         "pdf": {
@@ -1274,7 +1274,7 @@
             "icon": ""
         },
         "png": {
-            "color": "BrightPurple",
+            "color": "bright-purple",
             "icon": ""
         },
         "ppt": {
@@ -1298,11 +1298,11 @@
             "icon": ""
         },
         "ps1": {
-            "color": "BrightGreen",
+            "color": "bright-green",
             "icon": ""
         },
         "psd": {
-            "color": "BrightPurple",
+            "color": "bright-purple",
             "icon": ""
         },
         "pub": {
@@ -1338,7 +1338,7 @@
             "icon": ""
         },
         "rpm": {
-            "color": "BrightYellow",
+            "color": "bright-yellow",
             "icon": ""
         },
         "rs": {
@@ -1374,7 +1374,7 @@
             "icon": ""
         },
         "sh": {
-            "color": "BrightGreen",
+            "color": "bright-green",
             "icon": ""
         },
         "sitx": {
@@ -1406,7 +1406,7 @@
             "icon": ""
         },
         "svg": {
-            "color": "BrightPurple",
+            "color": "bright-purple",
             "icon": ""
         },
         "swift": {
@@ -1430,11 +1430,11 @@
             "icon": "󱁢"
         },
         "tif": {
-            "color": "BrightPurple",
+            "color": "bright-purple",
             "icon": ""
         },
         "tiff": {
-            "color": "BrightPurple",
+            "color": "bright-purple",
             "icon": ""
         },
         "toml": {
@@ -1494,7 +1494,7 @@
             "icon": ""
         },
         "webp": {
-            "color": "BrightPurple",
+            "color": "bright-purple",
             "icon": ""
         },
         "whl": {
@@ -1545,20 +1545,20 @@
             "color": "red",
             "icon": ""
         },
+        "zprofile": {
+            "color": "bright-green",
+            "icon": "󱆃"
+        },
         "zsh": {
-            "color": "BrightGreen",
+            "color": "bright-green",
             "icon": ""
         },
         "zsh_history": {
-            "color": "BrightGreen",
-            "icon": "󱆃"
+            "color": "bright-green",
+            "icon": ""
         },
         "zshrc": {
-            "color": "BrightGreen",
-            "icon": "󱆃"
-        },
-        "zprofile":{
-            "color": "BrightGreen",
+            "color": "bright-green",
             "icon": "󱆃"
         },
         "zst": {
