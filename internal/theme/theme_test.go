@@ -77,7 +77,7 @@ func TestStyle_ToReadable(t *testing.T) {
 				Color: global.BrightBlue,
 			},
 			want: Style{
-				Color: "BrightBlue",
+				Color: "bright-blue",
 			},
 		},
 	}
