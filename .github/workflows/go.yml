@@ -96,7 +96,7 @@ jobs:
       run: go test -v ./...
 
   windows-latest:
-    runs-on: macos-latest
+    runs-on: windows-latest
     steps:
     - uses: actions/cache@v4
       with:
@@ -140,7 +140,7 @@ jobs:
       run: go test -v ./...
 
   ubuntu-latest-latest:
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     steps:
     - uses: actions/cache@v4
       with:
