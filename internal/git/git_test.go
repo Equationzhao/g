@@ -56,7 +56,7 @@ func TestParseShort(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotRes := ParseShort(tt.args)
+			gotRes := ParseShort(normalizePath(tt.args))
 			for i := range gotRes {
 				gotRes[i].Name = normalizePath(gotRes[i].Name)
 			}
