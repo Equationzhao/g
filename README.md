@@ -1,6 +1,10 @@
 # g
 
 ---
+[![GitHub stars](https://img.shields.io/github/stars/Equationzhao/g)](https://github.com/Equationzhao/g/stargazers)
+[![GitHub forks](https://img.shields.io/github/forks/Equationzhao/g)](https://github.com/Equationzhao/g/network)
+[![GitHub issues](https://img.shields.io/github/issues/Equationzhao/g)](https://github.com/Equationzhao/g/issues)
+[![GitHub license](https://img.shields.io/github/license/Equationzhao/g)](https://github.com/Equationzhao/g/blob/master/LICENSE)
 
 A feature-rich, customizable, and cross-platform `ls` alternative.
 
