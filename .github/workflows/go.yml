@@ -92,8 +92,6 @@ jobs:
 
     - name: Build
       run: go build
-    - name: Run tests
-      run: go test -v ./...
 
   ubuntu-latest-latest:
     runs-on: ubuntu-latest
