@@ -85,7 +85,7 @@ func rearrangeArgs() {
 	os.Args = newArgs
 }
 
-func separateArgs(args []string) (flags []string, paths []string) {
+func separateArgs(args []string) (flags, paths []string) {
 	flagsWithArgs := buildFlagsWithArgsMap()
 	expectValue, hasDoubleDash := false, false
 	for i := 0; i < len(args); i++ {

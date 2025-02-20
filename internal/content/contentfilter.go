@@ -43,7 +43,7 @@ func (cf *ContentFilter) SetNoOutputOptions(outputFunc ...NoOutputOption) {
 }
 
 type (
-	ContentOption  func(info *item.FileInfo) (stringContent string, funcName string)
+	ContentOption  func(info *item.FileInfo) (stringContent, funcName string)
 	NoOutputOption func(info *item.FileInfo)
 )
 

@@ -721,7 +721,7 @@ func (t *TreePrinter) Print(s ...*item.FileInfo) {
 		level[string(v.Cache["level"])] = append(level[string(v.Cache["level"])], v)
 	}
 
-	prefixAndName := func(info *item.FileInfo) (prefix string, name string) {
+	prefixAndName := func(info *item.FileInfo) (prefix, name string) {
 		v := info.ValuesByOrdered()
 		pb := bytebufferpool.Get()
 		defer bytebufferpool.Put(pb)

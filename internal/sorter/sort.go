@@ -60,7 +60,7 @@ func ByNameWithoutALeadingDotCaseSensitiveAscend(a, b *item.FileInfo) int {
 	return cmp.Compare(strings.TrimPrefix(a.Name(), "."), strings.TrimPrefix(b.Name(), "."))
 }
 
-func byInode(a *item.FileInfo, b *item.FileInfo) (int, int) {
+func byInode(a, b *item.FileInfo) (int, int) {
 	inodeA, _ := strconv.Atoi(osbased.Inode(a))
 	inodeB, _ := strconv.Atoi(osbased.Inode(b))
 	a.Cache["Inode"] = []byte(strconv.Itoa(inodeA))
@@ -210,7 +210,7 @@ func byMimeType(a, b *item.FileInfo, ascend bool) int {
 
 const MimeTypeName = constval.NameOfMIME
 
-func getMimeName(a *item.FileInfo, b *item.FileInfo) (string, string) {
+func getMimeName(a, b *item.FileInfo) (string, string) {
 	mimeAstr, mimeBstr := "", ""
 	if c, ok := a.Cache[MimeTypeName]; ok {
 		mimeAstr = string(c)
