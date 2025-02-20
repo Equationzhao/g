@@ -10,8 +10,7 @@ on:
     branches: [ "master" ]
 
 jobs:
-
-  build:
+  build-macos-latest:
     runs-on: macos-latest
     steps:
     - uses: actions/checkout@v3
@@ -22,7 +21,7 @@ jobs:
         go-version: 1.24.0
 
     - name: Build linux 386
-      run: CGO_ENABLED=0 GOOS=linux GOARCH=386 go build -v ./...
+      run: CGO_ENABLED=0 GOOS=linux GOARCH=386 go build
     - name: Build linux amd64
       run: CGO_ENABLED=0 GOOS=linux GOARCH=amd64   go build
     - name: Build linux arm
@@ -43,3 +42,110 @@ jobs:
       run: CGO_ENABLED=0 GOOS=windows GOARCH=arm64 go build
     - name: Build windows arm
       run: CGO_ENABLED=0 GOOS=windows GOARCH=arm   go build
+    - name: Run tests
+      run: go test -v ./...
+
+  build-macos-13:
+    runs-on: macos-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Go
+      uses: actions/setup-go@v3
+      with:
+        go-version: 1.24.0
+
+    - name: Build linux 386
+      run: CGO_ENABLED=0 GOOS=linux GOARCH=386 go build
+    - name: Build linux amd64
+      run: CGO_ENABLED=0 GOOS=linux GOARCH=amd64   go build
+    - name: Build linux arm
+      run: CGO_ENABLED=0 GOOS=linux GOARCH=arm     go build
+    - name: Build linux arm64
+      run: CGO_ENABLED=0 GOOS=linux GOARCH=arm64   go build
+    - name: Build linux loong64
+      run: CGO_ENABLED=0 GOOS=linux GOARCH=loong64 go build
+    - name: Build darwin amd64
+      run: CGO_ENABLED=1 GOOS=darwin GOARCH=amd64  go build
+    - name: Build darwin arm64
+      run: CGO_ENABLED=1 GOOS=darwin GOARCH=arm64  go build
+    - name: Build windows 386
+      run:  CGO_ENABLED=0 GOOS=windows GOARCH=386   go build
+    - name: Build windows amd64
+      run: CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build
+    - name: Build windows arm64
+      run: CGO_ENABLED=0 GOOS=windows GOARCH=arm64 go build
+    - name: Build windows arm
+      run: CGO_ENABLED=0 GOOS=windows GOARCH=arm   go build
+    - name: Run tests
+      run: go test -v ./...
+
+  windows-latest:
+    runs-on: macos-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Go
+      uses: actions/setup-go@v3
+      with:
+        go-version: 1.24.0
+
+    - name: Build linux 386
+      run: CGO_ENABLED=0 GOOS=linux GOARCH=386 go build
+    - name: Build linux amd64
+      run: CGO_ENABLED=0 GOOS=linux GOARCH=amd64   go build
+    - name: Build linux arm
+      run: CGO_ENABLED=0 GOOS=linux GOARCH=arm     go build
+    - name: Build linux arm64
+      run: CGO_ENABLED=0 GOOS=linux GOARCH=arm64   go build
+    - name: Build linux loong64
+      run: CGO_ENABLED=0 GOOS=linux GOARCH=loong64 go build
+    - name: Build darwin amd64
+      run: CGO_ENABLED=1 GOOS=darwin GOARCH=amd64  go build
+    - name: Build darwin arm64
+      run: CGO_ENABLED=1 GOOS=darwin GOARCH=arm64  go build
+    - name: Build windows 386
+      run:  CGO_ENABLED=0 GOOS=windows GOARCH=386   go build
+    - name: Build windows amd64
+      run: CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build
+    - name: Build windows arm64
+      run: CGO_ENABLED=0 GOOS=windows GOARCH=arm64 go build
+    - name: Build windows arm
+      run: CGO_ENABLED=0 GOOS=windows GOARCH=arm   go build
+    - name: Run tests
+      run: go test -v ./...
+
+  ubuntu-latest-latest:
+    runs-on: macos-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Go
+      uses: actions/setup-go@v3
+      with:
+        go-version: 1.24.0
+
+    - name: Build linux 386
+      run: CGO_ENABLED=0 GOOS=linux GOARCH=386 go build
+    - name: Build linux amd64
+      run: CGO_ENABLED=0 GOOS=linux GOARCH=amd64   go build
+    - name: Build linux arm
+      run: CGO_ENABLED=0 GOOS=linux GOARCH=arm     go build
+    - name: Build linux arm64
+      run: CGO_ENABLED=0 GOOS=linux GOARCH=arm64   go build
+    - name: Build linux loong64
+      run: CGO_ENABLED=0 GOOS=linux GOARCH=loong64 go build
+    - name: Build darwin amd64
+      run: CGO_ENABLED=1 GOOS=darwin GOARCH=amd64  go build
+    - name: Build darwin arm64
+      run: CGO_ENABLED=1 GOOS=darwin GOARCH=arm64  go build
+    - name: Build windows 386
+      run:  CGO_ENABLED=0 GOOS=windows GOARCH=386   go build
+    - name: Build windows amd64
+      run: CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build
+    - name: Build windows arm64
+      run: CGO_ENABLED=0 GOOS=windows GOARCH=arm64 go build
+    - name: Build windows arm
+      run: CGO_ENABLED=0 GOOS=windows GOARCH=arm   go build
+    - name: Run tests
+      run: go test -v ./...
