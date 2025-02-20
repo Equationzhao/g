@@ -17,8 +17,8 @@ build:
     CGO_ENABLED=0 GOOS=linux GOARCH=arm64     go build {{ldflags}} -o build/g-linux-arm64
     CGO_ENABLED=0 GOOS=linux GOARCH=loong64   go build {{ldflags}} -o build/g-linux-loong64
 
-    CGO_ENABLED=0 GOOS=darwin GOARCH=amd64  go build {{ldflags}} -o build/g-darwin-amd64
-    CGO_ENABLED=0 GOOS=darwin GOARCH=arm64  go build {{ldflags}} -o build/g-darwin-arm64
+    GOOS=darwin GOARCH=amd64  go build {{ldflags}} -o build/g-darwin-amd64
+    GOOS=darwin GOARCH=arm64  go build {{ldflags}} -o build/g-darwin-arm64
 
     CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build {{ldflags}} -o build/g-windows-amd64.exe
     CGO_ENABLED=0 GOOS=windows GOARCH=386   go build {{ldflags}} -o build/g-windows-386.exe
@@ -224,7 +224,7 @@ precheck: format lint
 
 # generate the documentation
 doc: 
-    CGO_ENABLED=0 go build -tags 'doc'
+    go build -tags 'doc'
     ./g 
     rm g
 
@@ -233,7 +233,7 @@ testcustomtheme:
 
 # generate the theme
 theme:
-    CGO_ENABLED=0 go build -tags 'theme'
+    go build -tags 'theme'
     ./g
     rm g
 
