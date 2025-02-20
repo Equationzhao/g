@@ -60,7 +60,7 @@ const (
 
 // EnableTime enables time
 // accepts ['mod', 'modified', 'create', 'access', 'birth']
-func EnableTime(format string, mode string, renderer *render.Renderer) ContentOption {
+func EnableTime(format, mode string, renderer *render.Renderer) ContentOption {
 	return func(info *item.FileInfo) (string, string) {
 		// get mod time/ create time/ access time
 		var t time.Time

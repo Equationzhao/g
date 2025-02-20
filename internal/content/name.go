@@ -191,7 +191,7 @@ func NewNameEnabler() *Name {
 
 const NameName = global.NameOfName
 
-func makeLink(abs string, name string) string {
+func makeLink(abs, name string) string {
 	return util.MakeLink(abs, name)
 }
 
@@ -211,7 +211,7 @@ color + icon + file://quote+filename/relative-name+quote + classify + color-end 
 color: filetype->filename->fileext->file
 */
 func (n *Name) Enable(renderer *render.Renderer) ContentOption {
-	return func(info *item.FileInfo) (stringContent string, funcName string) {
+	return func(info *item.FileInfo) (stringContent, funcName string) {
 		name, color, icon, classify, mounts := info.Name(), "", "", "", ""
 		dereference := bytebufferpool.Get()
 		defer bytebufferpool.Put(dereference)
