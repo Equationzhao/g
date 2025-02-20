@@ -2,6 +2,8 @@ package git
 
 import (
 	"reflect"
+	"runtime"
+	"strings"
 	"testing"
 )
 
@@ -54,9 +56,23 @@ func TestParseShort(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if gotRes := ParseShort(tt.args); !reflect.DeepEqual(gotRes, tt.wantRes) {
+			gotRes := ParseShort(normalizePath(tt.args))
+			for i := range gotRes {
+				gotRes[i].Name = normalizePath(gotRes[i].Name)
+			}
+			if !reflect.DeepEqual(gotRes, tt.wantRes) {
 				t.Errorf("ParseShort() = %v, want %v", gotRes, tt.wantRes)
 			}
 		})
+	}
+}
+
+func normalizePath(path string) string {
+	// normalize path according to the OS
+	switch os := runtime.GOOS; os {
+	case "windows":
+		return strings.ReplaceAll(path, "/", "\\")
+	default:
+		return strings.ReplaceAll(path, "\\", "/")
 	}
 }
