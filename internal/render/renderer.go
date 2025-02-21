@@ -261,46 +261,34 @@ func (rd *Renderer) Time(toRender string) string {
 	return rd.infoByName(toRender, "time")
 }
 
+func closest256Color(r, g, b uint8) uint8 {
+	r6 := uint8(math.Round(float64(r) / 255.0 * 5.0))
+	g6 := uint8(math.Round(float64(g) / 255.0 * 5.0))
+	b6 := uint8(math.Round(float64(b) / 255.0 * 5.0))
+	return 16 + 36*r6 + 6*g6 + b6
+}
+
 func (rd *Renderer) calculateRTimeColor(dura time.Duration) string {
 	dura = dura.Abs()
-
-	const (
-		day  = time.Hour * 24
-		week = day * 7
-	)
-
-	const gUint = 35
-	var r, b float64 = 165, 255
+	const maxDura = 52 * 7 * 24 * time.Hour
+	t := float64(dura) / float64(maxDura)
+	if t > 1 {
+		t = 1
+	}
 
 	switch theme.ColorLevel {
 	case theme.TrueColor:
-		// calculate the radio.
-		// radio must < 1
-		// radio = e^(-dura)
-		radio := math.Exp(-dura.Seconds() / (10 * week.Seconds()))
-		r *= radio
-		b *= radio
-		rUint, bUint := uint8(math.Round(r)), uint8(math.Round(b))
-		rgb, _ := theme.RGB(rUint, gUint, bUint)
+		hue := 180.0 + (240.0-180.0)*t
+		saturation := 1.0
+		lightness := 0.5
+		r, g, b := theme.HslToRgb(hue, saturation, lightness)
+		rgb, _ := theme.RGB(r, g, b)
 		return rgb
 	case theme.C256:
-		code := 0
-		if dura <= time.Hour*6 {
-			code = 201
-		} else if dura <= day {
-			code = 165
-		} else if dura <= day*3 {
-			code = 129
-		} else if dura <= week {
-			code = 93
-		} else if dura <= week*6 {
-			code = 57
-		} else if dura <= week*52 {
-			code = 56
-		} else {
-			code = 55
-		}
-		res, _ := theme.Color256(code)
+		hue := 180.0 + (240.0-180.0)*t
+		r, g, b := theme.HslToRgb(hue, 1.0, 0.5)
+		code := closest256Color(r, g, b)
+		res, _ := theme.Color256(int(code))
 		return res
 	case theme.Ascii:
 		return rd.theme.InfoTheme["time"].Color
