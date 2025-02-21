@@ -192,13 +192,13 @@ func dive(
 		errSlice.AppendTo(err)
 		return
 	}
-	for _, f := range dir {
-		nowAbs := filepath.Join(parent, f.Name())
-		finfo, err := f.Info()
+	for _, entry := range dir {
+		f, err := entry.Info()
 		if err != nil {
 			errSlice.AppendTo(err)
 			continue
 		}
+		nowAbs := filepath.Join(parent, f.Name())
 		info, _ := item.NewFileInfoWithOption(item.WithAbsPath(nowAbs), item.WithFileInfo(finfo))
 		// check filter
 		if !itemFilter.Match(info) {
