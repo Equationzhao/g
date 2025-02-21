@@ -2,7 +2,6 @@ package render
 
 import (
 	"fmt"
-	"math"
 	"path/filepath"
 	"regexp"
 	"runtime"
@@ -269,36 +268,23 @@ func (rd *Renderer) calculateRTimeColor(dura time.Duration) string {
 		week = day * 7
 	)
 
-	const gUint = 35
-	var r, b float64 = 165, 255
-
 	switch theme.ColorLevel {
-	case theme.TrueColor:
-		// calculate the radio.
-		// radio must < 1
-		// radio = e^(-dura)
-		radio := math.Exp(-dura.Seconds() / (10 * week.Seconds()))
-		r *= radio
-		b *= radio
-		rUint, bUint := uint8(math.Round(r)), uint8(math.Round(b))
-		rgb, _ := theme.RGB(rUint, gUint, bUint)
-		return rgb
-	case theme.C256:
+	case theme.TrueColor, theme.C256:
 		code := 0
 		if dura <= time.Hour*6 {
-			code = 201
+			code = 45
 		} else if dura <= day {
-			code = 165
+			code = 39
 		} else if dura <= day*3 {
-			code = 129
+			code = 37
 		} else if dura <= week {
-			code = 93
+			code = 33
 		} else if dura <= week*6 {
-			code = 57
+			code = 21
 		} else if dura <= week*52 {
-			code = 56
+			code = 20
 		} else {
-			code = 55
+			code = 18
 		}
 		res, _ := theme.Color256(code)
 		return res
