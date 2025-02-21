@@ -199,7 +199,7 @@ func dive(
 			continue
 		}
 		nowAbs := filepath.Join(parent, f.Name())
-		info, _ := item.NewFileInfoWithOption(item.WithAbsPath(nowAbs), item.WithFileInfo(finfo))
+		info, _ := item.NewFileInfoWithOption(item.WithAbsPath(nowAbs), item.WithFileInfo(f))
 		// check filter
 		if !itemFilter.Match(info) {
 			continue
