@@ -1,7 +1,6 @@
 package cli
 
 import (
-	"sync"
 	"testing"
 
 	"github.com/Equationzhao/g/internal/filter"
@@ -30,11 +29,8 @@ func Test_dive(t *testing.T) {
 	// test
 	uslice := util.NewSlice[*item.FileInfo](10)
 	errSlice := util.NewSlice[error](1)
-	wg := sync.WaitGroup{}
-	wg.Add(1)
 	filters := filter.NewItemFilter()
-	dive(".", 1, -1, uslice, errSlice, &wg, filters, afs)
-	wg.Wait()
+	dive(".", 1, -1, uslice, errSlice, filters, afs)
 	if uslice.Len() != 9 {
 		t.Errorf("expect 7, got %d", uslice.Len())
 		for _, info := range *uslice.GetRaw() {
