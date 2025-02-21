@@ -8,10 +8,8 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/Equationzhao/g/internal/global"
 	"github.com/Equationzhao/g/internal/item"
 	"github.com/Equationzhao/g/internal/osbased"
-	"github.com/spf13/afero"
 )
 
 func Evallinks(fullPath string) (string, error) {
@@ -73,45 +71,39 @@ func GenRandomData(n int) []byte {
 // RecursivelySizeOf returns the size of the file or directory
 // depth < 0 means no limit
 func RecursivelySizeOf(info *item.FileInfo, depth int) int64 {
-	return RecursivelySizeOfGenerator(global.Fs)(info, depth)
-}
-
-func RecursivelySizeOfGenerator(afs afero.Fs) func(info *item.FileInfo, depth int) int64 {
-	return func(info *item.FileInfo, depth int) int64 {
-		currentDepth := 0
-		if info.IsDir() {
-			totalSize := int64(0)
-			if depth < 0 {
-				// -1 means no limit
-				_ = afero.Walk(afs, info.FullPath, func(path string, dir fs.FileInfo, err error) error {
-					if err != nil {
-						return err
-					}
-					totalSize += dir.Size()
-					return nil
-				})
-			} else {
-				_ = afero.Walk(afs, info.FullPath, func(path string, dir fs.FileInfo, err error) error {
-					if err != nil {
-						return err
-					}
-					if currentDepth > depth {
-						if dir.IsDir() {
-							return filepath.SkipDir
-						}
-						return nil
-					}
-					totalSize += dir.Size()
+	currentDepth := 0
+	if info.IsDir() {
+		totalSize := int64(0)
+		if depth < 0 {
+			// -1 means no limit
+			_ = filepath.Walk(info.FullPath, func(path string, dir fs.FileInfo, err error) error {
+				if err != nil {
+					return err
+				}
+				totalSize += dir.Size()
+				return nil
+			})
+		} else {
+			_ = filepath.Walk(info.FullPath, func(path string, dir fs.FileInfo, err error) error {
+				if err != nil {
+					return err
+				}
+				if currentDepth > depth {
 					if dir.IsDir() {
-						currentDepth++
+						return filepath.SkipDir
 					}
 					return nil
-				})
-			}
-			return totalSize
+				}
+				totalSize += dir.Size()
+				if dir.IsDir() {
+					currentDepth++
+				}
+				return nil
+			})
 		}
-		return info.Size()
+		return totalSize
 	}
+	return info.Size()
 }
 
 type MockFileInfo struct {

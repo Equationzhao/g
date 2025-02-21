@@ -2,6 +2,7 @@ package content
 
 import (
 	"slices"
+	"sync"
 
 	"github.com/Equationzhao/g/internal/display"
 	"github.com/Equationzhao/g/internal/item"
@@ -86,10 +87,16 @@ func (cf *ContentFilter) GetDisplayItems(e *[]*item.FileInfo) {
 	if cf.LimitN > 0 && len(*e) > int(cf.LimitN) {
 		*e = (*e)[:cf.LimitN]
 	}
+	wg := sync.WaitGroup{}
+	wg.Add(len(*e))
 	for _, entry := range *e {
 		entry := entry
-		_ = cf.processEntry(entry)
+		go func(e *item.FileInfo) {
+			defer wg.Done()
+			cf.processEntry(e)
+		}(entry)
 	}
+	wg.Wait()
 }
 
 func (cf *ContentFilter) processEntry(entry *item.FileInfo) error {

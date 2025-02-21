@@ -30,7 +30,6 @@ import (
 	"github.com/Equationzhao/pathbeautify"
 	"github.com/hako/durafmt"
 	"github.com/savioxavier/termlink"
-	"github.com/spf13/afero"
 	"github.com/urfave/cli/v2"
 	"github.com/xrash/smetrics"
 	"go.szostok.io/version/upgrade"
@@ -182,19 +181,25 @@ func init() {
 // for generating file tree
 func dive(
 	parent string, depth, limit int, infos *util.Slice[*item.FileInfo], errSlice *util.Slice[error],
-	itemFilter *filter.ItemFilter, fs afero.Fs,
+	wg *sync.WaitGroup, itemFilter *filter.ItemFilter,
 ) {
+	defer wg.Done()
 	if limit > 0 && depth > limit {
 		return
 	}
-	dir, err := afero.ReadDir(fs, parent)
+	dir, err := os.ReadDir(parent)
 	if err != nil {
 		errSlice.AppendTo(err)
 		return
 	}
 	for _, f := range dir {
 		nowAbs := filepath.Join(parent, f.Name())
-		info, _ := item.NewFileInfoWithOption(item.WithAbsPath(nowAbs), item.WithFileInfo(f))
+		finfo, err := f.Info()
+		if err != nil {
+			errSlice.AppendTo(err)
+			continue
+		}
+		info, _ := item.NewFileInfoWithOption(item.WithAbsPath(nowAbs), item.WithFileInfo(finfo))
 		// check filter
 		if !itemFilter.Match(info) {
 			continue
@@ -204,7 +209,8 @@ func dive(
 		info.Cache["level"] = []byte(strconv.Itoa(depth))
 		infos.AppendTo(info)
 		if f.IsDir() {
-			dive(info.FullPath, depth+1, limit, infos, errSlice, itemFilter, fs)
+			wg.Add(1)
+			go dive(info.FullPath, depth+1, limit, infos, errSlice, wg, itemFilter)
 		}
 	}
 }
@@ -792,12 +798,14 @@ var logic = func(context *cli.Context) error {
 			)
 			infos[0].Cache["level"] = []byte("0")
 			if depth >= 1 || depth < 0 {
+				wg := sync.WaitGroup{}
 				infoSlice := util.NewSlice[*item.FileInfo](10)
 				errSlice := util.NewSlice[error](10)
-				dive(
-					path[i], 1, depth, infoSlice, errSlice,
-					itemFilter, global.Fs,
+				wg.Add(1)
+				go dive(
+					path[i], 1, depth, infoSlice, errSlice, &wg, itemFilter,
 				)
+				wg.Wait()
 				infos = append(infos, *infoSlice.GetRaw()...)
 				for _, err := range *errSlice.GetRaw() {
 					if err != nil {

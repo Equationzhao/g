@@ -16,12 +16,10 @@ require (
 	github.com/junegunn/fzf v0.60.1
 	github.com/mattn/go-runewidth v0.0.16
 	github.com/olekukonko/ts v0.0.0-20171002115256-78ecb04241c0
-	github.com/panjf2000/ants/v2 v2.11.1
 	github.com/pkg/xattr v0.4.10
 	github.com/saintfish/chardet v0.0.0-20230101081208-5e3ef4b5456d
 	github.com/savioxavier/termlink v1.4.2
 	github.com/shirou/gopsutil/v3 v3.24.5
-	github.com/spf13/afero v1.12.0
 	github.com/stretchr/testify v1.10.0
 	github.com/syndtr/goleveldb v1.0.0
 	github.com/urfave/cli/v2 v2.27.5
@@ -88,6 +86,5 @@ require (
 	github.com/xo/terminfo v0.0.0-20220910002029-abceb7e1c41e // indirect
 	golang.org/x/crypto v0.33.0 // indirect
 	golang.org/x/net v0.35.0 // indirect
-	golang.org/x/sync v0.11.0 // indirect
 	golang.org/x/text v0.22.0 // indirect
 )
