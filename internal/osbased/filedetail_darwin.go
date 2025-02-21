@@ -5,50 +5,7 @@ package osbased
 /*
 #cgo CFLAGS: -mmacosx-version-min=10.9
 #cgo LDFLAGS: -framework CoreFoundation -framework CoreServices
-
-#include <CoreFoundation/CoreFoundation.h>
-#include <CoreServices/CoreServices.h>
-
-#include <stdlib.h>
-#include <string.h>
-#include <limits.h>
-#include <sys/xattr.h>
-
-char *resolveAlias(const char *path) {
-    CFURLRef url = CFURLCreateFromFileSystemRepresentation(NULL, (const UInt8 *)path, strlen(path), false);
-    if (!url) {
-        return NULL;
-    }
-
-    CFErrorRef error = NULL;
-    CFDataRef bookmarkData = CFURLCreateBookmarkDataFromFile(NULL, url, &error);
-    CFRelease(url);
-    if (!bookmarkData) {
-        if (error != NULL) {
-            CFRelease(error);
-        }
-        return NULL;
-    }
-
-    Boolean bookmarkIsStale;
-    CFURLRef resolvedURL = CFURLCreateByResolvingBookmarkData(NULL, bookmarkData, kCFBookmarkResolutionWithoutUIMask, NULL, NULL, &bookmarkIsStale, &error);
-    CFRelease(bookmarkData);
-    if (!resolvedURL) {
-        if (error != NULL) {
-            CFRelease(error);
-        }
-        return NULL;
-    }
-
-    UInt8 buffer[PATH_MAX];
-    Boolean success = CFURLGetFileSystemRepresentation(resolvedURL, true, buffer, PATH_MAX);
-    CFRelease(resolvedURL);
-    if (!success) {
-        return NULL;
-    }
-
-    return strdup((const char*)buffer);
-}
+#include "macos_alias.h"
 */
 import "C"
 
@@ -86,25 +43,18 @@ func BlockSize(info os.FileInfo) int64 {
 }
 
 func IsMacOSAlias(fullPath string) bool {
-	path := C.CString(fullPath)
-	defer C.free(unsafe.Pointer(path))
+	fi, err := os.Lstat(fullPath)
+	if err != nil {
+		return false
+	}
 
-	name := C.CString("com.apple.FinderInfo")
-	defer C.free(unsafe.Pointer(name))
+	if fi.Mode()&os.ModeSymlink != 0 {
+		return false
+	}
 
-	buf := make([]byte, 32)
-	size := C.size_t(len(buf))
-
-	ret, _ := C.getxattr(
-		path,
-		name,
-		unsafe.Pointer(&buf[0]),
-		size,
-		0,
-		0,
-	)
-
-	return ret > 0 && (buf[0]&0x20) != 0
+	cPath := C.CString(fullPath)
+	defer C.free(unsafe.Pointer(cPath))
+	return bool(C.isAlias(cPath))
 }
 
 func ResolveAlias(fullPath string) (string, error) {
