@@ -93,7 +93,7 @@ func (cf *ContentFilter) GetDisplayItems(e *[]*item.FileInfo) {
 		entry := entry
 		go func(e *item.FileInfo) {
 			defer wg.Done()
-			cf.processEntry(e)
+			_ = cf.processEntry(e)
 		}(entry)
 	}
 	wg.Wait()
