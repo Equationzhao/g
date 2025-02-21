@@ -426,7 +426,12 @@ func (n *Name) Enable(renderer *render.Renderer) ContentOption {
 			}
 		}
 		if n.hyperLink {
-			_, _ = b.WriteString(makeLink("file://"+info.FullPath, name))
+			if n.json {
+				info.Meta.Set("hyperlink", &display.ItemContent{Content: display.StringContent("file://" + info.FullPath)})
+				_, _ = b.WriteString(name)
+			} else {
+				_, _ = b.WriteString(makeLink("file://"+info.FullPath, name))
+			}
 		} else {
 			_, _ = b.WriteString(name)
 		}
