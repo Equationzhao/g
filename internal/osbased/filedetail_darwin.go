@@ -14,6 +14,24 @@ package osbased
 #include <limits.h>
 #include <sys/xattr.h>
 
+bool isAlias(const char *path) {
+    CFStringRef cfPath = CFStringCreateWithCString(NULL, path, kCFStringEncodingUTF8);
+    CFURLRef url = CFURLCreateWithFileSystemPath(NULL, cfPath, kCFURLPOSIXPathStyle, false);
+    CFRelease(cfPath);
+
+    Boolean isAlias = false;
+    if (url) {
+        CFBooleanRef isAliasRef;
+        if (CFURLCopyResourcePropertyForKey(url, kCFURLIsAliasFileKey, &isAliasRef, NULL)) {
+            isAlias = CFBooleanGetValue(isAliasRef);
+            CFRelease(isAliasRef);
+        }
+        CFRelease(url);
+    }
+
+    return isAlias;
+}
+
 char *resolveAlias(const char *path) {
     CFURLRef url = CFURLCreateFromFileSystemRepresentation(NULL, (const UInt8 *)path, strlen(path), false);
     if (!url) {
@@ -86,25 +104,18 @@ func BlockSize(info os.FileInfo) int64 {
 }
 
 func IsMacOSAlias(fullPath string) bool {
-	path := C.CString(fullPath)
-	defer C.free(unsafe.Pointer(path))
+	fi, err := os.Lstat(fullPath)
+	if err != nil {
+		return false
+	}
 
-	name := C.CString("com.apple.FinderInfo")
-	defer C.free(unsafe.Pointer(name))
+	if fi.Mode()&os.ModeSymlink != 0 {
+		return false
+	}
 
-	buf := make([]byte, 32)
-	size := C.size_t(len(buf))
-
-	ret, _ := C.getxattr(
-		path,
-		name,
-		unsafe.Pointer(&buf[0]),
-		size,
-		0,
-		0,
-	)
-
-	return ret > 0 && (buf[0]&0x20) != 0
+	cPath := C.CString(fullPath)
+	defer C.free(unsafe.Pointer(cPath))
+	return bool(C.isAlias(cPath))
 }
 
 func ResolveAlias(fullPath string) (string, error) {
