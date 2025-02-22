@@ -171,8 +171,32 @@ var Ext = Theme{
 		Color: pkg,
 		Icon:  "\uF306",
 	},
+	"aab": Style{
+		Color: global.Green,
+		Icon:  "\uF17B",
+	},
+	"aar": Style{
+		Color: global.Green,
+		Icon:  "\uF17B",
+	},
 	"apk": Style{
 		Color: global.Green,
+		Icon:  "\uF17B",
+	},
+	"dex": Style{
+		Color: global.Green,
+		Icon:  "\uF17B",
+	},
+	"odex": Style{
+		Color: global.Green,
+		Icon:  "\uF17B",
+	},
+	"aidl": Style{
+		Color: lang,
+		Icon:  "\uF17B",
+	},
+	"hidl": Style{
+		Color: lang,
 		Icon:  "\uF17B",
 	},
 	"app": Style{
@@ -276,6 +300,10 @@ var Ext = Theme{
 		Icon:  "\uE737",
 	},
 	"swift": Style{
+		Color: lang,
+		Icon:  "\uE755",
+	},
+	"xcplayground": Style{
 		Color: lang,
 		Icon:  "\uE755",
 	},
