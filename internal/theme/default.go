@@ -341,7 +341,7 @@ var Ext = Theme{
 	},
 	"astro": Style{
 		Color: lang,
-		Icon:  "\\uf135",
+		Icon:  "\uf135",
 	},
 	"js": Style{
 		Color: lang,
