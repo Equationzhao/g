@@ -677,9 +677,17 @@
             "color": "red",
             "icon": ""
         },
+        "aab": {
+            "color": "green",
+            "icon": ""
+        },
         "aac": {
             "color": "[199]@256",
             "icon": ""
+        },
+        "aar": {
+            "color": "green",
+            "icon": ""
         },
         "accdb": {
             "color": "[195]@256",
@@ -688,6 +696,10 @@
         "ai": {
             "color": "cyan",
             "icon": ""
+        },
+        "aidl": {
+            "color": "[158]@256",
+            "icon": ""
         },
         "alac": {
             "color": "[199]@256",
@@ -715,7 +727,7 @@
         },
         "astro": {
             "color": "[158]@256",
-            "icon": "\\uf135"
+            "icon": ""
         },
         "atom": {
             "color": "[158]@256",
@@ -873,6 +885,10 @@
             "color": "bright-yellow",
             "icon": ""
         },
+        "dex": {
+            "color": "green",
+            "icon": ""
+        },
         "diff": {
             "color": "cyan",
             "icon": ""
@@ -1000,6 +1016,10 @@
         "hh": {
             "color": "[158]@256",
             "icon": ""
+        },
+        "hidl": {
+            "color": "[158]@256",
+            "icon": ""
         },
         "hpp": {
             "color": "[158]@256",
@@ -1228,6 +1248,10 @@
         "nvimrc": {
             "color": "[41]@256",
             "icon": ""
+        },
+        "odex": {
+            "color": "green",
+            "icon": ""
         },
         "ogg": {
             "color": "[199]@256",
@@ -1508,6 +1532,10 @@
         "woff2": {
             "color": "cyan",
             "icon": ""
+        },
+        "xcplayground": {
+            "color": "[158]@256",
+            "icon": ""
         },
         "xls": {
             "color": "[150]@256",
