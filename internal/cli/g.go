@@ -29,9 +29,7 @@ import (
 	"github.com/Equationzhao/g/internal/util"
 	"github.com/Equationzhao/pathbeautify"
 	"github.com/hako/durafmt"
-	"github.com/panjf2000/ants/v2"
 	"github.com/savioxavier/termlink"
-	"github.com/spf13/afero"
 	"github.com/urfave/cli/v2"
 	"github.com/xrash/smetrics"
 	"go.szostok.io/version/upgrade"
@@ -66,7 +64,6 @@ var (
 	hookOnce        = util.Once{}
 	duplicateDetect = contents.NewDuplicateDetect()
 	hookPost        = make([]func(display.Printer, ...*item.FileInfo), 0)
-	pool            *ants.Pool
 	allPart         []string
 )
 
@@ -184,18 +181,23 @@ func init() {
 // for generating file tree
 func dive(
 	parent string, depth, limit int, infos *util.Slice[*item.FileInfo], errSlice *util.Slice[error],
-	wg *sync.WaitGroup, itemFilter *filter.ItemFilter, fs afero.Fs,
+	wg *sync.WaitGroup, itemFilter *filter.ItemFilter,
 ) {
 	defer wg.Done()
 	if limit > 0 && depth > limit {
 		return
 	}
-	dir, err := afero.ReadDir(fs, parent)
+	dir, err := os.ReadDir(parent)
 	if err != nil {
 		errSlice.AppendTo(err)
 		return
 	}
-	for _, f := range dir {
+	for _, entry := range dir {
+		f, err := entry.Info()
+		if err != nil {
+			errSlice.AppendTo(err)
+			continue
+		}
 		nowAbs := filepath.Join(parent, f.Name())
 		info, _ := item.NewFileInfoWithOption(item.WithAbsPath(nowAbs), item.WithFileInfo(f))
 		// check filter
@@ -208,14 +210,7 @@ func dive(
 		infos.AppendTo(info)
 		if f.IsDir() {
 			wg.Add(1)
-			err := pool.Submit(
-				func() {
-					dive(info.FullPath, depth+1, limit, infos, errSlice, wg, itemFilter, fs)
-				},
-			)
-			if err != nil {
-				panic(err)
-			}
+			go dive(info.FullPath, depth+1, limit, infos, errSlice, wg, itemFilter)
 		}
 	}
 }
@@ -669,14 +664,6 @@ var logic = func(context *cli.Context) error {
 	}
 
 	theme.ConvertThemeColor()
-	{
-		var err error
-		pool, err = ants.NewPool(ants.DefaultAntsPoolSize)
-		if err != nil {
-			panic(err)
-		}
-		contents.Pool = pool
-	}
 
 	if len(path) != 0 && context.Bool("stdin") {
 		newPath, err := getStdin()
@@ -779,19 +766,12 @@ var logic = func(context *cli.Context) error {
 		if !disableIndex {
 			wgUpdateIndex.Add(1)
 			i := i
-			err := pool.Submit(
-				func() {
-					func() {
-						if err = fuzzyUpdate(path[i]); err != nil {
-							minorErr = true
-						}
-						wgUpdateIndex.Done()
-					}()
-				},
-			)
-			if err != nil {
-				panic(err)
-			}
+			go func() {
+				defer wgUpdateIndex.Done()
+				if err = fuzzyUpdate(path[i]); err != nil {
+					minorErr = true
+				}
+			}()
 		}
 		if gitignore {
 			*removeGitIgnore = filter.RemoveGitIgnore(path[i])
@@ -822,10 +802,8 @@ var logic = func(context *cli.Context) error {
 				infoSlice := util.NewSlice[*item.FileInfo](10)
 				errSlice := util.NewSlice[error](10)
 				wg.Add(1)
-				pool.Tune(ants.DefaultAntsPoolSize)
-				dive(
-					path[i], 1, depth, infoSlice, errSlice, &wg,
-					itemFilter, global.Fs,
+				go dive(
+					path[i], 1, depth, infoSlice, errSlice, &wg, itemFilter,
 				)
 				wg.Wait()
 				infos = append(infos, *infoSlice.GetRaw()...)
@@ -950,7 +928,6 @@ var logic = func(context *cli.Context) error {
 			gitEnabler.InitCache(repo)
 		}
 
-		pool.Tune(1000)
 		contentFilter.GetDisplayItems(&infos)
 
 		if len(infos) == 0 {
@@ -1052,7 +1029,6 @@ var logic = func(context *cli.Context) error {
 			sizeEnabler.Reset()
 		}
 	}
-	pool.Release()
 	wgUpdateIndex.Wait()
 
 	if seriousErr {

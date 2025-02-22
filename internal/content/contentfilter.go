@@ -6,10 +6,7 @@ import (
 
 	"github.com/Equationzhao/g/internal/display"
 	"github.com/Equationzhao/g/internal/item"
-	"github.com/panjf2000/ants/v2"
 )
-
-var Pool *ants.Pool
 
 type ContentFilter struct {
 	noOutputOptions []NoOutputOption
@@ -94,15 +91,10 @@ func (cf *ContentFilter) GetDisplayItems(e *[]*item.FileInfo) {
 	wg.Add(len(*e))
 	for _, entry := range *e {
 		entry := entry
-		err := Pool.Submit(
-			func() {
-				defer wg.Done()
-				_ = cf.processEntry(entry)
-			},
-		)
-		if err != nil {
-			panic(err)
-		}
+		go func(e *item.FileInfo) {
+			defer wg.Done()
+			_ = cf.processEntry(e)
+		}(entry)
 	}
 	wg.Wait()
 }
