@@ -599,6 +599,12 @@ var viewFlag = []cli.Flag{
 		Category:           "VIEW",
 	},
 	&cli.BoolFlag{
+		Name:               "git-detail",
+		Usage:              "show git commit detail with hash, author, author date [if git is installed]",
+		DisableDefaultText: true,
+		Category:           "VIEW",
+	},
+	&cli.BoolFlag{
 		Name:               "git-repo-branch",
 		Usage:              "list root of git-tree branch [if git is installed]",
 		Aliases:            []string{"branch"},

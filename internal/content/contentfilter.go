@@ -1,6 +1,7 @@
 package content
 
 import (
+	"runtime"
 	"slices"
 	"sync"
 
@@ -87,12 +88,18 @@ func (cf *ContentFilter) GetDisplayItems(e *[]*item.FileInfo) {
 	if cf.LimitN > 0 && len(*e) > int(cf.LimitN) {
 		*e = (*e)[:cf.LimitN]
 	}
+
+	maxGoroutines := 10 * runtime.NumCPU()
+	sem := make(chan struct{}, maxGoroutines)
 	wg := sync.WaitGroup{}
 	wg.Add(len(*e))
+
 	for _, entry := range *e {
 		entry := entry
+		sem <- struct{}{}
 		go func(e *item.FileInfo) {
 			defer wg.Done()
+			defer func() { <-sem }()
 			_ = cf.processEntry(e)
 		}(entry)
 	}

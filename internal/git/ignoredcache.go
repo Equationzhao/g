@@ -17,7 +17,6 @@ var (
 
 const size = 20
 
-// your custom hash function
 func hasher(s string) uintptr {
 	return uintptr(xxh3.HashString(s))
 }

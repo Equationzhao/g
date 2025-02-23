@@ -46,25 +46,26 @@ var (
 	//  0  if OK,
 	//  1  if minor problems (e.g., cannot access subdirectory),
 	//  2  if serious trouble (e.g., cannot access command-line argument).
-	ReturnCode      = 0
-	contentFilter   = contents.NewContentFilter()
-	sort            = sorter.NewSorter()
-	timeType        = []string{"mod"}
-	sizeUint        = contents.Auto
-	sizeEnabler     = contents.NewSizeEnabler()
-	blockEnabler    = contents.NewBlockSizeEnabler()
-	ownerEnabler    = contents.NewOwnerEnabler()
-	groupEnabler    = contents.NewGroupEnabler()
-	gitEnabler      = contents.NewGitEnabler()
-	gitRepoEnabler  = contents.NewGitRepoEnabler()
-	nameToDisplay   = contents.NewNameEnabler()
-	flagsEnabler    = contents.NewFlagsEnabler()
-	depthLimitMap   map[string]int
-	limitOnce       = util.Once{}
-	hookOnce        = util.Once{}
-	duplicateDetect = contents.NewDuplicateDetect()
-	hookPost        = make([]func(display.Printer, ...*item.FileInfo), 0)
-	allPart         []string
+	ReturnCode       = 0
+	contentFilter    = contents.NewContentFilter()
+	sort             = sorter.NewSorter()
+	timeType         = []string{"mod"}
+	sizeUint         = contents.Auto
+	sizeEnabler      = contents.NewSizeEnabler()
+	blockEnabler     = contents.NewBlockSizeEnabler()
+	ownerEnabler     = contents.NewOwnerEnabler()
+	groupEnabler     = contents.NewGroupEnabler()
+	gitEnabler       = contents.NewGitEnabler()
+	gitRepoEnabler   = contents.NewGitRepoEnabler()
+	gitCommitEnabler = contents.NewGitCommitEnabler()
+	nameToDisplay    = contents.NewNameEnabler()
+	flagsEnabler     = contents.NewFlagsEnabler()
+	depthLimitMap    map[string]int
+	limitOnce        = util.Once{}
+	hookOnce         = util.Once{}
+	duplicateDetect  = contents.NewDuplicateDetect()
+	hookPost         = make([]func(display.Printer, ...*item.FileInfo), 0)
+	allPart          []string
 )
 
 var G *cli.App
@@ -526,6 +527,10 @@ var logic = func(context *cli.Context) error {
 	gitRepoStatus := context.Bool("git-repo-status")
 	if gitRepoStatus {
 		contentFunc = append(contentFunc, gitRepoEnabler.EnableStatus(r))
+	}
+
+	if context.Bool("git-detail") {
+		contentFunc = append(contentFunc, gitCommitEnabler.EnableHash(), gitCommitEnabler.EnableAuthor(), gitCommitEnabler.EnableAuthorDateWithTimeFormat(timeFormat))
 	}
 
 	if context.Bool("flags") {

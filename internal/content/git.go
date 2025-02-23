@@ -9,6 +9,7 @@ import (
 	constval "github.com/Equationzhao/g/internal/global"
 	"github.com/Equationzhao/g/internal/item"
 	"github.com/Equationzhao/g/internal/render"
+	"github.com/alphadose/haxmap"
 )
 
 type GitEnabler struct {
@@ -25,8 +26,6 @@ func NewGitEnabler() *GitEnabler {
 		cache: git.GetCache(),
 	}
 }
-
-const GitStatus = constval.NameOfGitStatus
 
 func (g *GitEnabler) Enable(renderer *render.Renderer) ContentOption {
 	isOrIsParentOf := func(parent, child string) bool {
@@ -96,8 +95,12 @@ func gitByName(status git.Status, renderer *render.Renderer) string {
 }
 
 const (
+	GitStatus     = constval.NameOfGitStatus
 	GitRepoBranch = constval.NameOfGitRepoBranch
 	GitRepoStatus = constval.NameOfGitRepoStatus
+	GitCommitHash = constval.NameOfGitCommitHash
+	GitAuthor     = constval.NameOfGitAuthor
+	GitAuthorDate = constval.NameOfGitAuthorDate
 )
 
 type GitRepoEnabler struct{}
@@ -120,4 +123,48 @@ func (g *GitRepoEnabler) EnableStatus(renderer *render.Renderer) ContentOption {
 
 func NewGitRepoEnabler() *GitRepoEnabler {
 	return &GitRepoEnabler{}
+}
+
+type GitCommitEnabler struct {
+	Cache *haxmap.Map[string, git.CommitInfo]
+}
+
+func (g *GitCommitEnabler) init(info *item.FileInfo) git.CommitInfo {
+	m, ok := g.Cache.Get(info.FullPath)
+	if ok {
+		return m
+	}
+	commit, err := git.GetLastCommitInfo(info.FullPath)
+	if err != nil {
+		commit = &git.NoneCommitInfo
+	}
+	defer g.Cache.Set(info.FullPath, *commit)
+	return *commit
+}
+
+func (g *GitCommitEnabler) EnableHash() ContentOption {
+	return func(info *item.FileInfo) (string, string) {
+		commit := g.init(info)
+		return commit.Hash, GitCommitHash
+	}
+}
+
+func (g *GitCommitEnabler) EnableAuthor() ContentOption {
+	return func(info *item.FileInfo) (string, string) {
+		commit := g.init(info)
+		return commit.Author, GitAuthor
+	}
+}
+
+func (g *GitCommitEnabler) EnableAuthorDateWithTimeFormat(timeFormat string) ContentOption {
+	return func(info *item.FileInfo) (string, string) {
+		commit := g.init(info)
+		return commit.GetAuthorDateInFormat(timeFormat), GitAuthorDate
+	}
+}
+
+func NewGitCommitEnabler() *GitCommitEnabler {
+	return &GitCommitEnabler{
+		Cache: haxmap.New[string, git.CommitInfo](10),
+	}
 }
