@@ -8,6 +8,9 @@ import (
 	"hash/crc32"
 	"io"
 	"os"
+	"slices"
+	"strings"
+	"sync"
 
 	"github.com/Equationzhao/g/internal/cached"
 	"github.com/Equationzhao/g/internal/item"
@@ -22,6 +25,8 @@ type (
 type DuplicateDetect struct {
 	IsThrough bool
 	hashTb    *cached.Map[hashStr, filenameList]
+
+	start sync.Once
 }
 
 type DOption func(d *DuplicateDetect)
@@ -53,17 +58,33 @@ func DetectorFallthrough(d *DuplicateDetect) {
 }
 
 func (d *DuplicateDetect) Enable() NoOutputOption {
-	return func(info *item.FileInfo) {
-		afterHash, err := fileHash(info, d.IsThrough)
-		if err != nil {
-			return
+	job := make(chan *item.FileInfo, 100)
+	isJobFinished := cached.NewCacheMap[string, *chan struct{}](1000)
+	go func() {
+		for info := range job {
+			func() {
+				c, _ := isJobFinished.Get(info.FullPath)
+				defer func() {
+					*c <- struct{}{}
+				}()
+				afterHash, err := fileHash(info, d.IsThrough)
+				if err != nil {
+					return
+				}
+				actual, _ := d.hashTb.GetOrCompute(
+					afterHash, func() filenameList {
+						return util.NewSlice[string](10)
+					},
+				)
+				actual.AppendTo(info.Name())
+			}()
 		}
-		actual, _ := d.hashTb.GetOrCompute(
-			afterHash, func() filenameList {
-				return util.NewSlice[string](10)
-			},
-		)
-		actual.AppendTo(info.Name())
+	}()
+	return func(info *item.FileInfo) {
+		c := make(chan struct{}, 1)
+		isJobFinished.Set(info.FullPath, &c)
+		job <- info
+		<-c
 	}
 }
 
@@ -76,7 +97,11 @@ func (d *DuplicateDetect) Result() []Duplicate {
 	res := make([]Duplicate, 0, len(list))
 	for _, i := range list {
 		if l := i.Len(); l > 1 {
-			res = append(res, Duplicate{Filenames: i.GetCopy()})
+			f := i.GetCopy()
+			slices.SortStableFunc(f, func(a, b string) int {
+				return strings.Compare(a, b)
+			})
+			res = append(res, Duplicate{Filenames: f})
 		}
 	}
 	return res
@@ -115,14 +140,9 @@ func fileHash(fileInfo *item.FileInfo, isThorough bool) (string, error) {
 	var bytes []byte
 	var fileReadErr error
 	if isThorough || fileInfo.Size() <= thresholdFileSize {
-		if content, ok := fileInfo.Cache["content"]; ok {
-			bytes = content
-		} else {
-			bytes, fileReadErr = os.ReadFile(fileInfo.FullPath)
-			if fileReadErr != nil {
-				return "", fmt.Errorf("couldn't read file: %w", fileReadErr)
-			}
-			fileInfo.Cache["content"] = bytes
+		bytes, fileReadErr = os.ReadFile(fileInfo.FullPath)
+		if fileReadErr != nil {
+			return "", fmt.Errorf("couldn't read file: %w", fileReadErr)
 		}
 		if fileInfo.Size() <= thresholdFileSize {
 			prefix = "f"
