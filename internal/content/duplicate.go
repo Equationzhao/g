@@ -10,7 +10,6 @@ import (
 	"os"
 	"slices"
 	"strings"
-	"sync"
 
 	"github.com/Equationzhao/g/internal/cached"
 	"github.com/Equationzhao/g/internal/item"
@@ -25,8 +24,6 @@ type (
 type DuplicateDetect struct {
 	IsThrough bool
 	hashTb    *cached.Map[hashStr, filenameList]
-
-	start sync.Once
 }
 
 type DOption func(d *DuplicateDetect)
