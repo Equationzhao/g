@@ -41,7 +41,7 @@ var (
 	noOutputFunc   = make([]contents.NoOutputOption, 0)
 	r              = render.NewRenderer(&theme.DefaultAll)
 	p              = display.NewFitTerminal()
-	timeFormat     = "Jan 06 15:04"
+	timeFormat     = "Jan 02 15:04"
 	// ReturnCode - Exit status:
 	//  0  if OK,
 	//  1  if minor problems (e.g., cannot access subdirectory),
