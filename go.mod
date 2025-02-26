@@ -4,6 +4,7 @@ go 1.24.0
 
 require (
 	github.com/Equationzhao/pathbeautify v0.0.7
+	github.com/Equationzhao/strftime v0.0.0-20250226043532-1b1ef5377e15
 	github.com/acarl005/stripansi v0.0.0-20180116102854-5a71ef0e047d
 	github.com/agiledragon/gomonkey/v2 v2.11.0
 	github.com/alphadose/haxmap v1.4.1

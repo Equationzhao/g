@@ -2,12 +2,14 @@ package content
 
 import (
 	"runtime"
+	"strings"
 	"time"
 
 	constval "github.com/Equationzhao/g/internal/global"
 	"github.com/Equationzhao/g/internal/item"
 	"github.com/Equationzhao/g/internal/osbased"
 	"github.com/Equationzhao/g/internal/render"
+	"github.com/Equationzhao/strftime"
 )
 
 type RelativeTimeEnabler struct {
@@ -87,6 +89,13 @@ func EnableTime(format, mode string, renderer *render.Renderer) ContentOption {
 			t = osbased.ModTime(info)
 			timeType = timeModified
 		}
-		return renderer.Time(t.Format(format)), timeName + " " + timeType
+
+		var timeString string
+		if strings.HasPrefix(format, "+") {
+			timeString = strftime.Strftime(strings.TrimPrefix(format, "+"), t)
+		} else {
+			timeString = t.Format(format)
+		}
+		return renderer.Time(timeString), timeName + " " + timeType
 	}
 }

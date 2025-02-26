@@ -10,7 +10,6 @@ import (
 	contents "github.com/Equationzhao/g/internal/content"
 	"github.com/Equationzhao/g/internal/display"
 	"github.com/Equationzhao/g/internal/filter"
-	"github.com/Equationzhao/g/internal/timeparse"
 	"github.com/gabriel-vasile/mimetype"
 	"github.com/urfave/cli/v2"
 )
@@ -179,8 +178,7 @@ var viewFlag = []cli.Flag{
 				Also, the TIME_STYLE environment variable sets the default style to use.
 			*/
 			if strings.HasPrefix(s, "+") {
-				s := s[1:] // remove +
-				timeFormat = timeparse.Transform(s)
+				timeFormat = s
 				return nil
 			}
 
