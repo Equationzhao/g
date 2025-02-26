@@ -185,13 +185,6 @@ var filteringFlag = []cli.Flag{
 			return nil
 		},
 	},
-	&cli.BoolFlag{
-		Name:               "git-ignore",
-		Aliases:            []string{"hide-git-ignore"},
-		Usage:              "hide git ignored file/dir [if git is installed]",
-		DisableDefaultText: true,
-		Category:           "FILTERING",
-	},
 	&cli.StringFlag{
 		Name: "before",
 		Usage: `show items which was modified/access/created before given time, the time field is determined by --time-type,
@@ -206,27 +199,24 @@ var filteringFlag = []cli.Flag{
 					if err != nil {
 						fmt.Println(err)
 						continue
-					} else {
-						f := filter.BeforeTime(t, filter.WhichTimeFiled(timeType[0]))
-						itemFilterFunc = append(itemFilterFunc, &f)
-						return nil
 					}
-				} else {
-					t, err := time.ParseInLocation(f, s, time.Local)
-					if err != nil {
-						continue
-					} else {
-						if strings.HasPrefix(f, "01-02") {
-							t = t.AddDate(time.Now().Year(), 0, 0)
-						} else if strings.HasPrefix(f, "15:04") {
-							now := time.Now()
-							t = t.AddDate(now.Year(), int(now.Month()), now.Minute())
-						}
-						f := filter.BeforeTime(t, filter.WhichTimeFiled(timeType[0]))
-						itemFilterFunc = append(itemFilterFunc, &f)
-						return nil
-					}
+					f := filter.BeforeTime(t, filter.WhichTimeFiled(timeType[0]))
+					itemFilterFunc = append(itemFilterFunc, &f)
+					return nil
 				}
+				t, err := time.ParseInLocation(f, s, time.Local)
+				if err != nil {
+					continue
+				}
+				if strings.HasPrefix(f, "01-02") {
+					t = t.AddDate(time.Now().Year(), 0, 0)
+				} else if strings.HasPrefix(f, "15:04") {
+					now := time.Now()
+					t = t.AddDate(now.Year(), int(now.Month()), now.Minute())
+				}
+				f := filter.BeforeTime(t, filter.WhichTimeFiled(timeType[0]))
+				itemFilterFunc = append(itemFilterFunc, &f)
+				return nil
 			}
 			return errors.New("invalid time format")
 		},
