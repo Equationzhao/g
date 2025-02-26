@@ -2,6 +2,7 @@ package util
 
 import (
 	"fmt"
+	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -64,4 +65,30 @@ func SplitNumberAndUnit(input string) (float64, string) {
 	unit = input[i:]
 
 	return number, unit
+}
+
+// GetLocale returns the language code from the system locale
+// It checks LC_ALL, LC_MESSAGES, and LANG environment variables in that order
+// If none are set, it returns "en_US" as default
+func GetLocale() string {
+	locale := ""
+
+	// Check environment variables in order of priority
+	for _, envVar := range []string{"LC_ALL", "LC_MESSAGES", "LANG"} {
+		if val := os.Getenv(envVar); val != "" {
+			locale = val
+			break
+		}
+	}
+
+	if locale == "" {
+		return "en_US" // default locale
+	}
+
+	// Extract just the language code part (e.g., "en_US" from "en_US.UTF-8")
+	if i := strings.IndexRune(locale, '.'); i > 0 {
+		locale = locale[:i]
+	}
+
+	return locale
 }

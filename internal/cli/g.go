@@ -42,6 +42,7 @@ var (
 	r              = render.NewRenderer(&theme.DefaultAll)
 	p              = display.NewFitTerminal()
 	timeFormat     = "Jan 02 15:04"
+	locale         = "en_US"
 	// ReturnCode - Exit status:
 	//  0  if OK,
 	//  1  if minor problems (e.g., cannot access subdirectory),
