@@ -59,7 +59,7 @@ complete -c g -l dereference -d "dereference symbolic links"
 complete -c g -l detect-size -d "set exact size for mimetype detection" -r -f
 complete -c g -l footer -d "add a footer row"
 complete -c g -l full-path -d "show full path"
-complete -c g -l full-time -d "like -all/l --time-style=full-iso" -a "default iso long-iso full-iso locale +FORMAT"
+complete -c g -l full-time -d "like -all/l --time-style=full-iso" -a "default iso long-iso full-iso +FORMAT"
 complete -c g -l gid -d "show gid instead of groupname"
 complete -c g -l git -l git-status -d "show git status"
 complete -c g -l git-repo-branch -l branch -d "list root of git-tree branch"

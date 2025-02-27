@@ -256,9 +256,9 @@ available fields:                       nature(default),none(nosort),
 --time-style TIME_TYPE                  time/date format with -l,
 
 valid TIME_TYPE are :
-										default, iso, long-iso, full-iso, locale,
+										default, iso, long-iso, full-iso,
 										and custom +FORMAT like date(1).
-										(default: +%%d.%%b'%%y %%H:%%M ,like 02.Jan'06 15:04)
+										(default: +%b %d %H:%M ,like Jan 02 15:04)`,
 
 
 --time-type value                       time type, mod(default), create, access, all, birth[macOS only]

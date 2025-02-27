@@ -156,6 +156,12 @@
         }
     },
     "git": {
+        "git-author": {
+            "color": "[67,202,207]@rgb"
+        },
+        "git-author-date": {
+            "color": "[54,102,180]@rgb"
+        },
         "git-branch": {
             "color": "yellow"
         },
@@ -166,6 +172,9 @@
         "git-branch-none": {
             "color": "bright-black",
             "icon": "-"
+        },
+        "git-commit-hash": {
+            "color": "bright-black"
         },
         "git-repo-clean": {
             "color": "green",
