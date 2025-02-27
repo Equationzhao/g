@@ -142,24 +142,24 @@ func (g *GitCommitEnabler) init(info *item.FileInfo) git.CommitInfo {
 	return *commit
 }
 
-func (g *GitCommitEnabler) EnableHash() ContentOption {
+func (g *GitCommitEnabler) EnableHash(renderer *render.Renderer) ContentOption {
 	return func(info *item.FileInfo) (string, string) {
 		commit := g.init(info)
-		return commit.Hash, GitCommitHash
+		return renderer.GitCommitHash(commit.Hash), GitCommitHash
 	}
 }
 
-func (g *GitCommitEnabler) EnableAuthor() ContentOption {
+func (g *GitCommitEnabler) EnableAuthor(renderer *render.Renderer) ContentOption {
 	return func(info *item.FileInfo) (string, string) {
 		commit := g.init(info)
-		return commit.Author, GitAuthor
+		return renderer.GitAuthor(commit.Author), GitAuthor
 	}
 }
 
-func (g *GitCommitEnabler) EnableAuthorDateWithTimeFormat(timeFormat string) ContentOption {
+func (g *GitCommitEnabler) EnableAuthorDateWithTimeFormat(renderer *render.Renderer, timeFormat string) ContentOption {
 	return func(info *item.FileInfo) (string, string) {
 		commit := g.init(info)
-		return commit.GetAuthorDateInFormat(timeFormat), GitAuthorDate
+		return renderer.GitAuthorDate(commit.GetAuthorDateInFormat(timeFormat)), GitAuthorDate
 	}
 }
 

@@ -530,7 +530,7 @@ var logic = func(context *cli.Context) error {
 	}
 
 	if context.Bool("git-detail") {
-		contentFunc = append(contentFunc, gitCommitEnabler.EnableHash(), gitCommitEnabler.EnableAuthor(), gitCommitEnabler.EnableAuthorDateWithTimeFormat(timeFormat))
+		contentFunc = append(contentFunc, gitCommitEnabler.EnableHash(r), gitCommitEnabler.EnableAuthor(r), gitCommitEnabler.EnableAuthorDateWithTimeFormat(r, timeFormat))
 	}
 
 	if context.Bool("flags") {

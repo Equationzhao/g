@@ -10,9 +10,9 @@ import (
 	"strings"
 	"time"
 
+	"github.com/Equationzhao/g/internal/git"
 	"github.com/Equationzhao/g/internal/global"
 
-	"github.com/Equationzhao/g/internal/git"
 	"github.com/Equationzhao/g/internal/theme"
 	"github.com/hako/durafmt"
 	"github.com/valyala/bytebufferpool"
@@ -216,6 +216,42 @@ func (rd *Renderer) Owner(toRender string) string {
 			style = rd.theme.User["root"]
 		}
 	}
+	_, _ = bb.WriteString(style.Color)
+	checkStyle(&style, bb)
+	_, _ = bb.WriteString(toRender)
+	_, _ = bb.WriteString(rd.Colorend())
+	return bb.String()
+}
+
+func (rd *Renderer) GitAuthor(toRender string) string {
+	style := rd.theme.Git["git-author"]
+	bb := bytebufferpool.Get()
+	defer bytebufferpool.Put(bb)
+
+	_, _ = bb.WriteString(style.Color)
+	checkStyle(&style, bb)
+	_, _ = bb.WriteString(toRender)
+	_, _ = bb.WriteString(rd.Colorend())
+	return bb.String()
+}
+
+func (rd *Renderer) GitAuthorDate(toRender string) string {
+	style := rd.theme.Git["git-author-date"]
+	bb := bytebufferpool.Get()
+	defer bytebufferpool.Put(bb)
+
+	_, _ = bb.WriteString(style.Color)
+	checkStyle(&style, bb)
+	_, _ = bb.WriteString(toRender)
+	_, _ = bb.WriteString(rd.Colorend())
+	return bb.String()
+}
+
+func (rd *Renderer) GitCommitHash(toRender string) string {
+	style := rd.theme.Git["git-commit-hash"]
+	bb := bytebufferpool.Get()
+	defer bytebufferpool.Put(bb)
+
 	_, _ = bb.WriteString(style.Color)
 	checkStyle(&style, bb)
 	_, _ = bb.WriteString(toRender)
