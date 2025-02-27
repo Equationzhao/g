@@ -1700,6 +1700,15 @@ var Git = map[string]Style{
 		Color: global.BrightBlack,
 		Icon:  "-",
 	},
+	"git-author": {
+		Color: rgb(67, 202, 207),
+	},
+	"git-author-date": {
+		Color: rgb(54, 102, 180),
+	},
+	"git-commit-hash": {
+		Color: global.BrightBlack,
+	},
 }
 
 var Owner = map[string]Style{

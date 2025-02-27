@@ -2,6 +2,7 @@ package git
 
 import (
 	"encoding/json"
+	"fmt"
 	"os/exec"
 	"strings"
 	"time"
@@ -28,7 +29,7 @@ func (c CommitInfo) GetCommiterDateInFormat(format string) string {
 }
 
 func (c CommitInfo) GetAuthorDateInFormat(format string) string {
-	t, err := time.Parse(time.RFC3339, c.AuthorDate)
+	t, err := time.Parse(goParseFormat, c.AuthorDate)
 	if err != nil {
 		return ""
 	}
@@ -45,8 +46,11 @@ func GetLastCommitInfo(path string) (*CommitInfo, error) {
 	return getLastCommitInfo(path)
 }
 
+const gitDateFormat = `format:"%Y-%m-%d %H:%M:%S.%9N %z"`
+const goParseFormat = time.RFC3339
+
 func getLastCommitInfo(path string) (*CommitInfo, error) {
-	cmd := exec.Command("git", "log", "-1", `--pretty=format:{"h":"%h","a":"%an","c":"%cn","ad":"%aI","cd":"%cI"}`, path)
+	cmd := exec.Command("git", "log", "-1", `--pretty=format:{"h":"%h","a":"%an","c":"%cn","ad":"%aI","cd":"%cI"}`, fmt.Sprintf(`--date=%s`, gitDateFormat), path)
 
 	output, err := cmd.Output()
 	if err != nil {
