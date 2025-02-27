@@ -3,7 +3,10 @@ package git
 import (
 	"encoding/json"
 	"os/exec"
+	"strings"
 	"time"
+
+	strftime "github.com/itchyny/timefmt-go"
 )
 
 type CommitInfo struct {
@@ -28,6 +31,9 @@ func (c CommitInfo) GetAuthorDateInFormat(format string) string {
 	t, err := time.Parse(time.RFC3339, c.AuthorDate)
 	if err != nil {
 		return ""
+	}
+	if strings.HasPrefix(format, "+") {
+		return strftime.Format(t, strings.TrimPrefix(format, "+"))
 	}
 	return t.Format(format)
 }
