@@ -9,7 +9,7 @@ import (
 	"github.com/Equationzhao/g/internal/item"
 	"github.com/Equationzhao/g/internal/osbased"
 	"github.com/Equationzhao/g/internal/render"
-	"github.com/Equationzhao/strftime"
+	strftime "github.com/itchyny/timefmt-go"
 )
 
 type RelativeTimeEnabler struct {
@@ -92,7 +92,7 @@ func EnableTime(format, mode string, renderer *render.Renderer) ContentOption {
 
 		var timeString string
 		if strings.HasPrefix(format, "+") {
-			timeString = strftime.Strftime(strings.TrimPrefix(format, "+"), t)
+			timeString = strftime.Format(t, strings.TrimPrefix(format, "+"))
 		} else {
 			timeString = t.Format(format)
 		}
