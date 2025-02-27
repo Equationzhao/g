@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/Equationzhao/g/internal/filter"
-	"github.com/Equationzhao/strftime"
+	strftime "github.com/itchyny/timefmt-go"
 	"github.com/urfave/cli/v2"
 )
 
@@ -195,7 +195,7 @@ var filteringFlag = []cli.Flag{
 			possibleTimeFormat := []string{"01-02", "01-02 15:04", "15:04", "2006-01-02", "2006-01-02 15:04", timeFormat}
 			for _, f := range possibleTimeFormat {
 				if strings.HasPrefix(f, "+") {
-					t, err := strftime.Parse(strings.TrimPrefix(f, "+"), s)
+					t, err := strftime.Parse(s, strings.TrimPrefix(f, "+"))
 					if err != nil {
 						fmt.Println(err)
 						continue
