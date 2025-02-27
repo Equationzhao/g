@@ -46,8 +46,10 @@ func GetLastCommitInfo(path string) (*CommitInfo, error) {
 	return getLastCommitInfo(path)
 }
 
-const gitDateFormat = `format:"%Y-%m-%d %H:%M:%S.%9N %z"`
-const goParseFormat = time.RFC3339
+const (
+	gitDateFormat = `format:"%Y-%m-%d %H:%M:%S.%9N %z"`
+	goParseFormat = time.RFC3339
+)
 
 func getLastCommitInfo(path string) (*CommitInfo, error) {
 	cmd := exec.Command("git", "log", "-1", `--pretty=format:{"h":"%h","a":"%an","c":"%cn","ad":"%aI","cd":"%cI"}`, fmt.Sprintf(`--date=%s`, gitDateFormat), path)
