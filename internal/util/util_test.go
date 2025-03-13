@@ -1,6 +1,9 @@
 package util
 
-import "testing"
+import (
+	"os"
+	"testing"
+)
 
 func TestSplitNumberAndUnit(t *testing.T) {
 	type args struct {
@@ -147,6 +150,85 @@ func TestEscape(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := Escape(tt.args.a); got != tt.want {
 				t.Errorf("Escape() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestGetLocale(t *testing.T) {
+	tests := []struct {
+		name     string
+		envVars  map[string]string
+		want     string
+		saveEnvs map[string]string
+	}{
+		{
+			name: "No env vars set",
+			envVars: map[string]string{
+				"LC_ALL":      "",
+				"LC_MESSAGES": "",
+				"LANG":        "",
+			},
+			want: "en_US",
+		},
+		{
+			name: "Only LANG set",
+			envVars: map[string]string{
+				"LC_ALL":      "",
+				"LC_MESSAGES": "",
+				"LANG":        "fr_FR.UTF-8",
+			},
+			want: "fr_FR",
+		},
+		{
+			name: "LC_MESSAGES takes precedence over LANG",
+			envVars: map[string]string{
+				"LC_ALL":      "",
+				"LC_MESSAGES": "de_DE.UTF-8",
+				"LANG":        "fr_FR.UTF-8",
+			},
+			want: "de_DE",
+		},
+		{
+			name: "LC_ALL takes precedence over all",
+			envVars: map[string]string{
+				"LC_ALL":      "ja_JP.UTF-8",
+				"LC_MESSAGES": "de_DE.UTF-8",
+				"LANG":        "fr_FR.UTF-8",
+			},
+			want: "ja_JP",
+		},
+		{
+			name: "No UTF-8 suffix",
+			envVars: map[string]string{
+				"LC_ALL": "ko_KR",
+			},
+			want: "ko_KR",
+		},
+	}
+
+	// Save original env vars to restore later
+	saveEnvs := make(map[string]string)
+	for _, envVar := range []string{"LC_ALL", "LC_MESSAGES", "LANG"} {
+		saveEnvs[envVar] = os.Getenv(envVar)
+	}
+
+	// Restore env vars after test completes
+	defer func() {
+		for k, v := range saveEnvs {
+			os.Setenv(k, v)
+		}
+	}()
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// Set environment variables for this test
+			for k, v := range tt.envVars {
+				os.Setenv(k, v)
+			}
+
+			if got := GetLocale(); got != tt.want {
+				t.Errorf("GetLocale() = %v, want %v", got, tt.want)
 			}
 		})
 	}
