@@ -20,4 +20,8 @@ build/
 # compress
 *.gz
 
+# python
+__pycache__/
+*.pyc
+
 example/
