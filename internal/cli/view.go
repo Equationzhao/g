@@ -10,6 +10,7 @@ import (
 	contents "github.com/Equationzhao/g/internal/content"
 	"github.com/Equationzhao/g/internal/display"
 	"github.com/Equationzhao/g/internal/filter"
+	"github.com/Equationzhao/g/internal/util"
 	"github.com/gabriel-vasile/mimetype"
 	"github.com/urfave/cli/v2"
 )
@@ -166,14 +167,14 @@ var viewFlag = []cli.Flag{
 	&cli.StringFlag{
 		Name: "time-style",
 		Usage: `time/date format with -l, 
-	valid timestamp styles are default, iso, long-iso, full-iso, locale, 
+	valid timestamp styles are default, iso, long-iso, full-iso,
 	custom +FORMAT like date(1). 
 	(default: +%b %d %H:%M ,like Jan 02 15:04)`,
 		EnvVars: []string{"TIME_STYLE"},
 		Action: func(context *cli.Context, s string) error {
 			_ = context.Set("time", "1")
 			/*
-				The TIME_STYLE argument can be full-iso, long-iso, iso, locale, or  +FORMAT.
+				The TIME_STYLE argument can be full-iso, long-iso, iso, or  +FORMAT.
 				FORMAT is interpreted like in date(1).
 				Also, the TIME_STYLE environment variable sets the default style to use.
 			*/
@@ -187,8 +188,6 @@ var viewFlag = []cli.Flag{
 				timeFormat = "2006-01-02 15:04:05.000000000 -0700"
 			case "long-iso":
 				timeFormat = "2006-01-02 15:04"
-			case "locale":
-				timeFormat = "Jan 02 15:04"
 			case "iso":
 				timeFormat = "01-02 15:04"
 			case "default":
@@ -196,6 +195,18 @@ var viewFlag = []cli.Flag{
 			default:
 				ReturnCode = 2
 				return errors.New("invalid time-style")
+			}
+			return nil
+		},
+		Category: "VIEW",
+	},
+	&cli.BoolFlag{
+		Name:               "locale",
+		Usage:              "show time in locale format",
+		DisableDefaultText: true,
+		Action: func(context *cli.Context, b bool) error {
+			if b {
+				locale = util.GetLocale()
 			}
 			return nil
 		},
