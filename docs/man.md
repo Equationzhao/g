@@ -2,7 +2,7 @@
 g [options] [files...]
 
 ## VERSION:
-0.28.2
+0.30.0
 
 ## GLOBAL OPTIONS
 --bug                      report bug
