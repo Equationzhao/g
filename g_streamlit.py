@@ -1,70 +1,150 @@
 import pandas as pd
 import streamlit as st
 
-# Set page configuration
 st.set_page_config(
     page_title="g - Advanced ls Command Alternative",
     page_icon="📂",
-    layout="wide",
+    # layout="wide",
     initial_sidebar_state="expanded"
 )
 
-# Custom CSS
 st.markdown("""
 <style>
+    /* Base styles */
+    body {
+        font-family: 'Inter', sans-serif;
+        line-height: 1.6;
+    }
+    
+    /* Title and headers */
     .main-title {
-        font-size: 3rem;
-        font-weight: bold;
+        font-size: 3.5rem;
+        font-weight: 800;
         color: #1E88E5;
-        margin-bottom: 1rem;
+        margin-bottom: 1.5rem;
         text-align: center;
+        text-shadow: 0px 2px 3px rgba(0,0,0,0.1);
     }
     .section-header {
-        font-size: 2rem;
+        font-size: 2.2rem;
+        font-weight: 700;
         color: #0D47A1;
-        border-bottom: 2px solid #90CAF9;
-        padding-bottom: 0.5rem;
-        margin-top: 2rem;
+        border-bottom: 3px solid #90CAF9;
+        padding-bottom: 0.7rem;
+        margin-top: 2.5rem;
+        margin-bottom: 1.5rem;
     }
-    .feature-card {
-        background-color: #f8f9fa;
-        border-radius: 8px;
-        padding: 20px;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        height: 100%;
-    }
+    
+    /* Cards and containers */
     .feature-title {
-        font-weight: bold;
+        font-weight: 700;
+        font-size: 1.35rem;
         color: #1565C0;
-        margin-bottom: 10px;
+        margin-bottom: 12px;
     }
+    
+    /* Code elements */
     .code-header {
-        font-weight: bold;
-        margin-top: 1rem;
+        font-weight: 600;
+        margin-top: 1.2rem;
+        margin-bottom: 0.5rem;
+        font-size: 1.1rem;
+        color: #333;
     }
+    .stCodeBlock {
+        border-radius: 8px !important;
+        margin-bottom: 1.5rem !important;
+    }
+    
+    /* Images */
     .screenshot {
-        border-radius: 8px;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        border-radius: 12px;
+        box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+        margin-bottom: 2rem;
     }
+    
+    /* Badges */
     .badge-container {
         display: flex;
         justify-content: center;
         flex-wrap: wrap;
-        gap: 10px;
-        margin-bottom: 20px;
+        gap: 12px;
+        margin-bottom: 25px;
+        padding: 10px;
+        background: rgba(240,240,240,0.5);
+        border-radius: 8px;
     }
     .badge-container img {
-        height: 25px;
+        height: 28px;
+        transition: transform 0.15s;
+    }
+    .badge-container img:hover {
+        transform: scale(1.05);
+    }
+    
+    /* Tables */
+    .dataframe {
+        font-size: 0.95rem !important;
+    }
+    .dataframe th {
+        background-color: #E3F2FD !important;
+        color: #0D47A1 !important;
+    }
+    
+    /* Custom tabs styling */
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 10px;
+    }
+    .stTabs [data-baseweb="tab"] {
+        border-radius: 4px 4px 0 0;
+        padding: 10px 16px;
+        font-weight: 500;
+    }
+    
+    /* Sidebar improvements */
+    [data-testid="stSidebar"] [data-testid="stMarkdownContainer"] a {
+        color: #1E88E5;
+        text-decoration: none;
+        transition: color 0.2s;
+    }
+    [data-testid="stSidebar"] [data-testid="stMarkdownContainer"] a:hover {
+        color: #0D47A1;
+        text-decoration: underline;
+    }
+    
+    /* Footer */
+    .footer {
+        margin-top: 3rem;
+        text-align: center;
+        padding: 1.5rem;
+        background-color: #f5f7f9;
+        border-radius: 8px;
+        color: #555;
+    }
+    
+    /* Expander refinements */
+    .streamlit-expanderHeader {
+        font-weight: 600;
+        font-size: 1.1rem;
+        color: #1565C0;
+    }
+    
+    /* Info block */
+    .info-block {
+        background-color: #E3F2FD;
+        padding: 15px;
+        border-radius: 8px;
+        border-left: 5px solid #1E88E5;
+        margin-bottom: 20px;
     }
 </style>
 """, unsafe_allow_html=True)
 
-# Sidebar
 with st.sidebar:
-    st.title("Navigation")
+    st.title("📋 Navigation")
     st.markdown("---")
     
-    st.markdown("### Content")
+    st.markdown("### 📑 Content")
     st.markdown("- [Key Features](#key-features)")
     st.markdown("- [Screenshots](#screenshots)")
     st.markdown("- [Usage](#usage)")
@@ -73,16 +153,17 @@ with st.sidebar:
     st.markdown("- [Project Comparison](#project-comparison)")
     
     st.markdown("---")
-    st.markdown("### Links")
+    st.markdown("### 🔗 Quick Links")
     st.markdown("- [GitHub Repository](https://github.com/Equationzhao/g)")
     st.markdown("- [Report Issues](https://github.com/Equationzhao/g/issues)")
     st.markdown("- [Theme Documentation](https://github.com/Equationzhao/g/blob/master/docs/Theme.md)")
     st.markdown("- [Manual](https://github.com/Equationzhao/g/blob/master/docs/man.md)")
+    
+    st.markdown("---")
+    st.caption("G - Version 0.30.0")
 
-# Main title
-st.markdown('<div class="main-title">🌈 g - Feature-rich ls Alternative</div>', unsafe_allow_html=True)
+st.markdown('<div class="main-title">🌈 g </div>', unsafe_allow_html=True)
 
-# Badges
 st.markdown('<div class="badge-container">'
             '<img src="https://img.shields.io/github/stars/Equationzhao/g" alt="Stars">'
             '<img src="https://img.shields.io/github/forks/Equationzhao/g" alt="Forks">'
@@ -90,70 +171,68 @@ st.markdown('<div class="badge-container">'
             '<img src="https://img.shields.io/github/license/Equationzhao/g" alt="License">'
             '</div>', unsafe_allow_html=True)
 
-# Introduction
 st.markdown("""
 **g** is a feature-rich, customizable, and cross-platform `ls` alternative. It provides enhanced visuals with type-specific icons, various layout options, and Git status integration.
 """)
 
-# Key Features
 st.markdown('<div class="section-header" id="key-features">Key Features</div>', unsafe_allow_html=True)
 
 col1, col2 = st.columns(2)
 
 with col1:
     with st.container():
-        st.markdown('<div class="feature-card">', unsafe_allow_html=True)
         st.markdown('<div class="feature-title">🎨 Customizable Display</div>', unsafe_allow_html=True)
         st.markdown("Icons and colors specific to file types, easy to customize")
         st.markdown('</div>', unsafe_allow_html=True)
-
-    st.markdown("")  # Spacing
-
-    with st.container():
-        st.markdown('<div class="feature-card">', unsafe_allow_html=True)
-        st.markdown('<div class="feature-title">🔀 Multiple Layouts</div>', unsafe_allow_html=True)
-        st.markdown("Choose from grid, across, byline, zero, comma, table, json, markdown, and tree layouts")
         st.markdown('</div>', unsafe_allow_html=True)
 
     st.markdown("")  # Spacing
 
     with st.container():
-        st.markdown('<div class="feature-card">', unsafe_allow_html=True)
+        st.markdown('<div class="feature-title">🔀 Multiple Layouts</div>', unsafe_allow_html=True)
+        st.markdown("Choose from grid, across, byline, zero, comma, table, json, markdown, and tree layouts")
+        st.markdown('</div>', unsafe_allow_html=True)
+        st.markdown('</div>', unsafe_allow_html=True)
+
+    st.markdown("")  # Spacing
+
+    with st.container():
         st.markdown('<div class="feature-title">🌐 Git Integration</div>', unsafe_allow_html=True)
         st.markdown("View file git-status/repo-status/repo-branch directly in your listings")
+        st.markdown('</div>', unsafe_allow_html=True)
         st.markdown('</div>', unsafe_allow_html=True)
 
 with col2:
     with st.container():
-        st.markdown('<div class="feature-card">', unsafe_allow_html=True)
         st.markdown('<div class="feature-title">🔄 Advanced Sorting</div>', unsafe_allow_html=True)
         st.markdown("Highly customizable sorting options like version-sort")
         st.markdown('</div>', unsafe_allow_html=True)
+        st.markdown('</div>', unsafe_allow_html=True)
 
     st.markdown("")  # Spacing
 
     with st.container():
-        st.markdown('<div class="feature-card">', unsafe_allow_html=True)
         st.markdown('<div class="feature-title">💻 Cross-Platform</div>', unsafe_allow_html=True)
         st.markdown("Works seamlessly on Linux, Windows, and MacOS")
         st.markdown('</div>', unsafe_allow_html=True)
+        st.markdown('</div>', unsafe_allow_html=True)
 
     st.markdown("")  # Spacing
 
     with st.container():
-        st.markdown('<div class="feature-card">', unsafe_allow_html=True)
         st.markdown('<div class="feature-title">🔍 Fuzzy Path Matching</div>', unsafe_allow_html=True)
         st.markdown("zoxide and fzf like fuzzy path matching")
         st.markdown('</div>', unsafe_allow_html=True)
+        st.markdown('</div>', unsafe_allow_html=True)
 
-# Screenshots
 st.markdown('<div class="section-header" id="screenshots">Screenshots</div>', unsafe_allow_html=True)
+st.markdown('<div class="screenshot-container">', unsafe_allow_html=True)
 st.image("https://raw.githubusercontent.com/Equationzhao/g/master/asset/screenshot_3.png", 
-         caption="g command interface", 
+         caption="g command interface with icons and features visible", 
          use_column_width=True, 
          output_format="PNG")
+st.markdown('</div>', unsafe_allow_html=True)
 
-# Usage
 st.markdown('<div class="section-header" id="usage">Usage</div>', unsafe_allow_html=True)
 
 st.markdown('<div class="code-header">Basic usage:</div>', unsafe_allow_html=True)
@@ -188,7 +267,6 @@ with more_options:
     For all options, see the [manual](https://github.com/Equationzhao/g/blob/master/docs/man.md)
     """)
     
-# Custom Themes
 theme = st.expander("Custom Themes", expanded=False)
 with theme:
     st.markdown("""
@@ -202,10 +280,9 @@ with theme:
     ```
     """)
 
-# Installation Guide
 st.markdown('<div class="section-header" id="installation-guide">Installation Guide</div>', unsafe_allow_html=True)
 
-install_tabs = st.tabs(["Package Managers", "Pre-built Binaries", "Build from Source"])
+install_tabs = st.tabs(["📦 Package Managers", "⬇️ Pre-built Binaries", "🛠️ Build from Source"])
 
 with install_tabs[0]:
     col1, col2 = st.columns(2)
@@ -268,7 +345,6 @@ with install_tabs[2]:
     ```
     """)
 
-# Recommended Terminals
 st.markdown("### Recommended Terminals")
 
 term_cols = st.columns(3)
@@ -287,13 +363,14 @@ with term_cols[2]:
     st.markdown("- [Hyper](https://hyper.is/)")
     st.markdown("- [WezTerm](https://wezfurlong.org/wezterm/)")
 
-# Shell Integration
 st.markdown('<div class="section-header" id="shell-integration">Shell Integration</div>', unsafe_allow_html=True)
 
-shell_tabs = st.tabs(["Command Completion", "Shell Aliases"])
+shell_tabs = st.tabs(["🔄 Command Completion", "🔠 Shell Aliases"])
 
 with shell_tabs[0]:
+    st.markdown('<div class="info-block">', unsafe_allow_html=True)
     st.info("If you install `g` through brew or the install script, the completion is usually installed already.")
+    st.markdown('</div>', unsafe_allow_html=True)
     
     completion_tabs = st.tabs(["zsh", "bash", "fish"])
     
@@ -382,7 +459,6 @@ echo $profile
 source ~/.g.nu
         """, language="nu")
 
-# Project Comparison
 st.markdown('<div class="section-header" id="project-comparison">Project Comparison</div>', unsafe_allow_html=True)
 
 st.markdown("""
@@ -392,7 +468,6 @@ g is highly inspired by the following excellent projects:
 - [ls-go](https://github.com/acarl005/ls-go)
 """)
 
-# Create comparison table
 comparison_data = {
     "Feature": ["Display Modes", "Unique Features", "Performance"],
     "eza": ["oneline, grid, across, tree, recurse", 
@@ -406,12 +481,11 @@ comparison_data = {
 df = pd.DataFrame(comparison_data)
 st.table(df)
 
-
-# Footer
 st.markdown("---")
 st.markdown("""
-<div style="text-align: center">
+<div class="footer">
     <p>g is an open-source project with MIT license</p>
     <p>© 2023-2025 Equationzhao</p>
+    <p><a href="https://github.com/Equationzhao/g/stargazers">⭐ Star on GitHub</a> if you find this project useful!</p>
 </div>
 """, unsafe_allow_html=True)
