@@ -2,7 +2,6 @@ package render
 
 import (
 	"fmt"
-	"math"
 	"path/filepath"
 	"regexp"
 	"runtime"
@@ -297,13 +296,6 @@ func (rd *Renderer) Time(toRender string) string {
 	return rd.infoByName(toRender, "time")
 }
 
-func closest256Color(r, g, b uint8) uint8 {
-	r6 := uint8(math.Round(float64(r) / 255.0 * 5.0))
-	g6 := uint8(math.Round(float64(g) / 255.0 * 5.0))
-	b6 := uint8(math.Round(float64(b) / 255.0 * 5.0))
-	return 16 + 36*r6 + 6*g6 + b6
-}
-
 func (rd *Renderer) calculateRTimeColor(dura time.Duration) string {
 	dura = dura.Abs()
 	const maxDura = 52 * 7 * 24 * time.Hour
@@ -323,9 +315,7 @@ func (rd *Renderer) calculateRTimeColor(dura time.Duration) string {
 	case theme.C256:
 		hue := 180.0 + (240.0-180.0)*t
 		r, g, b := theme.HslToRgb(hue, 1.0, 0.5)
-		code := closest256Color(r, g, b)
-		res, _ := theme.Color256(int(code))
-		return res
+		return theme.RGBTo256(r, g, b)
 	case theme.Ascii:
 		return rd.theme.InfoTheme["time"].Color
 	default:
