@@ -13,15 +13,15 @@ import (
 type CommitInfo struct {
 	Hash string `json:"h"`
 
-	Comitter     string `json:"c"`
-	ComitterDate string `json:"cd"`
+	Committer     string `json:"c"`
+	CommitterDate string `json:"cd"`
 
 	Author     string `json:"a"`
 	AuthorDate string `json:"ad"`
 }
 
-func (c CommitInfo) GetCommiterDateInFormat(format string) string {
-	t, err := time.Parse(time.RFC3339, c.ComitterDate)
+func (c CommitInfo) GetCommitterDateInFormat(format string) string {
+	t, err := time.Parse(time.RFC3339, c.CommitterDate)
 	if err != nil {
 		return ""
 	}
