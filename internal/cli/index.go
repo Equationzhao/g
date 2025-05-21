@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"os"
@@ -8,24 +9,24 @@ import (
 
 	"github.com/Equationzhao/g/internal/index"
 	"github.com/Equationzhao/pathbeautify"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 var indexFlags = []cli.Flag{
 	&cli.BoolFlag{
-		Name:               "disable-index",
-		Aliases:            []string{"di", "no-update"},
-		Usage:              "disable updating index",
-		Category:           "INDEX",
-		DisableDefaultText: true,
+		Name:        "disable-index",
+		Aliases:     []string{"di", "no-update"},
+		Usage:       "disable updating index",
+		Category:    "INDEX",
+		HideDefault: true,
 	},
 	&cli.BoolFlag{
-		Name:               "rebuild-index",
-		Aliases:            []string{"ri", "remove-all"},
-		Usage:              "rebuild index",
-		DisableDefaultText: true,
-		Category:           "INDEX",
-		Action: func(context *cli.Context, b bool) error {
+		Name:        "rebuild-index",
+		Aliases:     []string{"ri", "remove-all"},
+		Usage:       "rebuild index",
+		HideDefault: true,
+		Category:    "INDEX",
+		Action: func(c context.Context, cmd *cli.Command, b bool) error {
 			if b {
 				err := index.RebuildIndex()
 				if err != nil {
@@ -36,22 +37,22 @@ var indexFlags = []cli.Flag{
 		},
 	},
 	&cli.BoolFlag{
-		Name:               "fuzzy",
-		Aliases:            []string{"fz", "f"},
-		Usage:              "fuzzy search",
-		DisableDefaultText: true,
-		Category:           "INDEX",
+		Name:        "fuzzy",
+		Aliases:     []string{"fz", "f"},
+		Usage:       "fuzzy search",
+		HideDefault: true,
+		Category:    "INDEX",
 	},
 	&cli.StringSliceFlag{
 		Name:     "remove-index",
 		Aliases:  []string{"rm"},
 		Usage:    "remove paths from index",
 		Category: "INDEX",
-		Action: func(context *cli.Context, i []string) error {
+		Action: func(c context.Context, cmd *cli.Command, i []string) error {
 			var errSum error = nil
 
 			beautification := true
-			if context.Bool("np") { // --no-path-transform
+			if cmd.Bool("np") { // --no-path-transform
 				beautification = false
 			}
 
@@ -79,12 +80,12 @@ var indexFlags = []cli.Flag{
 		},
 	},
 	&cli.BoolFlag{
-		Name:               "list-index",
-		Aliases:            []string{"li"},
-		Usage:              "list index",
-		DisableDefaultText: true,
-		Category:           "INDEX",
-		Action: func(context *cli.Context, b bool) error {
+		Name:        "list-index",
+		Aliases:     []string{"li"},
+		Usage:       "list index",
+		HideDefault: true,
+		Category:    "INDEX",
+		Action: func(c context.Context, cmd *cli.Command, b bool) error {
 			if b {
 				keys, err := index.All()
 				if err != nil {
@@ -98,12 +99,12 @@ var indexFlags = []cli.Flag{
 		},
 	},
 	&cli.BoolFlag{
-		Name:               "remove-current-path",
-		Aliases:            []string{"rcp", "rc", "rmc"},
-		Usage:              "remove current path from index",
-		Category:           "INDEX",
-		DisableDefaultText: true,
-		Action: func(context *cli.Context, b bool) error {
+		Name:        "remove-current-path",
+		Aliases:     []string{"rcp", "rc", "rmc"},
+		Usage:       "remove current path from index",
+		Category:    "INDEX",
+		HideDefault: true,
+		Action: func(c context.Context, cmd *cli.Command, b bool) error {
 			if b {
 				r, err := os.Getwd()
 				if err != nil {
@@ -118,12 +119,12 @@ var indexFlags = []cli.Flag{
 		},
 	},
 	&cli.BoolFlag{
-		Name:               "remove-invalid-path",
-		Aliases:            []string{"rip"},
-		Usage:              "remove invalid paths from index",
-		Category:           "INDEX",
-		DisableDefaultText: true,
-		Action: func(ctx *cli.Context, b bool) error {
+		Name:        "remove-invalid-path",
+		Aliases:     []string{"rip"},
+		Usage:       "remove invalid paths from index",
+		Category:    "INDEX",
+		HideDefault: true,
+		Action: func(c context.Context, cmd *cli.Command, b bool) error {
 			if b {
 				paths, err := index.All()
 				if err != nil {

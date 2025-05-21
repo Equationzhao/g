@@ -10,7 +10,7 @@ import (
 	"github.com/Equationzhao/g/internal/config"
 	"github.com/agiledragon/gomonkey/v2"
 	"github.com/stretchr/testify/assert"
-	ucli "github.com/urfave/cli/v2"
+	ucli "github.com/urfave/cli/v3"
 )
 
 func Test_catchPanic(t *testing.T) {

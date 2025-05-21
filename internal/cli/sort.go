@@ -1,11 +1,12 @@
 package cli
 
 import (
+	"context"
 	"fmt"
 	"slices"
 
 	"github.com/Equationzhao/g/internal/sorter"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 var sortingFlags = []cli.Flag{
@@ -20,7 +21,7 @@ var sortingFlags = []cli.Flag{
 	   name,.name(sorts by name without a leading dot),	
 	   size,time,owner,group,extension,inode,width,mime. 	
 	   following '-descend' to sort descending`,
-		Action: func(context *cli.Context, slice []string) error {
+		Action: func(c context.Context, cmd *cli.Command, slice []string) error {
 			if slices.ContainsFunc(slice, func(s string) bool {
 				nosort := []string{"none", "None", "nosort", "U"}
 				return slices.Contains(nosort, s)
@@ -49,14 +50,14 @@ var sortingFlags = []cli.Flag{
 				case ".Name-descend":
 					sort.AddOption(sorter.ByNameWithoutALeadingDotCaseSensitiveDescend)
 				case "size-descend", "S", "sizesort":
-					if context.Bool("recursive-size") {
-						sort.AddOption(sorter.ByRecursiveSizeDescend(context.Int("depth")))
+					if cmd.Bool("recursive-size") {
+						sort.AddOption(sorter.ByRecursiveSizeDescend(cmd.Int("depth")))
 					} else {
 						sort.AddOption(sorter.BySizeDescend)
 					}
 				case "size":
-					if context.Bool("recursive-size") {
-						sort.AddOption(sorter.ByRecursiveSizeAscend(context.Int("depth")))
+					if cmd.Bool("recursive-size") {
+						sort.AddOption(sorter.ByRecursiveSizeAscend(cmd.Int("depth")))
 					} else {
 						sort.AddOption(sorter.BySizeAscend)
 					}
@@ -95,7 +96,7 @@ var sortingFlags = []cli.Flag{
 				case "mime", "mimetype", "Mime", "Mimetype":
 					err := limitOnce.Do(
 						func() error {
-							return setLimit(context)
+							return setLimit(cmd)
 						},
 					)
 					if err != nil {
@@ -105,7 +106,7 @@ var sortingFlags = []cli.Flag{
 				case "mime-descend", "mimetype-descend", "Mime-descend", "Mimetype-descend":
 					err := limitOnce.Do(
 						func() error {
-							return setLimit(context)
+							return setLimit(cmd)
 						},
 					)
 					if err != nil {
@@ -129,11 +130,11 @@ var sortingFlags = []cli.Flag{
 		Category: "SORTING",
 	},
 	&cli.BoolFlag{
-		Name:               "sort-reverse",
-		Aliases:            []string{"reverse", "r"},
-		Usage:              "reverse the order of the sort",
-		DisableDefaultText: true,
-		Action: func(context *cli.Context, b bool) error {
+		Name:        "sort-reverse",
+		Aliases:     []string{"reverse", "r"},
+		Usage:       "reverse the order of the sort",
+		HideDefault: true,
+		Action: func(c context.Context, cmd *cli.Command, b bool) error {
 			if b {
 				sort.Reverse()
 			}
@@ -142,11 +143,11 @@ var sortingFlags = []cli.Flag{
 		Category: "SORTING",
 	},
 	&cli.BoolFlag{
-		Name:               "df",
-		Aliases:            []string{"dir-first", "group-directories-first"},
-		Usage:              "list directories before other files",
-		DisableDefaultText: true,
-		Action: func(context *cli.Context, b bool) error {
+		Name:        "df",
+		Aliases:     []string{"dir-first", "group-directories-first"},
+		Usage:       "list directories before other files",
+		HideDefault: true,
+		Action: func(c context.Context, cmd *cli.Command, b bool) error {
 			if b {
 				sort.DirFirst()
 			} else {
@@ -157,13 +158,13 @@ var sortingFlags = []cli.Flag{
 		Category: "SORTING",
 	},
 	&cli.BoolFlag{
-		Name:               "S",
-		Aliases:            []string{"sort-by-size", "sizesort"},
-		Usage:              "sort by file size, largest first(descending)",
-		DisableDefaultText: true,
-		Action: func(context *cli.Context, b bool) error {
-			if context.Bool("srs") { // recursive size
-				sort.AddOption(sorter.ByRecursiveSizeDescend(context.Int("depth")))
+		Name:        "S",
+		Aliases:     []string{"sort-by-size", "sizesort"},
+		Usage:       "sort by file size, largest first(descending)",
+		HideDefault: true,
+		Action: func(c context.Context, cmd *cli.Command, b bool) error {
+			if cmd.Bool("srs") { // recursive size
+				sort.AddOption(sorter.ByRecursiveSizeDescend(cmd.Int("depth")))
 			} else {
 				sort.AddOption(sorter.BySizeDescend)
 			}
@@ -172,34 +173,34 @@ var sortingFlags = []cli.Flag{
 		Category: "SORTING",
 	},
 	&cli.BoolFlag{
-		Name:               "X",
-		Aliases:            []string{"sort-by-ext"},
-		Usage:              "sort alphabetically by entry extension",
-		DisableDefaultText: true,
-		Action: func(context *cli.Context, b bool) error {
+		Name:        "X",
+		Aliases:     []string{"sort-by-ext"},
+		Usage:       "sort alphabetically by entry extension",
+		HideDefault: true,
+		Action: func(c context.Context, cmd *cli.Command, b bool) error {
 			sort.AddOption(sorter.ByExtensionAscend)
 			return nil
 		},
 		Category: "SORTING",
 	},
 	&cli.BoolFlag{
-		Name:               "width",
-		Usage:              "sort by entry name width",
-		DisableDefaultText: true,
-		Action: func(context *cli.Context, b bool) error {
+		Name:        "width",
+		Usage:       "sort by entry name width",
+		HideDefault: true,
+		Action: func(c context.Context, cmd *cli.Command, b bool) error {
 			sort.AddOption(sorter.ByNameWidthAscend)
 			return nil
 		},
 		Category: "SORTING",
 	},
 	&cli.BoolFlag{
-		Name:               "sort-by-mime",
-		Usage:              "sort by mimetype",
-		DisableDefaultText: true,
-		Action: func(context *cli.Context, b bool) error {
+		Name:        "sort-by-mime",
+		Usage:       "sort by mimetype",
+		HideDefault: true,
+		Action: func(c context.Context, cmd *cli.Command, b bool) error {
 			err := limitOnce.Do(
 				func() error {
-					return setLimit(context)
+					return setLimit(cmd)
 				},
 			)
 			if err != nil {
@@ -212,14 +213,14 @@ var sortingFlags = []cli.Flag{
 		Category: "SORTING",
 	},
 	&cli.BoolFlag{
-		Name:               "sort-by-mime-descend",
-		Usage:              "sort by mimetype, descending",
-		DisableDefaultText: true,
-		Action: func(context *cli.Context, b bool) error {
+		Name:        "sort-by-mime-descend",
+		Usage:       "sort by mimetype, descending",
+		HideDefault: true,
+		Action: func(c context.Context, cmd *cli.Command, b bool) error {
 			if b {
 				err := limitOnce.Do(
 					func() error {
-						return setLimit(context)
+						return setLimit(cmd)
 					},
 				)
 				if err != nil {
@@ -233,14 +234,14 @@ var sortingFlags = []cli.Flag{
 		Category: "SORTING",
 	},
 	&cli.BoolFlag{
-		Name:               "sort-by-mime-parent",
-		Usage:              "sort by mimetype parent",
-		DisableDefaultText: true,
-		Action: func(context *cli.Context, b bool) error {
+		Name:        "sort-by-mime-parent",
+		Usage:       "sort by mimetype parent",
+		HideDefault: true,
+		Action: func(c context.Context, cmd *cli.Command, b bool) error {
 			if b {
 				err := limitOnce.Do(
 					func() error {
-						return setLimit(context)
+						return setLimit(cmd)
 					},
 				)
 				if err != nil {
@@ -254,14 +255,14 @@ var sortingFlags = []cli.Flag{
 		Category: "SORTING",
 	},
 	&cli.BoolFlag{
-		Name:               "sort-by-mime-parent-descend",
-		Usage:              "sort by mimetype parent",
-		DisableDefaultText: true,
-		Action: func(context *cli.Context, b bool) error {
+		Name:        "sort-by-mime-parent-descend",
+		Usage:       "sort by mimetype parent",
+		HideDefault: true,
+		Action: func(c context.Context, cmd *cli.Command, b bool) error {
 			if b {
 				err := limitOnce.Do(
 					func() error {
-						return setLimit(context)
+						return setLimit(cmd)
 					},
 				)
 				if err != nil {
@@ -278,18 +279,18 @@ var sortingFlags = []cli.Flag{
 		Name:    "versionsort",
 		Aliases: []string{"sort-by-version"},
 		Usage:   "sort by version numbers, ascending",
-		Action: func(context *cli.Context, b bool) error {
+		Action: func(c context.Context, cmd *cli.Command, b bool) error {
 			sort.AddOption(sorter.ByVersionAscend)
 			return nil
 		},
 		Category: "SORTING",
 	},
 	&cli.BoolFlag{
-		Name:               "U",
-		Aliases:            []string{"nosort", "no-sort"},
-		Usage:              "do not sort; list entries in directory order. ",
-		DisableDefaultText: true,
-		Action: func(context *cli.Context, b bool) error {
+		Name:        "U",
+		Aliases:     []string{"nosort", "no-sort"},
+		Usage:       "do not sort; list entries in directory order. ",
+		HideDefault: true,
+		Action: func(c context.Context, cmd *cli.Command, b bool) error {
 			sort.Reset()
 			return nil
 		},

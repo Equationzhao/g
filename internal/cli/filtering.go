@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"slices"
@@ -9,7 +10,7 @@ import (
 
 	"github.com/Equationzhao/g/internal/filter"
 	strftime "github.com/itchyny/timefmt-go"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 var filteringFlag = []cli.Flag{
@@ -25,7 +26,7 @@ var filteringFlag = []cli.Flag{
 		Name:    "I",
 		Aliases: []string{"ignore"},
 		Usage:   "ignore Glob patterns",
-		Action: func(context *cli.Context, s []string) error {
+		Action: func(c context.Context, cmd *cli.Command, s []string) error {
 			if len(s) > 0 {
 				f, err := filter.RemoveGlob(s...)
 				if err != nil {
@@ -41,7 +42,7 @@ var filteringFlag = []cli.Flag{
 		Name:    "M",
 		Aliases: []string{"match"},
 		Usage:   "match Glob patterns",
-		Action: func(context *cli.Context, s []string) error {
+		Action: func(c context.Context, cmd *cli.Command, s []string) error {
 			if len(s) > 0 {
 				f, err := filter.GlobOnly(s...)
 				if err != nil {
@@ -54,11 +55,11 @@ var filteringFlag = []cli.Flag{
 		Category: "FILTERING",
 	},
 	&cli.BoolFlag{
-		Name:               "show-only-hidden",
-		Aliases:            []string{"hidden"},
-		DisableDefaultText: true,
-		Usage:              "show only hidden files(overridden by --show-hidden/-a/-A)",
-		Action: func(context *cli.Context, b bool) error {
+		Name:        "show-only-hidden",
+		Aliases:     []string{"hidden"},
+		HideDefault: true,
+		Usage:       "show only hidden files(overridden by --show-hidden/-a/-A)",
+		Action: func(c context.Context, cmd *cli.Command, b bool) error {
 			if b {
 				itemFilterFunc = slices.DeleteFunc(itemFilterFunc, func(e *filter.ItemFilterFunc) bool {
 					return e == &filter.RemoveHidden
@@ -70,11 +71,11 @@ var filteringFlag = []cli.Flag{
 		Category: "FILTERING",
 	},
 	&cli.BoolFlag{
-		Name:               "a",
-		Aliases:            []string{"sh", "show-hidden"},
-		DisableDefaultText: true,
-		Usage:              "show hidden files",
-		Action: func(context *cli.Context, b bool) error {
+		Name:        "a",
+		Aliases:     []string{"sh", "show-hidden"},
+		HideDefault: true,
+		Usage:       "show hidden files",
+		Action: func(c context.Context, cmd *cli.Command, b bool) error {
 			if b {
 				// remove filter.RemoveHidden
 				itemFilterFunc = slices.DeleteFunc(itemFilterFunc, func(e *filter.ItemFilterFunc) bool {
@@ -88,7 +89,7 @@ var filteringFlag = []cli.Flag{
 	&cli.StringSliceFlag{
 		Name:  "ext",
 		Usage: "show file which has target ext, eg: --ext=go,java",
-		Action: func(context *cli.Context, s []string) error {
+		Action: func(c context.Context, cmd *cli.Command, s []string) error {
 			if len(s) > 0 {
 				f := filter.ExtOnly(s...)
 				itemFilterFunc = append(itemFilterFunc, &f)
@@ -101,7 +102,7 @@ var filteringFlag = []cli.Flag{
 		Name:    "no-ext",
 		Aliases: []string{"noext"},
 		Usage:   "show file which doesn't have target ext",
-		Action: func(context *cli.Context, s []string) error {
+		Action: func(c context.Context, cmd *cli.Command, s []string) error {
 			if len(s) > 0 {
 				f := filter.RemoveByExt(s...)
 				itemFilterFunc = append(itemFilterFunc, &f)
@@ -111,11 +112,11 @@ var filteringFlag = []cli.Flag{
 		Category: "FILTERING",
 	},
 	&cli.BoolFlag{
-		Name:               "no-dir",
-		Aliases:            []string{"nodir", "file"},
-		DisableDefaultText: true,
-		Usage:              "do not show directory",
-		Action: func(context *cli.Context, b bool) error {
+		Name:        "no-dir",
+		Aliases:     []string{"nodir", "file"},
+		HideDefault: true,
+		Usage:       "do not show directory",
+		Action: func(c context.Context, cmd *cli.Command, b bool) error {
 			if b {
 				itemFilterFunc = append(itemFilterFunc, &filter.RemoveDir)
 			}
@@ -124,11 +125,11 @@ var filteringFlag = []cli.Flag{
 		Category: "FILTERING",
 	},
 	&cli.BoolFlag{
-		Name:               "D",
-		Aliases:            []string{"dir", "only-dir"},
-		DisableDefaultText: true,
-		Usage:              "show directory only",
-		Action: func(context *cli.Context, b bool) error {
+		Name:        "D",
+		Aliases:     []string{"dir", "only-dir"},
+		HideDefault: true,
+		Usage:       "show directory only",
+		Action: func(c context.Context, cmd *cli.Command, b bool) error {
 			if b {
 				itemFilterFunc = append(itemFilterFunc, &filter.DirOnly)
 			}
@@ -137,11 +138,11 @@ var filteringFlag = []cli.Flag{
 		Category: "FILTERING",
 	},
 	&cli.BoolFlag{
-		Name:               "B",
-		Aliases:            []string{"ignore-backups"},
-		DisableDefaultText: true,
-		Usage:              "do not list implied entries ending with ~",
-		Action: func(context *cli.Context, b bool) error {
+		Name:        "B",
+		Aliases:     []string{"ignore-backups"},
+		HideDefault: true,
+		Usage:       "do not list implied entries ending with ~",
+		Action: func(c context.Context, cmd *cli.Command, b bool) error {
 			if b {
 				itemFilterFunc = append(itemFilterFunc, &filter.RemoveBackups)
 			}
@@ -150,11 +151,11 @@ var filteringFlag = []cli.Flag{
 		Category: "FILTERING",
 	},
 	&cli.BoolFlag{
-		Name:               "A",
-		Aliases:            []string{"almost-all"},
-		DisableDefaultText: true,
-		Usage:              "do not list implied . and ..",
-		Action: func(context *cli.Context, b bool) error {
+		Name:        "A",
+		Aliases:     []string{"almost-all"},
+		HideDefault: true,
+		Usage:       "do not list implied . and ..",
+		Action: func(c context.Context, cmd *cli.Command, b bool) error {
 			if b {
 				// remove filter.RemoveHidden
 				itemFilterFunc = slices.DeleteFunc(itemFilterFunc, func(e *filter.ItemFilterFunc) bool {
@@ -169,11 +170,11 @@ var filteringFlag = []cli.Flag{
 		Name:     "only-mime",
 		Usage:    "only show file with given mime type",
 		Category: "FILTERING",
-		Action: func(context *cli.Context, i []string) error {
+		Action: func(c context.Context, cmd *cli.Command, i []string) error {
 			if len(i) > 0 {
 				err := limitOnce.Do(
 					func() error {
-						return setLimit(context)
+						return setLimit(cmd)
 					},
 				)
 				if err != nil {
@@ -191,7 +192,7 @@ var filteringFlag = []cli.Flag{
 	the time will be parsed using format:
 		MM-dd, MM-dd HH:mm, HH:mm, YYYY-MM-dd, YYYY-MM-dd HH:mm, and the format set by --time-style`,
 		Category: "FILTERING",
-		Action: func(ctx *cli.Context, s string) error {
+		Action: func(c context.Context, cmd *cli.Command, s string) error {
 			possibleTimeFormat := []string{"01-02", "01-02 15:04", "15:04", "2006-01-02", "2006-01-02 15:04", timeFormat}
 			for _, f := range possibleTimeFormat {
 				if strings.HasPrefix(f, "+") {
@@ -225,7 +226,7 @@ var filteringFlag = []cli.Flag{
 		Name:     "after",
 		Usage:    "show items which was modified/access/created after given time, see --before",
 		Category: "FILTERING",
-		Action: func(ctx *cli.Context, s string) error {
+		Action: func(c context.Context, cmd *cli.Command, s string) error {
 			possibleTimeFormat := []string{"01-02", "01-02 15:04", "15:04", "2006-01-02", "2006-01-02 15:04", timeFormat}
 			for _, f := range possibleTimeFormat {
 				t, err := time.ParseInLocation(f, s, time.Local)

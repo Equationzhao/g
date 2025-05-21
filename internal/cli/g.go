@@ -2,6 +2,7 @@ package cli
 
 import (
 	"bufio"
+	"context"
 	"errors"
 	"fmt"
 	"os"
@@ -30,7 +31,7 @@ import (
 	"github.com/Equationzhao/pathbeautify"
 	"github.com/hako/durafmt"
 	"github.com/savioxavier/termlink"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 	"github.com/xrash/smetrics"
 	"go.szostok.io/version/upgrade"
 )
@@ -68,11 +69,11 @@ var (
 	allPart          []string
 )
 
-var G *cli.App
+var G *cli.Command
 
 func init() {
 	itemFilterFunc = append(itemFilterFunc, &filter.RemoveHidden)
-	G = &cli.App{
+	G = &cli.Command{
 		Name:               "g",
 		Usage:              "a powerful ls",
 		UsageText:          "g [options] [path]",
@@ -80,12 +81,12 @@ func init() {
 		SliceFlagSeparator: ",",
 		HideHelpCommand:    true,
 		Suggest:            true,
-		OnUsageError: func(cCtx *cli.Context, err error, isSubcommand bool) error {
+		OnUsageError: func(cCtx context.Context, cmd *cli.Command, err error, isSubcommand bool) error {
 			ReturnCode = 2
 			str := err.Error()
 			const prefix = "flag provided but not defined: "
 			if strings.HasPrefix(str, prefix) {
-				suggest := suggestFlag(cCtx.App.Flags, strings.TrimLeft(strings.TrimPrefix(str, prefix), "-"))
+				suggest := suggestFlag(cmd.Flags, strings.TrimLeft(strings.TrimPrefix(str, prefix), "-"))
 				if suggest != "" {
 					str = fmt.Sprintf("%s, Did you mean %s?", str, suggest)
 				}
@@ -102,7 +103,7 @@ func init() {
 			Name:     "check-new-version",
 			Usage:    "check if there's new release",
 			Category: "\b\b\b   META", // add \b to ensure the category is the first one to show
-			Action: func(context *cli.Context, b bool) error {
+			Action: func(c context.Context, cmd *cli.Command, b bool) error {
 				if b {
 					upgrade.WithUpdateCheckTimeout(5 * time.Second)
 					notice := upgrade.NewGitHubDetector("Equationzhao", "g")
@@ -111,21 +112,21 @@ func init() {
 				}
 				return nil
 			},
-			DisableDefaultText: true,
+			HideDefault: true,
 		},
 		&cli.BoolFlag{
-			Name:               "no-path-transform",
-			Aliases:            []string{"np"},
-			DisableDefaultText: true,
+			Name:        "no-path-transform",
+			Aliases:     []string{"np"},
+			HideDefault: true,
 			Usage: `By default, .../a/b/c will be transformed to ../../a/b/c, and ~ will be replaced by homedir, 
 	using this flag to disable this feature`,
 		},
 		&cli.BoolFlag{
-			Name:               "duplicate",
-			Aliases:            []string{"dup"},
-			Usage:              "show duplicate files",
-			DisableDefaultText: true,
-			Action: func(context *cli.Context, b bool) error {
+			Name:        "duplicate",
+			Aliases:     []string{"dup"},
+			Usage:       "show duplicate files",
+			HideDefault: true,
+			Action: func(c context.Context, cmd *cli.Command, b bool) error {
 				if b {
 					noOutputFunc = append(noOutputFunc, duplicateDetect.Enable())
 					hookPost = append(
@@ -141,7 +142,7 @@ func init() {
 		&cli.StringFlag{
 			Name:  "init",
 			Usage: `show the init script for shell, support zsh, bash, fish, powershell, nushell`,
-			Action: func(context *cli.Context, s string) error {
+			Action: func(c context.Context, cmd *cli.Command, s string) error {
 				init, err := shell.Init(s)
 				if err != nil {
 					return err
@@ -152,15 +153,15 @@ func init() {
 			Category: "SHELL",
 		},
 		&cli.BoolFlag{
-			Name:               "no-config",
-			Usage:              "do not load config file",
-			DisableDefaultText: true,
+			Name:        "no-config",
+			Usage:       "do not load config file",
+			HideDefault: true,
 		},
 		&cli.BoolFlag{
-			Name:               "bug",
-			Usage:              "report bug",
-			DisableDefaultText: true,
-			Action: func(context *cli.Context, b bool) error {
+			Name:        "bug",
+			Usage:       "report bug",
+			HideDefault: true,
+			Action: func(c context.Context, cmd *cli.Command, b bool) error {
 				_, _ = fmt.Println("please report bug to equationzhao@foxmail.com\nor file an issue at https://github.com/Equationzhao/g/issues")
 				return Err4Exit{}
 			},
@@ -246,7 +247,7 @@ func initHelpTemp() {
 	if err != nil {
 		configDir = filepath.Join("$UserConfigDir", "g")
 	}
-	cli.AppHelpTemplate = fmt.Sprintf(
+	cli.CommandHelpTemplate = fmt.Sprintf(
 		`USAGE:
   g [options] [files...]
 
@@ -420,7 +421,7 @@ VIEW
    -o                                      like -all, but do not list group information`
 
 func initVersionHelpFlags() {
-	cli.VersionPrinter = func(cCtx *cli.Context) {
+	cli.VersionPrinter = func(cmd *cli.Command) {
 		_, _ = fmt.Fprintf(os.Stdout, `💡 g - a powerful ls
  | Version                %s
  | Go Version             %s
@@ -434,19 +435,19 @@ func initVersionHelpFlags() {
 	}
 
 	cli.VersionFlag = &cli.BoolFlag{
-		Name:               "version",
-		Aliases:            []string{"v"},
-		Usage:              "print the version",
-		DisableDefaultText: true,
-		Category:           "\b\b\b   META",
+		Name:        "version",
+		Aliases:     []string{"v"},
+		Usage:       "print the version",
+		HideDefault: true,
+		Category:    "\b\b\b   META",
 	}
 
 	cli.HelpFlag = &cli.BoolFlag{
-		Name:               "help",
-		Aliases:            []string{"h", "?"},
-		Usage:              "show help",
-		DisableDefaultText: true,
-		Category:           "\b\b\b   META",
+		Name:        "help",
+		Aliases:     []string{"h", "?"},
+		Usage:       "show help",
+		HideDefault: true,
+		Category:    "\b\b\b   META",
 	}
 }
 
@@ -494,54 +495,54 @@ func suggestFlag(flags []cli.Flag, provided string) string {
 	return suggestion
 }
 
-var logic = func(context *cli.Context) error {
+var logic = func(ctx context.Context, cmd *cli.Command) error {
 	var (
 		minorErr   = false
 		seriousErr = false
 	)
 
-	path := context.Args().Slice()
+	path := cmd.Args().Slice()
 
-	if !context.Bool("no-icon") && (context.Bool("icon") || context.Bool("all")) {
+	if !cmd.Bool("no-icon") && (cmd.Bool("icon") || cmd.Bool("all")) {
 		nameToDisplay.SetIcon()
 	}
-	if context.Bool("F") {
+	if cmd.Bool("F") {
 		nameToDisplay.SetClassify()
 	}
-	if context.Bool("file-type") {
+	if cmd.Bool("file-type") {
 		nameToDisplay.SetClassify()
 		nameToDisplay.SetFileType()
 	}
 	if _, ok := p.(*display.JsonPrinter); ok {
 		nameToDisplay.SetJson()
 	}
-	git := context.Bool("git")
+	git := cmd.Bool("git")
 	if git {
 		contentFunc = append(contentFunc, gitEnabler.Enable(r))
 	}
 
-	gitBranch := context.Bool("git-repo-branch")
+	gitBranch := cmd.Bool("git-repo-branch")
 	if gitBranch {
 		contentFunc = append(contentFunc, gitRepoEnabler.Enable(r))
 	}
-	gitRepoStatus := context.Bool("git-repo-status")
+	gitRepoStatus := cmd.Bool("git-repo-status")
 	if gitRepoStatus {
 		contentFunc = append(contentFunc, gitRepoEnabler.EnableStatus(r))
 	}
 
-	if context.Bool("git-detail") {
+	if cmd.Bool("git-detail") {
 		contentFunc = append(contentFunc, gitCommitEnabler.EnableHash(r), gitCommitEnabler.EnableAuthor(r), gitCommitEnabler.EnableAuthorDateWithTimeFormat(r, timeFormat))
 	}
 
-	if context.Bool("flags") {
+	if cmd.Bool("flags") {
 		contentFunc = append(contentFunc, flagsEnabler.Enable())
 	}
 
-	if context.Bool("no-dereference") {
+	if cmd.Bool("no-dereference") {
 		nameToDisplay.SetNoDeference()
 	}
 
-	fuzzy := context.Bool("fuzzy")
+	fuzzy := cmd.Bool("fuzzy")
 	if fuzzy {
 		defer func() {
 			for i := 0; i < 10; i++ {
@@ -554,28 +555,28 @@ var logic = func(context *cli.Context) error {
 		}()
 	}
 
-	disableIndex := context.Bool("di")
+	disableIndex := cmd.Bool("di")
 	wgUpdateIndex := sync.WaitGroup{}
 
 	nameToDisplay.SetQuoteString(`'`)
 	// set quote to always
-	if context.Bool("Q") {
+	if cmd.Bool("Q") {
 		nameToDisplay.SetQuote()
 	}
 
 	// if no quote, set quote to never
 	// this will override the quote set by -Q
-	if context.Bool("N") {
+	if cmd.Bool("N") {
 		nameToDisplay.UnsetQuote()
 	}
 
-	if context.Bool("mounts") {
+	if cmd.Bool("mounts") {
 		nameToDisplay.SetMounts()
 	}
 
 	// no path transform
-	transformEnabled := !context.Bool("np")
-	if rp := context.String("relative-to"); rp != "" {
+	transformEnabled := !cmd.Bool("np")
+	if rp := cmd.String("relative-to"); rp != "" {
 		if transformEnabled {
 			rp = pathbeautify.Beautify(rp)
 		}
@@ -583,13 +584,13 @@ var logic = func(context *cli.Context) error {
 			rp = temp
 		}
 		nameToDisplay.SetRelativeTo(rp)
-	} else if context.Bool("fp") {
+	} else if cmd.Bool("fp") {
 		nameToDisplay.SetFullPath()
 	}
 	contentFunc = append(contentFunc, nameToDisplay.Enable(r))
 	itemFilter := filter.NewItemFilter(itemFilterFunc...)
 
-	gitignore := context.Bool("git-ignore")
+	gitignore := cmd.Bool("git-ignore")
 	removeGitIgnore := new(filter.ItemFilterFunc)
 	if gitignore {
 		itemFilter.AppendTo(removeGitIgnore)
@@ -599,23 +600,23 @@ var logic = func(context *cli.Context) error {
 		path = append(path, ".")
 	}
 
-	depth := context.Int("depth")
+	depth := cmd.Int("depth")
 
 	// flag: if d is set, display directory them self
-	flagd := context.Bool("d")
+	flagd := cmd.Bool("d")
 	// flag: if A is set
-	flagA := context.Bool("A")
-	flagR := context.Bool("R")
+	flagA := cmd.Bool("A")
+	flagR := cmd.Bool("R")
 	if flagR {
 		depthLimitMap = make(map[string]int)
 	}
-	header := context.Bool("header")
-	footer := context.Bool("footer")
-	if context.Bool("statistic") {
+	header := cmd.Bool("header")
+	footer := cmd.Bool("footer")
+	if cmd.Bool("statistic") {
 		nameToDisplay.SetStatistics(&contents.Statistics{})
 	}
 
-	hyperlink := context.String("hyperlink")
+	hyperlink := cmd.String("hyperlink")
 	switch hyperlink {
 	case "never":
 	case "always":
@@ -635,8 +636,8 @@ var logic = func(context *cli.Context) error {
 		}
 	}
 
-	flagSharp := context.Bool("#")
-	tree := context.Bool("tree")
+	flagSharp := cmd.Bool("#")
+	tree := cmd.Bool("tree")
 	if tree {
 		if _, ok := p.(*display.TreePrinter); !ok {
 			p = display.NewTreePrinter()
@@ -646,20 +647,20 @@ var logic = func(context *cli.Context) error {
 		}
 	}
 
-	smartGroup := context.Bool("smart-group")
+	smartGroup := cmd.Bool("smart-group")
 	if smartGroup {
 		groupEnabler.EnableSmartMode()
 	}
 
-	if n := context.Uint("n"); n > 0 && !tree {
+	if n := cmd.Uint("n"); n > 0 && !tree {
 		contentFilter.LimitN = n
 	}
 
 	longestEachPart := make(map[string]int)
 	startDir, _ := os.Getwd()
-	dereference := context.Bool("dereference")
+	dereference := cmd.Bool("dereference")
 
-	if !context.Bool("colorless") && !context.Bool("classic") && context.String("theme") == "" {
+	if !cmd.Bool("colorless") && !cmd.Bool("classic") && cmd.String("theme") == "" {
 		if config.Default.ThemeLocation != "" {
 			err := theme.GetTheme(config.Default.ThemeLocation)
 			if err != nil {
@@ -670,7 +671,7 @@ var logic = func(context *cli.Context) error {
 
 	theme.ConvertThemeColor()
 
-	if len(path) != 0 && context.Bool("stdin") {
+	if len(path) != 0 && cmd.Bool("stdin") {
 		newPath, err := getStdin()
 		if err != nil {
 			return err

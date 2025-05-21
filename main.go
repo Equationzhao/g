@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"os"
@@ -14,7 +15,7 @@ import (
 	"github.com/Equationzhao/g/internal/global/doc"
 	"github.com/Equationzhao/g/internal/util"
 	"github.com/Equationzhao/g/man"
-	ucli "github.com/urfave/cli/v2"
+	ucli "github.com/urfave/cli/v3"
 )
 
 func main() {
@@ -29,7 +30,7 @@ func main() {
 		man.GenMan()
 	} else {
 		preprocessArgs()
-		err := cli.G.Run(os.Args)
+		err := cli.G.Run(context.Background(), os.Args)
 		if err != nil {
 			if !errors.Is(err, cli.Err4Exit{}) {
 				if cli.ReturnCode == 0 {
