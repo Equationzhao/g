@@ -21,7 +21,7 @@ require (
 	github.com/shirou/gopsutil/v3 v3.24.5
 	github.com/stretchr/testify v1.10.0
 	github.com/syndtr/goleveldb v1.0.0
-	github.com/urfave/cli/v2 v2.27.6
+	github.com/urfave/cli/v3 v3.3.3
 	github.com/valyala/bytebufferpool v1.0.0
 	github.com/wk8/go-ordered-map/v2 v2.1.8
 	github.com/xrash/smetrics v0.0.0-20240521201337-686a1a2994c1
@@ -50,7 +50,6 @@ require (
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
 	github.com/bahlo/generic-list-go v0.2.0 // indirect
 	github.com/buger/jsonparser v1.1.1 // indirect
-	github.com/cpuguy83/go-md2man/v2 v2.0.7 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/golang/snappy v1.0.0 // indirect
@@ -67,7 +66,6 @@ require (
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/power-devops/perfstat v0.0.0-20240221224432-82ca36839d55 // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
-	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/shopspring/decimal v1.4.0 // indirect
 	github.com/spf13/cast v1.8.0 // indirect
 	github.com/xo/terminfo v0.0.0-20220910002029-abceb7e1c41e // indirect
