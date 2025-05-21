@@ -68,33 +68,3 @@ func getLastCommitInfo(path string) (*CommitInfo, error) {
 
 	return &info, nil
 }
-
-// // todo goGetLastCommitInfo using go-git to get the last commit info
-// func goGetLastCommitInfo(filePath string) (*CommitInfo, error) {
-// 	repo, err := goGitOpenWithCache(filePath)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-
-// 	commitIter, err := repo.Log(&git.LogOptions{FileName: &filePath})
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	defer commitIter.Close()
-
-// 	commit, err := commitIter.Next()
-// 	if err != nil {
-// 		return nil, err
-// 	}
-
-// 	relativeTime := formatRelativeTime(commit.Committer.When)
-// 	return &CommitInfo{
-// 		Hash:   commit.Hash.String(),
-// 		Author: commit.Author.Name,
-// 		Date:   relativeTime,
-// 	}, nil
-// }
-
-// func formatRelativeTime(commitTime time.Time) string {
-// 	return durafmt.Parse(time.Since(commitTime)).LimitFirstN(1).String()
-// }

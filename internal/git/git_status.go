@@ -70,25 +70,7 @@ func GetShortGitStatus(repoPath RepoPath) (string, error) {
 	if err == nil {
 		return string(out), err
 	}
-
-	// if failed, try go-git
-	return goGitStatus(repoPath)
-}
-
-func goGitStatus(repoPath RepoPath) (string, error) {
-	r, err := goGitOpenWithCache(repoPath)
-	if err != nil {
-		return "", err
-	}
-	w, err := r.Worktree()
-	if err != nil {
-		return "", err
-	}
-	status, err := w.Status()
-	if err != nil {
-		return "", err
-	}
-	return status.String(), nil
+	return "", err
 }
 
 type Status uint8
@@ -236,19 +218,7 @@ func GetBranch(repoPath RepoPath) string {
 	if err == nil {
 		return strings.TrimSpace(string(out))
 	}
-	return goBranch(repoPath)
-}
-
-func goBranch(repoPath RepoPath) string {
-	r, err := goGitOpenWithCache(repoPath)
-	if err != nil {
-		return ""
-	}
-	ref, err := r.Head()
-	if err != nil {
-		return ""
-	}
-	return ref.Name().Short()
+	return ""
 }
 
 // GetRepoStatus returns the status of the repository
@@ -267,24 +237,5 @@ func GetRepoStatus(repoPath RepoPath) RepoStatus {
 		}
 		return RepoStatusDirty
 	}
-	return goRepoStatus(repoPath)
-}
-
-func goRepoStatus(repoPath RepoPath) RepoStatus {
-	r, err := goGitOpenWithCache(repoPath)
-	if err != nil {
-		return RepoStatusSkip
-	}
-	w, err := r.Worktree()
-	if err != nil {
-		return RepoStatusSkip
-	}
-	status, err := w.Status()
-	if err != nil {
-		return RepoStatusSkip
-	}
-	if status.IsClean() {
-		return RepoStatusClean
-	}
-	return RepoStatusDirty
+	return RepoStatusSkip
 }
