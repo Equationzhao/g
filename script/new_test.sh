@@ -1,5 +1,8 @@
 #!/bin/bash
 
+echo "This script is deprecated"
+exit 0
+
 # creat a new test file in tests/*.sh and its output in tests/*.stdout
 
 # load base.sh

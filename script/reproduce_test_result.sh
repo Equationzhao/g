@@ -1,5 +1,8 @@
 #!/bin/bash
 
+echo "This script is deprecated"
+exit 0
+
 # Reproduce the test result from the test script
 # This script will overwrite the test result in tests/*.stdout
 

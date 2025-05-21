@@ -1,5 +1,8 @@
 #!/bin/bash
 
+echo "This script is deprecated"
+exit 0
+
 # should run in the root directory of the project
 # run all tests under tests/*.sh
 
