@@ -107,6 +107,7 @@ jobs:
     - name: Build
       run: go build
     - name: Check size of windows binary
+      shell: bash
       run: |
         SIZE=$(stat -c%s g.exe)
         echo "Binary size is $SIZE bytes"
