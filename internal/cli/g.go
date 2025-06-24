@@ -32,7 +32,6 @@ import (
 	"github.com/savioxavier/termlink"
 	"github.com/urfave/cli/v2"
 	"github.com/xrash/smetrics"
-	"go.szostok.io/version/upgrade"
 )
 
 var (
@@ -98,21 +97,6 @@ func init() {
 	}
 	G.Flags = append(
 		G.Flags,
-		&cli.BoolFlag{
-			Name:     "check-new-version",
-			Usage:    "check if there's new release",
-			Category: "\b\b\b   META", // add \b to ensure the category is the first one to show
-			Action: func(context *cli.Context, b bool) error {
-				if b {
-					upgrade.WithUpdateCheckTimeout(5 * time.Second)
-					notice := upgrade.NewGitHubDetector("Equationzhao", "g")
-					_ = notice.PrintIfFoundGreater(os.Stderr, Version)
-					return Err4Exit{}
-				}
-				return nil
-			},
-			DisableDefaultText: true,
-		},
 		&cli.BoolFlag{
 			Name:               "no-path-transform",
 			Aliases:            []string{"np"},
@@ -271,7 +255,6 @@ const optionsHelp = `GLOBAL OPTIONS
    --si                       use powers of 1000 for size format(default: false)
 
 META
-   --check-new-version  check if there's new release
    --help, -h, -?       show help
    --version, -v        print the version
 

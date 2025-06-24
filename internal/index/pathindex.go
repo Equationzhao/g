@@ -5,12 +5,10 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"github.com/Equationzhao/g/internal/config"
 	gutil "github.com/Equationzhao/g/internal/util"
-	"github.com/junegunn/fzf/src/algo"
-	"github.com/junegunn/fzf/src/util"
+	"github.com/sahilm/fuzzy"
 	"github.com/syndtr/goleveldb/leveldb"
 )
 
@@ -145,24 +143,13 @@ func DeleteThose(keys ...string) error {
 }
 
 func FuzzySearch(key string) (string, error) {
-	db, err := getDB()
+	keys, err := All()
 	if err != nil {
 		return "", err
 	}
-	iter := db.NewIterator(nil, nil)
-	defer iter.Release()
-	result := key
-	highest := 0
-	for iter.Next() {
-		input := util.ToChars([]byte(strings.ToLower(string(iter.Key()))))
-		pattern := algo.NormalizeRunes([]rune(strings.ToLower(key)))
-		res, _ := algo.FuzzyMatchV2(false, true, true, &input, pattern, true, nil)
-		score := res.Score
-		if score > highest {
-			highest = score
-			result = string(iter.Key())
-		}
+	matches := fuzzy.Find(key, keys)
+	if len(matches) > 0 {
+		return matches[0].Str, nil
 	}
-
-	return result, nil
+	return key, nil
 }

@@ -44,6 +44,13 @@ jobs:
       run: CGO_ENABLED=0 GOOS=windows GOARCH=arm   go build
     - name: Run tests
       run: go test -v ./...
+    - name: Check size of darwin amd64 binary
+      run: |
+        SIZE=$(stat -f%z g)
+        echo "Binary size is $SIZE bytes"
+        if [ $SIZE -gt 10000000 ]; then
+          echo "Binary size exceeds 10MB"
+        fi
 
   build-macos-13:
     runs-on: macos-latest
@@ -79,6 +86,13 @@ jobs:
       run: CGO_ENABLED=0 GOOS=windows GOARCH=arm   go build
     - name: Run tests
       run: go test -v ./...
+    - name: Check size of darwin amd64 binary
+      run: |
+        SIZE=$(stat -f%z g)
+        echo "Binary size is $SIZE bytes"
+        if [ $SIZE -gt 10000000 ]; then
+          echo "Binary size exceeds 10MB"
+        fi
 
   windows-latest:
     runs-on: windows-latest
@@ -92,6 +106,13 @@ jobs:
 
     - name: Build
       run: go build
+    - name: Check size of windows binary
+      run: |
+        SIZE=$(stat -c%s g.exe)
+        echo "Binary size is $SIZE bytes"
+        if [ $SIZE -gt 10000000 ]; then
+          echo "Binary size exceeds 10MB"
+        fi
 
   ubuntu-latest-latest:
     runs-on: ubuntu-latest
@@ -123,3 +144,10 @@ jobs:
       run: CGO_ENABLED=0 GOOS=windows GOARCH=arm   go build
     - name: Run tests
       run: go test -v ./...
+    - name: Check size of linux binary
+      run: |
+        SIZE=$(stat -c%s g)
+        echo "Binary size is $SIZE bytes"
+        if [ $SIZE -gt 10000000 ]; then
+          echo "Binary size exceeds 10MB"
+        fi

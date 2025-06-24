@@ -17,8 +17,6 @@ g [options] [files...]
 --si                       use powers of 1000 for size format(default: false)
 
 ## META
---check-new-version  check if there's new release
-
 --help, -h, -?       show help
 
 --version, -v        print the version
