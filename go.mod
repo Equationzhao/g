@@ -14,20 +14,20 @@ require (
 	github.com/jedib0t/go-pretty/v6 v6.6.7
 	github.com/mattn/go-runewidth v0.0.16
 	github.com/olekukonko/ts v0.0.0-20171002115256-78ecb04241c0
-	github.com/pkg/xattr v0.4.10
+	github.com/pkg/xattr v0.4.11
 	github.com/sahilm/fuzzy v0.1.1
 	github.com/saintfish/chardet v0.0.0-20230101081208-5e3ef4b5456d
 	github.com/savioxavier/termlink v1.4.2
 	github.com/shirou/gopsutil/v3 v3.24.5
 	github.com/stretchr/testify v1.10.0
 	github.com/syndtr/goleveldb v1.0.0
-	github.com/urfave/cli/v2 v2.27.6
+	github.com/urfave/cli/v2 v2.27.7
 	github.com/valyala/bytebufferpool v1.0.0
 	github.com/wk8/go-ordered-map/v2 v2.1.8
 	github.com/xrash/smetrics v0.0.0-20240521201337-686a1a2994c1
 	github.com/zeebo/assert v1.3.1
 	github.com/zeebo/xxh3 v1.0.2
-	golang.org/x/exp v0.0.0-20250506013437-ce4c2cf36ca6
+	golang.org/x/exp v0.0.0-20250620022241-b7579e27df2b
 	golang.org/x/sys v0.33.0
 	gopkg.in/yaml.v3 v3.0.1
 )
@@ -53,6 +53,6 @@ require (
 	github.com/rivo/uniseg v0.4.7 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/xo/terminfo v0.0.0-20220910002029-abceb7e1c41e // indirect
-	golang.org/x/net v0.40.0 // indirect
-	golang.org/x/text v0.25.0 // indirect
+	golang.org/x/net v0.41.0 // indirect
+	golang.org/x/text v0.26.0 // indirect
 )
