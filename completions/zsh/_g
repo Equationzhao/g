@@ -9,7 +9,7 @@ _g() {
         '--duplicate[show duplicate files]:duplicate files:_files'
         '--no-config[do not load config file]'
         '--no-path-transform[disable path transformation]'
-        '--check-new-version[check if there is new release]'
+        '--[check if there is new release]'
         '--help[show help]'
         '-h[show help]'
         '-?[show help]'

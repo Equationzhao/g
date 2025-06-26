@@ -10,7 +10,6 @@ _g() {
     --duplicate
     --no-config
     --no-path-transform
-    --check-new-version
     --help -h -?
     --version -v -#
     --csv
