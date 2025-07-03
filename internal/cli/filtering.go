@@ -2,7 +2,6 @@ package cli
 
 import (
 	"errors"
-	"fmt"
 	"slices"
 	"strings"
 	"time"
@@ -197,7 +196,6 @@ var filteringFlag = []cli.Flag{
 				if strings.HasPrefix(f, "+") {
 					t, err := strftime.Parse(s, strings.TrimPrefix(f, "+"))
 					if err != nil {
-						fmt.Println(err)
 						continue
 					}
 					f := filter.BeforeTime(t, filter.WhichTimeFiled(timeType[0]))
@@ -231,7 +229,6 @@ var filteringFlag = []cli.Flag{
 				if strings.HasPrefix(f, "+") {
 					t, err := strftime.Parse(s, strings.TrimPrefix(f, "+"))
 					if err != nil {
-						fmt.Println(err)
 						continue
 					}
 					f := filter.AfterTime(t, filter.WhichTimeFiled(timeType[0]))
