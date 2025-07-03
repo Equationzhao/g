@@ -207,6 +207,10 @@ brew:
 scoop:
     cd scoop && sh scoop.sh
 
+# update winget
+winget:
+    cd winget && sh winget.sh
+
 # clean the build directory
 clean: 
     rm -rf build

@@ -94,3 +94,21 @@ git push
 ```
 
 if you have no access to push to the master branch, please push to another branch and make a pull request
+
+### winget
+
+```zsh
+just winget
+```
+
+the winget manifests are generated in [winget/manifests](../winget/manifests)
+
+To submit to the official winget-pkgs repository:
+1. Fork [microsoft/winget-pkgs](https://github.com/microsoft/winget-pkgs)
+2. Copy the generated `manifests/` directory to your fork
+3. Create a pull request to the main repository
+
+For testing locally:
+```powershell
+winget install --manifest winget/manifests/e/Equationzhao/G/<version>
+```

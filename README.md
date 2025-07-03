@@ -91,7 +91,9 @@ scoop install https://raw.githubusercontent.com/Equationzhao/g/master/scoop/g.js
 
 #### Winget
 
-TODO, see [issue](https://github.com/Equationzhao/g/issues/119)
+```powershell
+winget install Equationzhao.G
+```
 
 ### Pre-built executable
 

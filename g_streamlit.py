@@ -302,7 +302,7 @@ with install_tabs[0]:
         st.code("scoop install https://raw.githubusercontent.com/Equationzhao/g/master/scoop/g.json", language="powershell")
         
         st.subheader("WinGet")
-        st.info("In development, see [#119](https://github.com/Equationzhao/g/issues/119)")
+        st.code("winget install Equationzhao.G", language="powershell")
 
 with install_tabs[1]:
     col1, col2 = st.columns(2)
