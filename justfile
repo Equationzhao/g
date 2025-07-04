@@ -102,7 +102,7 @@ deb:
     echo "Maintainer: Equationzhao <equationzhao at foxmail.com>" >> build/g_{{latest}}_amd64/DEBIAN/control
     echo "Description: a powerful ls tool" >> build/g_{{latest}}_amd64/DEBIAN/control
 
-    dpkg-deb -b build/g_{{latest}}_amd64
+    dpkg-deb -b --root-owner-group build/g_{{latest}}_amd64
     rm -rf build/g_{{latest}}_amd64
 
 
@@ -119,7 +119,7 @@ deb:
     echo "Maintainer: Equationzhao <equationzhao at foxmail.com>" >> build/g_{{latest}}_arm64/DEBIAN/control
     echo "Description: a powerful ls tool" >> build/g_{{latest}}_arm64/DEBIAN/control
 
-    dpkg-deb -b build/g_{{latest}}_arm64
+    dpkg-deb -b --root-owner-group build/g_{{latest}}_arm64
     rm -rf build/g_{{latest}}_arm64
 
 
@@ -136,7 +136,7 @@ deb:
     echo "Maintainer: Equationzhao <equationzhao at foxmail.com>" >> build/g_{{latest}}_386/DEBIAN/control
     echo "Description: a powerful ls tool" >> build/g_{{latest}}_386/DEBIAN/control
 
-    dpkg-deb -b build/g_{{latest}}_386
+    dpkg-deb -b --root-owner-group build/g_{{latest}}_386
     rm -rf build/g_{{latest}}_386
 
     # arm
@@ -152,7 +152,7 @@ deb:
     echo "Maintainer: Equationzhao <equationzhao at foxmail.com>" >> build/g_{{latest}}_arm/DEBIAN/control
     echo "Description: a powerful ls tool" >> build/g_{{latest}}_arm/DEBIAN/control
 
-    dpkg-deb -b build/g_{{latest}}_arm
+    dpkg-deb -b --root-owner-group build/g_{{latest}}_arm
     rm -rf build/g_{{latest}}_arm
 
     # loong64
@@ -168,7 +168,7 @@ deb:
     echo "Maintainer: Equationzhao <equationzhao at foxmail.com>" >> build/g_{{latest}}_loong64/DEBIAN/control
     echo "Description: a powerful ls tool" >> build/g_{{latest}}_loong64/DEBIAN/control
 
-    dpkg-deb -b build/g_{{latest}}_loong64
+    dpkg-deb -b --root-owner-group build/g_{{latest}}_loong64
     rm -rf build/g_{{latest}}_loong64
 
 # generate the checksum file for all build files
