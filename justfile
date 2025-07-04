@@ -281,9 +281,9 @@ check-git-status:
 check-install-script:
     @echo "git tag: v{{latest}}"
     @if [ "$(sh ./script/install.sh -v)" == {{latest}} ]; then \
-      echo "{{COLOR_GREEN}}install.go -v matches {{latest}} "; \
+      echo "{{COLOR_GREEN}}install.sh -v matches {{latest}} "; \
     else \
-      echo "{{COLOR_RED}}install.go -v "$(sh ./script/install.sh -v)""; \
+      echo "{{COLOR_RED}}install.sh -v "$(sh ./script/install.sh -v)""; \
       echo "{{COLOR_RED}}script version doesn't match {{latest}}"; \
     fi;
 
