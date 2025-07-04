@@ -672,6 +672,25 @@ var logic = func(context *cli.Context) error {
 		sort.AddOption(sorter.Default)
 	}
 	contentFilter.SetSortFunc(sort.Build())
+	
+	// Apply column ordering for long format after all flags have been processed
+	if isLongFormat {
+		var order []string
+		if len(columnOrder) > 0 {
+			order = columnOrder
+		} else {
+			order = config.GetOrder()
+		}
+		
+		if len(order) > 0 {
+			// Custom ordering: replace contentFunc with ordered columns
+			contentFunc = applyColumnOrder(context, order)
+		} else {
+			// Default long format: use standard default order
+			contentFunc = getDefaultLongFormatColumns(context)
+		}
+	}
+	
 	contentFilter.SetOptions(contentFunc...)
 	contentFilter.SetNoOutputOptions(noOutputFunc...)
 	for i := 0; i < len(path); i++ {
@@ -1219,6 +1238,8 @@ func getDefaultLongFormatColumns(context *cli.Context) []contents.ContentOption 
 	for _, s := range timeType {
 		defaultContentFunc = append(defaultContentFunc, contents.EnableTime(timeFormat, s, r))
 	}
+	// Add Name at the end for default order
+	defaultContentFunc = append(defaultContentFunc, nameToDisplay.Enable(r))
 	
 	return defaultContentFunc
 }

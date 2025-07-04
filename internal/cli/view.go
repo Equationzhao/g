@@ -7,7 +7,6 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/Equationzhao/g/internal/config"
 	contents "github.com/Equationzhao/g/internal/content"
 	"github.com/Equationzhao/g/internal/display"
 	"github.com/Equationzhao/g/internal/filter"
@@ -748,23 +747,8 @@ var viewFlag = []cli.Flag{
 		Action: func(context *cli.Context, b bool) error {
 			if b {
 				isLongFormat = true
-				// Determine column order: CLI flag takes precedence over config
-				var order []string
-				if len(columnOrder) > 0 {
-					order = columnOrder
-				} else {
-					order = config.GetOrder()
-				}
-				
-				if len(order) > 0 {
-					// Custom ordering: replace contentFunc entirely
-					contentFunc = applyColumnOrder(context, order)
-				} else {
-					// Default ordering: append to existing contentFunc
-					orderedColumns := applyColumnOrder(context, order)
-					contentFunc = append(contentFunc, orderedColumns...)
-				}
-				
+				// The actual column ordering will happen later in the main G function
+				// after all flags have been processed
 				if _, ok := p.(*display.Byline); !ok {
 					p = display.NewByline()
 				}
