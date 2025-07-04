@@ -12,7 +12,7 @@ import (
 	colortool "github.com/gookit/color"
 )
 
-var ColorLevel = colortool.DetectColorLevel()
+var ColorLevel = colortool.TermColorLevel()
 
 const (
 	BasicFormat    = "\033[0;%dm"
@@ -210,31 +210,6 @@ func HslToRgb(h, s, l float64) (uint8, uint8, uint8) {
 	g = (g + m) * 255
 	b = (b + m) * 255
 	return uint8(math.Round(r)), uint8(math.Round(g)), uint8(math.Round(b))
-}
-
-// RGBMultiply will multiply each r,g,b value by radio
-// if radio < 0, return the original string
-// if radio = 0, return the color of black
-// if 0 < radio < 1, the color will be darker
-// if radio > 1, the color will be lighter, and if the result is greater than 255, it will be 255
-func RGBMultiply(rgbStr string, radio float64) string {
-	// parse rgb
-	var r, g, b uint8 = 0, 0, 0
-	_, _ = fmt.Fscanf(strings.NewReader(rgbStr), RGBFormat, &r, &g, &b)
-
-	rf := math.Ceil(float64(r) * radio)
-	gf := math.Ceil(float64(g) * radio)
-	bf := math.Ceil(float64(b) * radio)
-	if rf > 255 {
-		rf = 255
-	}
-	if gf > 255 {
-		gf = 255
-	}
-	if bf > 255 {
-		bf = 255
-	}
-	return rgb(uint8(rf), uint8(gf), uint8(bf))
 }
 
 const (

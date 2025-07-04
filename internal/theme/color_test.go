@@ -88,41 +88,6 @@ func TestRGBConverts(t *testing.T) {
 	}
 }
 
-func TestRGBMultiply(t *testing.T) {
-	type args struct {
-		rgbStr string
-		radio  float64
-	}
-	tests := []struct {
-		name string
-		args args
-		want string
-	}{
-		{
-			name: "zero",
-			args: args{rgbStr: rgb(0, 0, 0), radio: 2},
-			want: rgb(0, 0, 0),
-		},
-		{
-			name: "2x",
-			args: args{rgbStr: rgb(1, 2, 3), radio: 2},
-			want: rgb(2, 4, 6),
-		},
-		{
-			name: "max=255",
-			args: args{rgbStr: rgb(100, 200, 255), radio: 2},
-			want: rgb(200, 255, 255),
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := RGBMultiply(tt.args.rgbStr, tt.args.radio); got != tt.want {
-				t.Errorf("RGBMultiply() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
 func TestConvertColorIfGreaterThanExpect(t *testing.T) {
 	type args struct {
 		to  color.Level
