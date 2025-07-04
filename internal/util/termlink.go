@@ -45,7 +45,7 @@ type v struct {
 // If a version number is not provided
 func parseVersion(version string) v {
 	var major, minor, patch int
-	fmt.Sscanf(version, "%d.%d.%d", &major, &minor, &patch)
+	_, _ = fmt.Sscanf(version, "%d.%d.%d", &major, &minor, &patch)
 	return v{
 		major: major,
 		minor: minor,
