@@ -533,5 +533,3 @@ func (n *Name) checkDereferenceErr(err error) (symlinks string) {
 func contains(r rune) bool {
 	return unicode.IsSpace(r)
 }
-
-
