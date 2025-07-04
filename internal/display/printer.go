@@ -263,7 +263,7 @@ func WidthNoHyperLinkLen(str string) int {
 
 var (
 	getTermWidthOnce util.Once
-	size             ts.Size
+	size             int
 	CustomTermSize   uint
 )
 
@@ -277,16 +277,17 @@ func getTermWidth() int {
 	if err := getTermWidthOnce.Do(
 		func() error {
 			var err error
-			size, err = ts.GetSize()
+			_size, err := ts.GetSize()
 			if err != nil {
 				return err
 			}
+			size = _size.Col()
 			return nil
 		},
 	); err != nil {
 		return 0
 	}
-	return size.Col()
+	return size
 }
 
 /*
