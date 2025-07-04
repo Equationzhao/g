@@ -5,32 +5,52 @@ ldflags := "-ldflags='-s -w'"
 COLOR_GREEN := "[0;32m"
 COLOR_RED := "[0;31m"
 
+# build lite version (minimal dependencies, smaller binary)
+build-lite:
+    mkdir -p build
+    CGO_ENABLED=0 go build {{ldflags}} -o build/g-lite
+
+# build full version (all features)  
+build-full:
+    mkdir -p build
+    CGO_ENABLED=0 go build {{ldflags}} -tags="fuzzy mounts" -o build/g-full
+
+# build with only fuzzy search support
+build-fuzzy:
+    mkdir -p build
+    CGO_ENABLED=0 go build {{ldflags}} -tags="fuzzy" -o build/g-fuzzy
+
+# build with only mounts support
+build-mounts:
+    mkdir -p build
+    CGO_ENABLED=0 go build {{ldflags}} -tags="mounts" -o build/g-mounts
+
 # build binaries for all platforms
 build: 
     # build the binary in build/
     # Linux macOS Windows
     # 386 amd64 arm arm64
     mkdir -p build
-    CGO_ENABLED=0 GOOS=linux GOARCH=386       go build {{ldflags}} -o build/g-linux-386
-    CGO_ENABLED=0 GOOS=linux GOARCH=amd64     go build {{ldflags}} -o build/g-linux-amd64
-    CGO_ENABLED=0 GOOS=linux GOARCH=arm       go build {{ldflags}} -o build/g-linux-arm
-    CGO_ENABLED=0 GOOS=linux GOARCH=arm64     go build {{ldflags}} -o build/g-linux-arm64
-    CGO_ENABLED=0 GOOS=linux GOARCH=loong64   go build {{ldflags}} -o build/g-linux-loong64
+    CGO_ENABLED=0 GOOS=linux GOARCH=386       go build {{ldflags}} -tags="fuzzy mounts" -o build/g-linux-386
+    CGO_ENABLED=0 GOOS=linux GOARCH=amd64     go build {{ldflags}} -tags="fuzzy mounts" -o build/g-linux-amd64
+    CGO_ENABLED=0 GOOS=linux GOARCH=arm       go build {{ldflags}} -tags="fuzzy mounts" -o build/g-linux-arm
+    CGO_ENABLED=0 GOOS=linux GOARCH=arm64     go build {{ldflags}} -tags="fuzzy mounts" -o build/g-linux-arm64
+    CGO_ENABLED=0 GOOS=linux GOARCH=loong64   go build {{ldflags}} -tags="fuzzy mounts" -o build/g-linux-loong64
 
-    CGO_ENABLED=1 GOOS=darwin GOARCH=amd64  go build {{ldflags}} -o build/g-darwin-amd64
-    CGO_ENABLED=1 GOOS=darwin GOARCH=arm64  go build {{ldflags}} -o build/g-darwin-arm64
+    CGO_ENABLED=1 GOOS=darwin GOARCH=amd64  go build {{ldflags}} -tags="fuzzy mounts" -o build/g-darwin-amd64
+    CGO_ENABLED=1 GOOS=darwin GOARCH=arm64  go build {{ldflags}} -tags="fuzzy mounts" -o build/g-darwin-arm64
 
-    CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build {{ldflags}} -o build/g-windows-amd64.exe
-    CGO_ENABLED=0 GOOS=windows GOARCH=386   go build {{ldflags}} -o build/g-windows-386.exe
-    CGO_ENABLED=0 GOOS=windows GOARCH=arm64 go build {{ldflags}} -o build/g-windows-arm64.exe
-    CGO_ENABLED=0 GOOS=windows GOARCH=arm   go build {{ldflags}} -o build/g-windows-arm.exe
+    CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build {{ldflags}} -tags="fuzzy mounts" -o build/g-windows-amd64.exe
+    CGO_ENABLED=0 GOOS=windows GOARCH=386   go build {{ldflags}} -tags="fuzzy mounts" -o build/g-windows-386.exe
+    CGO_ENABLED=0 GOOS=windows GOARCH=arm64 go build {{ldflags}} -tags="fuzzy mounts" -o build/g-windows-arm64.exe
+    CGO_ENABLED=0 GOOS=windows GOARCH=arm   go build {{ldflags}} -tags="fuzzy mounts" -o build/g-windows-arm.exe
 
-    upx build/g-linux-386
-    upx build/g-linux-amd64
-    upx build/g-linux-arm
-    upx build/g-linux-arm64
-    upx build/g-windows-amd64.exe
-    upx build/g-windows-386.exe
+    upx --best build/g-linux-386
+    upx --best build/g-linux-amd64
+    upx --best build/g-linux-arm
+    upx --best build/g-linux-arm64
+    upx --best build/g-windows-amd64.exe
+    upx --best build/g-windows-386.exe
 #    upx doesn't support darwin-amd64, darwin-arm64, linux-loong64, windows-arm64, windows-arm
 #    upx build/g-darwin-amd64
 #    upx build/g-darwin-arm64

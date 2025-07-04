@@ -75,12 +75,6 @@ func (s *Style) UnmarshalJSON(bytes []byte) error {
 	return nil
 }
 
-func (s *Style) ToReadable() Style {
-	r := *s
-	r.Color = color2str(r.Color)
-	return r
-}
-
 func (s *Style) FromReadable() error {
 	c, err := str2color(s.Color)
 	if err != nil {

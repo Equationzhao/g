@@ -1,3 +1,5 @@
+//go:build fuzzy
+
 package index
 
 import (

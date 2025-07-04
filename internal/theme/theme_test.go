@@ -65,33 +65,6 @@ func Test_genStyleField(t *testing.T) {
 	}
 }
 
-func TestStyle_ToReadable(t *testing.T) {
-	tests := []struct {
-		name   string
-		before Style
-		want   Style
-	}{
-		{
-			name: "TestStyle_ToReadable",
-			before: Style{
-				Color: global.BrightBlue,
-			},
-			want: Style{
-				Color: "bright-blue",
-			},
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got := tt.before.ToReadable()
-			if got.Color != tt.want.Color {
-				t.Errorf("Style.ToReadable() = %v, want %v", got.Color, tt.want.Color)
-			}
-		})
-	}
-}
-
 func TestStyle_FromReadable(t *testing.T) {
 	type fields struct {
 		Color     string

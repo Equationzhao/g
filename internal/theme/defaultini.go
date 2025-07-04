@@ -8,6 +8,12 @@ import (
 	"path/filepath"
 )
 
+func (s *Style) ToReadable() Style {
+	r := *s
+	r.Color = color2str(r.Color)
+	return r
+}
+
 func init() {
 	convert := func(theme Theme) {
 		for k, style := range theme {

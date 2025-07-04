@@ -29,9 +29,7 @@ import (
 	"github.com/Equationzhao/g/internal/util"
 	"github.com/Equationzhao/pathbeautify"
 	"github.com/hako/durafmt"
-	"github.com/savioxavier/termlink"
 	"github.com/urfave/cli/v2"
-	"github.com/xrash/smetrics"
 )
 
 var (
@@ -455,7 +453,7 @@ func suggestFlag(flags []cli.Flag, provided string) string {
 	for _, flag := range flags {
 		flagNames := flag.Names()
 		for _, name := range flagNames {
-			newDistance := smetrics.JaroWinkler(name, provided, global.BoostThreshold, global.PrefixSize)
+			newDistance := util.JaroWinkler(name, provided, global.BoostThreshold, global.PrefixSize)
 			if newDistance > distance {
 				distance = newDistance
 				suggestion = name
@@ -604,7 +602,7 @@ var logic = func(context *cli.Context) error {
 	default:
 		fallthrough
 	case "auto":
-		if termlink.SupportsHyperlinks() {
+		if util.SupportsHyperlinks() {
 			switch p.(type) {
 			case display.PrettyPrinter:
 			case *display.JsonPrinter:
