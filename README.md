@@ -136,6 +136,9 @@ go build -ldflags="-s -w"
 # then add the executable file to your `PATH`
 ```
 
+#### Build options
+See [BuildOption.md](docs/BuildOption.md) for optional build tags to enable or disable features.
+
 ## Recommended terminal
 
 macOS:

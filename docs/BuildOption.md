@@ -29,14 +29,14 @@ The `g` CLI tool supports conditional compilation using Go build tags to include
 ```bash
 go build -ldflags="-s -w" -o g-lite .
 ```
-- Size: ~7.4MB
+- Size: ~7.4MB/7.0MiB for macOS
 - Features: Core functionality only (no fuzzy search, no mount info)
 
 ### Full build (all features)
 ```bash  
 go build -ldflags="-s -w" -tags="fuzzy mounts" -o g-full .
 ```
-- Size: ~8.1MB
+- Size: ~8.1MB/7.7MiB for macOS
 - Features: All optional features enabled
 
 ### Custom builds
