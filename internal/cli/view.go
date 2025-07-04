@@ -462,14 +462,6 @@ var viewFlag = []cli.Flag{
 			return nil
 		},
 	},
-	&cli.StringFlag{
-		Name: "detect-size",
-		Usage: `set exact size for mimetype detection 
-			eg:1M/nolimit/infinity`,
-		Value:       "1M",
-		DefaultText: "1M",
-		Category:    "VIEW",
-	},
 	&cli.BoolFlag{
 		Name:               "mime",
 		Usage:              "show mime file type",
@@ -479,14 +471,7 @@ var viewFlag = []cli.Flag{
 		Action: func(context *cli.Context, b bool) error {
 			if b {
 				exact := contents.NewMimeFileTypeEnabler()
-				err := limitOnce.Do(
-					func() error {
-						return setLimit(context)
-					},
-				)
-				if err != nil {
-					return err
-				}
+				setLimit()
 				contentFunc = append(contentFunc, exact.Enable(r))
 			}
 			return nil
@@ -502,15 +487,7 @@ var viewFlag = []cli.Flag{
 			if b {
 				exact := contents.NewMimeFileTypeEnabler()
 				exact.ParentOnly = true
-
-				err := limitOnce.Do(
-					func() error {
-						return setLimit(context)
-					},
-				)
-				if err != nil {
-					return err
-				}
+				setLimit()
 				contentFunc = append(contentFunc, exact.Enable(r))
 			}
 			return nil
@@ -524,14 +501,7 @@ var viewFlag = []cli.Flag{
 		Action: func(context *cli.Context, b bool) error {
 			if b {
 				charset := contents.NewCharsetEnabler()
-				err := limitOnce.Do(
-					func() error {
-						return setLimit(context)
-					},
-				)
-				if err != nil {
-					return err
-				}
+				setLimit()
 				contentFunc = append(contentFunc, charset.Enable(r))
 			}
 			return nil
@@ -843,18 +813,6 @@ var viewFlag = []cli.Flag{
 	},
 }
 
-func setLimit(context *cli.Context) error {
-	size := context.String("detect-size")
-	var bytes uint64 = 1024 * 1024
-	if size == "0" || strings.EqualFold(size, "infinity") || strings.EqualFold(size, "nolimit") {
-		bytes = 0
-	} else if size != "" {
-		sizeUint, err := contents.ParseSize(size)
-		if err != nil {
-			return err
-		}
-		bytes = sizeUint.Bytes
-	}
-	mimetype.SetLimit(uint32(bytes))
-	return nil
+func setLimit() {
+	mimetype.SetLimit(1024 * 1024)
 }

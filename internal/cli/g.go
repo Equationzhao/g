@@ -60,7 +60,6 @@ var (
 	nameToDisplay    = contents.NewNameEnabler()
 	flagsEnabler     = contents.NewFlagsEnabler()
 	depthLimitMap    map[string]int
-	limitOnce        = util.Once{}
 	hookOnce         = util.Once{}
 	duplicateDetect  = contents.NewDuplicateDetect()
 	hookPost         = make([]func(display.Printer, ...*item.FileInfo), 0)
@@ -349,8 +348,6 @@ VIEW
                                              md5, sha1, sha224, sha256, sha384, sha512, crc32(default: sha1)
    --create, --cr, --created               created time
    --dereference                           dereference symbolic links
-   --detect-size value                     set exact size for mimetype detection
-                                             eg:1M/nolimit/infinity(default: 1M)
    --extended, -@                          list each file's extended attributes and sizes in long listing
    --footer                                add a footer row
    --fp, --full-path, --fullpath           show full path
