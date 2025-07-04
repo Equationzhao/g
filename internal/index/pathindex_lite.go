@@ -9,15 +9,7 @@ import "errors"
 
 var ErrNotSupported = errors.New("fuzzy search feature not available in this build (built without 'fuzzy' tag)")
 
-func getDB() (interface{}, error) {
-	return nil, ErrNotSupported
-}
-
 func Close() error {
-	return nil // No-op in lite build
-}
-
-func closeDB() error {
 	return nil // No-op in lite build
 }
 
