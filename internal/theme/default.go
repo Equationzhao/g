@@ -1551,6 +1551,10 @@ var Name = map[string]Style{
 		Color: global.White,
 		Icon:  "\uE5FC",
 	},
+	"code_of_conduct.md": {
+		Color: global.White,
+		Icon:  "",
+	},
 }
 
 var Permission = map[string]Style{

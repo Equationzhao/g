@@ -352,6 +352,10 @@
             "color": "[158]@256",
             "icon": ""
         },
+        "code_of_conduct.md": {
+            "color": "white",
+            "icon": ""
+        },
         "config": {
             "color": "white",
             "icon": ""
