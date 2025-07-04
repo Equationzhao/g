@@ -3,7 +3,7 @@ module github.com/Equationzhao/g
 go 1.24.0
 
 require (
-	github.com/Equationzhao/pathbeautify v0.0.7
+	github.com/Equationzhao/pathbeautify v0.0.8
 	github.com/acarl005/stripansi v0.0.0-20180116102854-5a71ef0e047d
 	github.com/agiledragon/gomonkey/v2 v2.11.0
 	github.com/alphadose/haxmap v1.4.1
@@ -14,7 +14,7 @@ require (
 	github.com/jedib0t/go-pretty/v6 v6.6.7
 	github.com/mattn/go-runewidth v0.0.16
 	github.com/olekukonko/ts v0.0.0-20171002115256-78ecb04241c0
-	github.com/pkg/xattr v0.4.11
+	github.com/pkg/xattr v0.4.12
 	github.com/sahilm/fuzzy v0.1.1
 	github.com/saintfish/chardet v0.0.0-20230101081208-5e3ef4b5456d
 	github.com/shirou/gopsutil/v3 v3.24.5
@@ -32,7 +32,7 @@ require (
 
 require (
 	github.com/go-ole/go-ole v1.3.0 // indirect
-	github.com/klauspost/cpuid/v2 v2.2.10 // indirect
+	github.com/klauspost/cpuid/v2 v2.2.11 // indirect
 	github.com/kylelemons/godebug v1.1.0 // indirect
 	github.com/onsi/gomega v1.34.1 // indirect
 	github.com/xrash/smetrics v0.0.0-20240521201337-686a1a2994c1 // indirect
