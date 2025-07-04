@@ -7,6 +7,7 @@ import (
 	"slices"
 	"strings"
 
+	"github.com/Equationzhao/g/internal/config"
 	contents "github.com/Equationzhao/g/internal/content"
 	"github.com/Equationzhao/g/internal/display"
 	"github.com/Equationzhao/g/internal/filter"
@@ -746,18 +747,24 @@ var viewFlag = []cli.Flag{
 		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
 			if b {
-				contentFunc = append(
-					contentFunc, contents.EnableFileMode(r), sizeEnabler.EnableSize(sizeUint, r),
-				)
-				if !context.Bool("O") {
-					contentFunc = append(contentFunc, ownerEnabler.EnableOwner(r))
+				isLongFormat = true
+				// Determine column order: CLI flag takes precedence over config
+				var order []string
+				if len(columnOrder) > 0 {
+					order = columnOrder
+				} else {
+					order = config.GetOrder()
 				}
-				if !context.Bool("G") {
-					contentFunc = append(contentFunc, groupEnabler.EnableGroup(r))
+				
+				if len(order) > 0 {
+					// Custom ordering: replace contentFunc entirely
+					contentFunc = applyColumnOrder(context, order)
+				} else {
+					// Default ordering: append to existing contentFunc
+					orderedColumns := applyColumnOrder(context, order)
+					contentFunc = append(contentFunc, orderedColumns...)
 				}
-				for _, s := range timeType {
-					contentFunc = append(contentFunc, contents.EnableTime(timeFormat, s, r))
-				}
+				
 				if _, ok := p.(*display.Byline); !ok {
 					p = display.NewByline()
 				}
@@ -840,6 +847,22 @@ var viewFlag = []cli.Flag{
 		Usage:              "list file flags[macOS only]",
 		DisableDefaultText: true,
 		Category:           "VIEW",
+	},
+	&cli.StringFlag{
+		Name:     "order",
+		Usage:    "custom column order for long format. Comma-separated list of: Permissions,Size,Owner,Group,Time,Name",
+		Category: "VIEW",
+		Action: func(context *cli.Context, s string) error {
+			if s != "" {
+				// Parse comma-separated column names
+				parts := strings.Split(s, ",")
+				columnOrder = make([]string, 0, len(parts))
+				for _, part := range parts {
+					columnOrder = append(columnOrder, strings.TrimSpace(part))
+				}
+			}
+			return nil
+		},
 	},
 }
 

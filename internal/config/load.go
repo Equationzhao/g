@@ -51,6 +51,7 @@ type Config struct {
 	Args            []string  `yaml:"Args"`
 	CustomTreeStyle TreeStyle `yaml:"CustomTreeStyle"`
 	ThemeLocation   string    `yaml:"Theme"`
+	Order           []string  `yaml:"Order"`
 }
 
 type TreeStyle struct {
@@ -85,6 +86,11 @@ var Default = Config{
 }
 
 var emptyConfig = Config{}
+
+// GetOrder returns the column order from the loaded config
+func GetOrder() []string {
+	return Default.Order
+}
 
 func Load() (*Config, error) {
 	Dir, err := GetUserConfigDir()

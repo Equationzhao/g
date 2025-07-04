@@ -41,6 +41,8 @@ var (
 	r              = render.NewRenderer(&theme.DefaultAll)
 	p              = display.NewFitTerminal()
 	timeFormat     = "Jan 02 15:04"
+	columnOrder    = []string{} // Custom column order from CLI or config
+	isLongFormat   = false      // Track if we're in long format mode
 	// ReturnCode - Exit status:
 	//  0  if OK,
 	//  1  if minor problems (e.g., cannot access subdirectory),
@@ -569,7 +571,11 @@ var logic = func(context *cli.Context) error {
 	} else if context.Bool("fp") {
 		nameToDisplay.SetFullPath()
 	}
-	contentFunc = append(contentFunc, nameToDisplay.Enable(r))
+	
+	// Only add name column automatically if we're not in long format with custom ordering
+	if !isLongFormat || (len(columnOrder) == 0 && len(config.GetOrder()) == 0) {
+		contentFunc = append(contentFunc, nameToDisplay.Enable(r))
+	}
 	itemFilter := filter.NewItemFilter(itemFilterFunc...)
 
 	gitignore := context.Bool("git-ignore")
@@ -1126,4 +1132,93 @@ func addTotalAndStatistic(nameToDisplay *contents.Name, start time.Time) {
 			s.Reset()
 		}
 	}
+}
+
+// applyColumnOrder reorders content functions based on specified column order
+func applyColumnOrder(context *cli.Context, order []string) []contents.ContentOption {
+	if len(order) == 0 {
+		// Return default order if no custom order specified
+		return getDefaultLongFormatColumns(context)
+	}
+
+	var orderedContentFunc []contents.ContentOption
+	
+	// Create a map of available column functions
+	availableColumns := map[string]contents.ContentOption{
+		"Permissions": contents.EnableFileMode(r),
+		"Size":        sizeEnabler.EnableSize(sizeUint, r),
+		"Owner":       ownerEnabler.EnableOwner(r),
+		"Group":       groupEnabler.EnableGroup(r),
+		"Name":        nameToDisplay.Enable(r),
+	}
+	
+	// Add time columns based on current timeType settings
+	for _, s := range timeType {
+		switch s {
+		case "mod", "modified":
+			availableColumns["Time Modified"] = contents.EnableTime(timeFormat, s, r)
+			availableColumns["Modified"] = contents.EnableTime(timeFormat, s, r)
+		case "create", "created", "cr":
+			availableColumns["Time Created"] = contents.EnableTime(timeFormat, s, r)
+			availableColumns["Created"] = contents.EnableTime(timeFormat, s, r)
+		case "access", "accessed", "ac":
+			availableColumns["Time Accessed"] = contents.EnableTime(timeFormat, s, r)
+			availableColumns["Accessed"] = contents.EnableTime(timeFormat, s, r)
+		case "birth":
+			availableColumns["Time Birth"] = contents.EnableTime(timeFormat, s, r)
+			availableColumns["Birth"] = contents.EnableTime(timeFormat, s, r)
+		default:
+			availableColumns["Time"] = contents.EnableTime(timeFormat, s, r)
+		}
+	}
+	
+	// If no time specified, default to modified time
+	if len(timeType) == 0 || (len(timeType) == 1 && timeType[0] == "mod") {
+		availableColumns["Time Modified"] = contents.EnableTime(timeFormat, "mod", r)
+		availableColumns["Time"] = contents.EnableTime(timeFormat, "mod", r)
+	}
+	
+	// Apply ordering - add columns in the specified order
+	for _, columnName := range order {
+		if contentFunc, exists := availableColumns[columnName]; exists {
+			// Check context flags to see if this column should be included
+			if shouldIncludeColumn(context, columnName) {
+				orderedContentFunc = append(orderedContentFunc, contentFunc)
+			}
+		}
+	}
+	
+	return orderedContentFunc
+}
+
+// shouldIncludeColumn checks if a column should be included based on context flags
+func shouldIncludeColumn(context *cli.Context, columnName string) bool {
+	switch columnName {
+	case "Owner":
+		return !context.Bool("O") // Include owner unless -O flag is set
+	case "Group":
+		return !context.Bool("G") // Include group unless -G flag is set
+	default:
+		return true
+	}
+}
+
+// getDefaultLongFormatColumns returns the default column order for long format
+func getDefaultLongFormatColumns(context *cli.Context) []contents.ContentOption {
+	var defaultContentFunc []contents.ContentOption
+	
+	// Default order: Permissions, Size, Owner, Group, Time, Name
+	defaultContentFunc = append(defaultContentFunc, contents.EnableFileMode(r), sizeEnabler.EnableSize(sizeUint, r))
+	
+	if !context.Bool("O") {
+		defaultContentFunc = append(defaultContentFunc, ownerEnabler.EnableOwner(r))
+	}
+	if !context.Bool("G") {
+		defaultContentFunc = append(defaultContentFunc, groupEnabler.EnableGroup(r))
+	}
+	for _, s := range timeType {
+		defaultContentFunc = append(defaultContentFunc, contents.EnableTime(timeFormat, s, r))
+	}
+	
+	return defaultContentFunc
 }

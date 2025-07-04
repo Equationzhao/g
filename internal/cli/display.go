@@ -3,7 +3,7 @@ package cli
 import (
 	"fmt"
 
-	"github.com/Equationzhao/g/internal/content"
+	"github.com/Equationzhao/g/internal/config"
 	"github.com/Equationzhao/g/internal/display"
 	"github.com/Equationzhao/g/internal/theme"
 	"github.com/urfave/cli/v2"
@@ -289,18 +289,25 @@ var displayFlag = []cli.Flag{
 					p = display.NewCommaPrint()
 				}
 			case "long", "l", "verbose":
-				contentFunc = append(
-					contentFunc, content.EnableFileMode(r), sizeEnabler.EnableSize(sizeUint, r),
-				)
-				if !context.Bool("O") {
-					contentFunc = append(contentFunc, ownerEnabler.EnableOwner(r))
+				isLongFormat = true
+				// Determine column order: CLI flag takes precedence over config
+				var order []string
+				if len(columnOrder) > 0 {
+					order = columnOrder
+				} else {
+					// Import config package to access order
+					order = config.GetOrder()
 				}
-				if !context.Bool("G") {
-					contentFunc = append(contentFunc, groupEnabler.EnableGroup(r))
+				
+				if len(order) > 0 {
+					// Custom ordering: replace contentFunc entirely
+					contentFunc = applyColumnOrder(context, order)
+				} else {
+					// Default ordering: append to existing contentFunc
+					orderedColumns := applyColumnOrder(context, order)
+					contentFunc = append(contentFunc, orderedColumns...)
 				}
-				for _, s := range timeType {
-					contentFunc = append(contentFunc, content.EnableTime(timeFormat, s, r))
-				}
+				
 				if _, ok := p.(*display.Byline); !ok {
 					p = display.NewByline()
 				}
