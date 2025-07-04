@@ -48,7 +48,6 @@ _g() {
     --checksum-algorithm
     --created
     --dereference
-    --detect-size
     --footer
     --full-path
     --full-time

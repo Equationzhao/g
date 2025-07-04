@@ -55,7 +55,6 @@ complete -c g -l checksum -d "show checksum of file"
 complete -c g -l checksum-algorithm -d "checksum algorithm" -a "md5 sha1 sha224 sha256 sha384 sha512 crc32"
 complete -c g -l created -d "created time"
 complete -c g -l dereference -d "dereference symbolic links"
-complete -c g -l detect-size -d "set exact size for mimetype detection" -r -f
 complete -c g -l footer -d "add a footer row"
 complete -c g -l full-path -d "show full path"
 complete -c g -l full-time -d "like -all/l --time-style=full-iso" -a "default iso long-iso full-iso +FORMAT"

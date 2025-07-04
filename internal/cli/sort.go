@@ -93,24 +93,10 @@ var sortingFlags = []cli.Flag{
 				case "width", "Width":
 					sort.AddOption(sorter.ByNameWidthAscend)
 				case "mime", "mimetype", "Mime", "Mimetype":
-					err := limitOnce.Do(
-						func() error {
-							return setLimit(context)
-						},
-					)
-					if err != nil {
-						return err
-					}
+					setLimit()
 					sort.AddOption(sorter.ByMimeTypeAscend)
 				case "mime-descend", "mimetype-descend", "Mime-descend", "Mimetype-descend":
-					err := limitOnce.Do(
-						func() error {
-							return setLimit(context)
-						},
-					)
-					if err != nil {
-						return err
-					}
+					setLimit()
 					sort.AddOption(sorter.ByMimeTypeDescend)
 				case "inode-descend":
 					sort.AddOption(sorter.ByInodeDescend)
@@ -197,15 +183,7 @@ var sortingFlags = []cli.Flag{
 		Usage:              "sort by mimetype",
 		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
-			err := limitOnce.Do(
-				func() error {
-					return setLimit(context)
-				},
-			)
-			if err != nil {
-				return err
-			}
-
+			setLimit()
 			sort.AddOption(sorter.ByMimeTypeAscend)
 			return nil
 		},
@@ -217,15 +195,7 @@ var sortingFlags = []cli.Flag{
 		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
 			if b {
-				err := limitOnce.Do(
-					func() error {
-						return setLimit(context)
-					},
-				)
-				if err != nil {
-					return err
-				}
-
+				setLimit()
 				sort.AddOption(sorter.ByMimeTypeDescend)
 			}
 			return nil
@@ -238,15 +208,7 @@ var sortingFlags = []cli.Flag{
 		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
 			if b {
-				err := limitOnce.Do(
-					func() error {
-						return setLimit(context)
-					},
-				)
-				if err != nil {
-					return err
-				}
-
+				setLimit()
 				sort.AddOption(sorter.ByMimeTypeParentAscend)
 			}
 			return nil
@@ -259,15 +221,7 @@ var sortingFlags = []cli.Flag{
 		DisableDefaultText: true,
 		Action: func(context *cli.Context, b bool) error {
 			if b {
-				err := limitOnce.Do(
-					func() error {
-						return setLimit(context)
-					},
-				)
-				if err != nil {
-					return err
-				}
-
+				setLimit()
 				sort.AddOption(sorter.ByMimeTypeParentDescend)
 			}
 			return nil

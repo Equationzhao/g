@@ -181,10 +181,6 @@ available fields:                       nature(default),none(nosort),
 
 --dereference                           dereference symbolic links
 
---detect-size value                     set exact size for mimetype detection
-											eg:1M/nolimit/infinity(default: 1M)
-
-
 --footer                                add a footer row
 
 --fp, --full-path, --fullpath           show full path

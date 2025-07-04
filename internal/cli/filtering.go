@@ -170,14 +170,7 @@ var filteringFlag = []cli.Flag{
 		Category: "FILTERING",
 		Action: func(context *cli.Context, i []string) error {
 			if len(i) > 0 {
-				err := limitOnce.Do(
-					func() error {
-						return setLimit(context)
-					},
-				)
-				if err != nil {
-					return err
-				}
+				setLimit()
 				eft := filter.MimeTypeOnly(i...)
 				itemFilterFunc = append(itemFilterFunc, &eft)
 			}
