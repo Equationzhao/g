@@ -126,7 +126,7 @@ func ParseShort(r string) (res FileGits) {
 		}
 	}
 
-	return
+	return res
 }
 
 func (s Status) String() string {
