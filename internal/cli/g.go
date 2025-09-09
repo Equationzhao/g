@@ -332,6 +332,7 @@ SORTING
    --versionsort, --sort-by-version        sort by version numbers, ascending(default: false)
    --width                                 sort by entry name width
    -S, --sort-by-size, --sizesort          sort by file size, largest first(descending)
+   -t                                      sort by time, newest first
    -U, --nosort, --no-sort                 do not sort; list entries in directory order.
    -X, --sort-by-ext                       sort alphabetically by entry extension
 
