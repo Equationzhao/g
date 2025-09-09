@@ -84,7 +84,7 @@ func BasicToRGBInt(basic string) (r, g, b uint8) {
 	default:
 		r, g, b = 0, 0, 0
 	}
-	return
+	return r, g, b
 }
 
 // BasicToRGB convert basic color to rgb color
@@ -153,7 +153,7 @@ func HexToRgb(hex string) (rgb []uint8) {
 	rgb = make([]uint8, 3)
 	hex = strings.TrimSpace(hex)
 	if hex == "" {
-		return
+		return rgb
 	}
 
 	// like from css. eg "#ccc" "#ad99c0"
@@ -171,7 +171,7 @@ func HexToRgb(hex string) (rgb []uint8) {
 
 	// recheck
 	if len(hex) != 6 {
-		return
+		return rgb
 	}
 
 	// convert string to int64
@@ -183,7 +183,7 @@ func HexToRgb(hex string) (rgb []uint8) {
 		rgb[1] = uint8((color & 0x00FF00) >> 8)
 		rgb[2] = uint8(color & 0x0000FF)
 	}
-	return
+	return rgb
 }
 
 // Convert HSL (Hue, Saturation, Lightness) to RGB (Red, Green, Blue)

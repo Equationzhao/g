@@ -189,7 +189,7 @@ func RemoveGitIgnore(repoPath git.RepoPath) ItemFilterFunc {
 				}
 			}
 		}
-		return
+		return ok
 	}
 }
 
@@ -286,5 +286,5 @@ func WhichTimeFiled(mod string) (t func(os.FileInfo) time.Time) {
 			t = osbased.CreateTime
 		}
 	}
-	return
+	return t
 }
