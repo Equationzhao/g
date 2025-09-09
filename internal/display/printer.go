@@ -734,7 +734,7 @@ func (t *TreePrinter) Print(s ...*item.FileInfo) {
 		}
 		prefix = pb.String()
 		name = v[len(v)-1].String()
-		return
+		return prefix, name
 	}
 
 	// root
