@@ -239,6 +239,16 @@ var sortingFlags = []cli.Flag{
 		Category: "SORTING",
 	},
 	&cli.BoolFlag{
+		Name:               "t",
+		Usage:              "sort by time, newest first",
+		DisableDefaultText: true,
+		Action: func(context *cli.Context, b bool) error {
+			sort.AddOption(sorter.ByTimeAscend(timeType[0]))
+			return nil
+		},
+		Category: "SORTING",
+	},
+	&cli.BoolFlag{
 		Name:               "U",
 		Aliases:            []string{"nosort", "no-sort"},
 		Usage:              "do not sort; list entries in directory order. ",
